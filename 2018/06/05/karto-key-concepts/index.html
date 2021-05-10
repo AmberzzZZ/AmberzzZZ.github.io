@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="slam," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="基于极其标准的图优化SLAM框架来实现：  提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。 scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！ key concepts： keyS">
+<meta name="keywords" content="slam">
+<meta property="og:type" content="article">
+<meta property="og:title" content="karto key concepts">
+<meta property="og:url" content="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="基于极其标准的图优化SLAM框架来实现：  提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。 scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！ key concepts： keyS">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/graph%20opti.jpeg">
+<meta property="og:updated_time" content="2018-12-12T12:29:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="karto key concepts">
+<meta name="twitter:description" content="基于极其标准的图优化SLAM框架来实现：  提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。 scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！ key concepts： keyS">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/"/>
+
+
+
+
+
+  <title>karto key concepts | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">karto key concepts</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-05T13:17:58+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/karto-key-concepts/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/05/karto-key-concepts/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>基于极其标准的图优化SLAM框架来实现：</p>
+<p><img src="/2018/06/05/karto-key-concepts/1.png" alt="framework"></p>
+<p>提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。</p>
+<p>scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！</p>
+<h4 id="key-concepts："><a href="#key-concepts：" class="headerlink" title="key concepts："></a>key concepts：</h4><ul>
+<li><p>keyScan：机器人运动一定的距离或角度（关键帧），储存在sensorManager，无地图缓存。</p>
+</li>
+<li><p>look-up table查找表：查找表的意义就是相比于暴力匹配，不需要每次都重新计算每个激光数据信息，<strong>相同角度不同位置</strong>的激光数据信息只需要被索引一次。</p>
+</li>
+<li><p>response响应值：将查找表以一定的位移投到子图上，总共有n个点被查找表击中（hit），击中的每个点得分不同（score），累加得分并除以可以达到的最高分。</p>
+<script type="math/tex; mode=display">
+response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
+<li><p>协方差：文献专门用了一节计算协方差，但是没看到用在哪，是为了后面求误差做准备吗？？？</p>
+</li>
+<li><p>addScans添加顶点和边：边是误差值，添加的边约束来自两部分，</p>
+<p>（1）link to running scans，距当前帧一定范围内的激光数据链（RunningScan chain）。</p>
+<p>（2）link to other near chains，从当前节点开始广度优先遍历一定距离范围内所有节点，依据当前id从sensorManager中分别递增和递减寻找一定范围内的chain（不一定直接相连）。</p>
+</li>
+<li><p>回环检测：操作与添加边约束类似，位姿图上要<strong>去除那些和当前节点的时间相邻的节点</strong>。</p>
+<p>（1）找到一定距离范围内（near）和相连（adjacent）的节点添加进nearLinkedScans。</p>
+<p>（2）<code>MapperGraph::FindPossibleLoopClosure</code>：从sensorManager中从前到后，依据序号挑选与当前节点在一定距离范围内，且不在nearLinkedScans中的candidate。返回潜在chain。其中涉及两个参数：</p>
+<ul>
+<li>LoopSearchMaximumDistance：candidateScan与当前scan的距离必须在可容许的距离内。</li>
+<li>LoopMatchMinimumChainSize：chain中的节点数必须不小于限定值。</li>
+</ul>
+<p>（3）<code>MapperGraph::TryCloseLoop</code>：scan2map匹配，当response和covariance达到一定要求认为闭环检测到，得到correct pose（也就是认为candidateScan的pose才是当前帧的实际pose）。</p>
+<p>（4）add link to loop，构成全局闭环。</p>
+<p>（5）触发correctPose，进行spa优化。</p>
+</li>
+</ul>
+<p><img src="/2018/06/05/karto-key-concepts/graph opti.jpeg" alt=""></p>
+<h4 id="代码随手记："><a href="#代码随手记：" class="headerlink" title="代码随手记："></a>代码随手记：</h4><ol>
+<li><p>ROS上面提供三个开源包：nav2d_karto, open_karto, slam_karto。</p>
+<p>ROS Wiki上这么描述nav2d_karto这个package：Graph-based Simultaneous Localization and Mapping module. Includes OpenKarto GraphSLAM library by “SRI International”.</p>
+<p>open_karto：开源的karto包，实现底层的kartoslam</p>
+<p>slam_karto：ros层，应用层的kartoslam接口</p>
+</li>
+<li><p>The LaserRangeFinder contains parameters for physical laser sensor used by the mapper for scan matching Also contains information about the maximum range of the sensor and provides a threshold for limiting the range of readings.</p>
+<p>The optimal value for the range threshold depends on the angular resolution of the scan and the desired map resolution.</p>
+</li>
+<li><p>resolution：0.25 &amp; 0.5 &amp; 1 degree</p>
+<p>number of range readings (beams)：（maximumAngle - minimumAngle）／angularResolution + 1</p>
+</li>
+<li><p>GridStates：0 for Unknown，100 for Occupied， 255 for Free。</p>
+</li>
+<li><p>flipY：最开始机器人应该处在世界坐标系的原点，传感器坐标系与机器人baselink存在一个坐标变换，原始的传感器坐标系位置应该与地图坐标系重合，这就是world和grid之间的offset。flip是啥呢？？</p>
+</li>
+<li><p>LookupArray[index]：Create lookup tables for point readings <strong>at varying angles</strong> in grid. This is to speed up finding best angle/position for a localized range scan</p>
+</li>
+<li><p>MapperGraph：花式构造位姿图</p>
+</li>
+<li><p>CorrelationGrid：Implementation of a <strong>correlation</strong> grid used for scan matching</p>
+</li>
+<li><p>Region of Interest ROI：</p>
+</li>
+<li><p>smear：The point readings are smeared by this value in X and Y to create a smoother response. 个人理解这句话是说点容易生成突变，用以点为中心的一小片区域平滑一点。</p>
+</li>
+<li><p>ScanMatch：返回响应值response</p>
+<p>   前端匹配调用<code>m_pSequentialScanMatcher-&gt;MatchScan</code></p>
+<p>   闭环检测调用<code>m_pLoopScanMatcher-&gt;MatchScan</code></p>
+<p>   两个函数继承于<code>ScanMatcher::MatchScan</code>：</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::MatchScan(</span><br><span class="line">	LocalizedRangeScan* pScan, </span><br><span class="line">    <span class="keyword">const</span> LocalizedRangeScanVector&amp; rBaseScans, </span><br><span class="line">    Pose2&amp; rMean, </span><br><span class="line">    Matrix3&amp; rCovariance, </span><br><span class="line">    kt_bool doPenalize, </span><br><span class="line">    kt_bool doRefineMatch)    <span class="comment">// default is True, 决定是否做精匹配</span></span><br><span class="line"><span class="comment">// @return: strength of response (best response)</span></span><br></pre></td></tr></table></figure>
+<p>   其中会调用<code>ScanMatcher::CorrelateScan</code>方法。<code>ScanMatcher::CorrelateScan</code>方法中调用<code>ScanMatcher::GetResponse</code>方法计算响应值。</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::GetResponse(</span><br><span class="line">	kt_int32u angleIndex, </span><br><span class="line">	kt_int32s gridPositionIndex) <span class="keyword">const</span></span><br></pre></td></tr></table></figure>
+<p>   <code>GetResponse</code>的核心在<code>kt_int8u* pByte</code>和<code>const LookupArray* pOffsets</code>两个数据结构：</p>
+<ul>
+<li>前者是在correlationGrid范围内的real sensed占据情况。</li>
+<li><p>后者是lookup-table中（已知地图）读取的栅格占据情况，只包含占据的栅格，key是angular。</p>
+<p>计算response只要看地图上的占据点是否在观测中是否也是占据的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (kt_int32u i = <span class="number">0</span>; i &lt; pOffsets-&gt;GetSize(); i++)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ignore points that fall off the grid</span></span><br><span class="line">  kt_int32s pointGridIndex = gridPositionIndex + pAngleIndexPointer[i];</span><br><span class="line">  <span class="keyword">if</span> (!math::IsUpTo(pointGridIndex, m_pCorrelationGrid-&gt;GetDataSize()) || pAngleIndexPointer[i] == INVALID_SCAN)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uses index offsets to efficiently find location of point in the grid</span></span><br><span class="line">  response += pByte[pAngleIndexPointer[i]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终的response要normalize：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// normalize response</span></span><br><span class="line">response /= (nPoints * GridStates_Occupied);   <span class="comment">// GridStates_Occupied = 100,</span></span><br><span class="line">assert(<span class="built_in">fabs</span>(response) &lt;= <span class="number">1.0</span>);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>karto只在闭环的时候触发后端优化<code>CorrectPoses()</code>，ScanSolver的实现在Samples路径下的SpaSolver，调用了现有的BA求解器<a href="http://users.ics.forth.gr/~lourakis/sba/" target="_blank" rel="noopener">sba(A Generic Sparse Bundle Adjustment C/C++ Package Based on the Levenberg-Marquardt Algorithm)</a>。</p>
+</li>
+</ol>
+<h4 id="参数-amp-优化方向"><a href="#参数-amp-优化方向" class="headerlink" title="参数&amp;优化方向"></a><a href="http://docs.ros.org/jade/api/nav2d_karto/html/classkarto_1_1OpenMapper.html" target="_blank" rel="noopener">参数</a>&amp;优化方向</h4><ol>
+<li>闭环中candidate数量的调整：<ul>
+<li>减小LoopSearchMaximumDistance，进入candidate范围的节点数据减少</li>
+<li>减小LoopMatchMinimumChainSize，用来计算优化的candidate数量减少</li>
+<li>增大minimum_travel_distance和minimum_travel_heading，这样总体的节点数减少</li>
+</ul>
+</li>
+<li>Map_update_interval：发布地图的间隔，其主要过程是遍历当前所有节点数据，对每个栅格的占有状态进行判定，生成栅格地图。</li>
+<li>ScanBufferSize和ScanBufferMaximumScanDistance：控制buffer也就是chain的大小。chain不能太大也不能太小，太小会造成前端误差累积，太大会导致构建闭环的节点数不足。推荐值是ScanBufferMaximumScanDistance／minimum_travel_distance。</li>
+<li>位姿纠正中：<ul>
+<li>CorrelationSearchSpaceDimension：The size of the <strong>search grid</strong></li>
+<li>CorrelationSearchSpaceResolution：The size of the <strong>correlation grid</strong></li>
+</ul>
+</li>
+<li>回环检测中：<ul>
+<li>LoopSearchMaximumDistance：闭环检测的搜索距离，数值越大能越早发现闭环，也能容忍更大的偏离误差。</li>
+<li>LoopMatchMinimumResponseCoarse和LoopMatchMinimumResponseFine：粗匹配和精匹配的响应阈值，与闭环中candidate数量相关。阈值过低会导致candidate迅速被填满，真正好的点还没找到。阈值过高会导致回环失败（一直找不到回环点），地图上出现重影。</li>
+</ul>
+</li>
+</ol>
+<h4 id="CPU-Usage"><a href="#CPU-Usage" class="headerlink" title="CPU Usage"></a>CPU Usage</h4><p>算法资源占用的主要压力来源：</p>
+<ol>
+<li>地图更新</li>
+<li>回环检测</li>
+<li>SPA优化</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/slam/" rel="tag"># slam</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/04/leetcode79-单词搜索/" rel="next" title="leetcode79 单词搜索">
+                <i class="fa fa-chevron-left"></i> leetcode79 单词搜索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/07/PnP-Perspective-n-Point/" rel="prev" title="PnP, Perspective-n-Point">
+                PnP, Perspective-n-Point <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#key-concepts："><span class="nav-number">1.</span> <span class="nav-text">key concepts：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码随手记："><span class="nav-number">2.</span> <span class="nav-text">代码随手记：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参数-amp-优化方向"><span class="nav-number">3.</span> <span class="nav-text">参数&amp;优化方向</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU-Usage"><span class="nav-number">4.</span> <span class="nav-text">CPU Usage</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+  
+
+
+  
+
+  
+
+</body>
+</html>

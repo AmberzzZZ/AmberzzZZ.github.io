@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="papers," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="综述 papers  deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS，主要贡献提出了空洞卷积，使得feature extraction阶段输出的特征图维持较高的resolution deeplabV2: Semantic Image Segmentation w">
+<meta name="keywords" content="papers">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deeplab系列">
+<meta property="og:url" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="综述 papers  deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS，主要贡献提出了空洞卷积，使得feature extraction阶段输出的特征图维持较高的resolution deeplabV2: Semantic Image Segmentation w">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/deeplabV1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/holes.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/grid.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/hdc.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/deeplabV2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/1d.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/2d.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/scoremap.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/aspp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/cascade.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/aspp+gap.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/result.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/deeplabV3+.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/atrousDW.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/en-de.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/xception.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/border.png">
+<meta property="og:updated_time" content="2020-05-13T08:24:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Deeplab系列">
+<meta name="twitter:description" content="综述 papers  deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS，主要贡献提出了空洞卷积，使得feature extraction阶段输出的特征图维持较高的resolution deeplabV2: Semantic Image Segmentation w">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2020/02/24/Deeplab系列/deeplabV1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2020/02/24/Deeplab系列/"/>
+
+
+
+
+
+  <title>Deeplab系列 | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/02/24/Deeplab系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Deeplab系列</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-24T18:20:49+08:00">
+                2020-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/02/24/Deeplab系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/02/24/Deeplab系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>papers</p>
+<ul>
+<li>deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS，主要贡献提出了空洞卷积，使得feature extraction阶段输出的特征图维持较高的resolution</li>
+<li>deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs，主要贡献是多尺度ASPP结构</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation，提出了基于ResNet的串行&amp;并行两种结构，细节上提到了multi-grid，改进了ASPP模块<ul>
+<li>deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation </li>
+</ul>
+</li>
+<li>Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation </li>
+</ul>
+<ol>
+<li><p>分割结果比较粗糙的原因</p>
+<ul>
+<li>池化：将全图抽象化，降低分辨率，会丢失细节信息，平移不变性，使得边界信息不清晰</li>
+<li>没有利用标签之间的概率关系：CNN缺少对空间、边缘信息等约束</li>
+</ul>
+<p>对此，deeplabV1引入了</p>
+<ul>
+<li><a href="https://www.jianshu.com/p/f743bd9041b3" target="_blank" rel="noopener">空洞卷积</a>：VGG中提出的多个小卷积核代替大卷积核的方法，只能使感受野线性增长，而多个空洞卷积串联，可以实现指数增长。</li>
+<li>全连接条件随机场CRF：作为stage2，提高模型捕获细节的能力，提升边界分割精度</li>
+</ul>
+</li>
+<li><p>大小物体同时分割</p>
+<p>deeplabV2引入</p>
+<ul>
+<li>多尺度ASPP(Atrous Spatial Pyramid Pooling)：并行的采用多个采样率的空洞卷积提取特征，再进行特征融合</li>
+<li>backbone model change：VGG16改为ResNet</li>
+<li>使用不同的学习率</li>
+</ul>
+</li>
+<li><p>进一步改进模型架构</p>
+<p>deeplabV3引入</p>
+<ul>
+<li>ASPP嵌入ResNet后几个block</li>
+<li>去掉了CRF</li>
+</ul>
+</li>
+<li><p>使用原始的Conv/pool操作，得到的low resolution score map，pool stride会使得过程中丢弃一部分信息，上采样会得到较大的失真图像，使用空洞卷积，保留特征图上的全部信息，同时keep resolution，减少了信息损失</p>
+</li>
+<li><p>DeeplabV3的ASPP相比较于V2，增加了一条1x1 conv path和一条image pooling path，加GAP这条path是因为，实验中发现，随着rate的增大，有效的weight数目开始减少（<strong>部分超出边界无法有效捕捉远距离信息</strong>），因此利用global average pooling提取了image-level的特征并与ASPP的特征并在一起，来补充因为dilation丢失的信息</p>
+<p>空洞卷积的path，V2是每条path分别空洞卷积然后接两个1x1conv（没有BN），V3是空洞卷积和BatchNormalization组合</p>
+<p>fusion方式，V2是sum fusion，V3是所有path concat然后1x1 conv，得到最终score map</p>
+</li>
+<li><p>DeeplabV3的串行版本，“In order to maintain original image size, convolutions are replaced with strous convolutions with rates that differ from each other with factor 2”，ppt上说后面几个block复制了block4，每个block里面三层conv，其中最后一层conv stride2，然后为了maintain output size，空洞rate*2，这个不太理解。</p>
+<p>multi-grid method：对每个block里面的三层卷积采用不同空洞率，unit rate（e.g.(1,2,4)） * rate （e.g. 2）</p>
+</li>
+</ol>
+<h2 id="deeplabV1-SEMANTIC-IMAGE-SEGMENTATION-WITH-DEEP-CONVOLUTIONAL-NETS-AND-FULLY-CONNECTED-CRFS"><a href="#deeplabV1-SEMANTIC-IMAGE-SEGMENTATION-WITH-DEEP-CONVOLUTIONAL-NETS-AND-FULLY-CONNECTED-CRFS" class="headerlink" title="deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS"></a>deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>brings together methods from Deep Convolutional Neural Networks and probabilistic graphical models </li>
+<li>poor localization property of deep networks</li>
+<li>combine a fully connected Conditional Random Field (CRF) </li>
+<li>be able to localize segment boundaries beyond previous accuracies</li>
+<li>speed: atrous</li>
+<li>accuracy: </li>
+<li>simplicity: cascade modules</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>DCNN learns hierarchical abstractions of data, which is desirable for high-level vision tasks (classification)</li>
+<li>but it hampers low-level tasks,  such as pose estimation and semantic segmentation, where we want precise localization, rather than <strong>abstraction of spatial details</strong></li>
+<li>two technical hurdles in DCNNs when applying to image labeling tasks<ul>
+<li>pooling, loss of resolution: we employ the ‘atrous’ (with holes) for efficient dense computation </li>
+<li>spacial invariance: we use the fully connected pairwise CRF to capture fine edge details </li>
+</ul>
+</li>
+<li><p>Our approach </p>
+<ul>
+<li>treats every pixel as a CRF node</li>
+<li>exploits long-range dependencies</li>
+<li>and uses CRF inference to directly optimize a DCNN-driven cost function </li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV1.png" width="65%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>structure</p>
+<ul>
+<li>fully convolutional VGG-16</li>
+<li>keep the first 3 subsampling blocks for a target stride of 8 </li>
+<li>use hole algorithm conv filters for the last two blocks</li>
+<li>keep the pooling layers for the purpose of fine-tuing，change strides from 2 to 1</li>
+<li>for dense map(h/8), the first fully convolutional 7*7*4096 is computational, thus change to 4*4 / 3*3 convs</li>
+<li>further computation decreasement: reduce the fc channels from 4096 to 1024</li>
+</ul>
+</li>
+<li><p>train</p>
+<ul>
+<li>label：ground truth subsampled by 8 </li>
+<li>loss function：cross-entropy </li>
+</ul>
+</li>
+<li><p>test</p>
+<ul>
+<li>x8：simply bilinear interpolation </li>
+<li>fcn：stride32 forces them to use learned upsampling layers, significantly increasing the complexity and training time</li>
+</ul>
+</li>
+<li><p>CRF</p>
+<ul>
+<li><p>short-range：used to smooth noisy </p>
+</li>
+<li><p>fully connected model：to recover detailed local structure rather than further smooth it   </p>
+</li>
+<li><p>energy function:</p>
+<script type="math/tex; mode=display">
+  E(x) = \sum_{i}\theta_i(x_i) + \sum_{ij}\theta_{ij}(x_i, x_j)\\
+  \theta_i(x_i) = -logP(x_i)\\</script><p>  $P(x_i)$ is the bi-linear interpolated probability output of DCNN.</p>
+<script type="math/tex; mode=display">
+  \theta_{ij}(x_i, x_j) = \mu(x_i, x_j)\sum_{m=1}^K \omega_m k^m (f_i,f_j)\\
+  \mu(x_i, x_j) = \begin{cases}
+  1& \text{if }x_i \neq x_j\\
+  0& \text{otherwise}
+  \end{cases}</script><p>  $k^m(f_i, f_j)$ is the Gaussian kernel depends on features (involving pixel positions &amp; pixel color intensities)</p>
+</li>
+</ul>
+</li>
+<li><p>multi-scale prediction</p>
+<ul>
+<li>to increase the boundary localization accuracy </li>
+<li>we attach to the input image and the output of each of the first four max pooling layers a two-layer MLP (first layer: 128 3x3 convolutional filters, second layer: 128 1x1 convolutional filters)  </li>
+<li>the feature maps above is <strong>concatenated</strong> to the main network’s last layer feature map </li>
+<li>the new outputs is enhanced by 128*5=640 channels</li>
+<li>we only adjust the newly added weights</li>
+<li>introducing these extra direct connections from fine-resolution layers improves localization performance, <strong>yet the effect is not as dramatic as the one obtained with the fully-connected CRF</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>空洞卷积dilated convolution</p>
+<p> <img src="/2020/02/24/Deeplab系列/holes.png" width="65%"></p>
+<ul>
+<li><p>空洞卷积相比较于正常卷积，多了一个 hyper-parameter——dilation rate，指的是kernel的间隔数量(正常的convolution dilatation rate是1)</p>
+</li>
+<li><p>fcn：先pooling再upsampling，过程中有信息损失，能不能设计一种新的操作，不通过pooling也能<strong>有较大的感受野</strong>看到更多的信息呢？</p>
+</li>
+<li><p>如图(b)的2-dilated conv，kernel size只有3x3，但是这个卷积的感受野已经增大到了7x7（假设前一层是3x3的1-dilated conv）</p>
+</li>
+<li><p>如图(c)的4-dilated conv，kernel size只有3x3，但是这个卷积的感受野已经增大到了15x15（假设前两层是3x3的1-dilated conv和3x3的2-dilated conv）</p>
+</li>
+<li><p>而传统的三个3x3的1-dilated conv堆叠，只能达到7x7的感受野</p>
+</li>
+<li><p>dilated使得在不做pooling损失信息的情况下，加大了感受野，让每个卷积输出都包含较大范围的信息</p>
+</li>
+<li><p><strong>The Gridding Effect</strong>：如下图，多次叠加3x3的2-dilated conv，会发现我们将愿输入离散化了。因此叠加卷积的 dilation rate 不能有大于1的公约数。</p>
+<p>  <img src="/2020/02/24/Deeplab系列/grid.png" width="60%"></p>
+</li>
+<li><p><strong>Long-ranged information</strong>：增大dilation rate对大物体有效果，对小物体可能有弊无利</p>
+</li>
+<li><p>HDC(Hybrid Dilated Convolution)设计结构</p>
+<ul>
+<li><p>叠加卷积的 dilation rate 不能有大于1的公约数，如[2,4,6]</p>
+</li>
+<li><p>将 dilation rate 设计成锯齿状结构，例如 [1, 2, 5, 1, 2, 5] 循环结构，锯齿状能够同时满足小物体大物体的分割要求(小 dilation rate 来关心近距离信息，大 dilation rate 来关心远距离信息)</p>
+</li>
+<li><p>满足$M_i = max [M_{i+1}-2r_i, M_{i+1}-2(M_{i+1}-r_i), r_i]$，$M_i$是第i层最大dilation rate</p>
+</li>
+<li><p>一个可行方案[1,2,5]：</p>
+<p>  <img src="/2020/02/24/Deeplab系列/hdc.png" width="65%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV2-Semantic-Image-Segmentation-with-Deep-Convolutional-Nets-Atrous-Convolution-and-Fully-Connected-CRFs"><a href="#deeplabV2-Semantic-Image-Segmentation-with-Deep-Convolutional-Nets-Atrous-Convolution-and-Fully-Connected-CRFs" class="headerlink" title="deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs"></a>deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>atrous convolution：control the resolution </li>
+<li>atrous spatial pyramid pooling (ASPP) ：multiple sampling rates </li>
+<li>fully connected Conditional Random Field (CRF) </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>three challenges in the application of DCNNs to semantic image segmentation </p>
+<ul>
+<li>reduced feature resolution：max-pooling and downsampling (‘striding’)  —&gt; atrous convolution</li>
+<li>existence of objects at multiple scales：multi input scale —&gt; ASPP</li>
+<li>reduced localization accuracy due to DCNN invariance：skip-layers —&gt; CRF</li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV2.png" width="70%"></p>
+</li>
+<li><p>improvements compared to its first version </p>
+<ul>
+<li>better segment objects at multiple scales</li>
+<li>ResNet replaces VGG16</li>
+<li>a more comprehensive experimental evaluation on models &amp; dataset</li>
+</ul>
+</li>
+<li>related works<ul>
+<li>jointly learning of the DCNN and CRF to form an end-to-end trainable feed-forward network </li>
+<li>while in our work still a 2 stage process</li>
+<li>use a series of atrous convolutional layers with increasing rates to aggregate multiscale context </li>
+<li>while in our structure using parallel instead of serial </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>atrous convolution</p>
+<ul>
+<li>在下采样以后的特征图上，运行普通卷积，相当于在原图上运行上采样的filter<ul>
+<li>1-D示意图上可以看出，两者感受野相同</li>
+<li>同时能保持high resolution</li>
+</ul>
+</li>
+<li><p>while both the number of filter parameters and the number of operations per position stay constant</p>
+<p><img src="/2020/02/24/Deeplab系列/1d.png" width="40%">   <img src="/2020/02/24/Deeplab系列/2d.png" width="40%">  </p>
+</li>
+<li><p>把backbone中下采样的层(pooling/conv)中的stride改成1，然后将接下来的conv层都改成2-dilated conv：could allow us to compute feature responses at the original image resolution</p>
+</li>
+<li>efficiency/accuracy trade-off：using atrous convolution to increase the resolution by a factor of 4</li>
+<li>followed by fast bilinear interpolation by a factor of 8 to the original image resolution </li>
+<li><p>Bilinear interpolation is sufficient in this setting because the class score maps are quite smooth <strong>unlike FCN</strong></p>
+<p><img src="/2020/02/24/Deeplab系列/scoremap.png" width="40%"></p>
+</li>
+<li><p>Atrous convolution offers easily control of the field-of-view and finds the best trade-off between accurate localization (small field-of-view) and context assimilation (large field-of-view)：大感受野，抽象融合上下文，大感受野，low-level局部信息准确</p>
+</li>
+<li>实现：（1）根据定义，给filter上采样，插0；（2）给feature map下采样得到k*k个reduced resolution maps，然后run orgin conv，组合位移结果</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li><p>multi input scale：</p>
+<ul>
+<li>run parallel DCNN branches that share the same parameters</li>
+<li>fuse by taking at each position the maximum response across scales</li>
+<li>computing</li>
+</ul>
+</li>
+<li><p>spatial pyramid pooling</p>
+<ul>
+<li>run multiple parallel filters with different rates</li>
+<li>multi-scale features are further processed in separate branches：fc7&amp;fc8</li>
+<li><p>fuse：sum fusion</p>
+<p><img src="/2020/02/24/Deeplab系列/aspp.png" width="55%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CRF：keep the same as V1</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV3-Rethinking-Atrous-Convolution-for-Semantic-Image-Segmentation"><a href="#deeplabV3-Rethinking-Atrous-Convolution-for-Semantic-Image-Segmentation" class="headerlink" title="deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation"></a>deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>for segmenting objects at multiple scales<ul>
+<li>employ atrous convolution in cascade or in parallel with multiple atrous rates</li>
+<li>augment ASPP with image-level features encoding global context and further boost performance</li>
+</ul>
+</li>
+<li>without DenseCRF</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>our proposed module consists of atrous convolution with various rates and <strong>batch normalization layers</strong></li>
+<li>modules in cascade or in parallel：when applying a 3*3  atrous convolution with an extremely large rate, it fails to capture long range information due to image boundary effects</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Atrous Convolution</p>
+<p>  for each location $i$ on the output $y$ and a filter $w$,  an $r$-rate atrous convolution is applied over the input feature map $x$：</p>
+<script type="math/tex; mode=display">
+  y[i] = \sum_k x[i+rk]w[k]</script></li>
+<li><p>in cascade</p>
+<ul>
+<li>duplicate several copies of the last ResNet block (block4)</li>
+<li><p>extra block5, block6, block7 as replicas of block4 </p>
+</li>
+<li><p>multi-rates</p>
+<p><img src="/2020/02/24/Deeplab系列/cascade.png" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li><p>we include batch normalization within ASPP</p>
+</li>
+<li><p>as the sampling rate becomes larger, the number of valid filter weights becomes smaller (beyond boundary)</p>
+</li>
+<li><p>to incorporate global context information：we adopt image-level features by GAP on the last feature map of the model </p>
+<p>  GAP —&gt; 1*1*256 conv —&gt; BN —&gt; bilinearly upsample </p>
+</li>
+<li><p>fusion: concatenated + 1*1 conv</p>
+<p><img src="/2020/02/24/Deeplab系列/aspp+gap.png" width="70%"></p>
+</li>
+<li><p>seg：final 1*1*n_classes conv</p>
+</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>large crop size required to make sure the large atrous rates effective </li>
+<li>upsample the output: it is important to keep the groundtruths intact and instead upsample the final logits</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>结论</p>
+<ul>
+<li><p>output stride=8 好过16，但是运算速度慢了几倍</p>
+<p><img src="/2020/02/24/Deeplab系列/result.png" width="70%"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV3-Encoder-Decoder-with-Atrous-Separable-Convolution-for-Semantic-Image-Segmentation"><a href="#deeplabV3-Encoder-Decoder-with-Atrous-Separable-Convolution-for-Semantic-Image-Segmentation" class="headerlink" title="deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation"></a>deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>spatial pyramid pooling module captures rich contextual information  </li>
+<li>encode-decoder structure captures sharp object boundaries </li>
+<li>combine the above two methods</li>
+<li>propose a simple yet effective decoder module </li>
+<li>explore Xception backbone</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>even though rich semantic information is encoded through ASPP, detailed information related to object boundaries is missing due to striding operations </li>
+<li>atrous convolution could alleviate but suffer the computational balance</li>
+<li>while encoder-decoder models lend themselves to faster computation (since no features are dilated) in the encoder path and gradually recover sharp object boundaries in the decoder path </li>
+<li><p>所谓encoder-decoder structure，就是通过encoder和decoder之间的短连接来将不同尺度的特征集成起来，增加这样的shortcut，同时增大网络的下采样率（encoder path上不使用空洞卷积，因此为了达到同样的感受野，得增加pooling，然后保留最底端的ASPP block），既减少了计算，又enrich了local border这种细节特征</p>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV3+.png" width="50%"></p>
+</li>
+<li><p>applying the atrous separable convolution to both the ASPP and decoder modules：最后又引入可分离卷积，进一步提升计算效率</p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>atrous separable convolution </p>
+<ul>
+<li><p>significantly reduces the computation complexity while maintaining similar (or better) performance</p>
+<p><img src="/2020/02/24/Deeplab系列/atrousDW.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>DeepLabv3 as encoder</p>
+<ul>
+<li>output_stride=16/8：remove the striding of the last 1/2 blocks</li>
+<li>atrous convolution：apply atrous convolution to the blocks without striding</li>
+<li>ASPP：run 1x1 conv in the end to set the output channel to 256</li>
+</ul>
+</li>
+<li><p>proposed decoder</p>
+<ul>
+<li>naive decoder：bilinearly upsampled by 16 </li>
+<li>proposed：first bilinearly upsampled by 4, then concatenated with the corresponding low-level features</li>
+<li>low-level features：<ul>
+<li>apply 1x1 conv on the low-level features to reduce the number of channels to avoid <strong>outweigh the importance</strong></li>
+<li>the last feature map in res2x residual block before striding </li>
+</ul>
+</li>
+<li>combined features：apply 3x3 conv(2 layers, 256 channels) to obtain sharper segmentation results </li>
+<li>more shortcut：observed no significant improvement</li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/en-de.png" width="45%"></p>
+</li>
+<li><p>modified Xception backbone</p>
+<ul>
+<li>deeper</li>
+<li>all the max pooling operations are replaced with depthwise separable convolutions with striding </li>
+<li><p>DWconv-BN-ReLU-PWconv-BN-ReLU</p>
+<p><img src="/2020/02/24/Deeplab系列/xception.png" width="50%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ol>
+<li><p>decoder effect on border</p>
+<p> <img src="/2020/02/24/Deeplab系列/border.png" width="50%"></p>
+</li>
+</ol>
+</li>
+<li><p>f</p>
+</li>
+</ol>
+<h2 id="Auto-DeepLab-Hierarchical-Neural-Architecture-Search-for-Semantic-Image-Segmentation"><a href="#Auto-DeepLab-Hierarchical-Neural-Architecture-Search-for-Semantic-Image-Segmentation" class="headerlink" title="Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation"></a>Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation</h2>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/papers/" rel="tag"># papers</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/08/RCNN系列/" rel="next" title="RCNN系列">
+                <i class="fa fa-chevron-left"></i> RCNN系列
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/13/attention系列/" rel="prev" title="attention系列">
+                attention系列 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deeplabV1-SEMANTIC-IMAGE-SEGMENTATION-WITH-DEEP-CONVOLUTIONAL-NETS-AND-FULLY-CONNECTED-CRFS"><span class="nav-number">2.</span> <span class="nav-text">deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deeplabV2-Semantic-Image-Segmentation-with-Deep-Convolutional-Nets-Atrous-Convolution-and-Fully-Connected-CRFs"><span class="nav-number">3.</span> <span class="nav-text">deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deeplabV3-Rethinking-Atrous-Convolution-for-Semantic-Image-Segmentation"><span class="nav-number">4.</span> <span class="nav-text">deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deeplabV3-Encoder-Decoder-with-Atrous-Separable-Convolution-for-Semantic-Image-Segmentation"><span class="nav-number">5.</span> <span class="nav-text">deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Auto-DeepLab-Hierarchical-Neural-Architecture-Search-for-Semantic-Image-Segmentation"><span class="nav-number">6.</span> <span class="nav-text">Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

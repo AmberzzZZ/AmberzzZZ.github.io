@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="3d CNN, 2.5d CNN," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类 [C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for compa">
+<meta name="keywords" content="3d CNN, 2.5d CNN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pseudo-3d">
+<meta property="og:url" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类 [C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for compa">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/P3D%20Blocks.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/bottlenecks.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/cmp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/mra.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/recon.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/cmp2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/3d%20res.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/2d3d.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/depth.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/c3d.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/PCA.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/2dvec.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/similarity.png">
+<meta property="og:updated_time" content="2020-09-03T10:12:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="pseudo-3d">
+<meta name="twitter:description" content="[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类 [C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for compa">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2020/09/02/pseudo-3d/P3D%20Blocks.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/"/>
+
+
+
+
+
+  <title>pseudo-3d | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">pseudo-3d</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-02T15:55:00+08:00">
+                2020-09-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/02/pseudo-3d/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/02/pseudo-3d/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类</p>
+<p>[C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for comparison，分类</p>
+<p>[Pseudo-3D resnet] Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks：伪3d，resblock，S和T花式连接，分类</p>
+<p>[2.5d Unet] Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss：patch输入，先2d后3d，针对各向异性，分割</p>
+<p>[two-pathway U-Net] Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning：patch输入，3d网络，xy和z平面分别conv &amp; concat，分割</p>
+<p>[Projection-Based 2.5D U-net] Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation：mip，2d网络，分割，重建</p>
+<p>[New 2.5D Representation] A New 2.5D Representation for Lymph Node Detection using Random Sets of Deep Convolutional Neural Network Observations：横冠矢三个平面作为三个channel输入，2d网络，检测</p>
+<h2 id="Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks"><a href="#Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks" class="headerlink" title="Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks"></a>Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>spatio-temporal video</li>
+<li>the development of a very deep 3D CNN from scratch results in expensive computational cost and memory demand</li>
+<li>new framework<ul>
+<li>1x3x3 &amp; 3x1x1</li>
+<li>Pseudo-3D Residual Net which exploits all the variants of blocks</li>
+</ul>
+</li>
+<li>outperforms 3D CNN and frame-based 2D CNN</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3d CNN的model size：making it extremely difficult to train a very deep model</li>
+<li>fine-tuning 2d 好于 train from scrach 3d</li>
+<li>RNN builds only the temporal connections on the high-level features，leaving the correlations in the low-level forms not fully exploited</li>
+<li>we propose<ul>
+<li>1x3x3 &amp; 3x1x1 in parallel or cascaded </li>
+<li>其中的3x3 conv可以用2d conv来初始化</li>
+<li>a family of bottleneck building blocks：enhance the structural diversity  </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>P3D Blocks  </p>
+<ul>
+<li>direct／indirect influence：S和T之间是串联还是并联</li>
+<li><p>direct／indirect connected to the final output：S和T的输出是否直接与identity path相加</p>
+<p><img src="/2020/09/02/pseudo-3d/P3D Blocks.png" width="40%"></p>
+</li>
+<li><p>bottleneck：</p>
+<ul>
+<li>头尾各接一个1x1x1的conv</li>
+<li>头用来narrow channel，尾用来widen back</li>
+<li><p>头有relu，尾没有relu</p>
+<p><img src="/2020/09/02/pseudo-3d/bottlenecks.png" width="80%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pseudo-3D ResNet </p>
+<ul>
+<li>mixing blocks：循环ABC</li>
+<li><p>better performance &amp; small increase in model size</p>
+<p><img src="/2020/09/02/pseudo-3d/cmp.png" width="45%"></p>
+</li>
+<li><p>fine-tuning resnet50：</p>
+<ul>
+<li>randomly cropped 224x224</li>
+<li>freeze all BN except for the first one</li>
+<li>add an extra dropout layer with 0.9 dropout rate </li>
+</ul>
+</li>
+<li>further fine-tuning P3D resnet：<ul>
+<li>initialize with r50 in last step</li>
+<li>randomly cropped 16x160x160</li>
+<li>horizontally flipped </li>
+<li>mini-batch as 128 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>future work</p>
+<ul>
+<li>attention mechanism will be incorporated </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation"><a href="#Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation" class="headerlink" title="Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation"></a>Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>MIP：2D images containing information of the full 3D image </p>
+</li>
+<li><p>faster, less memory, accurate</p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>2d unet</p>
+<ul>
+<li>MIP：$\alpha=36$</li>
+<li>3x3 conv, s2 pooling, transpose conv, concat, BN, relu, </li>
+<li>filters：begin with 32, end with 512</li>
+<li><p>dropout：0.5 in the deepest convolutional block and 0.2 in the second deepest blocks</p>
+<p><img src="/2020/09/02/pseudo-3d/mra.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>3d unet</p>
+<ul>
+<li>overfitting &amp; memory space</li>
+<li>filters：begin with 4, end with 16</li>
+<li>dropout：0.5 in the deepest convolutional block and 0.4 in the second deepest blocks</li>
+</ul>
+</li>
+<li><p>Projection-Based 2.5D U-net </p>
+<ul>
+<li><p>2d slice：loss of connection </p>
+</li>
+<li><p>2d mip：disappointing results </p>
+</li>
+<li><p>2d volume：long training time</p>
+</li>
+<li><p>the proposed 2.5D U-net：</p>
+<script type="math/tex; mode=display">
+  N(x) = T R_p F_p 
+  \left[
+   \begin{matrix}
+     U M_{\alpha_1}(x) \\
+     ... \\
+     U M_{\alpha_p}(x)
+    \end{matrix}
+    \right]</script><ul>
+<li><p>$M_{i}$：MIP，p=12</p>
+</li>
+<li><p>$U$：2d-Unet like above</p>
+</li>
+<li><p>$F_p$：learnable filtration，1x3 conv，for each projection，抑制重建伪影</p>
+</li>
+<li><p>$R_p$：reconstruction operator</p>
+<p>  <img src="/2020/09/02/pseudo-3d/recon.png" width="40%"></p>
+</li>
+<li><p>$T$：fine-tuning operator，shift &amp; scale back to 0-1 mask</p>
+</li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/cmp2.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition"><a href="#Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition" class="headerlink" title="Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition"></a>Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>3D kernels tend to overfit</li>
+<li>3D CNNs is relatively shallow</li>
+<li>propose a 3D CNNs based on ResNets<ul>
+<li>better performance</li>
+<li>not overfit</li>
+<li>deeper than C3D</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>two-stream architecture：consists of RGB and optical flow streams is often used to represent spatio-temporal information </li>
+<li>3D CNNs：trained on relatively small video datasets performs worse than 2D CNNs pretrained on large datasets </li>
+<li>Very deep 3D CNNs：not explored yet due to training difficulty  </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Network Architecture</p>
+<ul>
+<li>main difference：kernel dimensions</li>
+<li>stem：stride2 for S，stride1 for T</li>
+<li>resblock：conv_bn_relu&amp;conv + id</li>
+<li>identity shortcuts：use zero-padding for increasing dimensions，to avoid increasing the number of parameters</li>
+<li>stride2 conv：conv3_1、 conv4_1、 conv5_1</li>
+<li>input clips：3x16x112x112</li>
+<li><strong>large learning rate</strong> and batch size was important </li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/3d res.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>在小数据集上3d-r18不如C3D，overfit了：shallow architecture of the C3D and pretraining on the Sports-1M dataset prevent the C3D from overfitting </li>
+<li>在大数据集上3d-r34好于C3D，同时C3D的val acc明显高于train acc——太shallow欠拟合了，r34则表现更好，而且不需要预训练</li>
+<li>RGB-I3D achieved the best performance <ul>
+<li>3d-r34是更deeper的</li>
+<li>RGB-I3D用了更大的batch size：Large batch size is important to train good models with batch normalization </li>
+<li>High resolutions：3x64x224x224</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks"><a href="#Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks" class="headerlink" title="Learning Spatiotemporal Features with 3D Convolutional Networks"></a>Learning Spatiotemporal Features with 3D Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>generic </li>
+<li>efficient </li>
+<li>simple </li>
+<li>3d ConvNet with 3x3x3 conv &amp; a simple linear classifier</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3D ConvNets are more suitable for spatiotemporal feature learning compared to 2D ConvNets</li>
+<li>2D ConvNets lose temporal information of the input signal right after every convolution operation </li>
+<li><p>2d conv在channel维度上权重都是一样的，相当于temporal dims上没有重要性特征提取</p>
+<p><img src="/2020/09/02/pseudo-3d/2d3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>basic network settings</p>
+<ul>
+<li>5 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>filters：[64，128，256，256，256]</li>
+<li>fc dims：[2048，2048]</li>
+<li>conv kernel：dx3x3</li>
+<li>pooling kernel：2x2x2，s2 except for the first layer <ul>
+<li>with the intention of not to merge the temporal signal too early </li>
+<li>also to satisfy the clip length of 16 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>varing settings</p>
+<ul>
+<li>temporal kernel depth<ul>
+<li>homogeneous：depth-1/3/5/7 throughout</li>
+<li>varying：increasing-3-3-5-5-7 &amp; decreasing-7- 5-5-3-3  </li>
+</ul>
+</li>
+<li><p>depth-3 throughout performs the best</p>
+<p><img src="/2020/09/02/pseudo-3d/depth.png" width="60%"></p>
+</li>
+<li><p>depth-1 is significantly worse  </p>
+</li>
+<li>We also verify that 3D ConvNet consistently performs better than 2D ConvNet <strong>on a large-scale internal dataset</strong></li>
+</ul>
+</li>
+<li><p>C3D</p>
+<ul>
+<li>8 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>homogeneous：3x3x3 s1 conv thtoughout</li>
+<li>pool1：1x2x2 kernel size &amp; stride，rest 2x2x2</li>
+<li><p>fc dims：4096</p>
+<p><img src="/2020/09/02/pseudo-3d/c3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>C3D video descriptor：fc6 activations + L2-norm</p>
+</li>
+<li><p>deconvolution visualizing：</p>
+<ul>
+<li>conv5b feature maps</li>
+<li>starts by focusing on appearance in the first few frames </li>
+<li>tracks the salient motion in the subsequent frames </li>
+</ul>
+</li>
+<li><p>compactness </p>
+<ul>
+<li>PCA</li>
+<li>压缩到50-100dim不太损失acc</li>
+<li><p>压缩到10dim仍旧是最高acc</p>
+<p><img src="/2020/09/02/pseudo-3d/PCA.png" width="60%"></p>
+</li>
+<li><p>projected to 2-dimensional space using t-SNE </p>
+<ul>
+<li>C3D features are semantically separable compared to Imagenet  </li>
+<li><p>quantitatively observe that C3D is better than Imagenet</p>
+<p><img src="/2020/09/02/pseudo-3d/2dvec.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Action Similarity Labeling </p>
+<ul>
+<li>predicting action similarity  </li>
+<li>extract C3D features: prob, fc7, fc6, pool5 for each clip </li>
+<li>L2 normalization</li>
+<li>compute the 12 different distances for each feature：48 in total</li>
+<li>linear SVM is trained on these 48-dim feature vectors </li>
+<li><p>C3D significantly outperforms the others</p>
+<p><img src="/2020/09/02/pseudo-3d/similarity.png" width="50%"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/3d-CNN-2-5d-CNN/" rel="tag"># 3d CNN, 2.5d CNN</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/08/13/SSD/" rel="next" title="SSD">
+                <i class="fa fa-chevron-left"></i> SSD
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/09/07/regression-loss/" rel="prev" title="regression loss">
+                regression loss <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks"><span class="nav-number">1.</span> <span class="nav-text">Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition"><span class="nav-number">3.</span> <span class="nav-text">Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks"><span class="nav-number">4.</span> <span class="nav-text">Learning Spatiotemporal Features with 3D Convolutional Networks</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

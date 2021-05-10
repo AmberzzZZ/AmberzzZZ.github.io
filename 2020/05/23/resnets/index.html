@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="paper," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="overview papers  [resnet] ResNet: Deep Residual Learning for Image Recognition   [resnext] ResNext: Aggregated Residual Transformations for Deep Neural Networks  [resnest] ResNeSt: Split-Attention Net">
+<meta name="keywords" content="paper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="resnets">
+<meta property="og:url" content="https://amberzzzz.github.io/2020/05/23/resnets/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="overview papers  [resnet] ResNet: Deep Residual Learning for Image Recognition   [resnext] ResNext: Aggregated Residual Transformations for Deep Neural Networks  [resnest] ResNeSt: Split-Attention Net">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/rxblock.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/structure.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/equiv.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/equiv2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/bottled.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/resnets/rSblock.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/resnets/Split-Attention.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/acc.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/ResNet-RS.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/training%20methods.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/hyper.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/additive.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/23/resnets/resolution.png">
+<meta property="og:updated_time" content="2021-03-19T03:45:24.912Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="resnets">
+<meta name="twitter:description" content="overview papers  [resnet] ResNet: Deep Residual Learning for Image Recognition   [resnext] ResNext: Aggregated Residual Transformations for Deep Neural Networks  [resnest] ResNeSt: Split-Attention Net">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2020/05/23/resnets/rxblock.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2020/05/23/resnets/"/>
+
+
+
+
+
+  <title>resnets | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/23/resnets/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">resnets</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-23T10:00:58+08:00">
+                2020-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/23/resnets/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/23/resnets/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h2><ol>
+<li><p>papers</p>
+<p> [resnet] ResNet: Deep Residual Learning for Image Recognition </p>
+<p> [resnext] ResNext: Aggregated Residual Transformations for Deep Neural Networks</p>
+<p> [resnest] ResNeSt: Split-Attention Networks </p>
+<p> [revisiting resnets] Revisiting ResNets: Improved Training and Scaling Strategies </p>
+</li>
+</ol>
+<h2 id="ResNext-Aggregated-Residual-Transformations-for-Deep-Neural-Networks"><a href="#ResNext-Aggregated-Residual-Transformations-for-Deep-Neural-Networks" class="headerlink" title="ResNext: Aggregated Residual Transformations for Deep Neural Networks"></a>ResNext: Aggregated Residual Transformations for Deep Neural Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>new network architecture</li>
+<li>new building blocks with the same topology</li>
+<li>propose cardinality<ul>
+<li>increasing cardinality is able to improve classification accuracy</li>
+<li>is more effective than going deeper or wider</li>
+</ul>
+</li>
+<li>classification task</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>VGG &amp; ResNets：</p>
+<ul>
+<li>stacking building blocks of the same topology</li>
+<li>deeper</li>
+<li>reduces the free choices of hyper-parameters </li>
+</ul>
+</li>
+<li><p>Inception models </p>
+<ul>
+<li>split-transform-merge strategy</li>
+<li>split：1x1conv spliting into a few lower-dimensional embeddings </li>
+<li>transform：a set of specialized filters  </li>
+<li><p>merge：concat</p>
+</li>
+<li><p>approach the representational power of large and dense layers, but at a considerably lower computational complexity</p>
+</li>
+<li>modules are customized stage-by-stage</li>
+</ul>
+</li>
+<li><p>our architecture </p>
+<ul>
+<li>adopts VGG/ResNets’ repeating layers</li>
+<li>adopts Inception‘s split-transform-merge strategy </li>
+<li>aggregated by <strong>summation</strong></li>
+<li><p>cardinality：the size of the set of transformations（split path数）</p>
+<ul>
+<li>多了1x1 conv的计算量</li>
+<li>少了3x3 conv的计算量</li>
+</ul>
+<p><img src="/2020/05/23/resnets/rxblock.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素</p>
+<ul>
+<li>Multi-branch convolutional blocks</li>
+<li>Grouped convolutions：通道对齐，稀疏连接</li>
+<li>Compressing convolutional networks</li>
+<li>Ensembling </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<ul>
+<li>a template module</li>
+<li>if producing spatial maps of the same size, the blocks share the same hyper-parameters (width and filter sizes) </li>
+<li><p>when the spatial map is downsampled by a factor of 2, the width of the blocks is multiplied by a factor of 2</p>
+</li>
+<li><p>grouped convolutions：第一个1x1和3x3conv的width要根据C进行split</p>
+<p><img src="/2020/05/23/resnets/structure.png" width="40%;"></p>
+</li>
+<li><p>equivalent blocks</p>
+<ul>
+<li>BN after each conv</li>
+<li>ReLU after each BN except the last of block</li>
+<li>ReLU after add</li>
+<li><p>r</p>
+<p><img src="/2020/05/23/resnets/equiv.png" width="80%;"></p>
+<p><img src="/2020/05/23/resnets/equiv2.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model Capacity </p>
+<ul>
+<li><p>improve accuracy when maintaining the model complexity and number of parameters </p>
+</li>
+<li><p>adjust the width of bottleneck, the according C to maintain capacity：C=1的时候退化成ResNet block</p>
+<p>  <img src="/2020/05/23/resnets/bottled.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="ResNeSt-Split-Attention-Networks"><a href="#ResNeSt-Split-Attention-Networks" class="headerlink" title="ResNeSt: Split-Attention Networks"></a>ResNeSt: Split-Attention Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>propose a modular Split-Attention block </li>
+<li>enables attention across feature-map groups</li>
+<li>preserve the overall ResNet structure for downstream applications such as object detection and semantic segmentation  </li>
+<li>prove improvement on detection &amp; segmentation tasks</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>ResNet<ul>
+<li>simple and modular design </li>
+<li>limited receptive-field size and lack of cross-channel interaction</li>
+</ul>
+</li>
+<li>image classification networks have focused more on group or depth-wise convolution <ul>
+<li>do not transfer well to other tasks </li>
+<li>isolated representations cannot capture cross-channel relationships </li>
+</ul>
+</li>
+<li>a versatile backbone <ul>
+<li>improving performance across multiple tasks at the same time</li>
+<li>a network with cross-channel representations is desirable </li>
+<li>a Split-Attention block <ul>
+<li>divides the feature-map into several groups (along the channel dimension)  </li>
+<li>finer-grained subgroups or splits</li>
+<li>weighted combination </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>featuremap attention mechanism：NiN’s 1x1 conv</li>
+<li>Multi-path：GoogleNet </li>
+<li>channel-attention mechanism：SE-Net</li>
+<li><p>结构上，全局上看，模仿ResNext，引入cardinality和group conv，局部上看，每个group内部继续分组，然后模仿SK-Net，融合多个分支的split-attention，大group之间concat，而不是ResNext的add，再经1x1 conv调整维度，add id path</p>
+<p><img src="/2020/05/23/resnets/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/resnets/rSblock.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Split-Attention block </p>
+<ul>
+<li><p>enables feature-map attention across different feature-map groups</p>
+</li>
+<li><p>within a block：controlled by cardinality</p>
+</li>
+<li><p>within a cardinal group：introduce a new radix hyperparameter R indicating the number of splits </p>
+</li>
+<li><p>split-attention</p>
+<ul>
+<li>多个in-group branch的input输入进来</li>
+<li>fusion：先做element-wise summation </li>
+<li>channel-wise global contextual information：做global average pooling </li>
+<li>降维：Dense-BN-ReLU</li>
+<li>各分支Dense(the attention weight function)：学习各自的重要性权重</li>
+<li>channel-wise soft attention：对全部的dense做softmax</li>
+<li>加权：原始的各分支input与加权的dense做乘法</li>
+<li>和：加权的各分支add</li>
+<li><p>r=1：退化成SE-blockaverage pooling </p>
+<p><img src="/2020/05/23/resnets/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/resnets/Split-Attention.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>shortcut connection</p>
+<ul>
+<li>for blocks with a strided convolution or combined convolution-with-pooling can be applied to the id</li>
+</ul>
+</li>
+<li><p>concat</p>
+</li>
+<li><p>average pooling downsampling </p>
+<ul>
+<li>for dense prediction tasks：it becomes essential to preserve spatial information </li>
+<li>former work tend to use strided 3x3 conv</li>
+<li>we use an average pooling layer with 3x3 kernel</li>
+<li>2x2 average pooling applied to strided shortcut connection before 1x1 conv</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Revisiting-ResNets-Improved-Training-and-Scaling-Strategies"><a href="#Revisiting-ResNets-Improved-Training-and-Scaling-Strategies" class="headerlink" title="Revisiting ResNets: Improved Training and Scaling Strategies"></a>Revisiting ResNets: Improved Training and Scaling Strategies</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>disentangle the three aspects</p>
+<ul>
+<li>model architecture</li>
+<li>training methodology</li>
+<li>scaling strategies</li>
+</ul>
+</li>
+<li><p>improve ResNets to SOTA</p>
+<ul>
+<li>design a family of ResNet architectures, ResNet-RS </li>
+<li>use improved training and scaling strategies </li>
+<li>and combine minor architecture changes</li>
+<li>在ImageNet上打败efficientNet</li>
+<li><p>在半监督上打败efficientNet-noisystudent</p>
+<p><img src="/2020/05/23/resnets/acc.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>ImageNet上榜大法<ul>
+<li>Architecture <ul>
+<li>人工系列：AlexNet，VGG，ResNet，Inception，ResNeXt</li>
+<li>NAS系列：NasNet-A，AmoebaNet-A，EfficientNet</li>
+</ul>
+</li>
+<li>Training and Regularization Methods<ul>
+<li>regularization methods<ul>
+<li>dropout，label smoothing，stochastic depth，dropblock，data augmentation</li>
+<li>significantly improve generalization when training more epochs</li>
+</ul>
+</li>
+<li>training <ul>
+<li>learning rate schedules</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Scaling Strategies<ul>
+<li>model dimension：width，depth，resolution</li>
+<li>efficientNet提出的均衡增长，在本文中shows sub-optimal for both resnet and efficientNet</li>
+</ul>
+</li>
+<li>Additional Training Data<ul>
+<li>pretraining on larger dataset</li>
+<li>semi-supervised</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>the performance of a vision model <ul>
+<li>architecture：most research focus on</li>
+<li>training methods and scaling strategy：less publicized but critical</li>
+<li>unfair：使用modern training method的新架构与使用dated methods的老网络直接对比</li>
+</ul>
+</li>
+<li>we focus on the impact of training methods and scaling strategies<ul>
+<li>training methods：<ul>
+<li>We survey the modern training and regularization techniques</li>
+<li>发现引入其他正则方法的时候降低一点weight decay有好处</li>
+</ul>
+</li>
+<li>scaling strategies：<ul>
+<li>We offer new perspectives and practical advice on scaling</li>
+<li>可能出现过拟合的时候就加depth，否则先加宽</li>
+<li>resolution慢点增长，more slowly than prior works  </li>
+<li>从acc图可以看到：我们的scaling strategies与网络结构的lightweight change正交，是additive的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>re-scaled ResNets, ResNet-RS<ul>
+<li>仅improve training &amp; scaling strategy就能大幅度涨点</li>
+<li>combine minor architectural changes进一步涨点</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<ul>
+<li>use ResNet with two widely used architecture changes</li>
+<li>ResNet-D<ul>
+<li>stem的7x7conv换成3个3x3conv</li>
+<li>stem的maxpooling去掉，每个stage的首个3x3conv负责stride2</li>
+<li>residual path上前两个卷积的stride互换（在3x3上下采样）</li>
+<li>id path上的1x1 s2conv替换成2x2 s2的avg pooling+1x1conv</li>
+</ul>
+</li>
+<li><p>SE in bottleneck</p>
+<ul>
+<li>use se-ratio of 0.25</li>
+</ul>
+<p><img src="/2020/05/23/resnets/ResNet-RS.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>training methods</p>
+<ul>
+<li>match the efficientNet setup<ul>
+<li>train for 350 epochs</li>
+<li>use cosine learning rate instead of exponential decay </li>
+<li>RandAugment instead of AutoAugment </li>
+<li>use Momentum optimizer instead of RMSProp </li>
+</ul>
+</li>
+<li>regularization<ul>
+<li>weight decay</li>
+<li>label smoothing</li>
+<li>dropout</li>
+<li>stochastic depth</li>
+</ul>
+</li>
+<li><p>data augmentation</p>
+<ul>
+<li>we use RandAugment</li>
+<li>EfficientNet use AutoAugment which slightly outperforms RandAugment</li>
+</ul>
+<p><img src="/2020/05/23/resnets/training methods.png" width="75%;"></p>
+</li>
+<li><p>hyper：</p>
+<ul>
+<li>droprate</li>
+<li>increase the regularization as the model size increase to limit overfitting</li>
+<li>label smoothing = 0.1</li>
+<li>weight decay = 4e-5</li>
+<li><p><img src="/2020/05/23/resnets/hyper.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>improved training methods</p>
+<ul>
+<li><p>additive study</p>
+<ul>
+<li>总体上看都是additive的</li>
+<li>increase training epochs在添加regularization methods的前提下才不hurt，否则会overfitting</li>
+<li><p>dropout在不降低weight decay的情况下会hurt</p>
+<p><img src="/2020/05/23/resnets/additive.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>weight decay</p>
+<ul>
+<li>少量/没有regularization methods的情况下：大weight decay防止过拟合，1e-4</li>
+<li>多/强regularization methods的情况下：适当减小weight decay能涨点，4e-5</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>improved scaling strategies</p>
+<ul>
+<li><p>search space</p>
+<ul>
+<li>width multiplier：[0.25, 0.5, 1.0, 1.5, 2.0]</li>
+<li>depth：[26, 50, 101, 200, 300, 350, 400]</li>
+<li>resolution：[128, 160, 224, 320, 448]</li>
+<li>increase regularization as model size increase</li>
+<li>observe 10/100/350 epoch regime</li>
+</ul>
+</li>
+<li><p>we found that the best scaling strategies depends on training regime</p>
+</li>
+<li><p>strategy1：scale depth</p>
+<ul>
+<li>Depth scaling outperforms width scaling for longer epoch regimes </li>
+<li>width scaling is preferable for shorter epoch regimes</li>
+<li>scaling width可能会引起overfitting，有时候会hurt performance</li>
+<li>depth scaling引入的参数量也比width小</li>
+</ul>
+</li>
+<li><p>strategy2：slow resolution scaling</p>
+<ul>
+<li>efficientNets/resNeSt lead to very large images</li>
+<li><p>our experiments：大可不必</p>
+<p><img src="/2020/05/23/resnets/resolution.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/paper/" rel="tag"># paper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/18/Receptive-Field/" rel="next" title="Receptive Field">
+                <i class="fa fa-chevron-left"></i> Receptive Field
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/25/GANomaly/" rel="prev" title="GANomaly">
+                GANomaly <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#overview"><span class="nav-number">1.</span> <span class="nav-text">overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResNext-Aggregated-Residual-Transformations-for-Deep-Neural-Networks"><span class="nav-number">2.</span> <span class="nav-text">ResNext: Aggregated Residual Transformations for Deep Neural Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResNeSt-Split-Attention-Networks"><span class="nav-number">3.</span> <span class="nav-text">ResNeSt: Split-Attention Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Revisiting-ResNets-Improved-Training-and-Scaling-Strategies"><span class="nav-number">4.</span> <span class="nav-text">Revisiting ResNets: Improved Training and Scaling Strategies</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

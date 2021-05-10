@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="slam," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1 综述基于图优化的slam主要分为以下三个部分：  前端：基于传感器数据建图，匹配相邻帧，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈。 后端：优化图，基于历史信息的约束，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。 宏观的闭环检测：根据闭环">
+<meta name="keywords" content="slam">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Graph-based Optimization">
+<meta property="og:url" content="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="1 综述基于图优化的slam主要分为以下三个部分：  前端：基于传感器数据建图，匹配相邻帧，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈。 后端：优化图，基于历史信息的约束，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。 宏观的闭环检测：根据闭环">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/b.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/H.png">
+<meta property="og:updated_time" content="2019-11-20T08:33:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Graph-based Optimization">
+<meta name="twitter:description" content="1 综述基于图优化的slam主要分为以下三个部分：  前端：基于传感器数据建图，匹配相邻帧，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈。 后端：优化图，基于历史信息的约束，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。 宏观的闭环检测：根据闭环">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/b.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/"/>
+
+
+
+
+
+  <title>Graph-based Optimization | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Graph-based Optimization</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-02T15:32:59+08:00">
+                2018-05-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/02/graph-based-optimization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/02/graph-based-optimization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h3><p>基于图优化的slam主要分为以下三个部分：</p>
+<ul>
+<li>前端：基于传感器数据建图，<strong>匹配相邻帧</strong>，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。<strong>位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈</strong>。</li>
+<li>后端：<strong>优化</strong>图，<strong>基于历史信息的约束</strong>，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。</li>
+<li>宏观的闭环检测：根据闭环信息<strong>优化</strong>矫正整个拓扑图。</li>
+</ul>
+<p>这里面涉及到了<strong>两个优化</strong>，一个是后端局部优化，一个是全局闭环优化，两者计算的思路是一样的。</p>
+<h3 id="2-优化"><a href="#2-优化" class="headerlink" title="2 优化"></a>2 优化</h3><h4 id="2-1-全局闭环优化，用于矫正整个拓扑图"><a href="#2-1-全局闭环优化，用于矫正整个拓扑图" class="headerlink" title="2.1 全局闭环优化，用于矫正整个拓扑图"></a>2.1 全局闭环优化，用于矫正整个拓扑图</h4><p>前端后端完成的事情是<strong>探索并创建新的节点</strong>，获得新的测量值，添加新的位姿关系方程：</p>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{split}
+& x_0 + z_{01} = x_1\\
+& x_1 + z_{12} = x_2\\
+& ...\\
+& x_{k-1} + z_{k-1, k} = x_{k}\\
+\end{split}
+\end{eqnarray}</script><p>而全局闭环检测<strong>添加已知节点之间</strong>的位姿约束关系：</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+x_i + z_{i j} = x_j, \ \ \ \ i,j\in [0, k]
+\end{equation}</script><p>再添加一个<strong>初始条件</strong>（不是必须的，但是后面实验表明固定一个顶点比不固定效果要好——相当于有一个明确可信的基准）：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><ul>
+<li>以上线性方程组中，<strong>闭环检测部分的方程中的两个结点都在前面出现过，因此不增加矩阵的秩</strong>，因此最终要求解包含$k$个方程$k+1$个未知数的线性方程组。</li>
+<li>闭环的关键性：如果没有闭环条件，方程组$Ax=b$左右两边秩是相等的——有唯一解，添加了闭环条件以后，相当于方程组左侧$A$的秩不变，但是右侧$b$的秩则增加了，$rank(A) &lt; rank(A, b)$——没有解析解，只有最优。</li>
+<li>实际上状态$\textbf x$是一个包含夹角$\theta$的向量$[x, y, \theta]$，实际相对位姿的计算<strong>并非简单的线性叠加</strong>：</li>
+</ul>
+<script type="math/tex; mode=display">
+\textbf x \oplus \Delta \textbf x = 
+\begin{pmatrix}
+x + \Delta x cos\theta - \Delta y sin \theta  \\
+y + \Delta x sin\theta + \Delta y cos \theta  \\
+normAngle(\theta + \Delta \theta)
+\end{pmatrix}</script><p><strong>举个栗子</strong>：</p>
+<blockquote>
+<p>机器人从起始位置$x_0=0$处出发，里程计测得它向前移动了1m，到达$x_1$，接着测得它向后移动了0.8m，到达$x_2$，这时通过闭环检测，发现他回到了起始位置。</p>
+</blockquote>
+<p>首先根据给出信息构建图：</p>
+<script type="math/tex; mode=display">
+x_0 + 1 = x_1\\
+x_1 - 0.8 = x_2</script><p>然后根据闭环条件添加约束：</p>
+<script type="math/tex; mode=display">
+x_2 = x_0</script><p>补充初始条件：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><p>使用<strong>最小二乘法</strong>求上述方程组的最优解，首先构建<strong>残差平方和函数</strong>：</p>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{split}
+& f_1 = x_0 = 0\\
+& f_2 = x_1 - x_0 - 1 = 0\\
+& f_3 = x_2 - x_1 + 0.8 = 0\\
+& f_4 = x_2 - x_0 = 0
+\end{split}
+\end{eqnarray}</script><script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 + (x_2-x_1+0.8)^2 + (x_2-x_0)^2</script><p>然后对每个参数<strong>求偏导</strong>：</p>
+<script type="math/tex; mode=display">
+\frac{\partial c}{\partial x_1} = -x_0 + 2x_1-x_2 -1.8=0\\
+\frac{\partial c}{\partial x_2} = -x_0 - x_1 +2x_2 + 0.8 = 0</script><p>解得$x_1 = 0.93, x_2 = 0.07$，可以看到闭环矫正了所有节点的位姿，优化了整个拓扑图。</p>
+<h4 id="2-2-后端局部优化，用于矫正局部地图"><a href="#2-2-后端局部优化，用于矫正局部地图" class="headerlink" title="2.2 后端局部优化，用于矫正局部地图"></a>2.2 后端局部优化，用于矫正局部地图</h4><p>再举个栗子：</p>
+<blockquote>
+<p>机器人从起始位置$x_0=0$处出发，并观测到其正前方2m处有一个路标$l_0$，里程计测得它向前移动了1m，到达$x_1$，这时观测到路标在其正前方0.8m处。</p>
+</blockquote>
+<p>首先根据前端信息建图 raw graph（这样建图明显是存在累积误差的）：</p>
+<script type="math/tex; mode=display">
+x_0 + 1 = x_1</script><p>然后添加闭环约束：</p>
+<script type="math/tex; mode=display">
+x_1 + 0.8 = l_0\\
+x_0 + 2 = l_0</script><p>初始条件：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><p>构建残差平方和：</p>
+<script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>求偏导求解：$x_1 = 1.07, l_0 = 1.93$，可以看到后端是对前端新添加进来的节点位姿做了矫正，消除部分测量误差。</p>
+<p>这里面涉及到两种传感器信息——里程计和激光雷达，两种传感器的精度是有差别的，我们对其的信任程度也应该不同，反映到公式中就是<strong>要为不同传感器信息赋予不同的权重</strong>。假设编码器信息更准确，那么：</p>
+<script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + \textbf{10}(x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>调整权重之后解得：$x_1 = 1.01, l_0 = 1.9$，可以看到<strong>计算结果会向着更信任的传感器的测量结果靠近</strong>。</p>
+<h4 id="2-3-严格推导"><a href="#2-3-严格推导" class="headerlink" title="2.3 严格推导"></a>2.3 严格推导</h4><p><strong>2.3.1 信息矩阵（误差权重矩阵)</strong></p>
+<p>图优化问题转化为最小二乘问题，首先是带权重的残差平方和函数的一般形式：</p>
+<script type="math/tex; mode=display">
+F(x) = \Sigma_{i,j} e(x_i, x_j, z_{i,j})^T\Omega_{i,j}e(x_i, x_j, z_{i,j})</script><script type="math/tex; mode=display">
+x^{*} = argminF(x)</script><p>其中的$\Omega_{i,j}$项就是上文提到的误差权重矩阵，它的正式名字叫<strong>信息矩阵</strong>。</p>
+<p>传感器的测量值，可以看作是以真值为中心的多元高斯分布：</p>
+<script type="math/tex; mode=display">
+f_x(x_1, x_2, ..., x_k) = \frac{1}{\sqrt{}(2\pi)^k|\Sigma|}exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))</script><p>协方差矩阵$\Sigma$对角线上的值表示每一维对应的方差，该方差值越大表示该维度不确定性越大，对应的信息权重应该越小。<strong>实际上拓扑图上每条边对应的信息矩阵就是对应测量协方差矩阵的逆</strong>。</p>
+<p><strong>2.3.2 非线性</strong></p>
+<p>上文已经提到，位姿变化非线性——<strong>非线性最小二乘问题</strong>，要采用迭代法求解。迭代法需要有一个<strong>好的初始假设值</strong>，然后在这个值附近<strong>增量式迭代</strong>寻找最优解。</p>
+<script type="math/tex; mode=display">
+f(x) = \Sigma e^T\Omega e\\
+最小二乘问题目标函数：min \frac{1}{2}||f(x)||_2^2</script><p>首先要将非线性函数转化成关于增量$\Delta x$的线性函数——泰勒展开，根据具体的展开形式又分为：</p>
+<ul>
+<li><p>一阶、二阶梯度法</p>
+<p>直接<strong>对目标函数</strong>在$x$附近进行泰勒展开：</p>
+<script type="math/tex; mode=display">
+||f(x+\Delta x)||_2^2 \approx ||f(x)||_2^2 +J(x) \Delta x = \frac{1}{2} \Delta x^T H \Delta x</script><p><strong>一阶梯度法（最速下降法）</strong>：只保留一阶梯度，并引入步长$\lambda$：</p>
+<script type="math/tex; mode=display">
+\Delta x^* = -\lambda J^T(x)</script><p><strong>二阶梯度法（牛顿法）</strong>：保留一阶和二阶梯度信息</p>
+<script type="math/tex; mode=display">
+J^T(x)+H\Delta x^*=0</script><p>最速下降法过于贪心，容易走出锯齿路线，增加迭代次数。牛顿法需要计算目标函数的二阶导数（Hessian矩阵），计算困难。</p>
+</li>
+</ul>
+<ul>
+<li><p>高斯牛顿法</p>
+<p><strong>对$f(x)$而不是目标函数$f(x)^2$</strong>在$x$附近进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+f(x+\Delta x) \approx f(x) + J(x) \Delta x</script><p>对应每一个误差函数$e_{ij}$：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+& e_{ij}(x_i+\Delta x_i, x_j+\Delta x_j) = e_{i,j}(x+\Delta x)  \\
+&\approx e_{ij} +\frac{\partial e_{ij}}{\partial x}\Delta x = e_{ij} +  J_{ij}\Delta x
+\end{split}</script><p>​            其中$J_{ij}$为初始值附近的雅可比矩阵（定义见卡尔曼滤波）。</p>
+<p>带入目标函数得到<strong>近似二阶展开</strong>：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+& F_{ij}(x+\Delta x) = e_{ij}(x+\Delta x)^T \Omega_{ij}e_{ij}(x+\Delta x)\\
+& \approx (e_{ij} +  J_{ij}\Delta x)^T \Omega_{ij}(e_{ij} +  J_{ij}\Delta x)\\
+& = \underbrace{e_{ij}^T\Omega_{ij}e_{ij}}_{c_{ij}} + 2\underbrace{e_{ij}^T\Omega_{ij}J_{ij}}_{b_{ij}^T}\Delta x + \Delta x^T \underbrace{J_{ij}^T\Omega_{ij}J_{ij}}_{H_{ij}}\Delta x\\
+& = c_{ij} + 2b_{ij}^T\Delta x + \Delta x^T H_{ij}\Delta x
+\end{split}</script><p>求解增量$\Delta x$：</p>
+<script type="math/tex; mode=display">
+2b + 2H\Delta x^* = 0\\
+高斯牛顿方程：H\Delta x^* = -b\\</script><p>对比牛顿法可见，<strong>高斯牛顿法用$J^TJ$作为二阶Hessian矩阵的近似，简化了计算</strong>。</p>
+<p>上述算法要求近似$H$矩阵是正定且可逆的，实际数据很难满足，因而在使用高斯牛顿算法时可能出现<strong>$H$为奇异矩阵或病态</strong>的情况，增量稳定性较差，导致算法不收敛。</p>
+<blockquote>
+<p>图形上来思考，就是近似后的梯度方向不再是梯度变化最快的方向，可能引起不稳定。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p>列文伯格—马夸尔特法</p>
+<p>为$\Delta x$添加一个信赖区域，不让它因为过大而使得近似$f(x+\Delta x) = f(x) + J(x)\Delta x$不准确。</p>
+<script type="math/tex; mode=display">
+\rho = \frac{f(x+\Delta x) - f(x)}{J(x) \Delta x}</script><p>可以看到如果$\rho$接近1，说明近似比较好。如果$\rho$比较大，说明实际减小的值远大于估计减小的值，需要放大近似范围，反之你懂的。</p>
+<script type="math/tex; mode=display">
+||D\Delta x_k||_2^2 \leq \mu</script><p>将每次迭代得到的$\Delta x$限定在一个半径为信赖区域的椭球中，根据$\rho$的大小修改信赖区域。于是问题转化成为了<strong>带不等式约束的优化问题</strong>：</p>
+<script type="math/tex; mode=display">
+min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2, \ \ s.t. ||D \Delta x ||^2 = \mu</script><p>用拉格朗日乘子转化成无约束问题：</p>
+<script type="math/tex; mode=display">
+min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2 + \frac{\lambda}{2}||D \Delta x ||^2</script><p>展开后得到如下形式：</p>
+<script type="math/tex; mode=display">
+(H + \lambda D^TD)\Delta x^* = -b</script><p>通常把$D$取值为单位阵$I$，得到更简化形式：</p>
+<script type="math/tex; mode=display">
+(H + \lambda I)\Delta x^* = -b</script><p>当$\lambda$较小时，$H$占主要地位，说明二次近似模型较好，LM算法更接近高斯牛顿法。当$\lambda$较大时，$\lambda I$占主要地位，LM算法更接近一阶梯度法。修正了线性方程组矩阵的病态问题，比高斯牛顿法更加健壮，但是收敛速度也更慢。</p>
+<blockquote>
+<p>图形上思考，LM算法修正了高斯牛顿法得到的梯度，以此固定一个搜索区域，在区域内寻找最优。</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>2.3.3 稀疏矩阵</strong></p>
+<p>对于误差函数$e_{ij}$，它只和$e_i$和$e_j$有关，因此它的雅可比矩阵有如下结构（行数是$x$的维度，列数是拓扑图中节点映射关系的数目）：</p>
+<script type="math/tex; mode=display">
+J_{ij} = 
+\begin{bmatrix}
+0 & ... & 0 & \underbrace{\frac{\partial e_{i}}{\partial x_i}}_{A_{ij}} & 0 & ... &  \underbrace{\frac{\partial e_{j}}{\partial x_j}}_{B_{ij}} & 0 & ... & 0
+\end{bmatrix}</script><p>相应地$b_{ij}$是一个包含很多0的列向量：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+ b_{ij}^T& = e_{ij}^T \Omega_{ij} J_{ij}\\
+&= e_{ij}^T\Omega_{ij} (0 ... A_{ij}...B_{ij}...0)\\
+&=(0...e_{ij}^T\Omega_{ij}A_{ij}...e_{ij}^T\Omega_{ij}B_{ij}...0)
+\end{split}</script><p>$b = \Sigma_{ij} b_{ij}$：</p>
+<p><img src="/2018/05/02/graph-based-optimization/b.png" alt=""></p>
+<p>$H_{ij}$是一个包含很多0的对称阵：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+H_{ij}& = J_{ij}^T \Omega_{ij}J_{ij} \\
+& = 
+\begin{pmatrix}
+...\\
+A_{ij}^T\\
+...\\
+B_{ij}^T\\
+...
+\end{pmatrix}
+\Omega_{ij}
+\begin{pmatrix}
+... & A_{ij} & ... & B_{ij} & ...
+\end{pmatrix}\\
+& =
+\begin{pmatrix}
+    &  \\
+& A_{ij}^T\Omega{ij}A_{ij} & A_{ij}^T\Omega_{ij}B_{ij} & \\
+  & \\
+& B{ij}^T\Omega_{ij}A_{ij} & B_{ij}^T\Omega_{ij}B_{ij}& \\
+   & 
+\end{pmatrix}
+\end{split}</script><p>$H=\Sigma_{ij}H_{ij}$：</p>
+<p><img src="/2018/05/02/graph-based-optimization/H.png" alt=""></p>
+<p>梳理一下计算流程：$e_{ij} \to  J_{ij}  \to A_{ij}, B_{ij} \to b_{ij}, H_{ij} \to b, H \to \Delta x^* \to x$</p>
+<p><strong>2.3.4 误差函数</strong></p>
+<p>前面定义过位姿的非线性叠加，显然位姿误差也不是简单的线性加减关系：</p>
+<script type="math/tex; mode=display">
+e_{ij}(x_i, x_j) = t2v(Z_{ij}^{-1}(X_i^{-1}.X_j))</script><p>其中的$Z_{ij}$、$X_i$、$X_j$都是矩阵形式。$X_i^{-1}X_j$表示节点j到节点i之间的位姿差异$\hat Z_{ij}$，假设这个转移矩阵形式如下：</p>
+<script type="math/tex; mode=display">
+\hat Z_{ij} = 
+\begin{bmatrix}
+R_{2*2} & t_{2*1} \\
+0 & 1
+\end{bmatrix}</script><p>假设测量值$Z_{ij}$形式如下：</p>
+<script type="math/tex; mode=display">
+Z_{ij} = 
+\begin{bmatrix}
+R^{'} & t^{'}\\
+0 & 1
+\end{bmatrix}</script><p>分块矩阵的求逆过程如下：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}^{-1}& =
+\begin{bmatrix}
+\begin{bmatrix}
+I & t\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+R & 0\\
+0 & 1
+\end{bmatrix}
+\end{bmatrix}^{-1}=
+\begin{bmatrix}
+R & 0\\
+0 & 1
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+I & t\\
+0 & 1
+\end{bmatrix}^{-1}\\
+& =\begin{bmatrix}
+R^T & 0\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+I & -t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^T & -R^Tt\\
+0 & 1
+\end{bmatrix}
+\end{split}</script><p>所以误差$e_{ij}$计算如下：</p>
+<script type="math/tex; mode=display">
+E_{ij} = Z_{ij}^{-1}\hat Z_{ij} = 
+\begin{bmatrix}
+R^{'} & t^{'}\\
+0 & 1
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^{'T} & -R^{'T}t^{'}\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^{'T}R & R^{'T}(t-t^{'})\\
+0 & 1
+\end{bmatrix}</script><script type="math/tex; mode=display">
+e_{ij} = t2v(E_{ij})=
+\begin{bmatrix}
+R_z(t_{\hat z} - t_z)_{2*1}\\
+\theta_\hat z - \theta_z
+\end{bmatrix}_{3*1}=
+\begin{bmatrix}
+R_z(x_{\hat z} - x_z)\\
+R_z(y_{\hat z} - y_z)\\
+\theta_\hat z - \theta_z
+\end{bmatrix}=
+\begin{bmatrix}
+R_z[R_i(x_{j} - x_i) - x_z]\\
+R_z[R_i(y_{j} - y_{i}) - y_z]\\
+\theta_j - \theta_i - \theta_z
+\end{bmatrix}</script><p>求解雅可比矩阵$J_{ij}$：</p>
+<script type="math/tex; mode=display">
+A_{ij} = 
+\begin{bmatrix}
+\frac{\partial e_1}{\partial x_i} & \frac{\partial e_1}{\partial y_i} & \frac{\partial e_1}{\partial \theta_i}\\
+\frac{\partial e_2}{\partial x_i} & \frac{\partial e_2}{\partial y_i} & \frac{\partial e_2}{\partial \theta_i}\\
+\frac{\partial e_3}{\partial x_i} & \frac{\partial e_3}{\partial y_i} & \frac{\partial e_3}{\partial \theta_i}\\
+\end{bmatrix}=
+\begin{bmatrix}
+-R_z^TR_i^T & 0 & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(x_j-x_i)\\
+0 & -R_z^TR_i^T  & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(y_j-y_i)\\
+0 & 0 & -1
+\end{bmatrix}</script><script type="math/tex; mode=display">
+B_{ij} = 
+\begin{bmatrix}
+R_z^TR_i^T & 0\\
+0 & 1
+\end{bmatrix}</script><p>累加$b$和$H$矩阵： </p>
+<script type="math/tex; mode=display">
+b_{[i]} += A_{ij}\Omega_{ij}e_{ij}\\
+b_{[j]} += B_{ij}^T\Omega_{ij}e_{ij}\\
+H_{[ii]} += A_{ij}^T\Omega_{ij}A_{ij}\\
+H_{[ij]} += A_{ij}^T\Omega_{ij}B_{ij}\\
+H_{[ji]} += B_{ij}^T\Omega_{ij}A_{ij}\\
+H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/slam/" rel="tag"># slam</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/29/关联分析/" rel="next" title="关联分析">
+                <i class="fa fa-chevron-left"></i> 关联分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/03/clion使用/" rel="prev" title="CLion for record">
+                CLion for record <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-综述"><span class="nav-number">1.</span> <span class="nav-text">1 综述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-优化"><span class="nav-number">2.</span> <span class="nav-text">2 优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-全局闭环优化，用于矫正整个拓扑图"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 全局闭环优化，用于矫正整个拓扑图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-后端局部优化，用于矫正局部地图"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 后端局部优化，用于矫正局部地图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-严格推导"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 严格推导</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+  
+
+
+  
+
+  
+
+</body>
+</html>

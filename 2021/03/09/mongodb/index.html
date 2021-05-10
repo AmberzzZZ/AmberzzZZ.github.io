@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="数据库，NoSQL," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="download：https://www.mongodb.com/try/download/enterprise  install  123456789101112# 将解压以后的文件夹放在/usr/local下sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb# E">
+<meta name="keywords" content="数据库，NoSQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mongodb">
+<meta property="og:url" content="https://amberzzzz.github.io/2021/03/09/mongodb/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="download：https://www.mongodb.com/try/download/enterprise  install  123456789101112# 将解压以后的文件夹放在/usr/local下sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb# E">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/03/09/mongodb/concepts.png">
+<meta property="og:updated_time" content="2021-05-08T11:10:55.219Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mongodb">
+<meta name="twitter:description" content="download：https://www.mongodb.com/try/download/enterprise  install  123456789101112# 将解压以后的文件夹放在/usr/local下sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb# E">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2021/03/09/mongodb/concepts.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2021/03/09/mongodb/"/>
+
+
+
+
+
+  <title>mongodb | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/09/mongodb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">mongodb</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-09T12:19:54+08:00">
+                2021-03-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/09/mongodb/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/09/mongodb/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ol>
+<li><p>download：<a href="https://www.mongodb.com/try/download/enterprise" target="_blank" rel="noopener">https://www.mongodb.com/try/download/enterprise</a></p>
+</li>
+<li><p>install</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将解压以后的文件夹放在/usr/<span class="built_in">local</span>下</span></span><br><span class="line">sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/</span><br><span class="line">sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> ENV PATH</span></span><br><span class="line">export PATH=/usr/local/mongodb/bin:$PATH</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建日志及数据存放的目录</span></span><br><span class="line">sudo mkdir -p /usr/local/var/mongodb</span><br><span class="line">sudo mkdir -p /usr/local/var/log/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/log/mongodb</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>configuration</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 后台启动</span></span><br><span class="line">mongod --dbpath /usr/local/var/mongodb --logpath /usr/local/var/log/mongodb/mongo.log --fork</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 控制台启动</span></span><br><span class="line">mongod --config /usr/local/etc/mongod.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看状态</span></span><br><span class="line">ps aux | grep -v grep | grep mongod</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>run</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在db环境下启动一个终端</span></span><br><span class="line">cd /usr/local/mongodb/bin </span><br><span class="line">./mongo</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>original settings</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 显示所有数据的列表</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line"><span class="meta">#</span><span class="bash"> 三个系统保留的特殊数据库</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 连接/创建一个指定的数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use <span class="built_in">local</span></span></span><br><span class="line">switched to db local</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前数据库, 如果没use默认为<span class="built_in">test</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db</span></span><br><span class="line">test</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 【！！重要】关闭服务</span></span><br><span class="line">之前服务器被kill -9强制关闭，数据库丢失了</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use admin</span></span><br><span class="line">switched to db admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.shutdownServer()</span></span><br><span class="line">server should be down...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>concepts</p>
+<p> <img src="/2021/03/09/mongodb/concepts.png" width="90%;"></p>
+</li>
+<li><p>文档document</p>
+<p> 一组key-value对，如上面左图中的一行记录，如上面右图中的一个dict</p>
+</li>
+<li><p>集合collection</p>
+<p> 一张表，如上面左图和上面右图</p>
+</li>
+<li><p>主键primary key</p>
+<p> 唯一主键，ObjectId类型，自定生成，有标准格式</p>
+</li>
+<li><p>常用命令</p>
+<p>10.1 创建/删除/重命名db</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换至数据库test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 插入一条doc, db.COLLECTION_NAME.insert(document)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> db要包含至少一条文档，才能在show dbs的时候显示（才真正创建）</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet1.insert(&#123;<span class="string">'name'</span>: img0&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前已有数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除指定数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 旧版本(before4.0)重命名：先拷贝一份，在删除旧的</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.copyDatabase(<span class="string">'OLDNAME'</span>, <span class="string">'NEWNAME'</span>);</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use old_name</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 新版本重命名：dump&amp;restore，这个东西在mongodb tools里面，要另外下载，可执行文件放在bin下</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump   <span class="comment"># 将所有数据库导出到bin/dump/以每个db名字命名的文件夹下</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump -h dbhost -d dbname -o dbdirectory</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -h: 服务器地址:端口号</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -d: 需要备份的数据库</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -o: 存放位置（需要已存在）</span></span><br><span class="line">mongodump -d test -o tmp/</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在恢复备份数据库的时候换个名字：mongorestore -h dbhost -d dbname path</span></span><br><span class="line">mongorestore -d test_bkp tmp/test</span><br><span class="line"><span class="meta">#</span><span class="bash"> 这时候可以看到一个新增了一个叫test_bkp的db</span></span><br></pre></td></tr></table></figure>
+<p>10.2 创建/删除/重命名collection</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建：db.createCollection(name, options)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">'case2img'</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有tables</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 不用显示创建，在db insert的时候会自动创建集合</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.insert(&#123;<span class="string">"name"</span> : <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除：db.COLLECTION_NAME.drop()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.drop()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名：db.COLLECTION_NAME.renameCollection(<span class="string">'NEWNAME'</span>)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.renameCollection(<span class="string">'sheet3'</span>)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 复制：db.COLLECTION_NAME.aggregate(&#123;<span class="variable">$out</span>: <span class="string">'NEWNAME'</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.aggregate(&#123; <span class="variable">$out</span> : <span class="string">"sheet3"</span> &#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.3 插入/显示/更新/删除document</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入</span></span><br><span class="line">db.COLLECTION_NAME.insert(document)</span><br><span class="line">db.COLLECTION_NAME.save(document)</span><br><span class="line">db.COLLECTION_NAME.insertOne()</span><br><span class="line">db.COLLECTION_NAME.insertMany()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有doc</span></span><br><span class="line">db.COLLECTION_NAME.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新doc的部分内容</span></span><br><span class="line">db.COLLECTION_NAME.update(</span><br><span class="line">   &lt;query&gt;,   # 查询条件</span><br><span class="line">   &lt;update&gt;,  # 更新操作</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,     # if true 如果不存在则插入</span><br><span class="line">     multi: &lt;boolean&gt;,      # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">'case'</span>: <span class="string">'s2'</span>, <span class="string">'name'</span>: <span class="string">'img2'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新整条文档by object_id</span></span><br><span class="line">db.COLLECTION_NAME.save(</span><br><span class="line">   &lt;document&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.save(&#123;<span class="string">"_id"</span>: ObjectId(<span class="string">"60474e4b77e21bad9bd4655a"</span>), <span class="string">"case"</span>:<span class="string">"s3"</span>, <span class="string">"name"</span>:<span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除满足条件的doc</span></span><br><span class="line">db.COLLECTION_NAME.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,   # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除所有doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.4 简单查询find</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询表中的doc：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="string">"name"</span>:1&#125;)   <span class="comment"># projection的value在对应的key-value是list的时候有意义</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 格式化显示查询结果：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).pretty()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;).pretty()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取指定数量的数据记录：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).<span class="built_in">limit</span>(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).<span class="built_in">limit</span>(1)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 跳过指定数量的数据：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).skip(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).skip(1)</span></span><br></pre></td></tr></table></figure>
+<p>10.5 条件操作符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">(&gt;</span><span class="bash">) 大于 - <span class="variable">$gt</span></span></span><br><span class="line">(&lt;) 小于 - $lt</span><br><span class="line"><span class="meta">(&gt;</span><span class="bash">=) 大于等于 - <span class="variable">$gte</span></span></span><br><span class="line">(&lt;= ) 小于等于 - $lte</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img1'</span>, <span class="string">'size'</span>:100&#125;&#125;)</span></span><br><span class="line">WriteResult(&#123; "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s2'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img2'</span>, <span class="string">'size'</span>:200&#125;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询size&gt;150的doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>: 150&#125;&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.6 数据类型操作符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type(KEY)等于 - $type</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 比较对象可以是字符串/对应的reflect NUM</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'0'</span>&#125;&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.7 排序find().sort</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 通过指定字段&amp;指定升序/降序来对数据排序：db.COLLECTION_NAME.find().sort(&#123;KEY:1/-1&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find().sort(&#123;<span class="string">'name'</span>:1&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> skip(), limilt(), sort()三个放在一起执行的时候，执行的顺序是先 sort(), 然后是 skip()，最后是显示的 <span class="built_in">limit</span>()。</span></span><br></pre></td></tr></table></figure>
+<p>10.8 索引</p>
+<p>skip</p>
+<p>10.9 聚合aggregate</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 用于统计 db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by group</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:1&#125;&#125;&#125;])</span></span><br><span class="line">group by key value 'case'</span><br><span class="line">count number of items in each group</span><br><span class="line">refer to the number as img_num</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:<span class="string">'$size'</span>&#125;&#125;&#125;])</span></span><br><span class="line">计算每一个group内，size值的总和</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by match</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$match</span>: &#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>:150&#125;&#125;&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br><span class="line">类似shell的管道，match用来筛选条件，符合条件的送入下一步统计</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$skip</span>: 4&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>快速统计distinct</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.case2img.distinct(TAG_NAME)</span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意如果distinct的内容太长，超过16M，会报distinct too big的error，推荐用聚合来做统计</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">12. pymongo</span><br><span class="line"></span><br><span class="line">   用python代码来操作数据库</span><br><span class="line"></span><br><span class="line">   先安装：pip install pymongo</span><br><span class="line"></span><br><span class="line">   11.1 连接client</span><br><span class="line"></span><br><span class="line">   ```python</span><br><span class="line">   from pymongo import MongoClient</span><br><span class="line">   Client = MongoClient()</span><br></pre></td></tr></table></figure>
+<p>   11.2 获取数据库</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db = Client.DB_NAME</span><br><span class="line">db = Client[<span class="string">'DB_NAME'</span>]</span><br></pre></td></tr></table></figure>
+<p>   11.3 获取collection</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">collection = db.COLLECTION_NAME</span><br><span class="line">collection = db[<span class="string">'COLLECTION_NAME'</span>]</span><br></pre></td></tr></table></figure>
+<p>   11.4 插入doc</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># insert one</span></span><br><span class="line">document1 = &#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;</span><br><span class="line">document2 = &#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;</span><br><span class="line">post_1 = collection.insert_one(document1).inserted_id</span><br><span class="line">post_2 = collection.insert_one(document2).inserted_id</span><br><span class="line">print(post_1)</span><br><span class="line"></span><br><span class="line"><span class="comment"># insert many</span></span><br><span class="line">new_document = [&#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;,&#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;]</span><br><span class="line"><span class="comment"># new_document = [document1,document2]  注意doc是神拷贝，只能作为一条doc被插入一次</span></span><br><span class="line">result = collection.insert_many(new_document).inserted_ids</span><br><span class="line">print(result)</span><br></pre></td></tr></table></figure>
+<p>   11.5 查找</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> bson.objectid <span class="keyword">import</span> ObjectId</span><br><span class="line"></span><br><span class="line"><span class="comment"># find one 返回一条doc</span></span><br><span class="line">result = collection.find_one()</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'case'</span>: <span class="string">'s0'</span>&#125;)</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'_id'</span>: ObjectId(<span class="string">'604752f277e21bad9bd46560'</span>)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># find 返回一个迭代器</span></span><br><span class="line"><span class="keyword">for</span> _, item <span class="keyword">in</span> enumerate(collection.find()):</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
+<p>   11.6 更新</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># update one</span></span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$push'</span>:&#123;<span class="string">'add'</span>:<span class="number">1</span>&#125;&#125;)    <span class="comment"># 追加数组内容</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># update many</span></span><br><span class="line">collection.update_many(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
+<p>   11.7 删除</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在mongo shell里面是remove方法，在pymongo里面被deprecated成delete方法</span></span><br><span class="line">collection.delete_one(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>&#125;)</span><br><span class="line">collection.delete_many(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>   11.8 统计</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计数：count方法已经被重构</span></span><br><span class="line">print(collection.count_documents(&#123;<span class="string">'case'</span>:<span class="string">'s0'</span>&#125;))</span><br><span class="line"></span><br><span class="line"><span class="comment"># unique：distinct方法</span></span><br><span class="line">print(collection.distinct(<span class="string">'case'</span>))</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/数据库，NoSQL/" rel="tag"># 数据库，NoSQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/04/docker/" rel="next" title="docker">
+                <i class="fa fa-chevron-left"></i> docker
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/11/regnet/" rel="prev" title="regnet">
+                regnet <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

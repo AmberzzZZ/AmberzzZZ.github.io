@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="transformer, self-attention," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="startupreference：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维时间序列 1D CNN，并行计算 缺点：CNN擅长局部信息，卷积核尺寸和长距离依赖的balance">
+<meta name="keywords" content="transformer, self-attention">
+<meta property="og:type" content="article">
+<meta property="og:title" content="transformers">
+<meta property="og:url" content="https://amberzzzz.github.io/2021/01/18/transformers/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="startupreference：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维时间序列 1D CNN，并行计算 缺点：CNN擅长局部信息，卷积核尺寸和长距离依赖的balance">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/transformer.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/RNN.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/LSTM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/GRU.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/seq2seq.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/architecture.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/PE.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/transformer_arch.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/timeline.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/category.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/revisit%20transformer.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/efficient.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/ViT.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/ViT%20formulation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/hierarchical.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/shifted%20window.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/Swin.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/efficient-SW.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/swins.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/swinsacc.png">
+<meta property="og:updated_time" content="2021-04-20T11:17:00.645Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="transformers">
+<meta name="twitter:description" content="startupreference：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维时间序列 1D CNN，并行计算 缺点：CNN擅长局部信息，卷积核尺寸和长距离依赖的balance">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2021/01/18/transformers/transformer.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2021/01/18/transformers/"/>
+
+
+
+
+
+  <title>transformers | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/18/transformers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">transformers</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-18T12:02:51+08:00">
+                2021-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/18/transformers/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/18/transformers/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h2><p>reference：<a href="https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA</a></p>
+<ol>
+<li><p>NLP &amp; RNN</p>
+<ul>
+<li>文本涉及上下文关系</li>
+<li>RNN时序串行，建立前后关系</li>
+<li>缺点：对超长依赖关系失效，不好并行化</li>
+</ul>
+</li>
+<li><p>NLP &amp; CNN</p>
+<ul>
+<li>文本是1维时间序列</li>
+<li>1D CNN，并行计算</li>
+<li>缺点：CNN擅长局部信息，卷积核尺寸和长距离依赖的balance</li>
+</ul>
+</li>
+<li><p>NLP &amp; transformer</p>
+<ul>
+<li>对流入的每个单词，建立其对词库的权重映射，权重代表attention</li>
+<li>自注意力机制</li>
+<li><p>建立长距离依赖</p>
+<p><img src="/2021/01/18/transformers/transformer.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>put in CV</p>
+<ul>
+<li>插入类似的自注意力层</li>
+<li>完全抛弃卷积层，使用Transformers</li>
+</ul>
+</li>
+<li><p>RNN &amp; LSTM &amp; GRU cell</p>
+<ul>
+<li><p>标准要素：输入x、输出y、隐层状态h</p>
+</li>
+<li><p>RNN</p>
+<ul>
+<li>RNN cell每次接收一个当前输入$x_t$，和前一步的隐层输出$h_{t-1}$，然后产生一个新的隐层状态$h_t$，也是当前的输出$y_t$</li>
+<li>formulation：$y_t, h_t = f(x_t, h_{t-1})$</li>
+<li>same parameters for each time step：同一个cell每个time step的权重共享</li>
+<li><p>一个问题：梯度消失/爆炸</p>
+<ul>
+<li>考虑hidden states’ chain的简化形式：$h_t = \theta^t h_0$，一个sequence forward下去就是same weights multiplied over and over again</li>
+<li>另外tanh也是会让神经元梯度消失/爆炸</li>
+</ul>
+<p><img src="/2021/01/18/transformers/RNN.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>LSTM</p>
+<ul>
+<li><p>key ingredient</p>
+<ul>
+<li>cell：增加了一条cell state workflow，优化梯度流</li>
+<li>gate：通过门结构删选携带信息，优化长距离关联</li>
+</ul>
+<p><img src="/2021/01/18/transformers/LSTM.png" width="25%;"></p>
+</li>
+<li><p>可以看到LSTM的循环状态有两个：细胞状态$c_t$和隐层状态$h_t$，输出的$y_t$仍旧是$h_t$</p>
+</li>
+</ul>
+</li>
+<li><p>GRU</p>
+<ul>
+<li><p>LSTM的变体，仍旧是门结构，比LSTM结构简单，参数量小，据说更好训练</p>
+<p><img src="/2021/01/18/transformers/GRU.png" width="25%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>papers</p>
+<p>[Seq2Seq 2014] Sequence to Sequence Learning with Neural Networks，Google，最早的encoder-decoder stacking LSTM用于机翻</p>
+<p>[self-attention/Transformer 2017] Transformer: Attention Is All You Need，Google，</p>
+<p>[bert 2019] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding，Google，NLP</p>
+<p>[DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，</p>
+<p>[综述2020] Efficient Transformers: A Survey，Google，</p>
+<p>[综述2021] Transformers in Vision: A Survey，迪拜，</p>
+<p>[综述2021] A Survey on Visual Transformer，华为，</p>
+<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google</p>
+<p>[BotNet 2021] Bottleneck Transformers for Visual Recognition，Google</p>
+<p>[医学图像transformer UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达</p>
+<p>[Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
+</li>
+</ol>
+<h2 id="Sequence-to-Sequence"><a href="#Sequence-to-Sequence" class="headerlink" title="Sequence to Sequence"></a>Sequence to Sequence</h2><ol>
+<li><p>[a keras tutorial][<a href="https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html" target="_blank" rel="noopener">https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html</a>]</p>
+<ul>
+<li><p>general case</p>
+<ul>
+<li>extract the information of the entire input sequence</li>
+<li>then start generate the output sequence</li>
+</ul>
+</li>
+<li><p>seq2seq model workflow</p>
+<ul>
+<li>a (stacking of) RNN layer acts as encoder<ul>
+<li>processes the input sequence</li>
+<li>returns its own internal state：不要RNN的outputs，只要internal states</li>
+<li>encoder编码得到的东西叫Context Vector</li>
+</ul>
+</li>
+<li>a (stacking of) RNN layer acts as decoder<ul>
+<li>given previous characters of the target sequence</li>
+<li>it is trained to predict the next characters of the target sequence</li>
+<li>teacher forcing：<ul>
+<li>输入是target sequence，训练目标是使模型输出offset by one timestep的target sequence</li>
+<li>也可以不teacher forcing：直接把预测作为next step的输入</li>
+</ul>
+</li>
+<li>Context Vector的同质性：每个step，decoder都读取一样的Context Vector作为initial_state</li>
+</ul>
+</li>
+<li>when inference<ul>
+<li>第一步获取input sequence的state vectors</li>
+<li>repeat<ul>
+<li>给decoder输入input states和out sequence(begin with a 起始符)</li>
+<li>从prediction中拿到next character</li>
+</ul>
+</li>
+<li>append the character to the output sequence</li>
+<li>until：得到end character / hit the character limit</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>implementation</p>
+<p>  <a href="https://github.com/AmberzzZZ/transformer/blob/master/seq2seq.py" target="_blank" rel="noopener">https://github.com/AmberzzZZ/transformer/blob/master/seq2seq.py</a></p>
+</li>
+</ul>
+</li>
+<li><p>one step further</p>
+<ul>
+<li>改进方向<ul>
+<li>bi-directional RNN：粗暴反转序列，有效涨点</li>
+<li>attention：本质是将encoder的输出Context Vector加权</li>
+<li>ConvS2S：还没看</li>
+</ul>
+</li>
+<li>主要都是针对RNN的缺陷提出</li>
+</ul>
+</li>
+<li><p>动机</p>
+<ul>
+<li>present a general end-to-end sequence learning approach<ul>
+<li>multi-layered LSTMs</li>
+<li>encode the input seq to a fix-dim vector</li>
+<li>decode the target seq from the fix-dim vector</li>
+</ul>
+</li>
+<li>LSTM did not have difficulty on long sentences </li>
+<li><p>reversing the order of the words improved performance</p>
+<p><img src="/2021/01/18/transformers/seq2seq.png" width="65%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>standard  RNN</p>
+<ul>
+<li><p>given a sequence $(x_1, x_2, …, x_T)$</p>
+</li>
+<li><p>iterating：</p>
+<script type="math/tex; mode=display">
+  h_t = sigm(W^{hx} x_t + W^{hh}h_{t-1})\\
+  y_t = W^{yh} h_t</script></li>
+<li><p>如果输入、输出的长度事先已知且固定，一个RNN网络就能建模seq2seq model了</p>
+</li>
+<li><p>如果输入、输出的长度不同、并且服从一些更复杂的关系？就得用两个RNN网络，一个将input seq映射成fixed-sized vector，另一个将vector映射成output seq，but long-term-dependency issue</p>
+</li>
+</ul>
+</li>
+<li><p>LSTM</p>
+<ul>
+<li>LSTM是始终带着全部seq的信息的，如上图那样</li>
+</ul>
+</li>
+<li><p>our actual model</p>
+<ul>
+<li>use two LSTMs：encoder-decoder能够增加参数量</li>
+<li>an LSTM with four layers：deeper</li>
+<li>input sequence倒序：真正的句首更接近trans的句首，makes it easy for SGD to establish communication</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>LSTM：4 layers，1000 cells</li>
+<li>word-embedding：1000-dim，(input vocab 160,000, output vocab 80,000)</li>
+<li>naive softmax</li>
+<li>uniform initialization：(-0.08, 0.08)</li>
+<li>SGD，lr=0.7，half by every half epoch，total 7.5 epochs</li>
+<li>gradient norm [10, 25]</li>
+<li>all sentences in a minibatch are roughly of the same length</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Transformer-Attention-Is-All-You-Need"><a href="#Transformer-Attention-Is-All-You-Need" class="headerlink" title="Transformer: Attention Is All You Need"></a>Transformer: Attention Is All You Need</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>sequence2sequence models<ul>
+<li>encoder + decoder</li>
+<li>RNN / CNN + an attention path</li>
+</ul>
+</li>
+<li>we propose Transformer<ul>
+<li>base solely on attention mechanisms</li>
+<li>more parallelizable and less training time</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>sequence modeling<ul>
+<li>主流：RNN，LSTM，gated<ul>
+<li>align the positions to computing time steps</li>
+<li>sequential本质阻碍并行化</li>
+</ul>
+</li>
+<li>Attention mechanisms acts as a integral part<ul>
+<li>in previous work used in conjunction with the RNN</li>
+</ul>
+</li>
+<li>为了并行化<ul>
+<li>some methods use CNN as basic building blocks</li>
+<li>difficult to learn dependencies between distant positions</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>we propose Transformer<ul>
+<li>rely entirely on an attention mechanism</li>
+<li>draw global dependencies</li>
+</ul>
+</li>
+<li>self-attention<ul>
+<li>relating different positions of a single sequence</li>
+<li>to generate a overall representation of the sequence</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>encoder-decoder </p>
+<ul>
+<li>encoder：doc2emb<ul>
+<li>given an input sequence of symbol representation $(x_1, x_2, …, x_n)$</li>
+<li>map to a sequence of continuous representations  $(z_1, z_2, …, z_n)$，(embeddings)</li>
+</ul>
+</li>
+<li>decoder：hidden layers<ul>
+<li>given embeddings z</li>
+<li>generate an output sequence  $(y_1, y_2, …, y_m)$ one element at a time</li>
+<li>the previous generated symbols are served as additional input when computing the current time step</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Transformer Architecture</p>
+<ul>
+<li><p>Transformer use </p>
+<ul>
+<li>for both encoder and decoder</li>
+<li><p>stacked self-attention and point-wise fully-connected layers</p>
+<p><img src="/2021/01/18/transformers/architecture.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>encoder</p>
+<ul>
+<li>N=6 identical layers</li>
+<li>each layer has 2 sub-layers<ul>
+<li>multi-head self-attention mechanism</li>
+<li>postision-wise fully connected layer</li>
+</ul>
+</li>
+<li>residual<ul>
+<li>for two sub-layers independently</li>
+<li>add &amp; layer norm</li>
+</ul>
+</li>
+<li>d=512</li>
+</ul>
+</li>
+<li><p>decoder</p>
+<ul>
+<li>N=6 identical layers</li>
+<li>3 sub-layers<ul>
+<li>[new] masked multi-head self-attention：combine了先验知识，output embedding只能基于在它之前的time-step的embedding计算</li>
+<li>multi-head self-attention mechanism</li>
+<li>postision-wise fully connected layer</li>
+</ul>
+</li>
+<li>residual</li>
+</ul>
+</li>
+<li><p>attention</p>
+<ul>
+<li>reference：<a href="https://bbs.cvmart.net/articles/4032" target="_blank" rel="noopener">https://bbs.cvmart.net/articles/4032</a></li>
+<li>step1：project embedding to query-key-value pairs<ul>
+<li>$Q = W_Q^{d<em>d} A^{d</em>N}$</li>
+<li>$K = W_K^{d<em>d} A^{d</em>N}$</li>
+<li>$V = W_V^{d<em>d} A^{d</em>N}$</li>
+</ul>
+</li>
+<li>step2：scaled dot-product attention<ul>
+<li>$A^{N*N}=softmax(K^TQ/\sqrt{d})$</li>
+<li>$B^{d<em>N} = V^{d</em>N}A^{N*N}$</li>
+</ul>
+</li>
+<li>multi-head attention <ul>
+<li>以上的step1&amp;step2操作performs a single attention function</li>
+<li>事实上我们可以用多组projection得到多组$\{Q,K,V\}^h$，in parallel地执行attention运算，得到多组$\{B^{d*N}\}^h$</li>
+<li>concat &amp; project<ul>
+<li>concat in d-dim：$B\in R^{(d<em>h)</em>N}$</li>
+<li>linear project：$out = W^{d<em>(d</em>h)} B$</li>
+</ul>
+</li>
+<li>h=8</li>
+<li>$d_{in}/h=64$：embedding的dim</li>
+<li>$d_{out}=64$：query-key-value的dim</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>positional encoding</p>
+<ul>
+<li><p>数学本质是一个hand-crafted的映射矩阵$W^P$和one-hot的编码向量$p$：</p>
+<script type="math/tex; mode=display">
+  \left[ \begin{array}{ccc}
+  a\\
+  e
+  \end{array} 
+  \right ]
+  =
+  [W^I, W^P] 
+  \left[ \begin{array}{ccc}
+  x\\
+  p
+  \end{array} 
+  \right ]</script></li>
+<li><p>用PE表示e</p>
+<p>  <img src="/2021/01/18/transformers/PE.png" width="35%;"></p>
+<ul>
+<li>pos是sequence x上的position</li>
+<li>2i和2i+1是embedding a上的idx</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>point-wise feed-forward network</p>
+<ul>
+<li>fc-ReLU-fc</li>
+<li>dim_fc=2048</li>
+<li>dim_in &amp; dim_out = 512</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>运行过程</p>
+<ul>
+<li><p>encoder是可以并行计算的</p>
+<ul>
+<li>输入是sequence embedding和positional embedding：$A\in R^{d*N}$</li>
+<li>经过repeated blocks</li>
+<li>输出是另外一个sequence：$B\in R^{d*N}$</li>
+<li>self-attention：Q、K、V是一个东西</li>
+<li>encoder的本质就是在解析自注意力：</li>
+<li>并行的全局两两比较，一步到位<ul>
+<li>RNN要by step</li>
+</ul>
+</li>
+<li>CNN要stack layers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p>decoder是在训练阶段是可以并行的，在inference阶段by step</p>
+<ul>
+<li><p>输入是encoder的输出和上一个time-step decoder的输出embedding</p>
+<pre><code>  * 输出是当前time-step对应position的输出词的概率
+
+  * 第一个attention layer是out embedding的self-attention：要实现像RNN一样依次解码出来，每个time step要用到上一个位置的输出作为输入——masking
+
+      * given输入sequence是\ I have a cat，5个元素
+      * 那么mask就是$R^{5*5}$的下三角矩阵
+      * 输入embedding经过transformation变成Q、K、V三个矩阵
+</code></pre><ul>
+<li>仍旧是$A=K^TQ$计算attention</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>            * 这里有一些attention是非法的：位置靠前的query只能用到比他位置更靠前的query，因此要乘上mask矩阵：$A=M A$
+    * softmax：$A=softmax(A)$
+
+
+
+
+
+
+
+            * scale：$B = VA$
+    * concat &amp; projection
+
+            &lt;img src=&quot;transformers/mask.png&quot; width=&quot;65%;&quot; /&gt;
+
+        * 第二个attention layer是in &amp; out sequence的注意力，其key和value来自encoder，query来自上一个decoder block的输出
+
+    &lt;img src=&quot;transformers/flow.jpeg&quot; width=&quot;65%;&quot; /&gt;
+</code></pre><ol>
+<li><p>why self-attention</p>
+<ul>
+<li>衡量维度<ul>
+<li>total computational complexity per layer</li>
+<li>amount of computation that can be parallelized</li>
+<li>path-length between long-range dependencies</li>
+</ul>
+</li>
+<li>given input sequence with length N &amp; dim $d_{in}$，output sequence with dim $d_{out}$<ul>
+<li>RNN need N sequencial operations of $W\in R^{d_{in} * d_{out}}$</li>
+<li>CNN need N/k stacking layers of $d_{in}<em>d_{out}$ sequence operations of $W\in R^{k</em>k}$，generally是RNN的k倍</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training</p>
+<ul>
+<li>optimizer：$Adam(lr, \beta_1=0.9, \beta_2=0.98, \epsilon=10^{-9})$</li>
+<li>lrschedule：warmup by 4000 steps，then decay</li>
+<li><p>dropout</p>
+<ul>
+<li>residual dropout：就是stochastic depth</li>
+<li>dropout to the sum of embeddings &amp; PE for both encoder and decoder</li>
+<li>drop_rate = 0.1</li>
+</ul>
+</li>
+<li><p>label smoothing：smooth_factor = 0.1</p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>A：vary the number of attention heads，发现多了少了都hurts</li>
+<li>B：reduce the dim of attention key，发现hurts</li>
+<li>C &amp; D：大模型+dropout helps</li>
+<li>E：learnable &amp; sincos PE：nearly identical</li>
+<li><p>最后是big model的参数</p>
+<p><img src="/2021/01/18/transformers/transformer_arch.png" width="65%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="A-Survey-on-Visual-Transformer"><a href="#A-Survey-on-Visual-Transformer" class="headerlink" title="A Survey on Visual Transformer"></a>A Survey on Visual Transformer</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>provide a comprehensive overview of the recent advances in visual transformers </li>
+<li>discuss the potential directions for further improvement</li>
+<li><p>develop timeline</p>
+<p><img src="/2021/01/18/transformers/timeline.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>按照应用场景分类</p>
+<ul>
+<li>backbone：分类</li>
+<li>high/mid-level vision：通常是语义相关的，检测/分割/姿态估计</li>
+<li>low-level vision：对图像本身进行操作，超分/图像生成，目前应用较少</li>
+<li><p>video processing</p>
+<p><img src="/2021/01/18/transformers/category.png" width="85%;"></p>
+</li>
+</ul>
+</li>
+<li><p>revisiting transformer</p>
+<ul>
+<li><p>key-concepts：sentence、embedding、positional encoding、encoder、decoder、self-attention layer、encoder-decoder attention layer、multi-head attention、feed-forward neural network</p>
+<p><img src="/2021/01/18/transformers/revisit transformer.png" width="45%;"></p>
+</li>
+<li><p>self-attention layer</p>
+<ul>
+<li>input vector is transformed into 3 vectors<ul>
+<li>input vector is embedding+PE(pos,i)：pos是word在sequence中的位置，i是PE-element在embedding vec中的位置</li>
+<li>query vec q</li>
+<li>key vec k</li>
+<li>value vec v</li>
+<li>$d_q = d_k = d_v = d_{model} = 512$</li>
+</ul>
+</li>
+<li>then calculate：$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$</li>
+<li>encoder-decoder attention layer<ul>
+<li>K和V是从encoder中拿到</li>
+<li>Q是从前一层拿到</li>
+<li>计算是相似的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>multi-head attention<ul>
+<li>一个attention是一个softmax，对应了一对强相关，同时抑制了其他word的相关性</li>
+<li>考虑一个词往往与几个词强相关，这就需要多个attention</li>
+<li>multi-head：different QKV matrices are used for different heads</li>
+<li>given a input vector，the number of heads h<ul>
+<li>先产生h个<q,k,v> pairs</q,k,v></li>
+<li>$d_q=d_k=d_v=d_{model}/h=64$</li>
+<li>这h个pair，分别计算attention vector，得到h个[b,d]的context vector</li>
+<li>concat along-d-axis and linear projection to final [b,d] vector</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>residual &amp; layer-norm：layer-norm在residual-add以后</li>
+<li>feed-forward network<ul>
+<li>fc-GeLU-fc</li>
+<li>$d_h=2048$</li>
+</ul>
+</li>
+<li>final-layer in decoder<ul>
+<li>dense+softmax</li>
+<li>$d_{words}=$ number of words in the vocabulary </li>
+</ul>
+</li>
+<li>when applied in CV tasks<ul>
+<li>most transformers adopt the original transformer’s encoder module</li>
+<li>used as a feature selector</li>
+<li>相比较于CNN，能够capture long-distance characteristics，derive global information</li>
+<li>相比较于RNN，能够并行计算</li>
+</ul>
+</li>
+<li>计算量<ul>
+<li>首先是三个线性层：线性时间复杂度O(n)，计算量与$d_{model}$成正比</li>
+<li>然后是self-attention层：QKV矩阵乘法运算，平方时间复杂度O(n^2)</li>
+<li>multi-head的话，还有一个线性层：平方时间复杂度O(n^2)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>revisiting transformers for NLP</p>
+<ul>
+<li>最早期的RNN + attention：rnn的sequential本质影响了长距离/并行化/大模型</li>
+<li><p>transformer的solely attention结构：解决以上问题，促进了large pre-trained models (PTMs) for NLP</p>
+</li>
+<li><p>BERT and its variants </p>
+<ul>
+<li>are a series of PTMs built on the multi-layer transformer encoder architecture </li>
+<li>pre-trained<ul>
+<li>Masked language modeling </li>
+<li>Next sentence prediction </li>
+</ul>
+</li>
+<li>fine-tuned<ul>
+<li>add an output layer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Generative Pre-trained Transformer models (GPT)<ul>
+<li>are another type of PTMs based on the transformer decoder architecture</li>
+<li>masked self-attention mechanisms </li>
+<li>pre-trained<ul>
+<li>与BERT最大的不同是有向性</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>visual transformer</p>
+<ul>
+<li><p>【category1】: backbone for image classification</p>
+<ul>
+<li>transformer的输入是tokens，在NLP里是embedding形式的分词序列，在CV里就是representing a certain semantic concept的visual token<ul>
+<li>visual token可以来自CNN的feature</li>
+<li>也可以直接来自image的小patch</li>
+</ul>
+</li>
+<li><p>purely use transformer来做image classification任务的模型有iGPT、ViT、DeiT</p>
+</li>
+<li><p>iGPT</p>
+<ul>
+<li>pretraining stage + finetuning stage</li>
+<li>pre-training stage<ul>
+<li>self-supervised：自监督，所以结果较差</li>
+<li>given an unlabeled dataset</li>
+<li>train the model by minimizing the -log(density)，感觉是在force光栅排序正确</li>
+</ul>
+</li>
+<li>fine-tuning stage<ul>
+<li>average pool + fc + softmax</li>
+<li>jointly train with L_gen &amp; L_CE</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ViT<ul>
+<li>pre-trained on large datasets<ul>
+<li>standard transformer’s encoder + MLP head</li>
+<li>treats all patches equally</li>
+<li>有一个类似BERT class token的东西<ul>
+<li>从训练的角度，gather knowledge of the entire class</li>
+<li>inference的时候，只拿了这第一个logit用来做预测</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>fine-tuning<ul>
+<li>换一个zero-initialized的MLP head</li>
+<li>use higher resolution &amp; 插值pe</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>DeiT<ul>
+<li>Data-efficient image transformer </li>
+<li>better performance with <ul>
+<li>a more cautious training strategy </li>
+<li>and a token-based distillation</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>【category2】: High/Mid-level Vision </p>
+</li>
+<li><p>【category3】: Low-level Vision </p>
+</li>
+<li><p>【category4】: Video Processing </p>
+</li>
+<li><p>efficient transformer：瘦身&amp;加速</p>
+<ul>
+<li>Pruning and Decomposition </li>
+<li>Knowledge Distillation </li>
+<li>Quantization </li>
+<li><p>Compact Architecture Design </p>
+<p><img src="/2021/01/18/transformers/efficient.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><a href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE" class="headerlink" title="ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE"></a>ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>attention in vision<ul>
+<li>either in conjunction with CNN</li>
+<li>or replace certain part of a CNN</li>
+<li>overall都还是CNN-based</li>
+</ul>
+</li>
+<li>use a pure transformer to sequence of image patches</li>
+<li>verified on image classification tasks in supervised fashion</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>transformer lack some inductive biases inherent to CNNs，所以在insufficient data上not generalize well</li>
+<li>however large scale training trumps inductive bias，大数据集上ViT更好</li>
+<li>naive application of self-attention<ul>
+<li>建立pixel之间的两两关联：计算量太大了</li>
+<li>需要approximation：local/改变size</li>
+</ul>
+</li>
+<li>we use transformer<ul>
+<li>wih global self-attention</li>
+<li>to full-sized images</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<p> <img src="/2021/01/18/transformers/ViT.png" width="65%;"></p>
+<ul>
+<li><p>input 1D-embedding sequence</p>
+<ul>
+<li>将image $x\in R^{HWC}$ 展开成patches $\{x_p \in R^{P^2C}\}$</li>
+<li>thus sequence length $N=HW/P^2$</li>
+<li>patch embedding：<ul>
+<li>use a trainable linear projection</li>
+<li>fixed dimension size through-all</li>
+</ul>
+</li>
+<li>position embedding：<ul>
+<li>add to patch embedding</li>
+<li>standard learnable 1D position embedding</li>
+</ul>
+</li>
+<li>prepended embedding：<ul>
+<li>前置的learnable embedding $x_{class}$</li>
+<li>similar to BERT’s class token</li>
+</ul>
+</li>
+<li>以上三个embedding组合起来，作为输入sequence</li>
+</ul>
+</li>
+<li><p>transformer encoder</p>
+<ul>
+<li>follow the original Transformer </li>
+<li>交替的MSA和MLP</li>
+<li>layer norm LN</li>
+<li>residual</li>
+<li><p>GELU</p>
+<p><img src="/2021/01/18/transformers/ViT formulation.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>hybrid architecture</p>
+<ul>
+<li>input sequence也可以来源于CNN的feature maps</li>
+<li>patch size可以是1x1</li>
+</ul>
+</li>
+<li><p>classification head</p>
+<ul>
+<li>attached to $z_L^0$：是class token用来做预测</li>
+<li>pre-training的时候是MLP</li>
+<li>fine-tuning的时候换一个zero-initialized的single linear layer</li>
+</ul>
+</li>
+<li><p>workflow</p>
+<ul>
+<li>typically先pre-train on large datasets</li>
+<li>再fine-tune to downstream tasks</li>
+<li>fine-tune的时候替换一个zero-initialized的新线性分类头</li>
+<li>when feeding images with higher resolution<ul>
+<li>keep the patch size</li>
+<li>results in larger sequence length</li>
+<li>这时候pre-trained PE就no longer meaningful了</li>
+<li>we therefore perform 2D interpolation基于它在原图上的位置</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>Adam：$\beta_1=0.9，\beta_2=0.999$</li>
+<li>batch size 4096</li>
+<li>high weight decay 0.1</li>
+<li>linear lr warmup &amp; decay</li>
+</ul>
+</li>
+<li><p>fine-tuning details</p>
+<ul>
+<li>SGDM</li>
+<li>cosine LR</li>
+<li>no weight decay</li>
+<li>【？？？？】average 0.9999</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>use Transformer as visual tasks’ backbone</li>
+<li>challenges of Transformer in vision domain<ul>
+<li>large variations of scales of the visual entities</li>
+<li>high resolution of pixels</li>
+</ul>
+</li>
+<li>we propose hierarchical Transformer<ul>
+<li>shifted windows</li>
+<li>self-attention in local windows</li>
+<li>cross-window connection</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>classification：ImageNet top1 acc 86.4</li>
+<li>detection：COCO box-MAP 58.7</li>
+<li>segmentation：ADE20K</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>when transfer Transformer’s high performance in NLP domain to CV domain<ul>
+<li>differences between the two modalities <ul>
+<li>scale：NLP里面，word tokens serves as the basic element，但是CV里面，patch的形态大小都是可变的，previous methods里面，都是统一设定固定大小的patch token</li>
+<li>resolution：主要问题就是self-attention的计算复杂度，是image size的平方</li>
+</ul>
+</li>
+<li>we propose Swin Transformer<ul>
+<li>hierarchial feature maps</li>
+<li>linear computatoinal complexity to image size</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>hierarchical<ul>
+<li>start from small patches</li>
+<li>merge in deeper layers</li>
+<li>所以对不同尺度的特征patch进行了融合</li>
+</ul>
+</li>
+<li><p>linear complexity</p>
+<ul>
+<li>compute self-attention locally in each window</li>
+<li>每个window的number of patches是设定好的，window数是与image size成正比的</li>
+<li>所以是线性</li>
+</ul>
+<p><img src="/2021/01/18/transformers/hierarchical.png" width="45%;"></p>
+</li>
+<li><p>shifted window approach</p>
+<ul>
+<li>跨层的window shift，建立起相邻window间的桥梁</li>
+<li><p>【QUESTION】all query patches within a window share the same key set</p>
+<p><img src="/2021/01/18/transformers/shifted window.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>previous attemptations of Transformer</p>
+<ul>
+<li>self-attention based backbone architectures<ul>
+<li>将部分/全部conv layers替换成self-attention</li>
+<li>模型主体架构还是ResNet</li>
+<li>slightly better acc</li>
+<li>larger latency caused by self-att</li>
+</ul>
+</li>
+<li>self-attention complement CNNs<ul>
+<li>作为additional block，给到backbone/head，提供长距离信息</li>
+<li>有些检测/分割网络也开始用了transformer的encoder-decoder结构</li>
+</ul>
+</li>
+<li>transformer-based vision backbones<ul>
+<li>主要就是ViT及其衍生品</li>
+<li>ViT requires large-scale training sets</li>
+<li>DeiT introduces training strategies</li>
+<li>但是还存在high resolution计算量的问题</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/01/18/transformers/Swin.png" width="75%;"></p>
+<ul>
+<li>Swin-T：tiny version</li>
+<li>第一步是patch partition：<ul>
+<li>将RGB图切成non-overlapping patches</li>
+<li>patches：token，basic element</li>
+<li>feature dimention：with patch size 4x4，dim=4x4x3=48</li>
+</ul>
+</li>
+<li>然后是linear embedding layer<ul>
+<li>将raw feature re-projection到指定维度</li>
+<li>指定维度C</li>
+</ul>
+</li>
+<li>接下来是Swin Transformer blocks<ul>
+<li>the number of tokens maintain</li>
+</ul>
+</li>
+<li>patch merging layers负责reduce the number of tokens<ul>
+<li>第一个patch merging layer concat 所有2x2的neighbor patches：4C-dim vec each</li>
+<li>然后用了一个线性层re-projection</li>
+<li>number of tokens（resolution）：（H/4*W/4）/4 = （H/8*W/8），跟常规的CNN一样变化的</li>
+<li>token dims：2C</li>
+<li>后面接上一个Transformer blocks</li>
+<li>合起来叫stage2（stage3、stage4）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Swin Transformer blocks</p>
+<ul>
+<li><p>跟原始的Transformer block比，就是把原始的MSA替换成了window-based的MSA</p>
+</li>
+<li><p>原始的attention：global computation leads to quadratic complexity</p>
+</li>
+<li><p>window-based attention：</p>
+<ul>
+<li>attention的计算只发生在每个window内部</li>
+<li>non-overlapping partition</li>
+<li>很显然lacks connections across windows </li>
+</ul>
+</li>
+<li><p>shifted window partitioning in successive blocks</p>
+<ul>
+<li><p>两个attention block</p>
+</li>
+<li><p>第一个用常规的window partitioning strategy：从左上角开始，take M=4，window size 4x4（一个window里面包含4x4个patch）</p>
+</li>
+<li><p>第二层的window，基于前一层，各平移M/2</p>
+</li>
+<li><p>introduce connections between neighbor non-overlapping windows in the previous layer</p>
+</li>
+<li><p>efficient computation</p>
+<ul>
+<li><p>shifted window会导致window尺寸不一致，不利于并行计算</p>
+<p><img src="/2021/01/18/transformers/efficient-SW.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>relative position bias</p>
+<ul>
+<li>我们在MxM的window内部计算local attention：也就是input sequence的time-step是$M^2$</li>
+<li>Q、K、V $\in R ^ {M^2 d}$</li>
+<li>$Attention(Q,K,V)=Softmax(QK^T/\sqrt{d}+B)V$</li>
+<li>这个B作为local的position bias，在二维上，在每个轴上的变化范围[-M+1,M-1]</li>
+<li>we parameterized a smaller-sized bias matrix $\hat B\in R ^{(2M-1)*(2M-1)}$</li>
+<li>values in $B \in R ^ {M^2*M^2}$ are taken from $\hat B$</li>
+<li>the learnt relative position bias可以用来initialize fine-tuned model</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Architecture variants</p>
+<ul>
+<li><p>base model：Swin-B，参数量对标ViT-B</p>
+</li>
+<li><p>Swin-T：0.25x，对标ResNet-50 (DeiT-S) </p>
+</li>
+<li><p>Swin-S：0.5x，对标ResNet-101</p>
+</li>
+<li><p>Swin-L：2x</p>
+</li>
+<li><p>window size：M=7</p>
+</li>
+<li><p>query dim：d=32，（每个stage的input sequence dim逐渐x2，heads num逐渐x2）</p>
+</li>
+<li><p>MLP：expansion ratio=4</p>
+</li>
+<li><p>channel number C：第一个stage的embdding dim，（后续逐渐x2）</p>
+</li>
+<li><p>hypers：</p>
+<p>  <img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
+</li>
+<li><p>acc</p>
+<p>  <img src="/2021/01/18/transformers/swinsacc.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/transformer-self-attention/" rel="tag"># transformer, self-attention</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/01/17/pre-training-self-training/" rel="next" title="pre-training & self-training">
+                <i class="fa fa-chevron-left"></i> pre-training & self-training
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/01/18/GCN/" rel="prev" title="GCN">
+                GCN <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#startup"><span class="nav-number">1.</span> <span class="nav-text">startup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sequence-to-Sequence"><span class="nav-number">2.</span> <span class="nav-text">Sequence to Sequence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Attention-Is-All-You-Need"><span class="nav-number">3.</span> <span class="nav-text">Transformer: Attention Is All You Need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Survey-on-Visual-Transformer"><span class="nav-number">4.</span> <span class="nav-text">A Survey on Visual Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><span class="nav-number">5.</span> <span class="nav-text">ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><span class="nav-number">6.</span> <span class="nav-text">Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
