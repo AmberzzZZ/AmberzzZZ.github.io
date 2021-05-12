@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2020/10/29/nms/fastnms1.jpg">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/10/29/nms/fastnms2.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/10/29/nms/clusternms.png">
-<meta property="og:updated_time" content="2021-03-25T08:12:14.469Z">
+<meta property="og:updated_time" content="2021-05-11T03:51:14.151Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="nms">
 <meta name="twitter:description" content="Non-maximum suppression：非极大值抑制算法，本质是搜索局部极大值，抑制非极大值元素 [nms]：standard nms，当目标比较密集、存在遮挡时，漏检率高 [soft nms]：改变nms的hard threshold，用较低的分数替代0，提升recall [softer nms]：引入box position confidence，通过后处理提高定位精度 [DIoU n">
@@ -369,6 +369,7 @@
 <p>[cluster nms]：<a href="https://github.com/Zzh-tju/CIoU" target="_blank" rel="noopener">CIoU提出</a>，弥补Fast NMS的性能下降，运算效率比Fast NMS下降了一些</p>
 <p>[mask nms]：mask iou计算有不可忽略的延迟，因此比box nms更耗时</p>
 <p>[matrix nms]：SOLO将mask IoU并行化，比FAST-NMS还快，思路和FAST-NMS一样从上三角IoU矩阵出发，可能造成过多抑制。</p>
+<p>[WBF]：加权框融合，Kaggle胸片异物比赛claim有用，速度慢，大概比标准NMS慢3倍，WBF实验中是在已经完成NMS的模型上进行的</p>
 <ol>
 <li>nms<ul>
 <li>过滤+迭代+遍历+消除<ul>

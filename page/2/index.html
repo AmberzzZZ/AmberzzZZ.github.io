@@ -1305,7 +1305,8 @@
       
         
           
-            <h2 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h2><p>reference：<a href="https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA</a></p>
+            <h2 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h2><p>reference1：<a href="https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA</a></p>
+<p>reference2：<a href="https://zhuanlan.zhihu.com/p/308301901" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/308301901</a></p>
 <ol>
 <li><p>NLP &amp; RNN</p>
 <ul>
@@ -1377,17 +1378,20 @@
 </ul>
 </li>
 <li><p>papers</p>
+<p>[一个列了很多论文的主页] <a href="https://github.com/dk-liang/Awesome-Visual-Transformer" target="_blank" rel="noopener">https://github.com/dk-liang/Awesome-Visual-Transformer</a></p>
 <p>[Seq2Seq 2014] Sequence to Sequence Learning with Neural Networks，Google，最早的encoder-decoder stacking LSTM用于机翻</p>
 <p>[self-attention/Transformer 2017] Transformer: Attention Is All You Need，Google，</p>
 <p>[bert 2019] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding，Google，NLP</p>
-<p>[DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，</p>
+<p>[DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，CNN+transformer(en-de)+预测头，每个feature pixel作为一个input embedding，channel dim是vector dim</p>
 <p>[综述2020] Efficient Transformers: A Survey，Google，</p>
 <p>[综述2021] Transformers in Vision: A Survey，迪拜，</p>
 <p>[综述2021] A Survey on Visual Transformer，华为，</p>
-<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google</p>
+<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim</p>
 <p>[BotNet 2021] Bottleneck Transformers for Visual Recognition，Google</p>
 <p>[医学图像transformer UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达</p>
 <p>[Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
+<p>[SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水</p>
+<p>[UNETR 2021] Transformers for 3D Medical Image Segmentation，英伟达，Unet+transformer</p>
 </li>
 </ol>
 <h2 id="Sequence-to-Sequence"><a href="#Sequence-to-Sequence" class="headerlink" title="Sequence to Sequence"></a>Sequence to Sequence</h2><ol>
@@ -1692,38 +1696,36 @@
 <li><p>decoder是在训练阶段是可以并行的，在inference阶段by step</p>
 <ul>
 <li><p>输入是encoder的输出和上一个time-step decoder的输出embedding</p>
-<pre><code>  * 输出是当前time-step对应position的输出词的概率
-
-  * 第一个attention layer是out embedding的self-attention：要实现像RNN一样依次解码出来，每个time step要用到上一个位置的输出作为输入——masking
-
-      * given输入sequence是\ I have a cat，5个元素
-      * 那么mask就是$R^{5*5}$的下三角矩阵
-      * 输入embedding经过transformation变成Q、K、V三个矩阵
-</code></pre><ul>
-<li>仍旧是$A=K^TQ$计算attention</li>
+</li>
+<li><p>输出是当前time-step对应position的输出词的概率</p>
+</li>
+<li><p>第一个attention layer是out embedding的self-attention：要实现像RNN一样依次解码出来，每个time step要用到上一个位置的输出作为输入——masking</p>
+<ul>
+<li>given输入sequence是\ I have a cat，5个元素</li>
+<li>那么mask就是$R^{5*5}$的下三角矩阵</li>
+<li><p>输入embedding经过transformation变成Q、K、V三个矩阵</p>
+</li>
+<li><p>仍旧是$A=K^TQ$计算attention</p>
+</li>
+<li><p>这里有一些attention是非法的：位置靠前的query只能用到比他位置更靠前的query，因此要乘上mask矩阵：$A=M A$</p>
+</li>
+<li><p>softmax：$A=softmax(A)$</p>
+</li>
+<li><p>scale：$B = VA$</p>
+</li>
+<li><p>concat &amp; projection</p>
+<p><img src="/2021/01/18/transformers/mask.png" width="60%;"></p>
+<ul>
+<li>第二个attention layer是in &amp; out sequence的注意力，其key和value来自encoder，query来自上一个decoder block的输出</li>
 </ul>
+</li>
+</ul>
+<p><img src="/2021/01/18/transformers/flow.jpeg" width="45%;"></p>
 </li>
 </ul>
 </li>
 </ul>
-<pre><code>            * 这里有一些attention是非法的：位置靠前的query只能用到比他位置更靠前的query，因此要乘上mask矩阵：$A=M A$
-    * softmax：$A=softmax(A)$
-
-
-
-
-
-
-
-            * scale：$B = VA$
-    * concat &amp; projection
-
-            &lt;img src=&quot;transformers/mask.png&quot; width=&quot;65%;&quot; /&gt;
-
-        * 第二个attention layer是in &amp; out sequence的注意力，其key和value来自encoder，query来自上一个decoder block的输出
-
-    &lt;img src=&quot;transformers/flow.jpeg&quot; width=&quot;65%;&quot; /&gt;
-</code></pre><ol>
+<ol>
 <li><p>why self-attention</p>
 <ul>
 <li>衡量维度<ul>
@@ -2250,6 +2252,288 @@
 </li>
 <li><p>acc</p>
 <p>  <img src="/2021/01/18/transformers/swinsacc.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="DETR-End-to-End-Object-Detection-with-Transformers"><a href="#DETR-End-to-End-Object-Detection-with-Transformers" class="headerlink" title="DETR: End-to-End Object Detection with Transformers"></a>DETR: End-to-End Object Detection with Transformers</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>new task formulation：a direct set prediction problem</li>
+<li>main gradients<ul>
+<li>a set-based global loss</li>
+<li>a transformer en-de architecture</li>
+<li>remove the hand-designed componets like nms &amp; anchor</li>
+</ul>
+</li>
+<li>acc &amp; run-time on par with Faster R-CNN on COCO<ul>
+<li>significantly better performance on large objects</li>
+<li>lower performances on small objects</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>modern detectors run object detection in an indirect way</p>
+<ul>
+<li>基于格子/anchor/proposals进行回归和分类</li>
+<li>算法性能受制于nms机制、anchor设计、target-anchor的匹配机制</li>
+</ul>
+</li>
+<li><p>end-to-end approach</p>
+<p>  <img src="/2021/01/18/transformers/DETR.png" width="65%;"></p>
+<ul>
+<li>transformer的self-attention机制，explicitly model all pairwise interactions between elements：内含了去重（nms）的能力</li>
+<li>bipartite matching：set loss function，将预测和gt的box一一匹配，run in parallel</li>
+<li>DETR does not require any customized layers, thus can be reproduced easily</li>
+<li>expand to segmentation task：a simple segmentation head trained on top of a pre-trained DETR</li>
+</ul>
+</li>
+<li><p>set prediction：to predict a set of bounding boxes and the categories for each</p>
+<ul>
+<li>basic：multilabel classification</li>
+<li>detection task has near-duplicates issues</li>
+<li>set prediction是postprocessing-free的，它的global inference schemes能够avoid redundancy</li>
+<li>usual loss：bipartite match</li>
+</ul>
+</li>
+<li><p>object detection</p>
+<ul>
+<li>set-based loss<ul>
+<li>modern detectors use non-unique assignment rules together with NMS</li>
+<li>bipartite matching是target和pred一一对应</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overall</p>
+<p>  <img src="/2021/01/18/transformers/DETR pipeline.png" width="65%;"></p>
+<ul>
+<li>three main components<ul>
+<li>a CNN backbone</li>
+<li>an encoder-decoder transformer</li>
+<li>a simple FFN</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>backbone</p>
+<ul>
+<li>conventional r50</li>
+<li>input：$[H_0, W_0, 3]$</li>
+<li>output：$[H,W,C], H=\frac{H_0}{32}, W=\frac{W_0}{32}, C=2048$</li>
+</ul>
+</li>
+<li><p>transformer encoder</p>
+<ul>
+<li>reduce channel dim to $d$：1x1 conv，$d=512$</li>
+<li>collapse the spatial dimensions：feature sequence [d, HW]，每个spatial pixel作为一个feature</li>
+<li>fixed positional encodings：<ul>
+<li>added to the input of each attention layer</li>
+<li>【QUESTION】加在K和Q上还是embedding上？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>transformer decoder</p>
+<ul>
+<li>输入N个dim=d的embedding<ul>
+<li>叫object queries：表示我们预测固定值N个目标</li>
+<li>因为decoder也是permutation-invariant的（因为all shared），所以要输入N个不一样的embedding</li>
+<li>learnt positional encodings</li>
+<li>add them to the input of each attention layer</li>
+</ul>
+</li>
+<li>decodes the N objects in parallel</li>
+</ul>
+</li>
+<li><p>prediction FFN</p>
+<ul>
+<li>3 layer，ReLU，</li>
+<li>box prediction：normalized center coords &amp; height &amp; width</li>
+<li>class prediction：<ul>
+<li>an additional class label $\varnothing$ 表示no object</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>auxiliary losses</p>
+<ul>
+<li>each decoder layer后面都接一个FFN prediction和Hungarian loss</li>
+<li>shared FFN</li>
+<li>an additional shared LN to norm the inputs of FFN</li>
+<li>three components of the loss<ul>
+<li>class loss：CE loss</li>
+<li>box loss<ul>
+<li>GIOU loss</li>
+<li>L1 loss</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>technical details</p>
+<ul>
+<li>AdamW：<ul>
+<li>initial transformer lr=10e-4</li>
+<li>initial backbone lr=10e-5</li>
+<li>weight decay=10e-4</li>
+</ul>
+</li>
+<li>Xavier init</li>
+<li>imagenet-pretrained resnet weights with frozen batchnorm layers：r50 &amp; r101，DETR &amp; DETR-R101</li>
+<li>a variant：<ul>
+<li>increase feature resolution version</li>
+<li>remove stage5’s stride and add a dilation</li>
+<li>DETR-DC5 &amp; DETR-DC5-R101</li>
+<li>improve performance for small objects</li>
+<li>overall 2x computation increase</li>
+</ul>
+</li>
+<li>augmentation<ul>
+<li>resize input</li>
+<li>random crop：with 0.5 prob then resize</li>
+</ul>
+</li>
+<li>transformer default dropout 0.1</li>
+<li>lr schedule<ul>
+<li>300 epochs</li>
+<li>drop by factor 10 after 200 epochs</li>
+</ul>
+</li>
+<li>4 images per GPU，total batch 64</li>
+</ul>
+</li>
+<li><p>for segmentation task：全景分割</p>
+<ul>
+<li>给decoder outputs加mask head</li>
+<li>compute multi-head attention among<ul>
+<li>decoder box predictions</li>
+<li>encoder outputs</li>
+</ul>
+</li>
+<li>generate M attention heatmaps per object</li>
+<li>add a FPN styled CNN to recover resolution</li>
+<li><p>pixel-wise argmax</p>
+<p><img src="/2021/01/18/transformers/DETRseg.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="UNETR-Transformers-for-3D-Medical-Image-Segmentation"><a href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation" class="headerlink" title="UNETR: Transformers for 3D Medical Image Segmentation"></a>UNETR: Transformers for 3D Medical Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unet结构用于医学分割<ul>
+<li>encoder learns global context</li>
+<li>decoder utilize the representations to predict the semanic ouputs</li>
+<li>the locality of CNN limits long-range spatial dependency</li>
+</ul>
+</li>
+<li>our method<ul>
+<li>use a pure transformer as the encoder</li>
+<li>learn sequence representations of the input volume</li>
+<li>global</li>
+<li>multi-scale</li>
+<li>encoder directly connects to decoder with skip connections</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>unet结构<ul>
+<li>encoder用来提取全图特征</li>
+<li>decoder用来recover</li>
+<li>skip connections用来补充spatial information that is lost during downsampling</li>
+<li>localized receptive fields：<ul>
+<li>disadvantage in capturing multi-scale contextual information</li>
+<li>如不同尺寸的脑肿瘤</li>
+<li>缓和手段：atrous convs，still limited</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>transformer<ul>
+<li>self-attention mechanism in NLP<ul>
+<li>highlight the important features of word sequences</li>
+<li>learn its long-range dependencies</li>
+</ul>
+</li>
+<li>in ViT<ul>
+<li>an image is represented as a patch embedding sequence</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>our method<ul>
+<li>formulation<ul>
+<li>1D seq2seq problem</li>
+<li>use embedded patches</li>
+</ul>
+</li>
+<li>the first completely transformer-based encoder</li>
+</ul>
+</li>
+<li>other unet- transformer methods<ul>
+<li>2D (ours 3D)</li>
+<li>employ only in the bottleneck (ours pure transformer)</li>
+<li>CNN &amp; transformer in separate streams and fuse</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/01/18/transformers/UNETR.png" width="75%;"></p>
+</li>
+<li><p>transformer encoder</p>
+<ul>
+<li>input：1D sequence of input embeddings</li>
+<li>given 3D volume $x \in R^{HWDC}$</li>
+<li>divide into flattened uniform non-overlapping patches $x\in R^{LCN^3}$<ul>
+<li>$L=HWD/N^3$：the sequence length</li>
+<li>$N^3$：patch dimension</li>
+</ul>
+</li>
+<li>linear projection to K-dim $E \in R^{LCK}$：remain constant through transformer</li>
+<li>1D learnable positional embedding $E_{pos} \in R^LD$</li>
+<li>12 self-att blocks：MSA + MLP</li>
+</ul>
+</li>
+<li>decoder &amp;skip connections<ul>
+<li>选取encoder第{3,6,9,12}个block的输出</li>
+<li>reshape back to 3D volume $[\frac{H}{N},\frac{W}{N},\frac{D}{N},C]$</li>
+<li>consecutive 3x3x3 conv+BN+ReLU</li>
+<li>bottleneck<ul>
+<li>deconv by 2 to increase resolution</li>
+<li>then concat with the previous resized feature</li>
+<li>then jointly consecutive conv</li>
+<li>then upsample with deconv…</li>
+</ul>
+</li>
+<li>concat到原图resolution以后，consecutive conv以后，再1x1x1 conv+softmax</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>dice loss<ul>
+<li>dice：for each class channel，计算dice，然后求类平均</li>
+<li>1-dice</li>
+</ul>
+</li>
+<li>ce loss<ul>
+<li>for each pixel，求bce，然后求所有pixel的平均</li>
+</ul>
 </li>
 </ul>
 </li>

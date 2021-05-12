@@ -87,10 +87,12 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning [2020 MoCov 2] Improved Baselines with Momentum Contrastive Learning [2021 MoCo v3] An Empirical Study of Training Self">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2021-04-30T03:28:22.205Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/self-supervised.png">
+<meta property="og:updated_time" content="2021-05-12T10:31:00.901Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MoCo系列">
 <meta name="twitter:description" content="[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning [2020 MoCov 2] Improved Baselines with Momentum Contrastive Learning [2021 MoCo v3] An Empirical Study of Training Self">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/self-supervised.png">
 
 
 
@@ -358,19 +360,36 @@
 <p>[2020 MoCov 2] Improved Baselines with Momentum Contrastive Learning</p>
 <p>[2021 MoCo v3] An Empirical Study of Training Self-Supervised Visual Transformers</p>
 <h2 id="preview-自监督学习-Self-supervised-Learning"><a href="#preview-自监督学习-Self-supervised-Learning" class="headerlink" title="preview: 自监督学习 Self-supervised Learning"></a>preview: 自监督学习 Self-supervised Learning</h2><ol>
-<li>overview<ul>
+<li><p>overview</p>
+<ul>
 <li>本质上就是无监督</li>
 <li>针对的痛点（有监督训练模型）<ul>
 <li>标注成本高</li>
 <li>迁移性差</li>
 </ul>
 </li>
-<li>会基于数据特点，设置Pretext tasks，构造Pesdeo Labels来训练网络</li>
+<li>会基于数据特点，设置Pretext tasks（最常见的任务就是生成/重建），构造Pesdeo Labels来训练网络</li>
 <li>通常模型用来作为其他学习任务的预训练模型</li>
 <li>被认为是用来学习图像的通用视觉表示</li>
 </ul>
 </li>
+<li><p>methods</p>
+<ul>
+<li><p>主要就是两大类方法</p>
+<ul>
+<li>生成式：通过encoder-decoder结构还原输入，监督信号是输入输出尽可能相似</li>
+<li><p>判别式：输入两张图片，通过encoder编码，监督信号是判断两张图是否相似</p>
+<p><img src="/2021/04/30/MoCo系列/self-supervised.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>判别式模型也叫Contrastive Learning</p>
+<ul>
 <li></li>
+</ul>
+</li>
+</ul>
+</li>
 </ol>
 <h2 id="MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning"><a href="#MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning" class="headerlink" title="MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning"></a>MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning</h2><p>1. </p>
 
