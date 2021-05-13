@@ -97,6 +97,8 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/mask.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/flow.jpeg">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/transformer_arch.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/bert.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/bert%20input.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/timeline.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/category.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/revisit%20transformer.png">
@@ -113,7 +115,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETR%20pipeline.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETRseg.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/UNETR.png">
-<meta property="og:updated_time" content="2021-05-12T11:41:37.202Z">
+<meta property="og:updated_time" content="2021-05-13T09:14:51.346Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="transformers">
 <meta name="twitter:description" content="startupreference1：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA reference2：https://zhuanlan.zhihu.com/p/308301901  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维">
@@ -455,19 +457,27 @@
 </li>
 <li><p>papers</p>
 <p>[一个列了很多论文的主页] <a href="https://github.com/dk-liang/Awesome-Visual-Transformer" target="_blank" rel="noopener">https://github.com/dk-liang/Awesome-Visual-Transformer</a></p>
-<p>[Seq2Seq 2014] Sequence to Sequence Learning with Neural Networks，Google，最早的encoder-decoder stacking LSTM用于机翻</p>
-<p>[self-attention/Transformer 2017] Transformer: Attention Is All You Need，Google，</p>
-<p>[bert 2019] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding，Google，NLP</p>
-<p>[DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，CNN+transformer(en-de)+预测头，每个feature pixel作为一个input embedding，channel dim是vector dim</p>
-<p>[综述2020] Efficient Transformers: A Survey，Google，</p>
-<p>[综述2021] Transformers in Vision: A Survey，迪拜，</p>
-<p>[综述2021] A Survey on Visual Transformer，华为，</p>
-<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim</p>
-<p>[BotNet 2021] Bottleneck Transformers for Visual Recognition，Google</p>
-<p>[医学图像transformer UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达</p>
-<p>[Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
-<p>[SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水</p>
-<p>[UNETR 2021] Transformers for 3D Medical Image Segmentation，英伟达，Unet+transformer</p>
+<p>[经典考古]</p>
+<p>​    * [Seq2Seq 2014] Sequence to Sequence Learning with Neural Networks，Google，最早的encoder-decoder stacking LSTM用于机翻</p>
+<p>​    * [self-attention/Transformer 2017] Transformer: Attention Is All You Need，Google，</p>
+<p>​    * [bert 2019] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding，Google，NLP，输入single sentence/patched sentences，用Transformer encoder提取bidirectional cross sentence representation，用输出的第一个logit进行分类</p>
+<p>[综述]</p>
+<p>​    * [综述2020] Efficient Transformers: A Survey，Google，</p>
+<p>​    * [综述2021] Transformers in Vision: A Survey，迪拜，</p>
+<p>​    * [综述2021] A Survey on Visual Transformer，华为，</p>
+<p>[classification]</p>
+<p>​    * [ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim，可以看到跟bert基本一样，就是input sequence换成patch</p>
+<p>​    * [BotNet 2021] Bottleneck Transformers for Visual Recognition，Google，将CNN backbone最后几个stage替换成MSA</p>
+<p>​    * [CvT 2021] CvT: Introducing Convolutions to Vision Transformers，微软，</p>
+<p>[detection]</p>
+<p>​    * [DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，CNN+transformer(en-de)+预测头，每个feature pixel作为一个input embedding，channel dim是vector dim</p>
+<p>​    * [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
+<p>[segmentation]</p>
+<p>​    * [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transformer</p>
+<p>[Unet+Transformer]：</p>
+<p>​    * [UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达，直接使用transformer encoder做unet encoder</p>
+<p>​    * [TransUNet 2021] TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation，encoder stream里面加transformer block</p>
+<p>​    * [TransFuse 2021] TransFuse: Fusing Transformers and CNNs for Medical Image Segmentation，大学，CNN feature和Transformer feature进行bifusion</p>
 </li>
 </ol>
 <h2 id="Sequence-to-Sequence"><a href="#Sequence-to-Sequence" class="headerlink" title="Sequence to Sequence"></a>Sequence to Sequence</h2><ol>
@@ -840,6 +850,160 @@
 <li>E：learnable &amp; sincos PE：nearly identical</li>
 <li><p>最后是big model的参数</p>
 <p><img src="/2021/01/18/transformers/transformer_arch.png" width="65%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding"><a href="#BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding" class="headerlink" title="BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding"></a>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>BERT：Bidirectional Encoder Representations from Transformers<ul>
+<li>Bidirectional</li>
+<li>Encoder</li>
+<li>Representations</li>
+<li>Transformers</li>
+</ul>
+</li>
+<li>workflow<ul>
+<li>pretrain bidirectional representations from unlabeled text</li>
+<li>tune with one additional output layer to obtain the model</li>
+</ul>
+</li>
+<li>SOTA<ul>
+<li>GLUE score 80.5%</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>pretraining is effective in NLP tasks<ul>
+<li>feature-based method：use task-specfic architectures，仅使用pretrained model的特征</li>
+<li>fine-tuining method：直接fine-tune预训练模型</li>
+<li>两种方法在预训练阶段训练目标一致：use unidirectional language models to learn general language representations</li>
+<li>reduce the need for many heavily-engineered task- specific architectures</li>
+</ul>
+</li>
+<li>current methods’ limitations<ul>
+<li>unidirectional：<ul>
+<li>limit the choice of architectures</li>
+<li>事实上token的上下文都很重要，不能只看上文</li>
+</ul>
+</li>
+<li>简单的concat两个independent的L2R和R2L模型（biRNN）<ul>
+<li>independent</li>
+<li>shallow concat</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>BERT<ul>
+<li>masked language model：在一个sequence中预测被遮挡的词</li>
+<li>next sentence prediction：trains text-pair representations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>two steps</p>
+<ul>
+<li>pre-training<ul>
+<li>unlabeled data</li>
+<li>different pretraining tasks</li>
+</ul>
+</li>
+<li>fine-tuning<ul>
+<li>labeled data of the downstream tasks</li>
+<li>fine-tune all the params</li>
+</ul>
+</li>
+<li><p>两个阶段的模型，只有输出层不同</p>
+<ul>
+<li>例如问答模型</li>
+<li>pretraining阶段，输入是两个sentence，输入的起始有一个CLS symbol，两个句子的分隔有一个SEP symbol</li>
+<li>fine-tuning阶段，输入分别是问和答，【输出是啥？】</li>
+</ul>
+<p><img src="/2021/01/18/transformers/bert.png" width="65%;"></p>
+</li>
+</ul>
+</li>
+<li><p>architecture</p>
+<ul>
+<li><p>multi-layer bidirectional Transformer encoder</p>
+<ul>
+<li>number of transfomer blocks L</li>
+<li>hidden size H</li>
+<li>number of self-attention heads A</li>
+<li>FFN dim 4H</li>
+</ul>
+</li>
+<li><p>Bert base：L=12，H=768，A=12</p>
+</li>
+<li><p>Bert large：L=24，H=1024，A=16</p>
+</li>
+<li><p>input/output representations</p>
+<ul>
+<li>a single sentence / two packed up sentence：<ul>
+<li>拼接的sentence用特殊token SEP衔接</li>
+<li>segment embedding：同时add a learned embedding to every token indicating who it belongs</li>
+</ul>
+</li>
+<li>use WordPiece embeddings with 30000 token vocabulary</li>
+<li>输入sequence的第一个token永远是一个特殊符号CLS，它对应的final state输出作为sentence整体的representation，用于分类任务</li>
+<li><p>overall网络的input representation是通过将token embeddings拼接上上特殊符号，加上SE和PE得到</p>
+<p><img src="/2021/01/18/transformers/bert input.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>pre-training</p>
+<ul>
+<li>two unsupervised tasks<ul>
+<li>Masked LM (MLM)<ul>
+<li>mask some percentage of the input tokens at random：15%<ul>
+<li>80%的概率用MASK token替换</li>
+<li>10%的概率用random token替换</li>
+<li>10%的概率unchanged</li>
+</ul>
+</li>
+<li>then predict those masked tokens</li>
+<li>the final hidden states corresponding to the masked tokens are fed into a softmax</li>
+<li>相比较于传统的left2right/right2left/concat模型<ul>
+<li>既有前文又有后文</li>
+<li>只预测masked token，而不是全句预测</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Next Sentence Prediction (NSP)<ul>
+<li>对于relationship between sentences：<ul>
+<li>例如question&amp;answer，句子推断</li>
+<li>not direatly captured by language modeling，模型直观学习的是token relationship</li>
+</ul>
+</li>
+<li>binarized next sentence prediction task<ul>
+<li>选取sentence A&amp;B：<ul>
+<li>50%的概率是真的上下文（IsNext）</li>
+<li>50%的概率是random（NotNext）</li>
+</ul>
+</li>
+<li>构成了一个二分类问题：仍旧用CLS token对应的hidden state C来预测</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>fine-tuning</p>
+<ul>
+<li>BERT兼容many downstream tasks：single text or text pairs</li>
+<li>直接组好输入，end-to-end fine-tuning就行</li>
+<li>输出还是用CLS token对应的hidden state C来预测，接分类头</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -1798,7 +1962,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#startup"><span class="nav-number">1.</span> <span class="nav-text">startup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sequence-to-Sequence"><span class="nav-number">2.</span> <span class="nav-text">Sequence to Sequence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Attention-Is-All-You-Need"><span class="nav-number">3.</span> <span class="nav-text">Transformer: Attention Is All You Need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Survey-on-Visual-Transformer"><span class="nav-number">4.</span> <span class="nav-text">A Survey on Visual Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><span class="nav-number">5.</span> <span class="nav-text">ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><span class="nav-number">6.</span> <span class="nav-text">Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">7.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation"><span class="nav-number">8.</span> <span class="nav-text">UNETR: Transformers for 3D Medical Image Segmentation</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#startup"><span class="nav-number">1.</span> <span class="nav-text">startup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sequence-to-Sequence"><span class="nav-number">2.</span> <span class="nav-text">Sequence to Sequence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Attention-Is-All-You-Need"><span class="nav-number">3.</span> <span class="nav-text">Transformer: Attention Is All You Need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding"><span class="nav-number">4.</span> <span class="nav-text">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Survey-on-Visual-Transformer"><span class="nav-number">5.</span> <span class="nav-text">A Survey on Visual Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><span class="nav-number">6.</span> <span class="nav-text">ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><span class="nav-number">7.</span> <span class="nav-text">Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">8.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation"><span class="nav-number">9.</span> <span class="nav-text">UNETR: Transformers for 3D Medical Image Segmentation</span></a></li></ol></div>
             
 
           </div>
