@@ -96,7 +96,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/02/layer-norm/WS.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/02/layer-norm/gradients.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/02/layer-norm/imageNet.png">
-<meta property="og:updated_time" content="2021-03-26T06:29:44.045Z">
+<meta property="og:updated_time" content="2021-05-20T08:27:05.846Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="layer norm">
 <meta name="twitter:description" content="综述 papers  [batch norm 2015] Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift，inceptionV2，Google Team，归一化层的始祖，加速训练&amp;amp;正则，BN被后辈追着打的主要痛点：approximation by min">
@@ -555,6 +555,13 @@ P_s(X) \neq P_t(X)</script></li>
 <li>different training cases have different normalization terms</li>
 <li>没啥好说的，就是在channel维度计算norm</li>
 <li>further的GN把channel维度分组做norm，IN在直接每个特征计算norm</li>
+<li>gain &amp; bias<ul>
+<li>也是在对应维度：(hwd)c-dim</li>
+<li><a href="https://tobiaslee.top/2019/11/21/understanding-layernorm/" target="_blank" rel="noopener">https://tobiaslee.top/2019/11/21/understanding-layernorm/</a></li>
+<li>后续有实验发现，去掉两个learnable rescale params反而提点</li>
+<li>考虑是在training set上的过拟合</li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>实验</p>
