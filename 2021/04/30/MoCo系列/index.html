@@ -95,6 +95,9 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/MoCo.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/key%20encoder.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/MoCo%20code.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/acc.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/framework.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/SimCLR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/optimization.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/temperature.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/ablation.png">
@@ -106,7 +109,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/lamb.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/random.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/04/30/MoCo系列/ViT.png">
-<meta property="og:updated_time" content="2021-05-17T11:15:56.716Z">
+<meta property="og:updated_time" content="2021-05-20T02:30:44.343Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MoCo系列">
 <meta name="twitter:description" content="papers： [2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming [2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Representations，Google Brain，混进来是因为">
@@ -656,6 +659,90 @@
 <li><p>实验</p>
 </li>
 </ol>
+<h2 id="SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations"><a href="#SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations" class="headerlink" title="SimCLR: A Simple Framework for Contrastive Learning of Visual Representations"></a>SimCLR: A Simple Framework for Contrastive Learning of Visual Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>simplify recently proposed contrastive self-supervised learning algorithms </li>
+<li>systematically study the major components <ul>
+<li>data augmentations</li>
+<li>learnable unlinear prediction head</li>
+<li>larger batch size and more training steps</li>
+</ul>
+</li>
+<li><p>outperform previous self-supervised &amp; semi-supervised learning methods on ImageNet</p>
+<p><img src="/2021/04/30/MoCo系列/acc.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>discriminative approaches based on contrastive learning</p>
+<ul>
+<li>maximizing agreement between differently augmented views of the same data sample </li>
+<li>via a contrastive loss in the latent space</li>
+</ul>
+</li>
+<li><p>major components &amp; conclusions</p>
+<ul>
+<li>数据增强很重要，unsupervised比supervised benefits more</li>
+<li>引入的learnable nonlinear transformation提升了representation quality</li>
+<li>contrastive cross entropy loss受益于normalized embedding和adjusted temperature parameter</li>
+<li>larger batch size and more training steps很重要，unsupervised比supervised benefits more</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>common framework</p>
+<p>  <img src="/2021/04/30/MoCo系列/framework.png" width="40%;"></p>
+<ul>
+<li><p>4 major components</p>
+<ul>
+<li>随机数据增强<ul>
+<li>results in two views of the same sample，构成positive pair</li>
+<li>crop + resize back + color distortions + gaussian blur</li>
+</ul>
+</li>
+<li>base encoder<ul>
+<li>用啥都行，本文用了resnet including the GAP</li>
+</ul>
+</li>
+<li>a projection head<ul>
+<li>将representation dim映射到the space where contrastive loss is applied（given 1 pos pair &amp; N neg pair，就是N+1 dim）</li>
+<li>之前有方法直接用linear projection</li>
+<li>我们用了带一个hidden layer的MLP：fc-bn-relu-fc</li>
+</ul>
+</li>
+<li>a contrastive loss</li>
+</ul>
+</li>
+<li><p>overall workflow</p>
+<ul>
+<li>random sample a minibatch of N</li>
+<li>random augmentation results in 2N data points</li>
+<li>对每个样本来讲，有1个positive pair，其余2(N-1)个data points都是negative samples</li>
+<li>set cosine similarity $sim(u,v)=u^Tv/|u||v|$</li>
+<li>given positive pair $(i,j)$ then the loss is $l_{i,j} = -log \frac{exp(s_{i,j}/\tau)}{\sum_{k\neq i}^{2N} exp(s_{i,k}/\tau)}$</li>
+<li>对每个positive pair都计算，包括$(i,j)$ 和$(j,i)$，叫那个symmetrized loss</li>
+<li><p>update encoder</p>
+<p><img src="/2021/04/30/MoCo系列/SimCLR.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training with large batch size</p>
+<ul>
+<li>batch 8192，negatives 16382</li>
+<li>大batch时，linear learning rate scaling可能不稳定，所以用了LARS optmizer</li>
+<li>global BN，aggregate BN mean &amp; variance over all devices</li>
+<li>TPU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning"><a href="#MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning" class="headerlink" title="MoCo v2: Improved Baselines with Momentum Contrastive Learning"></a>MoCo v2: Improved Baselines with Momentum Contrastive Learning</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -968,6 +1055,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2021/05/19/memory-bank/" rel="prev" title="memory bank">
+                memory bank <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -1050,7 +1141,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">120</span>
+                  <span class="site-state-item-count">121</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1063,7 +1154,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-count">59</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1106,7 +1197,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#preview-自监督学习-Self-supervised-Learning"><span class="nav-number">1.</span> <span class="nav-text">preview: 自监督学习 Self-supervised Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning"><span class="nav-number">2.</span> <span class="nav-text">MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning"><span class="nav-number">3.</span> <span class="nav-text">MoCo v2: Improved Baselines with Momentum Contrastive Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers"><span class="nav-number">4.</span> <span class="nav-text">MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#preview-自监督学习-Self-supervised-Learning"><span class="nav-number">1.</span> <span class="nav-text">preview: 自监督学习 Self-supervised Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning"><span class="nav-number">2.</span> <span class="nav-text">MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations"><span class="nav-number">3.</span> <span class="nav-text">SimCLR: A Simple Framework for Contrastive Learning of Visual Representations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning"><span class="nav-number">4.</span> <span class="nav-text">MoCo v2: Improved Baselines with Momentum Contrastive Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers"><span class="nav-number">5.</span> <span class="nav-text">MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers</span></a></li></ol></div>
             
 
           </div>
