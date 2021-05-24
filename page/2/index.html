@@ -276,6 +276,453 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/02/03/transform-in-CNN/" itemprop="url">transform in CNN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-03T14:04:06+08:00">
+                2021-02-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/02/03/transform-in-CNN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/03/transform-in-CNN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li>几何变换<ul>
+<li>STN：<ul>
+<li>普通的CNN能够隐式的学习一定的平移、旋转不变性，让网络能够适应这种变换：降采样结构本身能够使得网络对变换不敏感</li>
+<li>从数据角度出发，我们还会引入各种augmentation，强化网络对变化的不变能力</li>
+<li>deepMind为网络设计了一个显式的变换模块来学习各种变化，将distorted的输入变换回去，让网络学习更简单的东西</li>
+<li>参数量：就是变换矩阵的参数，通常是2x3的纺射变化矩阵，也就是6个参数</li>
+</ul>
+</li>
+<li>deformable conv：<ul>
+<li>based on STN</li>
+<li>针对分类和检测分别提出deformable convolution和deformable RoI pooling：</li>
+<li>感觉deformable RoI pooling和guiding anchor里面的feature adaption是一个东西</li>
+<li>参数量：regular kernel params 3x3 + deformable offsets 3x3x2</li>
+<li>what’s new？<ul>
+<li>个人认为引入更多的参数引入的变化</li>
+<li>首先STN是从output到input的映射，使用变换矩阵M通常只能表示depictable transformation，且全图只有1个transformation</li>
+<li>其次STN的sampling kernel也是预定义的算法，对kernel内的所有pixel使用相同的变化，也就是1个weight factor</li>
+<li>deformable conv是从input到output的映射，映射可以是任意的transformation，且3x3x2的参数最多可以包含3x3种transformation</li>
+<li>sampling kernel对kernel内的每个点，也可以有不同的权重，也就是3x3个weight factor</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>还有啥跟形变相关的</li>
+</ul>
+</li>
+<li>attention机制<ul>
+<li>spatial attention：STN，sSE</li>
+<li>channel attention：SENet</li>
+<li>同时使用空间attention和通道attention机制：CBAM</li>
+</ul>
+</li>
+</ol>
+<h2 id="STN-Spatial-Transformer-Networks"><a href="#STN-Spatial-Transformer-Networks" class="headerlink" title="STN: Spatial Transformer Networks"></a>STN: Spatial Transformer Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>传统卷积：lack the ability of spacially invariant</li>
+<li>propose a new learnable module<ul>
+<li>can be inserted into CNN</li>
+<li>spatially manipulate the data</li>
+<li>without any extra supervision</li>
+<li>models learn to be invariant to transformations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>spatially invariant<ul>
+<li>the ability of being invariant to large transformations of the input data</li>
+</ul>
+</li>
+<li>max-pooling<ul>
+<li>在一定程度上spatially invariant</li>
+<li>因为receptive fields are fixed and local and small</li>
+<li>必须叠加到比较深层的时候才能实现，intermediate feature layers对large transformations不太行</li>
+<li>是一种pre-defined mechanism，跟sample无关</li>
+</ul>
+</li>
+<li>spatial transformation module<ul>
+<li>conditioned on individual samples</li>
+<li>dynamic mechanism</li>
+<li>produce a transformation and perform it on the entire feature map </li>
+</ul>
+</li>
+<li>task场景<ul>
+<li>distorted digits分类：对输入做tranform能够simplify后面的分类任务</li>
+<li>co-localisation：</li>
+<li>spatial attention</li>
+</ul>
+</li>
+<li>related work<ul>
+<li>生成器用来生成transformed images，从而判别器能够学习分类任务from transformation supervision</li>
+<li>一些methods试图从网络结构、feature extractors的角度的获得invariant representations，while STN aims to achieve this by manipulating the data</li>
+<li>manipulating the data通常就是基于attention mechanism，crop涉及differentiable问题</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>formulation </p>
+<ul>
+<li>localisation network：predict transform parameters</li>
+<li>grid generator：基于predicted params生成sampling grid</li>
+<li><p>sampler：element-multiply</p>
+<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/spacial transformer.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>localisation network</p>
+<ul>
+<li>input feature map $U \in R^{h<em>w</em>c}$</li>
+<li>same transformation is applied to each channel</li>
+<li>generate parameters of transformation $\theta$：1-d vector</li>
+<li>fc / conv + final regression layer</li>
+</ul>
+</li>
+<li><p>parameterised sampling grid</p>
+<ul>
+<li><p>sampling kernel</p>
+</li>
+<li><p>applied by pixel</p>
+</li>
+<li><p>general affine transformation：cropping，translation，rotation，scale，skew</p>
+</li>
+<li><p>ouput map上任意一点一定来自变换前的某一点，反之不一定，input map上某一点可能是bg，被crop掉了，所以pointwise transformation写成反过来的：</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pointwise transformation.png" width="50%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/transformation.png" width="70%;"></p>
+</li>
+<li><p>target points构成的点集就是sampling points on the input feature map</p>
+</li>
+</ul>
+</li>
+<li><p>differentiable image sampling </p>
+<ul>
+<li><p>通过上一步的矩阵transformation，得到input map上需要保留的source point set</p>
+</li>
+<li><p>对点集中每一点apply kernel</p>
+</li>
+<li><p>通用的插值表达式：</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/interpolation.png" width="70%;"></p>
+</li>
+<li><p>最近邻kernel是个pulse函数</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/nearest.png" width="70%;"></p>
+</li>
+<li><p>bilinear kernel是个distance&gt;1的全mute掉，分段可导</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/bilinear.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>STN：Spatial Transformer Networks </p>
+<ul>
+<li>把spatial transformer嵌进CNN去：learn how to actively transform the features to help minimize the overall cost</li>
+<li>computationally fast</li>
+<li>几种用法<ul>
+<li>feed the output of the localization network $\theta$ to the rest of the network：因为transform参数explicitly encodes目标的位置姿态信息</li>
+<li>place multiple spatial transformers at increasing depth：串行能够让深层的transformer学习更抽象的变换</li>
+<li>place multiple spatial transformers in parallel：并行的变换使得每个变换针对不同的object</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<p> <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/error.png" width="70%;"></p>
+<ul>
+<li>R、RTS、P、E：distortion ahead</li>
+<li>aff、proj、TPS：transformer predefined<ul>
+<li>aff：给定角度？？</li>
+<li>TPS：薄板样条插值</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Deformable-Convolutional-Networks"><a href="#Deformable-Convolutional-Networks" class="headerlink" title="Deformable Convolutional Networks"></a>Deformable Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>CNN：fixed geometric structures</li>
+<li>enhance the transformation modeling capability<ul>
+<li>deformable convolution</li>
+<li>deformable RoI pooling</li>
+</ul>
+</li>
+<li>without additional supervision</li>
+<li>share similiar spirit with STN</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>to accommodate geometric variations </p>
+<ul>
+<li>data augmentation is limited to model large, unknown transformations </li>
+<li>fixed receptive fields is undesirable for high level CNN layers that encode the semantics </li>
+<li>使用大量增广的数据，枚举不全，而且收敛慢，所需网络参数量大</li>
+<li>对于提取语义特征的高层网络来讲，固定的感受野对不同目标不友好</li>
+</ul>
+</li>
+<li><p>introduce two new modules </p>
+<ul>
+<li>deformable convolution<ul>
+<li>learning offsets for each kernel via additional convolutional layers </li>
+</ul>
+</li>
+<li><p>deformable RoI pooling</p>
+<ul>
+<li>learning offset for each bin partition of the previous RoI pooling </li>
+</ul>
+<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/deform.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>operate on the 2D spatial domain </li>
+<li>remains the same across the channel dimension </li>
+</ul>
+</li>
+<li><p>deformable convolution</p>
+<ul>
+<li>正常的卷积：<ul>
+<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n)$</li>
+<li>$p_n \in R\{(-1,-1),(-1,0),…, (0,0), (1,1)\}$</li>
+</ul>
+</li>
+<li>deformable conv：with offsets $\Delta p_n$<ul>
+<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n + \Delta p_n)$</li>
+<li>offset value is typically fractional </li>
+<li>bilinear interpolation：<ul>
+<li>$x(p) = \sum_q G(q,p)x(q)$</li>
+<li>其中$G(q,p)$是条件：$G(q,p)=max(0, 1-|q_x-p_x|)*max(0, 1-|q_y-p_y|)$</li>
+<li>只计算和offset点距离小于1个单位的邻近点</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>实现<ul>
+<li><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/conv.png" width="40%;"></li>
+<li>offsets conv和特征提取conv是一样的kernel：same spatial resolution and dilation（N个position）</li>
+<li>the channel dimension 2N：因为是x和y两个方向的offset</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>deformable RoI pooling</p>
+<ul>
+<li><p>RoI pooling converts an input feature map of arbitrary size into fixed size features </p>
+</li>
+<li><p>常规的RoI pooling</p>
+<ul>
+<li>divides ROI into k*k bins and for each bin：$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p)/n_{ij}$</li>
+<li>对feature map上划分到每个bin里面所有的点</li>
+</ul>
+</li>
+<li><p>deformable RoI pooling：with offsets $\Delta p_{ij}$</p>
+<ul>
+<li>$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p+\Delta p_{ij})/n_{ij}$</li>
+<li>scaled normalized offsets：$\Delta p_{ij} = \gamma \Delta p_{ij} (w,h) $</li>
+<li>normalized offset value is fractional </li>
+<li>bilinear interpolation on the pooled map as above</li>
+</ul>
+</li>
+<li><p>实现</p>
+<ul>
+<li><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pooling.png" width="40%;"></li>
+<li>fc layer：k*k*2个element（sigmoid？）</li>
+</ul>
+</li>
+<li><p>position sensitive RoI Pooling</p>
+<ul>
+<li>fully convolutional  </li>
+<li>input feature map先通过卷积扩展成k*k*(C+1)通道</li>
+<li><p>对每个C+1(包含k<em>k个feature map)，conv出全图的offset(2\</em>k*k个)</p>
+<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pspooling.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>deformable convNets</p>
+<ul>
+<li>initialized with zero weights</li>
+<li>learning rates are set to $\beta$ times of the learning rate for the existing layers <ul>
+<li>$\beta=1.0$ for conv</li>
+<li>$\beta=0.01$ for fc</li>
+</ul>
+</li>
+<li>feature extraction<ul>
+<li>back：ResNet-101 &amp; Aligned-Inception-ResNet </li>
+<li>withoutTop：A randomly initialized 1x1 conv is added at last to reduce the channel dimension to 1024 </li>
+<li>last block<ul>
+<li>stride is changed from 2 to 1</li>
+<li>the dilation of all the convolution filters with kernel size&gt;1 is changed from 1 to 2</li>
+</ul>
+</li>
+<li>Optionally last block<ul>
+<li>use deformable conv in res5a,b,c</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>segmentation and detection<ul>
+<li>deeplab predicts 1x1 score maps</li>
+<li>Category-Aware RPN run region proposal with specific class</li>
+<li>modified faster R-CNN：add ROI pooling at last conv</li>
+<li>optional faster R-CNN：use deformable ROI pooling</li>
+<li>R-FCN：state-of-the-art detector</li>
+<li>optional R-FCN：use deformable ROI pooling</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/Illustration.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>Accuracy steadily improves when more deformable convolution layers are used：使用越多层deform conv越好，经验取了3</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table1.png" width="80%;"></p>
+</li>
+<li><p>the learned offsets are highly adaptive to the image content：大目标的间距大，因为reception field大，consistent in different layers </p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table2.png" width="45%;"></p>
+</li>
+<li><p>atrous convolution also improves：default networks have too small receptive fields，但是dilation需要手调到最优</p>
+</li>
+<li><p>using deformable RoI pooling alone already produces noticeable performance gains, using both obtains significant accuracy improvements</p>
+<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table3.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/28/spineNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1649,7 +2096,7 @@
 <p>​    * [综述2021] Transformers in Vision: A Survey，迪拜，</p>
 <p>​    * [综述2021] A Survey on Visual Transformer，华为，</p>
 <p>[classification]</p>
-<p>​    * [ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim，可以看到跟bert基本一样，就是input sequence换成patch</p>
+<p>​    * [ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim，可以看到跟bert基本一样，就是input sequence换成patch，后续基于它的提升有DeiT、LV-ViT</p>
 <p>​    * [BotNet 2021] Bottleneck Transformers for Visual Recognition，Google，将CNN backbone最后几个stage替换成MSA</p>
 <p>​    * [CvT 2021] CvT: Introducing Convolutions to Vision Transformers，微软，</p>
 <p>[detection]</p>
@@ -4109,168 +4556,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/CPNDet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/05/CPNDet/" itemprop="url">CPNDet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T14:14:30+08:00">
-                2021-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/05/CPNDet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/CPNDet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection"><a href="#Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection" class="headerlink" title="Corner Proposal Network for Anchor-free, Two-stage Object Detection"></a>Corner Proposal Network for Anchor-free, Two-stage Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>anchor-free</li>
-<li>two-stage<ul>
-<li>先找potential corner keypoints</li>
-<li>classify each proposal</li>
-</ul>
-</li>
-<li>corner-based方法：对于objects of various scales有效，在训练中避免产生过多的冗余false-positive proposals，但是在结果上会出现更多的fp</li>
-<li>得到的是competitive results</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>anchor-based methods对形状奇怪的目标容易漏检</li>
-<li><p>anchor-free methods容易引入假阳caused by mistakely grouping</p>
-<ul>
-<li>thus an individual classifier is strongly required  </li>
-</ul>
-</li>
-<li><p>Corner Proposal Network (CPN) </p>
-<ul>
-<li>use key-point detection in CornerNet</li>
-<li>但是group阶段不再用embedding distance衡量，而是用a binary classifier </li>
-<li>然后是multi-class classifier，operate on the survived objects</li>
-<li>最后soft-NMS</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4325,7 +4610,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">121</span>
+                  <span class="site-state-item-count">122</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4338,7 +4623,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">60</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

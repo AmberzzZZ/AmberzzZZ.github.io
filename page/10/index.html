@@ -276,6 +276,151 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/16/recovery-behavior/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/16/recovery-behavior/" itemprop="url">recovery behavior</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-16T11:25:19+08:00">
+                2018-11-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/16/recovery-behavior/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/16/recovery-behavior/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>navigation stack的move_base包中一个插件。<a href="https://amberzzzz.github.io/2018/11/15/dynamic-window-approach/">DWA</a>的速度空间中如果没有可行的采样点，那么机器人get stuck，触发recovery行为。</p>
+<p>recovery行为的实质是clear out space——试图搞清楚自己的处境：</p>
+<ol>
+<li>首先机器人会清扫地图——conservative reset</li>
+<li>然后原地旋转360度，刷新处境——clearing rotation</li>
+<li>如果还是导航失败，机器人会更加激进的清扫地图——aggressive reset</li>
+<li>然后原地旋转360度，刷新处境——clearing rotation</li>
+<li>如果仍旧失败——mission impossible</li>
+</ol>
+<p><img src="/2018/11/16/recovery-behavior/recovery_behaviors.png" alt=""></p>
+<p>源代码在move_base.cpp里面，继承了nav_core的接口，设置在move_base_params.yaml配置文件中。</p>
+<ul>
+<li>nav_core的recovery_behavior.h封装了RecoveryBehavior类。</li>
+<li>move_base中创建了名为”clear_costmap_recovery/ClearCostmapRecovery”、”rotate_recovery/RotateRecovery”、”clear_costmap_recovery/ClearCostmapRecovery”的默认对象。</li>
+<li>move_base的主程序是一个状态机，case CLEARING就调用RecoveryBehavior的runBehavior()。</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/15/dynamic-window-approach/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1902,143 +2047,6 @@ d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/10/VMware扩容/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/10/10/VMware扩容/" itemprop="url">VMware扩容</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-10T16:41:18+08:00">
-                2018-10-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/10/10/VMware扩容/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/10/VMware扩容/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前创建虚拟机时不知道需要多大空间，给了20G，装了ROS相关套件之后磁盘使用率到了90%。</p>
-<p>然后在硬盘设置里面调整到了60G，我以为这样就可以了。。。。</p>
-<p><img src="/2018/10/10/VMware扩容/硬盘.png" alt=""></p>
-<p>too naive。。。还是要手动配置一下，需要安装工具Gparted：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install gparted</span><br></pre></td></tr></table></figure>
-<p>然后先抹掉extended和swap两个分区，然后就可以resize主分区了，然后在重新创建那两个分区就好了。</p>
-<p><img src="/2018/10/10/VMware扩容/gparted.png" alt=""></p>
-<p><strong>Attention：</strong>磁盘只能扩展，不能变小，因此建议逐渐扩展。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2093,7 +2101,7 @@ d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">121</span>
+                  <span class="site-state-item-count">122</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2106,7 +2114,7 @@ d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">60</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

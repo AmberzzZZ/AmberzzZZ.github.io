@@ -276,6 +276,228 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/09/metrics/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/10/09/metrics/" itemprop="url">metrics</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-09T15:45:31+08:00">
+                2020-10-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/10/09/metrics/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/metrics/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="分类指标"><a href="#分类指标" class="headerlink" title="分类指标"></a>分类指标</h2><ul>
+<li>recall：召回率</li>
+<li>precision：准确率</li>
+<li>accuracy：正确率</li>
+<li>F-Measure</li>
+<li>sensitivity：灵敏度</li>
+<li>specificity：特异度</li>
+<li>TPR</li>
+<li>FPR</li>
+<li>ROC</li>
+<li>AUC</li>
+</ul>
+<ol>
+<li><p>混淆矩阵</p>
+<p> |           |  gt is p   |   gt is n    |<br> | :———-: | :————: | :—————: |<br> | pred is p |     tp     | fp（假阳性） |<br> | pred is n | fn（漏检） |      tn      |</p>
+<ul>
+<li>注意区分fp和fn</li>
+<li>fp：被错误地划分为正例的个数，即实际为负例但被分类器划分为正例的实例数</li>
+<li>fn：被错误地划分为负例的个数，即实际为正例但被分类器划分为负例的实例数</li>
+</ul>
+</li>
+<li><p>recall</p>
+<ul>
+<li>衡量查全率</li>
+<li>对gt is p做统计</li>
+<li>$recall = \frac{tp}{tp+fn}$</li>
+</ul>
+</li>
+<li><p>precision</p>
+<ul>
+<li>衡量查准率</li>
+<li>对pred is p做统计</li>
+<li>$precision = \frac{tp}{tp+fp}$</li>
+</ul>
+</li>
+<li><p>accuracy</p>
+<ul>
+<li>对的除以所有</li>
+<li>$accuracy = \frac{tp+tn}{p+n}$</li>
+</ul>
+</li>
+<li><p>sensitivity</p>
+<ul>
+<li>衡量分类器对正例的识别能力</li>
+<li>对gt is p做统计</li>
+<li>$sensitivity = \frac{tp}{p}=\frac{tp}{tp+fn}$</li>
+</ul>
+</li>
+<li><p>specificity</p>
+<ul>
+<li>衡量分类器对负例的识别能力</li>
+<li>对gt is n做统计</li>
+<li>$specificity =\frac{tn}{n}= \frac{tn}{fp+tn}$</li>
+</ul>
+</li>
+<li><p>F-measure</p>
+<ul>
+<li>综合考虑P和R，是Precision和Recall加权调和平均</li>
+<li>$F = \frac{(a^2+1)<em>P</em>R}{a^2*P+R}$</li>
+<li>$F_1 = \frac{2PR}{P+R}$</li>
+</ul>
+</li>
+<li><p>TPR</p>
+<ul>
+<li>将正例分对的概率</li>
+<li>对gt is t做统计</li>
+<li>$TPR = \frac{tp}{tp+fn}$</li>
+</ul>
+</li>
+<li><p>FPR</p>
+<ul>
+<li>将负例错分为正例的概率</li>
+<li>对gt is n做统计</li>
+<li>$FPR = \frac{fp}{fp+tn}$</li>
+<li>FPR = 1 - 特异度</li>
+</ul>
+</li>
+<li><p>ROC</p>
+<ul>
+<li>每个点的横坐标是FPR，纵坐标是TPR</li>
+<li>描绘了分类器在TP（真正的正例）和FP（错误的正例）间的trade-off</li>
+<li>通过变化阈值，得到不同的分类统计结果，连接这些点就形成ROC curve</li>
+<li>曲线在对角线左上方，离得越远说明分类效果好</li>
+<li>P/R和ROC是两个不同的评价指标和计算方式，一般情况下，检索用前者，分类、识别等用后者</li>
+</ul>
+</li>
+<li><p>AUC</p>
+<ul>
+<li>AUC的值就是处于ROC curve下方的那部分面积的大小</li>
+<li>通常，AUC的值介于0.5到1.0之间</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/25/metric-learning系列/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3193,430 +3415,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/02/pseudo-3d/" itemprop="url">pseudo-3d</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-02T15:55:00+08:00">
-                2020-09-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/02/pseudo-3d/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/02/pseudo-3d/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类</p>
-<p>[C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for comparison，分类</p>
-<p>[Pseudo-3D resnet] Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks：伪3d，resblock，S和T花式连接，分类</p>
-<p>[2.5d Unet] Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss：patch输入，先2d后3d，针对各向异性，分割</p>
-<p>[two-pathway U-Net] Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning：patch输入，3d网络，xy和z平面分别conv &amp; concat，分割</p>
-<p>[Projection-Based 2.5D U-net] Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation：mip，2d网络，分割，重建</p>
-<p>[New 2.5D Representation] A New 2.5D Representation for Lymph Node Detection using Random Sets of Deep Convolutional Neural Network Observations：横冠矢三个平面作为三个channel输入，2d网络，检测</p>
-<h2 id="Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks"><a href="#Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks" class="headerlink" title="Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks"></a>Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>spatio-temporal video</li>
-<li>the development of a very deep 3D CNN from scratch results in expensive computational cost and memory demand</li>
-<li>new framework<ul>
-<li>1x3x3 &amp; 3x1x1</li>
-<li>Pseudo-3D Residual Net which exploits all the variants of blocks</li>
-</ul>
-</li>
-<li>outperforms 3D CNN and frame-based 2D CNN</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>3d CNN的model size：making it extremely difficult to train a very deep model</li>
-<li>fine-tuning 2d 好于 train from scrach 3d</li>
-<li>RNN builds only the temporal connections on the high-level features，leaving the correlations in the low-level forms not fully exploited</li>
-<li>we propose<ul>
-<li>1x3x3 &amp; 3x1x1 in parallel or cascaded </li>
-<li>其中的3x3 conv可以用2d conv来初始化</li>
-<li>a family of bottleneck building blocks：enhance the structural diversity  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>P3D Blocks  </p>
-<ul>
-<li>direct／indirect influence：S和T之间是串联还是并联</li>
-<li><p>direct／indirect connected to the final output：S和T的输出是否直接与identity path相加</p>
-<p><img src="/2020/09/02/pseudo-3d/P3D Blocks.png" width="40%"></p>
-</li>
-<li><p>bottleneck：</p>
-<ul>
-<li>头尾各接一个1x1x1的conv</li>
-<li>头用来narrow channel，尾用来widen back</li>
-<li><p>头有relu，尾没有relu</p>
-<p><img src="/2020/09/02/pseudo-3d/bottlenecks.png" width="80%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Pseudo-3D ResNet </p>
-<ul>
-<li>mixing blocks：循环ABC</li>
-<li><p>better performance &amp; small increase in model size</p>
-<p><img src="/2020/09/02/pseudo-3d/cmp.png" width="45%"></p>
-</li>
-<li><p>fine-tuning resnet50：</p>
-<ul>
-<li>randomly cropped 224x224</li>
-<li>freeze all BN except for the first one</li>
-<li>add an extra dropout layer with 0.9 dropout rate </li>
-</ul>
-</li>
-<li>further fine-tuning P3D resnet：<ul>
-<li>initialize with r50 in last step</li>
-<li>randomly cropped 16x160x160</li>
-<li>horizontally flipped </li>
-<li>mini-batch as 128 frames </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>future work</p>
-<ul>
-<li>attention mechanism will be incorporated </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation"><a href="#Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation" class="headerlink" title="Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation"></a>Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>MIP：2D images containing information of the full 3D image </p>
-</li>
-<li><p>faster, less memory, accurate</p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>2d unet</p>
-<ul>
-<li>MIP：$\alpha=36$</li>
-<li>3x3 conv, s2 pooling, transpose conv, concat, BN, relu, </li>
-<li>filters：begin with 32, end with 512</li>
-<li><p>dropout：0.5 in the deepest convolutional block and 0.2 in the second deepest blocks</p>
-<p><img src="/2020/09/02/pseudo-3d/mra.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>3d unet</p>
-<ul>
-<li>overfitting &amp; memory space</li>
-<li>filters：begin with 4, end with 16</li>
-<li>dropout：0.5 in the deepest convolutional block and 0.4 in the second deepest blocks</li>
-</ul>
-</li>
-<li><p>Projection-Based 2.5D U-net </p>
-<ul>
-<li><p>2d slice：loss of connection </p>
-</li>
-<li><p>2d mip：disappointing results </p>
-</li>
-<li><p>2d volume：long training time</p>
-</li>
-<li><p>the proposed 2.5D U-net：</p>
-<script type="math/tex; mode=display">
-  N(x) = T R_p F_p 
-  \left[
-   \begin{matrix}
-     U M_{\alpha_1}(x) \\
-     ... \\
-     U M_{\alpha_p}(x)
-    \end{matrix}
-    \right]</script><ul>
-<li><p>$M_{i}$：MIP，p=12</p>
-</li>
-<li><p>$U$：2d-Unet like above</p>
-</li>
-<li><p>$F_p$：learnable filtration，1x3 conv，for each projection，抑制重建伪影</p>
-</li>
-<li><p>$R_p$：reconstruction operator</p>
-<p>  <img src="/2020/09/02/pseudo-3d/recon.png" width="40%"></p>
-</li>
-<li><p>$T$：fine-tuning operator，shift &amp; scale back to 0-1 mask</p>
-</li>
-</ul>
-<p><img src="/2020/09/02/pseudo-3d/cmp2.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition"><a href="#Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition" class="headerlink" title="Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition"></a>Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>3D kernels tend to overfit</li>
-<li>3D CNNs is relatively shallow</li>
-<li>propose a 3D CNNs based on ResNets<ul>
-<li>better performance</li>
-<li>not overfit</li>
-<li>deeper than C3D</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>two-stream architecture：consists of RGB and optical flow streams is often used to represent spatio-temporal information </li>
-<li>3D CNNs：trained on relatively small video datasets performs worse than 2D CNNs pretrained on large datasets </li>
-<li>Very deep 3D CNNs：not explored yet due to training difficulty  </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Network Architecture</p>
-<ul>
-<li>main difference：kernel dimensions</li>
-<li>stem：stride2 for S，stride1 for T</li>
-<li>resblock：conv_bn_relu&amp;conv + id</li>
-<li>identity shortcuts：use zero-padding for increasing dimensions，to avoid increasing the number of parameters</li>
-<li>stride2 conv：conv3_1、 conv4_1、 conv5_1</li>
-<li>input clips：3x16x112x112</li>
-<li><strong>large learning rate</strong> and batch size was important </li>
-</ul>
-<p><img src="/2020/09/02/pseudo-3d/3d res.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>在小数据集上3d-r18不如C3D，overfit了：shallow architecture of the C3D and pretraining on the Sports-1M dataset prevent the C3D from overfitting </li>
-<li>在大数据集上3d-r34好于C3D，同时C3D的val acc明显高于train acc——太shallow欠拟合了，r34则表现更好，而且不需要预训练</li>
-<li>RGB-I3D achieved the best performance <ul>
-<li>3d-r34是更deeper的</li>
-<li>RGB-I3D用了更大的batch size：Large batch size is important to train good models with batch normalization </li>
-<li>High resolutions：3x64x224x224</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks"><a href="#Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks" class="headerlink" title="Learning Spatiotemporal Features with 3D Convolutional Networks"></a>Learning Spatiotemporal Features with 3D Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>generic </li>
-<li>efficient </li>
-<li>simple </li>
-<li>3d ConvNet with 3x3x3 conv &amp; a simple linear classifier</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>3D ConvNets are more suitable for spatiotemporal feature learning compared to 2D ConvNets</li>
-<li>2D ConvNets lose temporal information of the input signal right after every convolution operation </li>
-<li><p>2d conv在channel维度上权重都是一样的，相当于temporal dims上没有重要性特征提取</p>
-<p><img src="/2020/09/02/pseudo-3d/2d3d.png" width="80%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>basic network settings</p>
-<ul>
-<li>5 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
-<li>filters：[64，128，256，256，256]</li>
-<li>fc dims：[2048，2048]</li>
-<li>conv kernel：dx3x3</li>
-<li>pooling kernel：2x2x2，s2 except for the first layer <ul>
-<li>with the intention of not to merge the temporal signal too early </li>
-<li>also to satisfy the clip length of 16 frames </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>varing settings</p>
-<ul>
-<li>temporal kernel depth<ul>
-<li>homogeneous：depth-1/3/5/7 throughout</li>
-<li>varying：increasing-3-3-5-5-7 &amp; decreasing-7- 5-5-3-3  </li>
-</ul>
-</li>
-<li><p>depth-3 throughout performs the best</p>
-<p><img src="/2020/09/02/pseudo-3d/depth.png" width="60%"></p>
-</li>
-<li><p>depth-1 is significantly worse  </p>
-</li>
-<li>We also verify that 3D ConvNet consistently performs better than 2D ConvNet <strong>on a large-scale internal dataset</strong></li>
-</ul>
-</li>
-<li><p>C3D</p>
-<ul>
-<li>8 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
-<li>homogeneous：3x3x3 s1 conv thtoughout</li>
-<li>pool1：1x2x2 kernel size &amp; stride，rest 2x2x2</li>
-<li><p>fc dims：4096</p>
-<p><img src="/2020/09/02/pseudo-3d/c3d.png" width="80%"></p>
-</li>
-</ul>
-</li>
-<li><p>C3D video descriptor：fc6 activations + L2-norm</p>
-</li>
-<li><p>deconvolution visualizing：</p>
-<ul>
-<li>conv5b feature maps</li>
-<li>starts by focusing on appearance in the first few frames </li>
-<li>tracks the salient motion in the subsequent frames </li>
-</ul>
-</li>
-<li><p>compactness </p>
-<ul>
-<li>PCA</li>
-<li>压缩到50-100dim不太损失acc</li>
-<li><p>压缩到10dim仍旧是最高acc</p>
-<p><img src="/2020/09/02/pseudo-3d/PCA.png" width="60%"></p>
-</li>
-<li><p>projected to 2-dimensional space using t-SNE </p>
-<ul>
-<li>C3D features are semantically separable compared to Imagenet  </li>
-<li><p>quantitatively observe that C3D is better than Imagenet</p>
-<p><img src="/2020/09/02/pseudo-3d/2dvec.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Action Similarity Labeling </p>
-<ul>
-<li>predicting action similarity  </li>
-<li>extract C3D features: prob, fc7, fc6, pool5 for each clip </li>
-<li>L2 normalization</li>
-<li>compute the 12 different distances for each feature：48 in total</li>
-<li>linear SVM is trained on these 48-dim feature vectors </li>
-<li><p>C3D significantly outperforms the others</p>
-<p><img src="/2020/09/02/pseudo-3d/similarity.png" width="50%"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3671,7 +3469,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">121</span>
+                  <span class="site-state-item-count">122</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3684,7 +3482,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">60</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,174 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/11/天池脊柱MRI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/11/天池脊柱MRI/" itemprop="url">天池脊柱MRI</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-11T22:26:59+08:00">
+                2020-06-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/11/天池脊柱MRI/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/11/天池脊柱MRI/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>MRI</p>
+<p> T1加权相上面密度高的骨头会比较亮(就是高信号)，还有脂肪和甲状腺也是高信号，水份一般都是无信号，<br> T2加权相里水是高信号所以水比较亮，因为很多的病变有水肿，所以T2加权相通俗可以说是看病变(毕竟比较明显)，</p>
+<p> 视觉直观上来看，T1看解剖，T2看病变</p>
+<p> ——怎么fusion一个case（标注只有一张）</p>
+</li>
+<li><p>数据集</p>
+<p> T1、T2矢状位，T2轴状位，</p>
+<p> 关键点：基于T2矢状位的中间帧，</p>
+<p> 标注范围：从胸12（T12）腰1（L1）间的椎间盘开始，到腰5（L5）骶1（S1）间的椎间盘结束</p>
+<p> 类别：椎块有编号（T12到L5），间盘通过上下椎块的编号表示（T12-L1到L5-S1）</p>
+<p> 病灶：</p>
+<pre><code> * 椎块有两类：正常V1和退行性病变V2，
+ * 椎间盘有7类：正常V1，退行性改变V2，弥漫性膨出，非对称性膨出，突出，脱出，疝出V7
+</code></pre><p> json结构：</p>
+<ul>
+<li>uid，dim，spacing等一些header info</li>
+<li>annotation：<ul>
+<li>slice：难道不是T2矢状位的中间帧吗？</li>
+<li>point：关键点坐标，病灶类别，关键点类别</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>评估指标</p>
+<ul>
+<li><p>distance&lt;8mm</p>
+</li>
+<li><p>TP：多个命中取最近的，其余忽略</p>
+</li>
+<li>FP：假阳性，distance超出所有gt的8mm圈圈／落进圈圈但是类别错了</li>
+<li>FN：假阴性，gt点没有被TP</li>
+<li>precision：TP/(TP+FP)</li>
+<li>recall：TP/(TP+FN)</li>
+<li>AP</li>
+<li>MAP</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/08/group-normalization/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3107,297 +3275,6 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/14/Hausdorff-Distance/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/14/Hausdorff-Distance/" itemprop="url">Hausdorff Distance</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-14T10:10:07+08:00">
-                2020-05-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/14/Hausdorff-Distance/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/14/Hausdorff-Distance/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks"><a href="#Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks" class="headerlink" title="Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks"></a>Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>novel loss function to reduce HD directly </li>
-<li>propose three methods </li>
-<li>2D&amp;3D，ultra &amp; MR &amp; CT</li>
-<li>lead to approximately 18 − 45% reduction in HD without degrading other segmentation performance criteria </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>HD is one of the most informative and useful criteria because it is an indicator of the largest segmentation error </li>
-<li>current segmentation algorithms rarely aim at minimizing or reducing HD directly <ul>
-<li>HD is determined <strong>solely</strong> by the largest error instead of the overall segmentation performance </li>
-<li>HD‘s sensitivity to noise and outliers  —&gt; modified version</li>
-<li>the optimization diffculty</li>
-</ul>
-</li>
-<li>thus we propose an “HD- inspired” loss function </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>denotations</p>
-<ul>
-<li>probability：$q$</li>
-<li>binary mask：$\bar p$、$\bar q$</li>
-<li>boundary：$\delta p$、$\delta q$</li>
-<li><p>single hd：$hd(\bar p, \bar q)$、$hd(\bar q, \bar p)$</p>
-<p><img src="/2020/05/14/Hausdorff-Distance/start.png" width="40%"></p>
-</li>
-</ul>
-</li>
-<li><p>based on distance transforms </p>
-<ul>
-<li><p>distance map $d_p$：define the distance map as the unsigned distance to the boundary $\delta p$</p>
-<script type="math/tex; mode=display">
-  DT_X[i,j] = min_{[k,l]\in X}d([i,j], [k,l])</script><p>  距离场定义为：每个点到目标区域(X)的距离的最小值</p>
-<p>  <img src="/2020/05/14/Hausdorff-Distance/dt.png" width="40%"></p>
-</li>
-<li><p>HD based on DT：</p>
-<script type="math/tex; mode=display">
-  hd_{DT}(\delta p, \delta q) = max((\bar p \triangle \bar q)\circ d_p)\\
-  \bar p \triangle \bar q = |\bar p - \bar q|</script><ul>
-<li>finally have：<script type="math/tex; mode=display">
-  HD_{DT}(\delta p, \delta q) = max(hd_{DT}(\delta p, \delta q), hd_{DT}(\delta q, \delta p))</script></li>
-</ul>
-</li>
-<li><p>modified loss version of HD：</p>
-<script type="math/tex; mode=display">
-  Loss_{DT}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}+d_q^{\alpha}))</script><ul>
-<li>penalizely focus on areas instead of single point</li>
-<li>$\alpha$ determines how strongly we penalize larger errors</li>
-<li>use possibility instead of thresholded value</li>
-<li>use $(p-q)^2$ instead of $|p-q|$</li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{DT}$：Pearson correlation coefficient above 0.99</li>
-<li><p>$Loss_{DT}$：Pearson correlation coefficient above 0.93</p>
-<p><img src="/2020/05/14/Hausdorff-Distance/correlation.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>drawback </p>
-<ul>
-<li><p><strong>high computational</strong> cost especially in 3D </p>
-</li>
-<li><p>$q$ changes along with training process thus $d_q$ changes while $d_p$ remains</p>
-</li>
-<li><p>modified one-sided HD (OS)：</p>
-<script type="math/tex; mode=display">
-  Loss_{DT-OS}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}))</script></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>HD using Morphological Operations</p>
-<ul>
-<li><p>morphological erosion：</p>
-<script type="math/tex; mode=display">
-  S \ominus B = \{z\in \Omega | B(z) \subseteq S\}</script><p>  腐蚀操作定义为：在原始二值化图的前景区域，以每个像素为中心点，run structure element block B，如果B完全在原图内，则当前中心点在腐蚀后也是前景。</p>
-</li>
-<li><p>HD based on erosion：</p>
-<script type="math/tex; mode=display">
-  HD_{ER}(\delta p, \delta q)=2r^*\\
-  where\ r^* = min_r \{(\bar p \triangle \bar q) \ominus B_r = \varnothing\}</script><ul>
-<li>$HD_{ER}$ is a lower bound of the true value</li>
-<li>can be computed more efficiently using convolutional operations </li>
-</ul>
-</li>
-<li><p>modifid loss version：</p>
-<script type="math/tex; mode=display">
-  Loss_{ER}(q,p) = \frac{1}{|\Omega|}\sum_k \sum_{\Omega}((p-q)^2 \ominus_k B)k^{\alpha}</script><ul>
-<li>k successive erosions </li>
-<li><strong>cross-shaped kernel</strong> whose elements sum to one followed by a <strong>soft thresholding</strong> at 0.50</li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{ER}$：Pearson correlation coefficient above 0.91</li>
-<li>$Loss_{ER}$：Pearson correlation coefficient above 0.83</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>HD using circular-shaped convolutional kernel </p>
-<ul>
-<li><p>circular-shaped kernel</p>
-<p>   <img src="/2020/05/14/Hausdorff-Distance/circle.png" width="40%"></p>
-</li>
-<li><p>HD based on circular-shaped kernel：</p>
-<script type="math/tex; mode=display">
-  hd_{CV}(\delta p, \delta q)=max(r_1, r_2)\\
-  where \ r_1=max_r (max_{\Omega}f_h(\bar p ^C * B_r)\circ(\bar q \backslash \bar p))\\
-  where \ r_2=max_r (max_{\Omega}f_h(\bar p * B_r)\circ(\bar p \backslash \bar q))\\</script><ul>
-<li>$\bar p^C$：complement 补集</li>
-<li>$f_h$：hard thresholding setting all values below 1 to zero </li>
-</ul>
-</li>
-<li><p>modified loss version：</p>
-<script type="math/tex; mode=display">
-  Loss_{CV}(q,p)=\frac{1}{|\Omega|}\sum_{r\in R}r^{\alpha}\sum_{\Omega}[f_s(Br*\bar p^C)\circ f_{\bar q\backslash \bar p} + f_s(B_r * \bar p) \circ f_{\bar p \backslash \bar q}\\
-  +f_s(Br*\bar q^C)\circ f_{\bar p\backslash \bar q} + f_s(B_r * \bar q) \circ f_{\bar q \backslash \bar p}]</script><ul>
-<li>soft thresholding</li>
-<li><script type="math/tex; mode=display">f_{\bar p\backslash \bar q} = (p-q)^2*p</script></li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{CV}$：Pearson correlation coefficient above 0.99</li>
-<li>$Loss_{CV}$：Pearson correlation coefficient above 0.88</li>
-</ul>
-</li>
-<li><p>computation：</p>
-<ul>
-<li>kernel size<ul>
-<li>$HD_{ER}$ is computed using small fixed convolutional kernels (of size 3)</li>
-<li>$Loss_{CV}$ require applying filters of increasing size(we use a maximum kernel radius of 18 pixels in 2D and 9 voxels in 3D)</li>
-</ul>
-</li>
-<li>steps<ul>
-<li>choose R based on the expected range of segmentation errors </li>
-<li>set R = {3, 6, . . . 18} for 2D images and R = {3,6,9} for 3D </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>standard Unet</li>
-<li>augment our HD-based loss term with a DSC loss term for more stable training</li>
-<li>reweight both loss after every epoch</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>d</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3452,7 +3329,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">121</span>
+                  <span class="site-state-item-count">122</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3465,7 +3342,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">60</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

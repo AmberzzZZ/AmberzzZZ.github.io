@@ -276,6 +276,168 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/CPNDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/05/CPNDet/" itemprop="url">CPNDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T14:14:30+08:00">
+                2021-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/05/CPNDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/CPNDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection"><a href="#Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection" class="headerlink" title="Corner Proposal Network for Anchor-free, Two-stage Object Detection"></a>Corner Proposal Network for Anchor-free, Two-stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>anchor-free</li>
+<li>two-stage<ul>
+<li>先找potential corner keypoints</li>
+<li>classify each proposal</li>
+</ul>
+</li>
+<li>corner-based方法：对于objects of various scales有效，在训练中避免产生过多的冗余false-positive proposals，但是在结果上会出现更多的fp</li>
+<li>得到的是competitive results</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>anchor-based methods对形状奇怪的目标容易漏检</li>
+<li><p>anchor-free methods容易引入假阳caused by mistakely grouping</p>
+<ul>
+<li>thus an individual classifier is strongly required  </li>
+</ul>
+</li>
+<li><p>Corner Proposal Network (CPN) </p>
+<ul>
+<li>use key-point detection in CornerNet</li>
+<li>但是group阶段不再用embedding distance衡量，而是用a binary classifier </li>
+<li>然后是multi-class classifier，operate on the survived objects</li>
+<li>最后soft-NMS</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/refineNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2536,228 +2698,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/09/metrics/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/10/09/metrics/" itemprop="url">metrics</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-09T15:45:31+08:00">
-                2020-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/10/09/metrics/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/metrics/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="分类指标"><a href="#分类指标" class="headerlink" title="分类指标"></a>分类指标</h2><ul>
-<li>recall：召回率</li>
-<li>precision：准确率</li>
-<li>accuracy：正确率</li>
-<li>F-Measure</li>
-<li>sensitivity：灵敏度</li>
-<li>specificity：特异度</li>
-<li>TPR</li>
-<li>FPR</li>
-<li>ROC</li>
-<li>AUC</li>
-</ul>
-<ol>
-<li><p>混淆矩阵</p>
-<p> |           |  gt is p   |   gt is n    |<br> | :———-: | :————: | :—————: |<br> | pred is p |     tp     | fp（假阳性） |<br> | pred is n | fn（漏检） |      tn      |</p>
-<ul>
-<li>注意区分fp和fn</li>
-<li>fp：被错误地划分为正例的个数，即实际为负例但被分类器划分为正例的实例数</li>
-<li>fn：被错误地划分为负例的个数，即实际为正例但被分类器划分为负例的实例数</li>
-</ul>
-</li>
-<li><p>recall</p>
-<ul>
-<li>衡量查全率</li>
-<li>对gt is p做统计</li>
-<li>$recall = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>precision</p>
-<ul>
-<li>衡量查准率</li>
-<li>对pred is p做统计</li>
-<li>$precision = \frac{tp}{tp+fp}$</li>
-</ul>
-</li>
-<li><p>accuracy</p>
-<ul>
-<li>对的除以所有</li>
-<li>$accuracy = \frac{tp+tn}{p+n}$</li>
-</ul>
-</li>
-<li><p>sensitivity</p>
-<ul>
-<li>衡量分类器对正例的识别能力</li>
-<li>对gt is p做统计</li>
-<li>$sensitivity = \frac{tp}{p}=\frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>specificity</p>
-<ul>
-<li>衡量分类器对负例的识别能力</li>
-<li>对gt is n做统计</li>
-<li>$specificity =\frac{tn}{n}= \frac{tn}{fp+tn}$</li>
-</ul>
-</li>
-<li><p>F-measure</p>
-<ul>
-<li>综合考虑P和R，是Precision和Recall加权调和平均</li>
-<li>$F = \frac{(a^2+1)<em>P</em>R}{a^2*P+R}$</li>
-<li>$F_1 = \frac{2PR}{P+R}$</li>
-</ul>
-</li>
-<li><p>TPR</p>
-<ul>
-<li>将正例分对的概率</li>
-<li>对gt is t做统计</li>
-<li>$TPR = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>FPR</p>
-<ul>
-<li>将负例错分为正例的概率</li>
-<li>对gt is n做统计</li>
-<li>$FPR = \frac{fp}{fp+tn}$</li>
-<li>FPR = 1 - 特异度</li>
-</ul>
-</li>
-<li><p>ROC</p>
-<ul>
-<li>每个点的横坐标是FPR，纵坐标是TPR</li>
-<li>描绘了分类器在TP（真正的正例）和FP（错误的正例）间的trade-off</li>
-<li>通过变化阈值，得到不同的分类统计结果，连接这些点就形成ROC curve</li>
-<li>曲线在对角线左上方，离得越远说明分类效果好</li>
-<li>P/R和ROC是两个不同的评价指标和计算方式，一般情况下，检索用前者，分类、识别等用后者</li>
-</ul>
-</li>
-<li><p>AUC</p>
-<ul>
-<li>AUC的值就是处于ROC curve下方的那部分面积的大小</li>
-<li>通常，AUC的值介于0.5到1.0之间</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2812,7 +2752,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">121</span>
+                  <span class="site-state-item-count">122</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2825,7 +2765,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">60</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
