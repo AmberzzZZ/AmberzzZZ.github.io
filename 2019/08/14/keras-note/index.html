@@ -88,7 +88,7 @@
 <meta property="og:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/08/14/keras-note/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/keras-note/slice.png">
-<meta property="og:updated_time" content="2021-05-13T10:42:58.313Z">
+<meta property="og:updated_time" content="2021-05-26T09:40:55.074Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="keras note">
 <meta name="twitter:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
@@ -820,10 +820,10 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 <li>compute_output_shape(input_shape)：</li>
 </ul>
 </li>
-<li>【以下方法和属性不适用于类继承模型】，所以推荐优先使用函数式 API<ul>
+<li>【以下方法和属性不适用于类继承模型】，所以还是推荐优先使用函数式 API<ul>
 <li>model.inputs &amp; model.outputs</li>
 <li>model.to_yaml() &amp; model.to_json()</li>
-<li>model.get_config() &amp; model.save()</li>
+<li>model.get_config() &amp; model.save()：！！！只能save_weights！！！</li>
 </ul>
 </li>
 </ul>
@@ -964,7 +964,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">122</span>
+                  <span class="site-state-item-count">125</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -977,7 +977,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-count">63</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

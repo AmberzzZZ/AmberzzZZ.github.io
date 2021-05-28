@@ -276,6 +276,1237 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/03/15/cs231n-RNN-review/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/15/cs231n-RNN-review/" itemprop="url">cs231n-RNN-review</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-15T20:19:46+08:00">
+                2020-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/03/15/cs231n-RNN-review/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/03/15/cs231n-RNN-review/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/03/13/attention系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/13/attention系列/" itemprop="url">attention系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-13T16:26:14+08:00">
+                2020-03-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/03/13/attention系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/03/13/attention系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0-综述"><a href="#0-综述" class="headerlink" title="0. 综述"></a>0. 综述</h2><ol>
+<li><p>attention的方式分为两种（<a href="https://blog.csdn.net/yideqianfenzhiyi/article/details/79422857?depth_1-utm_source=distribute.pc_relevant.none-task&amp;utm_source=distribute.pc_relevant.none-task" target="_blank" rel="noopener">Reference</a>）</p>
+<ul>
+<li>学习权重分布<ul>
+<li>部分加权（hard attention）／全部加权（soft attention）</li>
+<li>原图上加权／特征图上加权</li>
+<li>空间尺度加权／channel尺度加权／时间域加权／混合域加权</li>
+<li>CAM系列、SE-block系列：花式加权，学习权重，non-local的模块，作用于某个维度</li>
+</ul>
+</li>
+<li>任务分解<ul>
+<li>设计不同的网络结构（或分支）专注于不同的子任务，</li>
+<li>重新分配网络的学习能力，从而降低原始任务的难度，使网络更加容易训练</li>
+<li>STN、deformable conv：添加显式的模块负责学习形变/receptive field的变化，local模块，apply by pixel</li>
+</ul>
+</li>
+<li>local / non-local<ul>
+<li>local模块的结果是pixel-specific的</li>
+<li>non-local模块的结果是全局共同计算的的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>基于权重的attention（<a href="https://blog.csdn.net/bigbug_sec/article/details/89025318" target="_blank" rel="noopener">Reference</a>）</p>
+<ul>
+<li>注意力机制通常由一个连接在原神经网络之后的额外的神经网络实现</li>
+<li>整个模型仍然是端对端的，因此注意力模块能够和原模型一起同步训练</li>
+<li>对于soft attention，注意力模块对其输入是可微的，所以整个模型仍可用梯度方法来优化</li>
+<li>而hard attention要离散地选择其输入的一部分，这样整个系统对于输入不再是可微的</li>
+</ul>
+</li>
+<li><p>papers</p>
+<ul>
+<li><p>[STN] <a href="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/">Spatial Transformer Networks</a></p>
+</li>
+<li><p>[deformable conv] Deformable Convolutional Networks </p>
+</li>
+<li><p>[CBAM] CBAM: Convolutional Block Attention Module </p>
+</li>
+<li><p>[SE-Net] <a href="https://amberzzzz.github.io/2020/04/30/SE-block/">Squeeze-and-Excitation Networks</a></p>
+</li>
+<li><p>[SE-block的一系列变体] SC-SE（for segmentation）、CMPE-SE（复杂又没用）</p>
+</li>
+<li><p>[SK-Net] Selective Kernel Networks：是attension module，但是主要改进点在receptive field，trick大杂烩</p>
+</li>
+<li><p>[GC-Net] GCNet: Non-local Networks Meet Squeeze-Excitation Networks and Beyond </p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="CBAM-Convolutional-Block-Attention-Module"><a href="#CBAM-Convolutional-Block-Attention-Module" class="headerlink" title="CBAM: Convolutional Block Attention Module"></a>CBAM: Convolutional Block Attention Module</h2><ol>
+<li>动机<ul>
+<li>attention module </li>
+<li>lightweight and general  </li>
+<li>improvements in classification and detection </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>deeper： can obtain richer representation </li>
+<li>increased width：can outperform an extremely deep network</li>
+<li>cardinality：results in stronger representation power than depth and width </li>
+<li>attention：improves the representation of interests <ul>
+<li>humans exploit a sequence of partial glimpses and selectively focus on salient parts </li>
+<li>Residual Attention Network：computes 3d attention map</li>
+<li>we decompose the process that learns channel attention and spatial attention separately </li>
+<li>SE-block：use global average-pooled features</li>
+<li>we suggest to use max-pooled features as well  </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>sequentially infers a <strong>1D channel attention map</strong> and a <strong>2D spatial attention map</strong>  </li>
+<li><p>broadcast and element-wise multiplication </p>
+<p><img src="/2020/03/13/attention系列/CBAM.png" width="45%;"></p>
+</li>
+<li><p>Channel attention module</p>
+<ul>
+<li>focuses on ‘what’ is meaningful  </li>
+<li>squeeze the spatial dimension </li>
+<li>use both average-pooled and max-pooled features simultaneously </li>
+<li>both descriptors are then forwarded to a shared MLP to reduce dimension</li>
+<li>【QUESTION】看论文MLP是线性的吗，没写激活函数</li>
+<li>then use element-wise summation  </li>
+<li>sigmoid function </li>
+</ul>
+</li>
+<li>Spatial attention module <ul>
+<li>focuses on ‘where’ </li>
+<li>apply average-pooling and max-pooling  along the channel axis and concatenate </li>
+<li>7x7 conv</li>
+<li>sigmoid function </li>
+</ul>
+</li>
+<li><p>Arrangement of attention modules</p>
+<ul>
+<li>in a parallel or sequential manner </li>
+<li>we found sequential better than parallel </li>
+<li>we found channel-first order slightly better than the spatial-first</li>
+</ul>
+<p><img src="/2020/03/13/attention系列/module.png" width="45%;"></p>
+</li>
+<li><p>integration</p>
+<ul>
+<li>apply CBAM on the convolution outputs in each block </li>
+<li>in residual path</li>
+<li><p>before the add operation</p>
+<p><img src="/2020/03/13/attention系列/integration.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>Ablation studies </p>
+<ul>
+<li>Channel attention：两个pooling path都有效，一起用最好</li>
+<li>Spatial attention：1x1conv直接squeeze也行，avg+max更好，7x7conv略好于3x3conv</li>
+<li>arrangement：前面说了，比SE的单spacial squeeze好，channel在前好于在后，串行好于并行</li>
+</ul>
+</li>
+<li><p>Classification results：outperform baselines and SE</p>
+</li>
+<li>Network Visualization  <ul>
+<li>cover the target object regions better </li>
+<li>the target class scores also increase accordingly </li>
+</ul>
+</li>
+<li>Object Detection results<ul>
+<li>apply to detectors：right before every classifier </li>
+<li>apply to backbone</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SK-Net-Selective-Kernel-Networks"><a href="#SK-Net-Selective-Kernel-Networks" class="headerlink" title="SK-Net: Selective Kernel Networks"></a>SK-Net: Selective Kernel Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>生物的神经元的感受野是随着刺激变化而变化的</li>
+<li>propose a selective kernel unit<ul>
+<li>adaptively adjust the RF</li>
+<li>multiple branches with different kernel sizes</li>
+<li>guided fusion</li>
+<li>大杂烩：multi-branch&amp;kernel，group conv，dilated conv，attention mechanism</li>
+</ul>
+</li>
+<li>SKNet<ul>
+<li>by stacking multiple SK units</li>
+<li>在分类任务上验证</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>multi-scale aggregation<ul>
+<li>inception block就有了</li>
+<li>but linear aggregation approach may be insufficient</li>
+</ul>
+</li>
+<li>multi-branch network<ul>
+<li>two-branch：以resnet为代表，主要是为了easier to train</li>
+<li>multi-branch：以inception为代表，主要为了得到multifarious features </li>
+</ul>
+</li>
+<li>grouped/depthwise/dilated conv<ul>
+<li>grouped conv：reduce computation，提升精度</li>
+<li>depthwise conv：reduce computation，牺牲精度</li>
+<li>dilated conv：enlarge RF，比dense large kernel节省参数量</li>
+</ul>
+</li>
+<li>attention mechanism<ul>
+<li>加权系列：<ul>
+<li>SENet&amp;CBAM：</li>
+<li>相比之下SKNet多了adaptive RF</li>
+</ul>
+</li>
+<li>动态卷积系列：<ul>
+<li>STN不好训练，训好以后变换就定死了</li>
+<li>deformable conv能够在inference的时候也动态的变化变换，但是没有multi-scale和nonlinear aggregation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>thus we propose SK convolution <ul>
+<li>multi-kernels：大size的conv kernel是用了dilated conv</li>
+<li>nonlinear aggregation</li>
+<li>computationally lightweight </li>
+<li>could successfully embedded into small models</li>
+<li>workflow<ul>
+<li>split</li>
+<li>fuse</li>
+<li>select</li>
+</ul>
+</li>
+<li>main difference from inception<ul>
+<li>less customized</li>
+<li>adaptive selection instead of equally addition</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>selective kernel convolution</p>
+<ul>
+<li><p>split</p>
+<ul>
+<li>multi-branch with different kernel size</li>
+<li>grouped/depthwise conv + BN + ReLU</li>
+<li>5x5 kernel can be further replaced with dilated conv</li>
+</ul>
+</li>
+<li><p>fuse</p>
+<ul>
+<li>to learn the control of information flow from different branches</li>
+<li>element-wise summation</li>
+<li>global average pooling</li>
+<li>fc-BN-ReLU：reduce dimension，at least 32</li>
+</ul>
+</li>
+<li><p>select</p>
+<ul>
+<li><p>channel-wise weighting factor A &amp; B &amp; more：A+B + more = 1</p>
+</li>
+<li><p>fc-softmax</p>
+<p>  <img src="/2020/03/13/attention系列/softmax.png" width="50%;"></p>
+</li>
+<li><p>在2分支的情况下，一个权重矩阵A就够了，B是冗余的，因为可以间接算出来</p>
+</li>
+<li><p>reweighting</p>
+</li>
+</ul>
+<p><img src="/2020/03/13/attention系列/sk.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>network</p>
+<ul>
+<li>start from resnext</li>
+<li>repeated SK units：类似bottleneck<ul>
+<li>1x1 conv</li>
+<li>SK conv</li>
+<li>1x1 conv</li>
+<li>hyperparams<ul>
+<li>number of branches M=2</li>
+<li>group number G=32：cardinality of each path</li>
+<li>reduction ratio r=16：fuse operator中dim-reduction的参数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>嵌入到轻量的网络结构</p>
+<ul>
+<li>MobileNet/shuffleNet</li>
+<li>把其中的3x3 depthwise卷积替换成SK conv</li>
+</ul>
+<p><img src="/2020/03/13/attention系列/skNet.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>比sort的resnet、densenet、resnext精度都要好</p>
+<p>  <img src="/2020/03/13/attention系列/error.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="GCNet-Non-local-Networks-Meet-Squeeze-Excitation-Networks-and-Beyond"><a href="#GCNet-Non-local-Networks-Meet-Squeeze-Excitation-Networks-and-Beyond" class="headerlink" title="GCNet: Non-local Networks Meet Squeeze-Excitation Networks and Beyond"></a>GCNet: Non-local Networks Meet Squeeze-Excitation Networks and Beyond</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Non-Local Network (NLNet)<ul>
+<li>capture long-range dependencies</li>
+<li>obtain query-specific global context</li>
+<li>but we found global contexts are almost the same for different query positions</li>
+</ul>
+</li>
+<li>we produce<ul>
+<li>query-independent formulation</li>
+<li>smiliar structure as SE-Net</li>
+<li>aims at global context modeling</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Capturing long-range dependency </p>
+<ul>
+<li><p>mainly by sdeeply stacking conv layers：inefficient </p>
+</li>
+<li><p>non-local network</p>
+<ul>
+<li>via self-attention mechanism </li>
+<li>computes the pairwise relations between the query position then aggregate</li>
+<li><p>但是不同位置query得到的attention map基本一致</p>
+<p><img src="/2020/03/13/attention系列/NLNet.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>we simply the non-local block</p>
+<ul>
+<li>query-independent </li>
+<li>maintain acc &amp; save computation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>our proposed GC-block</p>
+<ul>
+<li>unifies both the NL block and the SE block</li>
+<li>three steps<ul>
+<li>global context modeling：</li>
+<li>feature transform module：capture channel-wise interdependency</li>
+<li>fusion module：merge into the original features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>多种任务上均有涨点</p>
+<ul>
+<li>但都是在跟resnet50对比</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>revisit NLNet</p>
+<ul>
+<li><p>non-local block</p>
+<ul>
+<li><p><img src="/2020/03/13/attention系列/NL formulation.png" width="45%;"></p>
+</li>
+<li><p>$f(x_i, x_j)$：</p>
+<ul>
+<li>encodes the relationship between position i &amp; j</li>
+<li>计算方式有Gaussian、Embedded Gaussian、Dot product、Concat</li>
+<li>different instantiations achieve comparable performance</li>
+</ul>
+</li>
+<li><p>$C(x)$：norm factor</p>
+</li>
+<li><p>$x_i + \sum^{N_p} F(x_j)$：aggregates a specific global feature on $x_i$</p>
+</li>
+<li><p>widely-used Embedded Gaussian：</p>
+<p>  <img src="/2020/03/13/attention系列/NL block.png" width="50%;"></p>
+</li>
+<li><p>嵌入方式：</p>
+<ul>
+<li>Mask R-CNN with FPN and Res50 </li>
+<li>only add one non-local block right before the last residual block of res4</li>
+</ul>
+</li>
+<li><p>observations &amp; inspirations</p>
+<ul>
+<li>distances among inputs show that input features are discriminated</li>
+<li>outputs &amp; attention maps are almost the same：global context after training is actually independent of query position</li>
+<li>inspirations<ul>
+<li>simplify the Non-local block</li>
+<li>no need of query-specific</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>simplifying form of NL block：SNL</p>
+<ul>
+<li><p>求一个common的global feature，share给全图每个position</p>
+<p><img src="/2020/03/13/attention系列/simplify1.png" width="45%;"></p>
+</li>
+<li><p>进一步简化：把$x_j$的1x1 conv提到前面，FLOPs大大减少，因为feature scale从HW变成了1x1</p>
+<p>  <img src="/2020/03/13/attention系列/simplify2.png" width="45%;"></p>
+</li>
+<li><p>the SNL block achieves comparable performance to the NL block with significantly lower FLOPs</p>
+</li>
+</ul>
+</li>
+<li><p>global context modeling</p>
+<ul>
+<li>SNL可以抽象成三部分：<ul>
+<li>global attention pooling：通过$W_k$ &amp; softmax获取attention weights，然后进行global pooling</li>
+<li>feature transform：1x1 conv</li>
+<li>feature aggregation：broadcast element-wise add</li>
+</ul>
+</li>
+<li><p>SE-block也可以分解成类似的抽象</p>
+<ul>
+<li>global attention pooling：用了简单的global average pooling</li>
+<li>feature transform：用了squeeze &amp; excite的fc-relu-fc-sigmoid</li>
+<li>feature aggregation：broadcast element-wise multiplication </li>
+</ul>
+<p><img src="/2020/03/13/attention系列/gc-block.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Global Context Block</p>
+<ul>
+<li>integrate the benefits of both<ul>
+<li>SNL global attention pooling：effective modeling on long-range dependency</li>
+<li>SE bottleneck transform：light computation（只要ratio大于2就会节省参数量和计算量）</li>
+</ul>
+</li>
+<li>特别地，在SE transform的squeeze layer上，又加了BN<ul>
+<li>ease optimization </li>
+<li>benefit generalization </li>
+</ul>
+</li>
+<li>fusion：add</li>
+<li>嵌入方式：<ul>
+<li>GC-ResNet50</li>
+<li>add GC-block to all layers (c3+c4+c5) in resnet50 with se ratio of 16</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>relationship to SE-block</p>
+<ul>
+<li>首先是fusion method reflects different goals<ul>
+<li>SE基于全局信息rescales the channels，间接使用</li>
+<li>GC直接使用，将long-range dependency加在每个position上</li>
+</ul>
+</li>
+<li>其次是norm layer<ul>
+<li>ease optimization</li>
+</ul>
+</li>
+<li>最后是global attention pooling<ul>
+<li>SE的GAP是a special case</li>
+<li>weighting factors shows superior</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/02/24/Deeplab系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/02/24/Deeplab系列/" itemprop="url">Deeplab系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-24T18:20:49+08:00">
+                2020-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/02/24/Deeplab系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/02/24/Deeplab系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>papers</p>
+<ul>
+<li>deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS，主要贡献提出了空洞卷积，使得feature extraction阶段输出的特征图维持较高的resolution</li>
+<li>deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs，主要贡献是多尺度ASPP结构</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation，提出了基于ResNet的串行&amp;并行两种结构，细节上提到了multi-grid，改进了ASPP模块<ul>
+<li>deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation </li>
+</ul>
+</li>
+<li>Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation </li>
+</ul>
+<ol>
+<li><p>分割结果比较粗糙的原因</p>
+<ul>
+<li>池化：将全图抽象化，降低分辨率，会丢失细节信息，平移不变性，使得边界信息不清晰</li>
+<li>没有利用标签之间的概率关系：CNN缺少对空间、边缘信息等约束</li>
+</ul>
+<p>对此，deeplabV1引入了</p>
+<ul>
+<li><a href="https://www.jianshu.com/p/f743bd9041b3" target="_blank" rel="noopener">空洞卷积</a>：VGG中提出的多个小卷积核代替大卷积核的方法，只能使感受野线性增长，而多个空洞卷积串联，可以实现指数增长。</li>
+<li>全连接条件随机场CRF：作为stage2，提高模型捕获细节的能力，提升边界分割精度</li>
+</ul>
+</li>
+<li><p>大小物体同时分割</p>
+<p>deeplabV2引入</p>
+<ul>
+<li>多尺度ASPP(Atrous Spatial Pyramid Pooling)：并行的采用多个采样率的空洞卷积提取特征，再进行特征融合</li>
+<li>backbone model change：VGG16改为ResNet</li>
+<li>使用不同的学习率</li>
+</ul>
+</li>
+<li><p>进一步改进模型架构</p>
+<p>deeplabV3引入</p>
+<ul>
+<li>ASPP嵌入ResNet后几个block</li>
+<li>去掉了CRF</li>
+</ul>
+</li>
+<li><p>使用原始的Conv/pool操作，得到的low resolution score map，pool stride会使得过程中丢弃一部分信息，上采样会得到较大的失真图像，使用空洞卷积，保留特征图上的全部信息，同时keep resolution，减少了信息损失</p>
+</li>
+<li><p>DeeplabV3的ASPP相比较于V2，增加了一条1x1 conv path和一条image pooling path，加GAP这条path是因为，实验中发现，随着rate的增大，有效的weight数目开始减少（<strong>部分超出边界无法有效捕捉远距离信息</strong>），因此利用global average pooling提取了image-level的特征并与ASPP的特征并在一起，来补充因为dilation丢失的信息</p>
+<p>空洞卷积的path，V2是每条path分别空洞卷积然后接两个1x1conv（没有BN），V3是空洞卷积和BatchNormalization组合</p>
+<p>fusion方式，V2是sum fusion，V3是所有path concat然后1x1 conv，得到最终score map</p>
+</li>
+<li><p>DeeplabV3的串行版本，“In order to maintain original image size, convolutions are replaced with strous convolutions with rates that differ from each other with factor 2”，ppt上说后面几个block复制了block4，每个block里面三层conv，其中最后一层conv stride2，然后为了maintain output size，空洞rate*2，这个不太理解。</p>
+<p>multi-grid method：对每个block里面的三层卷积采用不同空洞率，unit rate（e.g.(1,2,4)） * rate （e.g. 2）</p>
+</li>
+</ol>
+<h2 id="deeplabV1-SEMANTIC-IMAGE-SEGMENTATION-WITH-DEEP-CONVOLUTIONAL-NETS-AND-FULLY-CONNECTED-CRFS"><a href="#deeplabV1-SEMANTIC-IMAGE-SEGMENTATION-WITH-DEEP-CONVOLUTIONAL-NETS-AND-FULLY-CONNECTED-CRFS" class="headerlink" title="deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS"></a>deeplabV1: SEMANTIC IMAGE SEGMENTATION WITH DEEP CONVOLUTIONAL NETS AND FULLY CONNECTED CRFS</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>brings together methods from Deep Convolutional Neural Networks and probabilistic graphical models </li>
+<li>poor localization property of deep networks</li>
+<li>combine a fully connected Conditional Random Field (CRF) </li>
+<li>be able to localize segment boundaries beyond previous accuracies</li>
+<li>speed: atrous</li>
+<li>accuracy: </li>
+<li>simplicity: cascade modules</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>DCNN learns hierarchical abstractions of data, which is desirable for high-level vision tasks (classification)</li>
+<li>but it hampers low-level tasks,  such as pose estimation and semantic segmentation, where we want precise localization, rather than <strong>abstraction of spatial details</strong></li>
+<li>two technical hurdles in DCNNs when applying to image labeling tasks<ul>
+<li>pooling, loss of resolution: we employ the ‘atrous’ (with holes) for efficient dense computation </li>
+<li>spacial invariance: we use the fully connected pairwise CRF to capture fine edge details </li>
+</ul>
+</li>
+<li><p>Our approach </p>
+<ul>
+<li>treats every pixel as a CRF node</li>
+<li>exploits long-range dependencies</li>
+<li>and uses CRF inference to directly optimize a DCNN-driven cost function </li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV1.png" width="65%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>structure</p>
+<ul>
+<li>fully convolutional VGG-16</li>
+<li>keep the first 3 subsampling blocks for a target stride of 8 </li>
+<li>use hole algorithm conv filters for the last two blocks</li>
+<li>keep the pooling layers for the purpose of fine-tuing，change strides from 2 to 1</li>
+<li>for dense map(h/8), the first fully convolutional 7*7*4096 is computational, thus change to 4*4 / 3*3 convs</li>
+<li>further computation decreasement: reduce the fc channels from 4096 to 1024</li>
+</ul>
+</li>
+<li><p>train</p>
+<ul>
+<li>label：ground truth subsampled by 8 </li>
+<li>loss function：cross-entropy </li>
+</ul>
+</li>
+<li><p>test</p>
+<ul>
+<li>x8：simply bilinear interpolation </li>
+<li>fcn：stride32 forces them to use learned upsampling layers, significantly increasing the complexity and training time</li>
+</ul>
+</li>
+<li><p>CRF</p>
+<ul>
+<li><p>short-range：used to smooth noisy </p>
+</li>
+<li><p>fully connected model：to recover detailed local structure rather than further smooth it   </p>
+</li>
+<li><p>energy function:</p>
+<script type="math/tex; mode=display">
+  E(x) = \sum_{i}\theta_i(x_i) + \sum_{ij}\theta_{ij}(x_i, x_j)\\
+  \theta_i(x_i) = -logP(x_i)\\</script><p>  $P(x_i)$ is the bi-linear interpolated probability output of DCNN.</p>
+<script type="math/tex; mode=display">
+  \theta_{ij}(x_i, x_j) = \mu(x_i, x_j)\sum_{m=1}^K \omega_m k^m (f_i,f_j)\\
+  \mu(x_i, x_j) = \begin{cases}
+  1& \text{if }x_i \neq x_j\\
+  0& \text{otherwise}
+  \end{cases}</script><p>  $k^m(f_i, f_j)$ is the Gaussian kernel depends on features (involving pixel positions &amp; pixel color intensities)</p>
+</li>
+</ul>
+</li>
+<li><p>multi-scale prediction</p>
+<ul>
+<li>to increase the boundary localization accuracy </li>
+<li>we attach to the input image and the output of each of the first four max pooling layers a two-layer MLP (first layer: 128 3x3 convolutional filters, second layer: 128 1x1 convolutional filters)  </li>
+<li>the feature maps above is <strong>concatenated</strong> to the main network’s last layer feature map </li>
+<li>the new outputs is enhanced by 128*5=640 channels</li>
+<li>we only adjust the newly added weights</li>
+<li>introducing these extra direct connections from fine-resolution layers improves localization performance, <strong>yet the effect is not as dramatic as the one obtained with the fully-connected CRF</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>空洞卷积dilated convolution</p>
+<p> <img src="/2020/02/24/Deeplab系列/holes.png" width="65%"></p>
+<ul>
+<li><p>空洞卷积相比较于正常卷积，多了一个 hyper-parameter——dilation rate，指的是kernel的间隔数量(正常的convolution dilatation rate是1)</p>
+</li>
+<li><p>fcn：先pooling再upsampling，过程中有信息损失，能不能设计一种新的操作，不通过pooling也能<strong>有较大的感受野</strong>看到更多的信息呢？</p>
+</li>
+<li><p>如图(b)的2-dilated conv，kernel size只有3x3，但是这个卷积的感受野已经增大到了7x7（假设前一层是3x3的1-dilated conv）</p>
+</li>
+<li><p>如图(c)的4-dilated conv，kernel size只有3x3，但是这个卷积的感受野已经增大到了15x15（假设前两层是3x3的1-dilated conv和3x3的2-dilated conv）</p>
+</li>
+<li><p>而传统的三个3x3的1-dilated conv堆叠，只能达到7x7的感受野</p>
+</li>
+<li><p>dilated使得在不做pooling损失信息的情况下，加大了感受野，让每个卷积输出都包含较大范围的信息</p>
+</li>
+<li><p><strong>The Gridding Effect</strong>：如下图，多次叠加3x3的2-dilated conv，会发现我们将愿输入离散化了。因此叠加卷积的 dilation rate 不能有大于1的公约数。</p>
+<p>  <img src="/2020/02/24/Deeplab系列/grid.png" width="60%"></p>
+</li>
+<li><p><strong>Long-ranged information</strong>：增大dilation rate对大物体有效果，对小物体可能有弊无利</p>
+</li>
+<li><p>HDC(Hybrid Dilated Convolution)设计结构</p>
+<ul>
+<li><p>叠加卷积的 dilation rate 不能有大于1的公约数，如[2,4,6]</p>
+</li>
+<li><p>将 dilation rate 设计成锯齿状结构，例如 [1, 2, 5, 1, 2, 5] 循环结构，锯齿状能够同时满足小物体大物体的分割要求(小 dilation rate 来关心近距离信息，大 dilation rate 来关心远距离信息)</p>
+</li>
+<li><p>满足$M_i = max [M_{i+1}-2r_i, M_{i+1}-2(M_{i+1}-r_i), r_i]$，$M_i$是第i层最大dilation rate</p>
+</li>
+<li><p>一个可行方案[1,2,5]：</p>
+<p>  <img src="/2020/02/24/Deeplab系列/hdc.png" width="65%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV2-Semantic-Image-Segmentation-with-Deep-Convolutional-Nets-Atrous-Convolution-and-Fully-Connected-CRFs"><a href="#deeplabV2-Semantic-Image-Segmentation-with-Deep-Convolutional-Nets-Atrous-Convolution-and-Fully-Connected-CRFs" class="headerlink" title="deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs"></a>deeplabV2: Semantic Image Segmentation with Deep Convolutional Nets, Atrous Convolution, and Fully Connected CRFs</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>atrous convolution：control the resolution </li>
+<li>atrous spatial pyramid pooling (ASPP) ：multiple sampling rates </li>
+<li>fully connected Conditional Random Field (CRF) </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>three challenges in the application of DCNNs to semantic image segmentation </p>
+<ul>
+<li>reduced feature resolution：max-pooling and downsampling (‘striding’)  —&gt; atrous convolution</li>
+<li>existence of objects at multiple scales：multi input scale —&gt; ASPP</li>
+<li>reduced localization accuracy due to DCNN invariance：skip-layers —&gt; CRF</li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV2.png" width="70%"></p>
+</li>
+<li><p>improvements compared to its first version </p>
+<ul>
+<li>better segment objects at multiple scales</li>
+<li>ResNet replaces VGG16</li>
+<li>a more comprehensive experimental evaluation on models &amp; dataset</li>
+</ul>
+</li>
+<li>related works<ul>
+<li>jointly learning of the DCNN and CRF to form an end-to-end trainable feed-forward network </li>
+<li>while in our work still a 2 stage process</li>
+<li>use a series of atrous convolutional layers with increasing rates to aggregate multiscale context </li>
+<li>while in our structure using parallel instead of serial </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>atrous convolution</p>
+<ul>
+<li>在下采样以后的特征图上，运行普通卷积，相当于在原图上运行上采样的filter<ul>
+<li>1-D示意图上可以看出，两者感受野相同</li>
+<li>同时能保持high resolution</li>
+</ul>
+</li>
+<li><p>while both the number of filter parameters and the number of operations per position stay constant</p>
+<p><img src="/2020/02/24/Deeplab系列/1d.png" width="40%">   <img src="/2020/02/24/Deeplab系列/2d.png" width="40%">  </p>
+</li>
+<li><p>把backbone中下采样的层(pooling/conv)中的stride改成1，然后将接下来的conv层都改成2-dilated conv：could allow us to compute feature responses at the original image resolution</p>
+</li>
+<li>efficiency/accuracy trade-off：using atrous convolution to increase the resolution by a factor of 4</li>
+<li>followed by fast bilinear interpolation by a factor of 8 to the original image resolution </li>
+<li><p>Bilinear interpolation is sufficient in this setting because the class score maps are quite smooth <strong>unlike FCN</strong></p>
+<p><img src="/2020/02/24/Deeplab系列/scoremap.png" width="40%"></p>
+</li>
+<li><p>Atrous convolution offers easily control of the field-of-view and finds the best trade-off between accurate localization (small field-of-view) and context assimilation (large field-of-view)：大感受野，抽象融合上下文，大感受野，low-level局部信息准确</p>
+</li>
+<li>实现：（1）根据定义，给filter上采样，插0；（2）给feature map下采样得到k*k个reduced resolution maps，然后run orgin conv，组合位移结果</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li><p>multi input scale：</p>
+<ul>
+<li>run parallel DCNN branches that share the same parameters</li>
+<li>fuse by taking at each position the maximum response across scales</li>
+<li>computing</li>
+</ul>
+</li>
+<li><p>spatial pyramid pooling</p>
+<ul>
+<li>run multiple parallel filters with different rates</li>
+<li>multi-scale features are further processed in separate branches：fc7&amp;fc8</li>
+<li><p>fuse：sum fusion</p>
+<p><img src="/2020/02/24/Deeplab系列/aspp.png" width="55%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CRF：keep the same as V1</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV3-Rethinking-Atrous-Convolution-for-Semantic-Image-Segmentation"><a href="#deeplabV3-Rethinking-Atrous-Convolution-for-Semantic-Image-Segmentation" class="headerlink" title="deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation"></a>deeplabV3: Rethinking Atrous Convolution for Semantic Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>for segmenting objects at multiple scales<ul>
+<li>employ atrous convolution in cascade or in parallel with multiple atrous rates</li>
+<li>augment ASPP with image-level features encoding global context and further boost performance</li>
+</ul>
+</li>
+<li>without DenseCRF</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>our proposed module consists of atrous convolution with various rates and <strong>batch normalization layers</strong></li>
+<li>modules in cascade or in parallel：when applying a 3*3  atrous convolution with an extremely large rate, it fails to capture long range information due to image boundary effects</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Atrous Convolution</p>
+<p>  for each location $i$ on the output $y$ and a filter $w$,  an $r$-rate atrous convolution is applied over the input feature map $x$：</p>
+<script type="math/tex; mode=display">
+  y[i] = \sum_k x[i+rk]w[k]</script></li>
+<li><p>in cascade</p>
+<ul>
+<li>duplicate several copies of the last ResNet block (block4)</li>
+<li><p>extra block5, block6, block7 as replicas of block4 </p>
+</li>
+<li><p>multi-rates</p>
+<p><img src="/2020/02/24/Deeplab系列/cascade.png" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li><p>we include batch normalization within ASPP</p>
+</li>
+<li><p>as the sampling rate becomes larger, the number of valid filter weights becomes smaller (beyond boundary)</p>
+</li>
+<li><p>to incorporate global context information：we adopt image-level features by GAP on the last feature map of the model </p>
+<p>  GAP —&gt; 1*1*256 conv —&gt; BN —&gt; bilinearly upsample </p>
+</li>
+<li><p>fusion: concatenated + 1*1 conv</p>
+<p><img src="/2020/02/24/Deeplab系列/aspp+gap.png" width="70%"></p>
+</li>
+<li><p>seg：final 1*1*n_classes conv</p>
+</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>large crop size required to make sure the large atrous rates effective </li>
+<li>upsample the output: it is important to keep the groundtruths intact and instead upsample the final logits</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>结论</p>
+<ul>
+<li><p>output stride=8 好过16，但是运算速度慢了几倍</p>
+<p><img src="/2020/02/24/Deeplab系列/result.png" width="70%"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="deeplabV3-Encoder-Decoder-with-Atrous-Separable-Convolution-for-Semantic-Image-Segmentation"><a href="#deeplabV3-Encoder-Decoder-with-Atrous-Separable-Convolution-for-Semantic-Image-Segmentation" class="headerlink" title="deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation"></a>deeplabV3+: Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>spatial pyramid pooling module captures rich contextual information  </li>
+<li>encode-decoder structure captures sharp object boundaries </li>
+<li>combine the above two methods</li>
+<li>propose a simple yet effective decoder module </li>
+<li>explore Xception backbone</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>even though rich semantic information is encoded through ASPP, detailed information related to object boundaries is missing due to striding operations </li>
+<li>atrous convolution could alleviate but suffer the computational balance</li>
+<li>while encoder-decoder models lend themselves to faster computation (since no features are dilated) in the encoder path and gradually recover sharp object boundaries in the decoder path </li>
+<li><p>所谓encoder-decoder structure，就是通过encoder和decoder之间的短连接来将不同尺度的特征集成起来，增加这样的shortcut，同时增大网络的下采样率（encoder path上不使用空洞卷积，因此为了达到同样的感受野，得增加pooling，然后保留最底端的ASPP block），既减少了计算，又enrich了local border这种细节特征</p>
+<p><img src="/2020/02/24/Deeplab系列/deeplabV3+.png" width="50%"></p>
+</li>
+<li><p>applying the atrous separable convolution to both the ASPP and decoder modules：最后又引入可分离卷积，进一步提升计算效率</p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>atrous separable convolution </p>
+<ul>
+<li><p>significantly reduces the computation complexity while maintaining similar (or better) performance</p>
+<p><img src="/2020/02/24/Deeplab系列/atrousDW.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>DeepLabv3 as encoder</p>
+<ul>
+<li>output_stride=16/8：remove the striding of the last 1/2 blocks</li>
+<li>atrous convolution：apply atrous convolution to the blocks without striding</li>
+<li>ASPP：run 1x1 conv in the end to set the output channel to 256</li>
+</ul>
+</li>
+<li><p>proposed decoder</p>
+<ul>
+<li>naive decoder：bilinearly upsampled by 16 </li>
+<li>proposed：first bilinearly upsampled by 4, then concatenated with the corresponding low-level features</li>
+<li>low-level features：<ul>
+<li>apply 1x1 conv on the low-level features to reduce the number of channels to avoid <strong>outweigh the importance</strong></li>
+<li>the last feature map in res2x residual block before striding </li>
+</ul>
+</li>
+<li>combined features：apply 3x3 conv(2 layers, 256 channels) to obtain sharper segmentation results </li>
+<li>more shortcut：observed no significant improvement</li>
+</ul>
+<p><img src="/2020/02/24/Deeplab系列/en-de.png" width="45%"></p>
+</li>
+<li><p>modified Xception backbone</p>
+<ul>
+<li>deeper</li>
+<li>all the max pooling operations are replaced with depthwise separable convolutions with striding </li>
+<li><p>DWconv-BN-ReLU-PWconv-BN-ReLU</p>
+<p><img src="/2020/02/24/Deeplab系列/xception.png" width="50%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ol>
+<li><p>decoder effect on border</p>
+<p> <img src="/2020/02/24/Deeplab系列/border.png" width="50%"></p>
+</li>
+</ol>
+</li>
+<li><p>f</p>
+</li>
+</ol>
+<h2 id="Auto-DeepLab-Hierarchical-Neural-Architecture-Search-for-Semantic-Image-Segmentation"><a href="#Auto-DeepLab-Hierarchical-Neural-Architecture-Search-for-Semantic-Image-Segmentation" class="headerlink" title="Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation"></a>Auto-DeepLab: Hierarchical Neural Architecture Search for Semantic Image Segmentation</h2>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/01/08/RCNN系列/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3687,561 +4918,6 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/06/c-tricks-in-engineering/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/11/06/c-tricks-in-engineering/" itemprop="url">c++ tricks in engineering</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-06T14:14:52+08:00">
-                2019-11-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/11/06/c-tricks-in-engineering/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/06/c-tricks-in-engineering/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>数组传参</p>
-<p> 工程化被坑了好多回！</p>
-<p> C/C++ 传递数组，虽然传递的是首地址地址，但是<strong>参数到了函数内就成了普通指针</strong>。</p>
-<p> 所以试图在调用函数中求取所传递数组的长度是行不通的。</p>
-</li>
-<li><p>vector传参</p>
-<p> 传值—&gt;拷贝构造，传引用／指针—&gt;不发生拷贝构造。</p>
-<p> 实际工程化中遇到的问题是，构建了一个vector\<cv::mat\> imgs对象，传入函数以后，在函数内部创建空间cv::Mat img，然后将img push进vector。在函数外读取该vector的时候发现其内部没值。</cv::mat\></p>
-<p> <strong>要点：1. 要传引用，2. push clone：imgs.push_back(img)</strong></p>
-<p> 另外，vector可以作为函数返回值。</p>
-</li>
-<li></li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/10/31/图像算法综述/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/31/图像算法综述/" itemprop="url">图像算法综述</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-31T14:59:19+08:00">
-                2019-10-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/10/31/图像算法综述/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/10/31/图像算法综述/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>类别</p>
-<ul>
-<li>按照任务类型：度量学习（metric learning）和描述子学习（image descriptor learning）</li>
-<li>按照网络结构：pairwise的siamese结构、triplet的three branch结构、以及引入尺度信息的central-surround结构</li>
-<li>按照网络输出：特征向量（feature embedding）和单个概率值（pairwise similarity）</li>
-<li>按照损失函数：对比损失函数、交叉熵损失函数、triplet loss、hinge loss等，此外损失函数可以带有隐式的<strong>困难样本挖掘</strong>，例如pn-net中的softpn等，也可以是显示的困难挖掘。</li>
-</ul>
-</li>
-<li><p>Plain网络</p>
-<p> 主要是说AlexNet／VGG-Net，后者更常用一些。</p>
-<p> Plain网络的设计主要遵循以下几个准则：</p>
-<p> （1）输出特征图尺寸相同的层使用相同数量的滤波器。</p>
-<p> （2）如果特征图尺寸减半，那么滤波器数量就加倍，从而保证每层的时间复杂度相同（这是为啥？？）。</p>
-</li>
-<li><p>名词</p>
-<ul>
-<li><p>感受野：卷积神经网络每一层输出的特征图上的像素点在<strong>原始图像</strong>上映射区域的大小。通俗的说，就是输入图像对这一层输出的神经元的影响有多大。</p>
-<p>  感受野计算：由当前层向前推，需要的参数是kernel size和stride。</p>
-<script type="math/tex; mode=display">
-  N\_RF = kernel\_size + (cur\_RF-1)*stride</script><p>  其中$cur_RF$是当前层（start from 1），$N_RF$、$kernel_size$、$stride$是上一层参数。</p>
-</li>
-<li><p>有效感受野：并不是感受野内所有像素对输出向量的贡献相同，在很多情况下感受野区域内像素的影响分布是高斯，有效感受野仅占理论感受野的一部分，且高斯分布从中心到边缘快速衰减。</p>
-</li>
-<li><p>感受野大小：</p>
-<ul>
-<li>小感受野：local，位置信息更准确</li>
-</ul>
-</li>
-<li>大感受野：global，语义信息更丰富</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>inception module：下图为其中一种。</p>
-<p>意义：增加网络深度和宽度的同时，减少参数。结构中嵌入了多尺度信息，集成了多种不同感受野上的特征。</p>
-<p><img src="/2019/10/31/图像算法综述/inception.png" width="50%;"></p>
-</li>
-<li><p>building block：左边这种，红色框框里面是一个block。</p>
-<p>几个相同的building block堆叠为一层conv。在第一个building Block块中，输出特征图的尺寸下降一半（第一个卷积stride=2），剩余的building Block块输入输出尺寸是一样的。</p>
-</li>
-<li><p>bottleneck：右边这种，蓝色框框block。字面意思，瓶颈，形容输入输出维度差距较大。</p>
-<p>第一个1*1负责降低维度，第二个1*1负责恢复维度，3*3层就处在一个输入／输出维度较小的瓶颈。</p>
-<pre><code>左右两种结构时间复杂度相似。
-
-&lt;img src=&quot;图像算法综述/block.png&quot; width=&quot;30%;&quot; /&gt;
-
-&lt;img src=&quot;图像算法综述/ImageNet.png&quot; width=&quot;110%;&quot; /&gt;
-</code></pre><ul>
-<li><p>top-1和top-5：top-1就是预测概率最大的类别，top-5则取最后预测概率的前五个，只要其中包含正确类别则认为预测正确。</p>
-<p>使用top-5主要是因为ImageNet中很多图片中其实是包含多个物体的。    </p>
-</li>
-<li><p>accuracy、error rate、F1-score、sensitivity、specificity、precision、recall</p>
-<ul>
-<li>accuracy：总体准确率</li>
-<li>precision：从结果角度，单一类别准确率</li>
-<li>recall：从输入角度，预测类别真实为1的准确率</li>
-<li>P-R曲线：选用不同阈值，precision-recall围成的曲线</li>
-<li>AP：平均精度，P-R曲线围住的面积</li>
-<li>F1-score：对于某个分类，综合了Precision和Recall的一个判断指标，因为选用不同阈值，precision-recall会随之变化，F1-score用于选出最佳阈值。</li>
-<li>sensitivity：=recall</li>
-<li>specificity：预测类别真实为0的准确率</li>
-</ul>
-<p>reference：<a href="https://zhuanlan.zhihu.com/p/33273532" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/33273532</a></p>
-</li>
-<li><p>trade-off：</p>
-</li>
-<li><p>FLOPS：每秒浮点运算次数是每秒所执行的浮点运算次数的简称，被用来估算电脑效能。</p>
-</li>
-<li><p>ROC、AUC、MAP：</p>
-<ul>
-<li>ROC：TPR和FPR围成的曲线</li>
-<li>AUC：ROC围住的面积</li>
-<li>mAP：所有类别AP的平均值</li>
-</ul>
-</li>
-<li><p>梯度弥散：</p>
-</li>
-<li><p>“底层先收敛、高层再收敛”：</p>
-</li>
-<li><p>特征图：卷积层通过线性滤波器进行线性卷积运算，然后再接个非线性激活函数，最终生成特征图。</p>
-</li>
-<li><p>TTA test time augmentation：测试时增强，为原始图像造出多个不同版本，包括不同区域裁剪和更改缩放程度等，并将它们输入到模型中；然后对多个版本进行计算得到平均输出，作为图像的最终输出分数。</p>
-</li>
-<li><p>pooling mode: </p>
-<ul>
-<li>full mode：从filter和image刚开始相交开始卷积</li>
-<li>same mode：当filter的中心和image的角重合时开始卷积，如果stride=1，那么输入输出尺寸相同</li>
-<li>valid mode：当filter完全在image里面时开始卷积</li>
-</ul>
-<p><img src="/2019/10/31/图像算法综述/full.png" width="20%;"> <img src="/2019/10/31/图像算法综述/same.png" width="20%;"> <img src="/2019/10/31/图像算法综述/valid.png" width="20%;"></p>
-</li>
-<li><p><a href="https://zhangting2020.github.io/2018/05/30/Transform-Invariance/" target="_blank" rel="noopener">空间不变性</a>：</p>
-<ul>
-<li>平移不变性：不管输入如何平移，系统产生完全相同的响应，<strong>比如图像分类任务</strong>，图像中的目标不管被移动到图片的哪个位置，得到的结果（标签）应该是相同的</li>
-<li><strong>平移同变性（translation equivariance）：</strong>系统在不同位置的工作原理相同，但它的响应随着目标位置的变化而变化，<strong>比如实例分割任务</strong>，目标如果被平移了，那么输出的实例掩码也相应变化</li>
-<li>局部连接：每个神经元没有必要对全局图像进行感知，只需要对局部进行感知，然后在更高层将局部的信息综合起来就得到了全局的信息</li>
-<li>权值共享：对于这个图像上的所有位置，我们都能使用同样的学习特征</li>
-<li>池化：<a href="https://www.zhihu.com/question/36980971" target="_blank" rel="noopener">通过消除非极大值，降低了上层的计算复杂度</a>。最大池化返回感受野中的最大值，如果最大值被移动了，但是仍然在这个感受野中，那么池化层也仍然会输出相同的最大值。</li>
-<li>卷积和池化这两种操作<strong>共同</strong>提供了<strong>一些</strong>平移不变性，即使图像被平移，卷积保证仍然能检测到它的特征，池化则尽可能地保持一致的表达。</li>
-<li>同理，所谓的CNN的尺度、旋转不变性，也是由于pooling操作，引入的微小形变的鲁棒性。</li>
-</ul>
-</li>
-<li><p>模型大小与参数量：float32是4个字节，因此模型大小字节数=参数量×4</p>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>训练技巧</p>
-<ul>
-<li><p>迁移学习：当数据集太小，无法用来训练一个足够好的神经网络，可以选择fine-tune一些预训练网络。使用时修改最后几层，降低学习率。</p>
-<p>  keras中一些预训练权重下载地址：<a href="https://github.com/fchollet/deep-learning-models/releases/" target="_blank" rel="noopener">https://github.com/fchollet/deep-learning-models/releases/</a></p>
-</li>
-<li><p><a href="https://zhuanlan.zhihu.com/p/24825503" target="_blank" rel="noopener">K-fold交叉验证</a>：</p>
-<ol>
-<li><p>我们不能将全部数据集用于训练——这样就没有数据来测试模型性能了</p>
-</li>
-<li><p>将数据集分割为training set 和 test set，衡量结果取决于数据集划分，training set和全集之间存在bias，不同test下结果variety很大</p>
-</li>
-<li><p>交叉验证Cross-Validation：</p>
-<ul>
-<li>极端情况LOOCV：全集N，每次取一个做test，其他做train，重复N次，得到N个模型，并计算N个test做平均</li>
-<li>K-fold：全集切分成k份，每次取一个做test，其他做train，重复k次～</li>
-<li>实验显示LOOCV和10-foldCV的结果很相近，后者计算成本明显减小</li>
-<li>Bias-Variance Trade-Off：K越大，train set越接近全集，bias越小，但是每个train set之间相关性越大，<strong>而这种大相关性会导致最终的test error具有更大的Variance</strong></li>
-</ul>
-</li>
-</ol>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>分割</p>
-<ul>
-<li><p>实例分割&amp;语义分割</p>
-<ul>
-<li>instance segmentation：标记实例和语义, 不仅要分割出<code>人</code>这个类, 而且要分割出<code>这个人是谁</code>, 也就是具体的实例</li>
-<li><p>semantic segmentation：只标记语义, 也就是说只分割出<code>人</code>这个类来</p>
-<p><img src="/2019/10/31/图像算法综述/segmentation.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/08/22/Segmentation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/22/Segmentation/" itemprop="url">Segmentation</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-22T15:04:25+08:00">
-                2019-08-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/08/22/Segmentation/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/08/22/Segmentation/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>idea: </p>
-<ol>
-<li>CT图一般是单通道灰度图像，假如我将128张CT图堆叠在一起（即128通道的图像），然后用2D卷积（会考虑通道数128），这样和直接用3D卷积会有结果上的差别吗？</li>
-<li>3d网络可以结合图像层间信息，能够保证隔层图像Mask之间的一个变化连续性，效果会比2d好。层间距大的图像，在预处理中会有插值。</li>
-<li>3d网络因为显存的限制，一种处理方式是裁成3d patch作为输入，导致其感受野有限，通常只能专注于细节和局部特征，适合作为第二级网络用于对细节做精优化。一种处理方式是降采样，分割精度下降。</li>
-<li>2.5D网络。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4296,7 +4972,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">122</span>
+                  <span class="site-state-item-count">125</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4309,7 +4985,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-count">63</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

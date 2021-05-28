@@ -276,6 +276,755 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/re-labeling/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/27/re-labeling/" itemprop="url">re-labeling</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T15:01:58+08:00">
+                2021-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/27/re-labeling/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/re-labeling/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Re-labeling-ImageNet-from-Single-to-Multi-Labels-from-Global-to-Localized-Labels"><a href="#Re-labeling-ImageNet-from-Single-to-Multi-Labels-from-Global-to-Localized-Labels" class="headerlink" title="Re-labeling ImageNet: from Single to Multi-Labels, from Global to Localized Labels"></a>Re-labeling ImageNet: from Single to Multi-Labels, from Global to Localized Labels</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>label noise<ul>
+<li>single-label benchmark</li>
+<li>but contains multiple classes in one sample</li>
+<li>a random crop may contain an entirely different object from the gt label</li>
+<li>exhaustive multi-label annotations per image is too cost</li>
+</ul>
+</li>
+<li>mismatch<ul>
+<li>researches refine the validation set with multi-labels</li>
+<li>propose new multi-label evaluation metrics</li>
+<li>但是造成数据集的mismatch</li>
+</ul>
+</li>
+<li>we propose<ul>
+<li>re-label</li>
+<li>use a strong image classifier trained on extra source of data to generate the multi-labels</li>
+<li>use pixel-wise multi-label predictions before GAP：addtional location-specific supervision</li>
+<li>then trained on re-labeled samples</li>
+<li>further boost with CutMix</li>
+</ul>
+</li>
+<li>from single to multi-labels：多标签</li>
+<li><p>from global to localized：dense prediction map</p>
+<p><img src="/2021/05/27/re-labeling/re-labeling.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>single-label<ul>
+<li>和multi-label validation set的mismatch</li>
+<li>random crop augmentation加剧了问题</li>
+<li>除了多目标还有前背景，只有23%的random crops IOU&gt;0.5</li>
+</ul>
+</li>
+<li>ideally label<ul>
+<li>the full set of classes——multi-label</li>
+<li>where each objects——localized label</li>
+<li>results in a dense pixel labeling $L\in \{0,1\}^{HWC}$</li>
+</ul>
+</li>
+<li><p>we propose a re-labeling strategy</p>
+<ul>
+<li>ReLabel <ul>
+<li>strong classifier</li>
+<li>external training data</li>
+<li>generate feature map predictions</li>
+</ul>
+</li>
+<li>LabelPooling<ul>
+<li>with dense labels &amp; random crop</li>
+<li>pooling the label scores from crop region</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>evaluations</p>
+<ul>
+<li>baseline r50：77.5%</li>
+<li>r50 + ReLabel：78.9%</li>
+<li>r50 + ReLabel + CutMix：80.2%</li>
+</ul>
+</li>
+<li><p>【QUESTION】同样是引入外部数据实现无痛长点，与noisy student的区别/好坏？？？</p>
+<ul>
+<li><p>目前论文提到的就只有efficiency，ReLabel是one-time cost的，知识蒸馏是iterative&amp;on-the-fly的</p>
+<p><img src="/2021/05/27/re-labeling/differences.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Re-labeling</p>
+<ul>
+<li><p>super annotator</p>
+<ul>
+<li>state-of-the-art classifier</li>
+<li>trained on super large dataset</li>
+<li>fine-tuned on ImageNet</li>
+<li>and predict ImageNet labels</li>
+</ul>
+</li>
+<li><p>we use open-source trained weights as annotators</p>
+<ul>
+<li>though trained with single-label supervision</li>
+<li>still tend to make multi-label predictions</li>
+<li>EfficientNet-L2</li>
+<li>input size 475</li>
+<li>feature map size 15x15x5504</li>
+<li><p>output dense label size 15x15x1000</p>
+<p><img src="/2021/05/27/re-labeling/relabel.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>location-specific labels</p>
+<ul>
+<li>remove GAP heads</li>
+<li>add a 1x1 conv</li>
+<li>说白了就是一个fcn</li>
+<li>original classifier的fc层权重与新添加的1x1 conv层的权重是一样的</li>
+<li><p>label的每个channel对应了一个类别的heatmap，可以看到disjointly located at each object’s position</p>
+<p><img src="/2021/05/27/re-labeling/labelmap.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>LabelPooling</p>
+<p>  <img src="/2021/05/27/re-labeling/labelpooling.png" width="40%;"></p>
+<ul>
+<li>loads the pre-computed label map</li>
+<li>region pooling (RoIAlign) on the label map</li>
+<li>GAP + softmax to get multi-label vector</li>
+<li>train a classifier with the multi-label vector</li>
+<li><p>uses CE</p>
+<p><img src="/2021/05/27/re-labeling/algorithm.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>choices</p>
+<ul>
+<li><p>space consumption</p>
+<ul>
+<li>主要是存储label map的空间</li>
+<li>store only top-5 predictions per image：10GB</li>
+</ul>
+</li>
+<li><p>time consumption</p>
+<ul>
+<li>主要是说生成label map的one-shot-inference time和labelPooling引入的额外计算时间</li>
+<li>relabeling：10-GPU hours</li>
+<li>labelPooling：0.5% additiona training time</li>
+<li>more efficient than KD</li>
+</ul>
+</li>
+<li><p>annotators</p>
+<ul>
+<li><p>标注工具哪家强：目前看下来eff-L2的supervision效果最强</p>
+<p><img src="/2021/05/27/re-labeling/annotators.png" width="40%;"></p>
+</li>
+<li><p>supervision confidence</p>
+<ul>
+<li>随着image crop与前景物体的IOU增大，confidence逐渐增加</li>
+<li><p>说明supervision provides some uncertainty when low IOU</p>
+<p><img src="/2021/05/27/re-labeling/supervision.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/mlp系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/27/mlp系列/" itemprop="url">mlp系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T14:39:20+08:00">
+                2021-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/27/mlp系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/mlp系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[papers]</p>
+<ul>
+<li>[MLP-Mixer] MLP-Mixer: An all-MLP Architecture for Vision，Google</li>
+<li>[ResMLP] ResMLP: Feedforward networks for image classification with data-efficient training，Facebook</li>
+</ul>
+<h2 id="MLP-Mixer-An-all-MLP-Architecture-for-Vision"><a href="#MLP-Mixer-An-all-MLP-Architecture-for-Vision" class="headerlink" title="MLP-Mixer: An all-MLP Architecture for Vision"></a>MLP-Mixer: An all-MLP Architecture for Vision</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>image classification task</li>
+<li>neither of [CNN, attention] are necessary</li>
+<li>our proposed MLP-Mixer<ul>
+<li>仅包含multi-layer-perceptrons</li>
+<li>independently to image patches</li>
+<li>repeated applied across either spatial locations or feature channels</li>
+<li>two types<ul>
+<li>applied independently to image patches</li>
+<li>applied across patches</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/05/27/mlp系列/mixer.png" width="70%;"></p>
+<ul>
+<li>输入是token sequences<ul>
+<li>non-overlapping image patches</li>
+<li>linear projected to dimension C</li>
+</ul>
+</li>
+<li>Mixer Layer<ul>
+<li>maintain the input dimension</li>
+<li>channel-mixing MLP<ul>
+<li>operate on each token independently</li>
+<li>可以看作是1x1的conv</li>
+</ul>
+</li>
+<li>token-mixing MLP<ul>
+<li>operate on each channel independently</li>
+<li>take each spatial vectors (hxw)x1 as inputs</li>
+<li>可以看作是一个global depth-wise conv，s1，same pad，kernel size是(h,w)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>最后对token embedding做GAP，提取sequence vec，然后进行类别预测</li>
+</ul>
+</li>
+<li><p>idea behind Mixer</p>
+<ul>
+<li>clearly separate the per-location operations &amp; cross-location operations </li>
+<li>CNN是同时进行这俩的</li>
+<li>transformer的MSA同时进行这俩，MLP只进行per-location operations</li>
+</ul>
+</li>
+<li><p>Mixer Layer</p>
+<ul>
+<li><p>two MLP blocks</p>
+</li>
+<li><p>given input $X\in R^{SC}$，S for spatial dim，C for channel dim</p>
+<p>  <img src="/2021/05/27/mlp系列/blocks.png" width="70%;"></p>
+</li>
+<li><p>先是token-mixing MLP</p>
+<ul>
+<li>acts on S dim</li>
+<li>maps $R^S$ to $R^S$</li>
+<li>share across C-axis</li>
+<li>LN-FC-GELU-FC-residual</li>
+</ul>
+</li>
+<li><p>然后是channel-mixing MLP</p>
+<ul>
+<li>acts on C dim</li>
+<li>maps $R^C$ to $R^C$</li>
+<li>share across S-axis</li>
+<li>LN-FC-GELU-FC-residual</li>
+</ul>
+</li>
+<li><p>fixed width，更接近transformer/RNN，而不是CNN那种金字塔结构</p>
+</li>
+<li><p>不使用position embeddings</p>
+<ul>
+<li>the token-mixing MLPs are sensitive to the order of the input tokens</li>
+<li>may learn to represent locations</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training"><a href="#ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training" class="headerlink" title="ResMLP: Feedforward networks for image classification with data-efficient training"></a>ResMLP: Feedforward networks for image classification with data-efficient training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>entirely build upon MLP</li>
+<li>alternates from a simple residual network<ul>
+<li>a linear layer to interact with image patches</li>
+<li>a two-layer FFN to interact independently with each patch</li>
+<li>affine transform替代LN是一个特别之处</li>
+</ul>
+</li>
+<li>trained with modern strategy<ul>
+<li>heavy data-augmentation </li>
+<li>optionally distillation</li>
+</ul>
+</li>
+<li>show good performace on ImageNet classification</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>strongly inspired by ViT but simpler<ul>
+<li>没有attention层，只有fc层+gelu</li>
+<li>没有norm层，因为much more stable to train，但是用了affine transformation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/05/27/mlp系列/ResMLP.png" width="70%;"></p>
+<ul>
+<li>takes flattened patches as inputs<ul>
+<li>typically N=16：16x16</li>
+</ul>
+</li>
+<li>linear project the patches into embeddings<ul>
+<li>form $N^2$ d-dim embeddings</li>
+</ul>
+</li>
+<li>ResMLP Layer<ul>
+<li>main the dim throughout $[N^2,d]$</li>
+<li>a simple linear layer<ul>
+<li>interaction between the patches</li>
+<li>applied to all channels independently</li>
+<li>类似depth-wise conv with global kernel的东西，线性！！</li>
+</ul>
+</li>
+<li>a two-layer-mlp<ul>
+<li>fc-GELU-fc</li>
+<li>independently applied to all patches</li>
+<li>非线性！！</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>average pooled $[d-dim]$ + linear classifier $cls-dim$</li>
+</ul>
+</li>
+<li><p>Residual Multi-Layer Perceptron Layer</p>
+<ul>
+<li>a linear layer + a FFN layer</li>
+<li>each layer is paralleled with a skip-connection</li>
+<li><p>没用LN，但是用了learnable affine transformation</p>
+<ul>
+<li>$Aff_{\alpha, \beta} (x) = Diag(\alpha) x + \beta$</li>
+<li>rescale and shifts the input component-wise：对每个patch，分别做affine变换</li>
+<li>在推理阶段可以与上一层线性层合并：no cost</li>
+<li>用了两次<ul>
+<li>第一个用在main path上用来替代LN：初值为identity transform(1,0)</li>
+<li>第二个在residual path里面，down scale to boost，用一个small value初始化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>given input： $d\times N^2$ matrix $X$</p>
+<p>  <img src="/2021/05/27/mlp系列/mlp1.png" width="50%;"></p>
+<ul>
+<li>affine在d-dim上做</li>
+<li>第一个Linear layer在$N^2-dim$上做：参数量$N^2 \times N^2$</li>
+<li><p>第二、三个Linear layer在$d-dim$上做：参数量$d \times 4d$ &amp; $4d \times d$</p>
+<p><img src="/2021/05/27/mlp系列/mlp2.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/24/torch-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/24/torch-note/" itemprop="url">torch-note</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-24T15:23:48+08:00">
+                2021-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/24/torch-note/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/24/torch-note/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>torch.cuda.amp</p>
+<p> 自动混合精度：FloatTensor &amp; HalfTensor</p>
+</li>
+<li><p>torch.jit.script</p>
+<p> 将模型从纯Python程序转换为能够独立于Python运行的TorchScript程序</p>
+</li>
+<li><p>torch.nn.DataParallel</p>
+</li>
+<li><p>torch.flatten(input, start_dim=0, end_dim=-1)</p>
+<p> 展开start_dim到end_dim之间的dim成一维</p>
+</li>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/21/LV-ViT/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -357,7 +1106,7 @@
       
         
           
-            <p>[LV-ViT 2021] Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet，新加坡国立&amp;字节，主体结构还是ViT，deeper+narrower+auxiliary label&amp;loss</p>
+            <p>[LV-ViT 2021] Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet，新加坡国立&amp;字节，主体结构还是ViT，deeper+narrower+multi-layer-cnn-patch-projection+auxiliary label&amp;loss</p>
 <p>同等参数量下，能够达到与CNN相当的分类精度</p>
 <ul>
 <li>26M——84.4% ImageNet top1 acc</li>
@@ -2260,7 +3009,7 @@
 <p>10.2 创建/删除/重命名collection</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建：db.createCollection(name, options)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">'case2img'</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有tables</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 不用显示创建，在db insert的时候会自动创建集合</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.insert(&#123;<span class="string">"name"</span> : <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除：db.COLLECTION_NAME.drop()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.drop()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名：db.COLLECTION_NAME.renameCollection(<span class="string">'NEWNAME'</span>)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.renameCollection(<span class="string">'sheet3'</span>)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 复制：db.COLLECTION_NAME.aggregate(&#123;<span class="variable">$out</span>: <span class="string">'NEWNAME'</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.aggregate(&#123; <span class="variable">$out</span> : <span class="string">"sheet3"</span> &#125;)</span></span><br></pre></td></tr></table></figure>
 <p>10.3 插入/显示/更新/删除document</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入</span></span><br><span class="line">db.COLLECTION_NAME.insert(document)</span><br><span class="line">db.COLLECTION_NAME.save(document)</span><br><span class="line">db.COLLECTION_NAME.insertOne()</span><br><span class="line">db.COLLECTION_NAME.insertMany()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有doc</span></span><br><span class="line">db.COLLECTION_NAME.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新doc的部分内容</span></span><br><span class="line">db.COLLECTION_NAME.update(</span><br><span class="line">   &lt;query&gt;,   # 查询条件</span><br><span class="line">   &lt;update&gt;,  # 更新操作</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,     # if true 如果不存在则插入</span><br><span class="line">     multi: &lt;boolean&gt;,      # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">'case'</span>: <span class="string">'s2'</span>, <span class="string">'name'</span>: <span class="string">'img2'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新整条文档by object_id</span></span><br><span class="line">db.COLLECTION_NAME.save(</span><br><span class="line">   &lt;document&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.save(&#123;<span class="string">"_id"</span>: ObjectId(<span class="string">"60474e4b77e21bad9bd4655a"</span>), <span class="string">"case"</span>:<span class="string">"s3"</span>, <span class="string">"name"</span>:<span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除满足条件的doc</span></span><br><span class="line">db.COLLECTION_NAME.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,   # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除所有doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;&#125;)</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入</span></span><br><span class="line">db.COLLECTION_NAME.insert(document)</span><br><span class="line">db.COLLECTION_NAME.save(document)</span><br><span class="line">db.COLLECTION_NAME.insertOne()</span><br><span class="line">db.COLLECTION_NAME.insertMany()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有doc</span></span><br><span class="line">db.COLLECTION_NAME.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新doc的部分内容</span></span><br><span class="line">db.COLLECTION_NAME.update(</span><br><span class="line">   &lt;query&gt;,   # 查询条件</span><br><span class="line">   &lt;update&gt;,  # 更新操作</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,     # if true 如果不存在则插入</span><br><span class="line">     multi: &lt;boolean&gt;,      # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">'case'</span>: <span class="string">'s2'</span>, <span class="string">'name'</span>: <span class="string">'img2'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 给doc的某个key重命名</span></span><br><span class="line">db.COLLECTION_NAME.updateMany(</span><br><span class="line">&#123;&#125;,</span><br><span class="line">&#123;'$rename': &#123;"old_key": "new_key"&#125;&#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新整条文档by object_id</span></span><br><span class="line">db.COLLECTION_NAME.save(</span><br><span class="line">   &lt;document&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.save(&#123;<span class="string">"_id"</span>: ObjectId(<span class="string">"60474e4b77e21bad9bd4655a"</span>), <span class="string">"case"</span>:<span class="string">"s3"</span>, <span class="string">"name"</span>:<span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除满足条件的doc</span></span><br><span class="line">db.COLLECTION_NAME.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,   # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除所有doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;&#125;)</span></span><br></pre></td></tr></table></figure>
 <p>10.4 简单查询find</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询表中的doc：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="string">"name"</span>:1&#125;)   <span class="comment"># projection的value在对应的key-value是list的时候有意义</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 格式化显示查询结果：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).pretty()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;).pretty()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取指定数量的数据记录：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).<span class="built_in">limit</span>(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).<span class="built_in">limit</span>(1)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 跳过指定数量的数据：db.COLLECTION_NAME.find(&#123;query&#125;, &#123;KEY:1&#125;).skip(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).skip(1)</span></span><br></pre></td></tr></table></figure>
 <p>10.5 条件操作符</p>
@@ -2504,1409 +3253,11 @@
 </li>
 </ul>
 </li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/02/layer-norm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/02/layer-norm/" itemprop="url">layer norm</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-02T15:06:47+08:00">
-                2021-03-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/02/layer-norm/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/02/layer-norm/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li>papers</li>
-</ol>
-<p>[batch norm 2015] Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift，inceptionV2，Google Team，归一化层的始祖，加速训练&amp;正则，BN被后辈追着打的主要痛点：approximation by mini-batch，test phase frozen</p>
-<p>[layer norm 2016] Layer Normalization，Toronto+Google，针对BN不适用small batch和RNN的问题，主要用于RNN，在CNN上不好，在test的时候也是active的，因为mean&amp;variance由于当前数据决定，有负责rescale和reshift的layer params</p>
-<p>[weight norm 2016] Weight normalization: A simple reparameterization to accelerate training of deep neural networks，OpenAI，</p>
-<p>[cosine norm 2017] Cosine Normalization: Using Cosine Similarity Instead of Dot Product in Neural Networks，中科院，</p>
-<p>[instance norm 2017] Instance Normalization: The Missing Ingredient for Fast Stylization，高校report，针对风格迁移，IN在test的时候也是active的，而不是freeze的，单纯的instance-independent norm，没有layer params</p>
-<p>[group norm 2018] Group Normalization，FAIR Kaiming，针对BN在small batch上性能下降的问题，提出batch-independent的</p>
-<p>[weight standardization 2019] Weight Standardization，Johns Hopkins，</p>
-<p>[batch-channel normalization &amp; weight standardization 2020] BCN&amp;WS: Micro-Batch Training with Batch-Channel Normalization and Weight Standardization，Johns Hopkins，</p>
+<li><p>案例</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 拉镜像</span></span><br><span class="line">docker pull 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示镜像</span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行指定镜像</span></span><br><span class="line">docker run -itd --name='test' 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看运行的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 进入容器</span></span><br><span class="line">docker exec -it 容器id或name /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 一顿操作完退出容器</span></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 将修改后的容器保存为镜像</span></span><br><span class="line">docker commit 容器id或name 新镜像名字</span><br><span class="line">docker images可以看到这个镜像了</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 保存镜像到本地</span></span><br><span class="line">docker save -o tf_torch.rar  tf_torch</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 还原镜像</span></span><br><span class="line">docker load --input tf_torch.tar</span><br></pre></td></tr></table></figure>
 <ol>
-<li><p>why Normalization</p>
-<ul>
-<li><p>独立同分布：independent and identically distribute</p>
-</li>
-<li><p>白化：whitening（[PCA whitening][<a href="http://ufldl.stanford.edu/tutorial/unsupervised/PCAWhitening/]）" target="_blank" rel="noopener">http://ufldl.stanford.edu/tutorial/unsupervised/PCAWhitening/]）</a></p>
-<ul>
-<li>去除特征之间的相关性</li>
-<li>使所有特征具有相同的均值和方差</li>
-</ul>
-</li>
-<li><p>样本分布变化：Internal Covariate Shift</p>
-<ul>
-<li>对于神经网络的各层输入，由于stacking internel byproduct，每层的分布显然各不相同，但是对于某个特定的样本输入，他们所指示的label是不变的</li>
-<li><p>即源空间和目标空间的条件概率是一致的，但是边缘概率是不同的</p>
-<script type="math/tex; mode=display">
-P_s(Y|X=x) = P_t(Y|X=x) \\
-P_s(X) \neq P_t(X)</script></li>
-<li><p>每个神经元的数据不再是独立同分布，网络需要不断适应新的分布，上层神经元容易饱和：网络训练又慢又不稳定</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>how to Normalization</p>
-<ul>
-<li><p>preparation</p>
-<ul>
-<li>unit：一个神经元（一个op），输入[b,N,C_in]，输出[b,N,1]</li>
-<li>layer：一层的神经元（一系列op，$W\in R^{M*N}$），在channel-dim上concat当前层所有unit的输出[b,N,C_out]</li>
-<li>dims<ul>
-<li>b：batch dimension</li>
-<li>N：spatial dimension，1/2/3-dims</li>
-<li>C：channel dimension</li>
-</ul>
-</li>
-<li>unified representation：本质上都是对数据在规范化<ul>
-<li>$h = f(g*\frac{x-\mu}{\sigma}+b)$：先归一化，在rescale &amp; reshift</li>
-<li>$\mu$ &amp; $\sigma$：compute from上一层的特征值</li>
-<li>$g$ &amp; $b$：learnable params基于当前层</li>
-<li>$f$：neurons’ weighting operation</li>
-<li>各方法的主要区别在于mean &amp; variance的计算维度</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>对数据</p>
-<ul>
-<li>BN：以一层每个神经元的输出为单位，即每个channel的mean&amp;var相互独立</li>
-<li>LN：以一层所有神经元的输出为单位，即每个sample的mean&amp;var相互独立</li>
-<li>IN：以每个sample在每个神经元的输出为单位，每个sample在每个channel的mean&amp;var都相互独立</li>
-<li>GN：以每个sample在一组神经元的输出为单位，一组包含一个神经元的时候变成IN，一组包含一层所有神经元的时候就是LN</li>
-<li><p>示意图：</p>
-<p><img src="/2021/03/02/layer-norm/methods.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>对权重</p>
-<ul>
-<li>WN：将权重分解为单位向量和一个固定标量，相当于神经元的任意输入vec点乘了一个单位vec（downscale），再rescale，进一步地相当于没有做shift和reshift的数据normalization</li>
-<li>WS：对权重做全套（归一化再recale），比WN多了shift，“zero-center is the key” </li>
-</ul>
-</li>
-<li><p>对op</p>
-<ul>
-<li><p>CosN：</p>
-<ul>
-<li><p>将线性变换op替换成cos op：$f_w(x) = cos <w,x> = \frac{w \cdot x}{|w||x|}$</w,x></p>
-</li>
-<li><p>数学本质上又退化成了只有downscale的变换，表征能力不足</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<li>dockerfile</li>
 </ol>
-<h2 id="Whitening白化"><a href="#Whitening白化" class="headerlink" title="Whitening白化"></a>Whitening白化</h2><ol>
-<li><p>purpose</p>
-<ul>
-<li>images的adjacent pixel values are highly correlated，thus redundant</li>
-<li>linearly move the origin distribution，making the inputs share the same mean &amp; variance</li>
-</ul>
-</li>
-<li><p>method</p>
-<ul>
-<li><p>首先进行PCA预处理，去掉correlation</p>
-<ul>
-<li><p>mean on sample（注意不是mean on image）</p>
-<script type="math/tex; mode=display">
-  \overline x = \frac{1}{N}\sum_{i=1}^N x_i\\
-  x^{'} = x - \overline x</script></li>
-<li><p>协方差矩阵</p>
-<script type="math/tex; mode=display">
-  X \in R^{d*N}\\
-  S = \frac{1}{N}XX^T</script></li>
-<li><p>奇异值分解svd(S)</p>
-<script type="math/tex; mode=display">
-  S = U \Sigma V^T</script><ul>
-<li>$\Sigma$为对角矩阵，对角上的元素为奇异值</li>
-<li>$U=[u_1,u_2,…u_N]$中是奇异值对应的正交向量</li>
-</ul>
-</li>
-<li><p>投影变换</p>
-<script type="math/tex; mode=display">
-  X^{'} = U_p^T X</script><ul>
-<li>取投影矩阵$U_p$ from $U$，$U_p \in R^{N*d}$表示将数据空间从N维投影到$U_p$所在的d维空间上</li>
-</ul>
-</li>
-<li><p>recover（投影逆变换）</p>
-<script type="math/tex; mode=display">
-  X^{''} = U_p^T X^{'}</script></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>        * 取投影矩阵$U_r=U_p^T$，就是将 数据空间从d维空间再投影回N维空间上
-
-* PCA白化：
-
-    * 对PCA投影后的新坐标，做归一化处理：基于特征值进行缩放
-        $$
-        X_{PCAwhite} = \Sigma^{-\frac{1}{2}}X^{&#39;} =  \Sigma^{-\frac{1}{2}}U^TX
-        $$
-
-    * $X_{PCAwhite}$的协方差矩阵$S_{PCAwhite} = I$，因此是去了correlation的
-
-* ZCA白化：在上一步做完之后，再把它变换到原始空间，所以ZCA白化后的特征图更接近原始数据
-
-    * 对PCA白化后的数据，再做一步recover
-        $$
-        X_{ZCAwhite} = U X_{PCAwhite}
-        $$
-
-    * 协方差矩阵仍旧是I，合法白化
-</code></pre><h2 id="Layer-Normalization"><a href="#Layer-Normalization" class="headerlink" title="Layer Normalization"></a>Layer Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>BN reduces training time</p>
-<ul>
-<li>compute by each neuron</li>
-<li>require moving average</li>
-<li>depend on mini-batch size</li>
-<li>how to apply to recurrent neural nets</li>
-</ul>
-</li>
-<li><p>propose layer norm</p>
-<ul>
-<li>[unlike BN] compute by each layer</li>
-<li>[like BN] with adaptive bias &amp; gain</li>
-<li>[unlike BN] perform the same computation at training &amp; test time</li>
-<li>[unlike BN] straightforward to apply to recurrent nets</li>
-<li>work well for RNNs</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>BN<ul>
-<li>reduce training time &amp; serves as regularizer</li>
-<li>require moving average：introduce dependencies between training cases </li>
-<li>the approxmation of mean &amp; variance expectations constraints on the size of a mini-batch</li>
-</ul>
-</li>
-<li>intuition<ul>
-<li>norm layer提升训练速度的核心是限制神经元输入输出的变化幅度，稳定梯度</li>
-<li>只要控制数据分布，就能保持训练速度</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>compute over all hidden units in the same layer</li>
-<li>different training cases have different normalization terms</li>
-<li>没啥好说的，就是在channel维度计算norm</li>
-<li>further的GN把channel维度分组做norm，IN在直接每个特征计算norm</li>
-<li>gain &amp; bias<ul>
-<li>也是在对应维度：(hwd)c-dim</li>
-<li><a href="https://tobiaslee.top/2019/11/21/understanding-layernorm/" target="_blank" rel="noopener">https://tobiaslee.top/2019/11/21/understanding-layernorm/</a></li>
-<li>后续有实验发现，去掉两个learnable rescale params反而提点</li>
-<li>考虑是在training set上的过拟合</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>RNN上有用</li>
-<li>CNN上比没有norm layer好，但是没有BN好：因为channel是特征维度，特征维度之间有明显的有用/没用，不能简单的norm</li>
-</ul>
-</li>
-</ol>
-<h2 id="Weight-Normalization-A-Simple-Reparameterization-to-Accelerate-Training-of-Deep-Neural-Networks"><a href="#Weight-Normalization-A-Simple-Reparameterization-to-Accelerate-Training-of-Deep-Neural-Networks" class="headerlink" title="Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks"></a>Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks</h2><ol>
-<li>动机<ul>
-<li>reparameterizing the weights<ul>
-<li>decouple length &amp; direction</li>
-<li>no dependency between samples which suits well for<ul>
-<li>recurrent</li>
-<li>reinforcement</li>
-<li>generative</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>no additional memory and computation</li>
-<li>testified on<ul>
-<li>MLP with CIFAR</li>
-<li>generative model VAE &amp; DRAW</li>
-<li>reinforcement DQN</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>a neuron：<ul>
-<li>get inputs from former layers(neurons)</li>
-<li>weighted sum over the inputs</li>
-<li>add a bias</li>
-<li>elementwise nonlinear transformation</li>
-<li>batch outputs：one value per sample</li>
-</ul>
-</li>
-<li>intuition of normalization：<ul>
-<li>give gradients that are more like whitened natural gradients</li>
-<li>BN：make the outputs of each neuron服从std norm</li>
-<li>our WN：<ul>
-<li>inspired by BN</li>
-<li>does not share BN’s across-sample property</li>
-<li>no addition memory and tiny addition computation</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Instance-Normalization-The-Missing-Ingredient-for-Fast-Stylization"><a href="#Instance-Normalization-The-Missing-Ingredient-for-Fast-Stylization" class="headerlink" title="Instance Normalization: The Missing Ingredient for Fast Stylization"></a>Instance Normalization: The Missing Ingredient for Fast Stylization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>stylization：针对风格迁移网络</li>
-<li>with a small change：swapping BN with IN</li>
-<li>achieve qualitative improvement</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>stylized image <ul>
-<li>a content image + a style image</li>
-<li>both style and content statistics are obtained from a pretrained CNN for image classification</li>
-<li>methods<ul>
-<li>optimization-based：iterative thus computationally inefficient</li>
-<li>generator-based：single pass but never as good as </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>our work<ul>
-<li>revisit the feed-forward  method</li>
-<li>replace BN in the generator with IN</li>
-<li>keep them at test time as opposed to freeze</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>given a fixed stype image $x_0$</li>
-<li>given a set of content images $x_t, t= 1,2,…,n$</li>
-<li>given a pre-trained CNN</li>
-<li>with a variable z controlling the generation of stylization results</li>
-<li>compute the stylied image g($x_t$, z)</li>
-<li>compare the statistics：$min_g \frac{1}{n} \sum^n_{t=1} L(x_0, x_t, g(x_t, z))$</li>
-<li>comparing target：the contrast of the stylized image is similar to the constrast of the style image</li>
-</ul>
-</li>
-<li><p>observations</p>
-<ul>
-<li>the more training examples, the poorer the qualitive results</li>
-<li>the result of stylization still depent on the constrast of the content image</li>
-</ul>
-</li>
-<li><p>intuition </p>
-<ul>
-<li>风格迁移本质上就是将style image的contrast用在content image的：也就是rescale content image的contrast</li>
-<li><p>constrast是per sample的：$\frac{pixel}{\sum pixels\ on\ the\ map}$</p>
-</li>
-<li><p>BN在norm的时候将batch samples搅合在了一起</p>
-</li>
-</ul>
-</li>
-<li><p>IN</p>
-<ul>
-<li>instance-specfic normalization</li>
-<li><p>also known as contrast normalization</p>
-</li>
-<li><p>就是per image做标准化，没有trainable/frozen params，在test phase也一样用</p>
-<p>  <img src="/2021/03/02/layer-norm/IN.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Group-Normalization"><a href="#Group-Normalization" class="headerlink" title="Group Normalization"></a>Group Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>for small batch size</li>
-<li>do normalization in channel groups</li>
-<li>batch-independent</li>
-<li>behaves stably over different batch sizes</li>
-<li><p>approach BN’s accuracy </p>
-<p><img src="/2021/03/02/layer-norm/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/group-normalization/error.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>BN<ul>
-<li>requires sufficiently large batch size (e.g. 32)</li>
-<li>Mask R-CNN frameworks use a batch size of 1 or 2 images because of higher resolution, where BN is “frozen” by transforming to a linear layer </li>
-<li>synchronized BN 、BR</li>
-</ul>
-</li>
-<li>LN &amp; IN<ul>
-<li>effective for training sequential models or generative models </li>
-<li>but have limited success in visual recognition </li>
-<li>GN能转换成LN／IN</li>
-</ul>
-</li>
-<li>WN<ul>
-<li>normalize the filter weights, instead of operating on features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>group</p>
-<ul>
-<li>it is not necessary to think of deep neural network features as unstructured vectors <ul>
-<li>第一层卷积核通常存在一组对称的filter，这样就能捕获到相似特征</li>
-<li>这些特征对应的channel can be normalized together</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>normalization</p>
-<ul>
-<li><p>transform the feature x：$\hat x_i = \frac{1}{\sigma}(x_i-\mu_i)$</p>
-</li>
-<li><p>the mean and the standard deviation：</p>
-<script type="math/tex; mode=display">
-  \mu_i=\frac{1}{m}\sum_{k\in S_i}x_k\\
-  \sigma_i=\sqrt {\frac{1}{m}\sum_{k\in S_i}(x_k-\mu_i)^2+\epsilon}</script></li>
-<li><p>the set $S_i$</p>
-<ul>
-<li>BN：<ul>
-<li>$S_i=\{k|k_C = i_C\}$</li>
-<li>pixels sharing the same channel index are normalized together </li>
-<li>for each channel, BN computes μ and σ along the (N, H, W) axes </li>
-</ul>
-</li>
-<li>LN<ul>
-<li>$S_i=\{k|k_N = i_N\}$</li>
-<li>pixels sharing the same batch index (per sample) are normalized together </li>
-<li>LN computes μ and σ along the (C,H,W) axes for each sample </li>
-</ul>
-</li>
-<li>IN<ul>
-<li>$S_i=\{k|k_N = i_N, k_C=i_C\}$</li>
-<li>pixels sharing the same batch index and the same channel index are normalized together </li>
-<li>LN computes μ and σ along the (H,W) axes for each sample </li>
-</ul>
-</li>
-<li>GN<ul>
-<li>$S_i=\{k|k_N = i_N, [\frac{k_C}{C/G}]=[\frac{i_C}{C/G}]\}$</li>
-<li>computes μ and σ along the (H, W ) axes and along a group of C/G channels </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>linear transform  </p>
-<ul>
-<li>to keep representational ability </li>
-<li><strong>per channel</strong></li>
-<li>scale and shift：$y_i = \gamma \hat x_i + \beta$</li>
-</ul>
-<p><img src="/2021/03/02/layer-norm/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/group-normalization/gn.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>relation</p>
-<ul>
-<li>to LN<ul>
-<li>LN assumes <em>all</em> channels in a layer make “similar contributions” </li>
-<li>which is less valid with the presence of convolutions </li>
-<li>GN improved representational power over LN</li>
-</ul>
-</li>
-<li>to IN<ul>
-<li>IN can only rely on the spatial dimension for computing the mean and variance </li>
-<li>it misses the opportunity of exploiting the channel dependence</li>
-<li>【QUESTION】BN也没考虑通道间的联系啊，但是计算mean和variance时跨了sample</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>implementation</p>
-<ul>
-<li>reshape</li>
-<li>learnable $\gamma \&amp; \beta$</li>
-<li>computable mean &amp; var</li>
-</ul>
-<p><img src="/2021/03/02/layer-norm/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/group-normalization/code.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>GN相比于BN，training error更低，但是val error略高于BN<ul>
-<li>GN is effective for easing optimization</li>
-<li>loses some regularization ability </li>
-<li>it is possible that GN combined with a suitable regularizer will improve results </li>
-</ul>
-</li>
-<li>选取不同的group数，所有的group&gt;1均好于group=1（LN）</li>
-<li>选取不同的channel数（C／G），所有的channel&gt;1均好于channel=1（IN）</li>
-<li>Object Detection  <ul>
-<li>frozen：因为higher resolution，batch size通常设置为2/GPU，这时的BN frozen成一个线性层$y=\gamma(x-\mu)/\sigma+beta$，其中的$\mu$和$sigma$是load了pre-trained model中保存的值，并且frozen掉，不再更新</li>
-<li>denote as BN*</li>
-<li>replace BN* with GN during fine-tuning </li>
-<li>use a weight decay of 0 for the γ and β parameters </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="WS-Weight-Standardization"><a href="#WS-Weight-Standardization" class="headerlink" title="WS: Weight Standardization"></a>WS: Weight Standardization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>accelerate training</li>
-<li>micro-batch：<ul>
-<li>以BN with large-batch为基准</li>
-<li>目前BN with micro-batch及其他normalization methods都不能match这个baseline</li>
-</ul>
-</li>
-<li>operates on weights instead of activations</li>
-<li>效果<ul>
-<li>match or outperform BN</li>
-<li>smooth the loss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>two facts</p>
-<ul>
-<li>BN的performance gain与reduction of internal covariate shift没什么关系</li>
-<li>BN使得optimization landscape significantly smoother</li>
-<li>因此our target is to find another technique<ul>
-<li>achieves smooth landscape</li>
-<li>work with micro-batch</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>normalization methods </p>
-<ul>
-<li>focus on activations<ul>
-<li>不展开</li>
-</ul>
-</li>
-<li><p>focus on weights</p>
-<ul>
-<li>WN：just length-direction decoupling</li>
-</ul>
-<p><img src="/2021/03/02/layer-norm/methods2.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Lipschitz constants </p>
-<ul>
-<li>BN reduces the Lipschitz constants of the loss function</li>
-<li>makes the gradient more Lipschitz</li>
-<li>BN considers the Lipschitz constants with respect to activations，not the weights that the optimizer is directly optimizing</li>
-</ul>
-</li>
-<li><p>our inspiration</p>
-<ul>
-<li>standardize the weights也同样能够smooth the landscape</li>
-<li>更直接</li>
-<li>smoothing effects on activations and weights是可以累积的，因为是线性运算</li>
-</ul>
-</li>
-<li><p>Weight Standardization </p>
-<ul>
-<li>reparameterize the original weights $W$<ul>
-<li>对卷积层的权重参数做变换，no bias</li>
-<li>$W \in R^{O * I}$</li>
-<li>$O=C_{out}$</li>
-<li>$I=C_{in}*kernel_size$</li>
-</ul>
-</li>
-<li>optimize the loss on $\hat W$</li>
-<li>compute mean &amp; var on I-dim</li>
-<li><p>只做标准化，无需affine，因为默认后续还要接一个normalization layer对神经元进行refine</p>
-<p><img src="/2021/03/02/layer-norm/WS.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>WS normalizes gradients </p>
-<ul>
-<li><p>拆解：</p>
-<ul>
-<li>eq5：$W$ to $\dot W$，减均值，zero-centered</li>
-<li>eq6：$\dot W$ to $\hat W$，除方差，one-varianced</li>
-<li>eq8：$\delta \hat W$由前一步的梯度normalize得到</li>
-<li>eq9：$\delta \dot W$也由前一步的梯度normalize</li>
-<li><p>最终用于梯度更新的梯度是zero-centered</p>
-<p><img src="/2021/03/02/layer-norm/gradients.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>WS smooths landscape </p>
-<ul>
-<li>判定是否smooth就看Lipschitz constant的大小</li>
-<li>eq5和eq6都能reduce the Lipschitz constant</li>
-<li>其中eq5 makes the major improvements </li>
-<li>eq6 slightly improves，因为计算量不大，所以保留</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>ImageNet</p>
-<ul>
-<li>BN的batchsize是64，其余都是1，其余的梯度更新iterations改成64——使得参数更新次数同步</li>
-<li>所有的normalization methods加上WS都有提升</li>
-<li>裸的normalization methods里面batchsize1的GN最好，所以选用GN+WS做进一步实验</li>
-<li><p>GN+WS+AF：加上conv weight的affine会harm</p>
-<p><img src="/2021/03/02/layer-norm/imageNet.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>code</p>
-</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># official release</span></span><br><span class="line"><span class="comment"># 放在WSConv2D子类的call里面</span></span><br><span class="line">kernel_mean = tf.math.reduce_mean(kernel, axis=[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], keepdims=<span class="keyword">True</span>, name=<span class="string">'kernel_mean'</span>)</span><br><span class="line">kernel = kernel - kernel_mean</span><br><span class="line">kernel_std = tf.keras.backend.std(kernel, axis=[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], keepdims=<span class="keyword">True</span>)</span><br><span class="line">kernel = kernel / (kernel_std + <span class="number">1e-5</span>)</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/22/NFNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/22/NFNet/" itemprop="url">NFNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-22T10:37:57+08:00">
-                2021-02-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/22/NFNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/22/NFNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="NFNet-High-Performance-Large-Scale-Image-Recognition-Without-Normalization"><a href="#NFNet-High-Performance-Large-Scale-Image-Recognition-Without-Normalization" class="headerlink" title="NFNet: High-Performance Large-Scale Image Recognition Without Normalization"></a>NFNet: High-Performance Large-Scale Image Recognition Without Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>NF：<ul>
-<li>normalization-free</li>
-<li>aims to match the test acc of batch-normalized networks<ul>
-<li>attain new SOTA 86.5%</li>
-<li>pre-training + fine-tuning上也表现更好89.2%</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>batch normalization<ul>
-<li>不是完美解决方案</li>
-<li>depends on batch size</li>
-</ul>
-</li>
-<li>non-normalized networks<ul>
-<li>accuracy</li>
-<li>instabilities：develop adaptive gradient clipping</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>vast majority models<ul>
-<li>variants of deep residual + BN</li>
-<li>allow deeper, stable and regularizing</li>
-</ul>
-</li>
-<li>disadvantages of batch normalization<ul>
-<li>computational expensive</li>
-<li>introduces discrepancy between training &amp; testing models &amp; increase params</li>
-<li>breaks the independence among samples</li>
-</ul>
-</li>
-<li>methods seeks to replace BN<ul>
-<li>alternative normalizers </li>
-<li>study the origin benefits of BN</li>
-<li>train deep ResNets without normalization layers  </li>
-</ul>
-</li>
-<li>key theme when removing normalization<ul>
-<li>suppress the scale of the residual branch</li>
-<li>simplest way：apply a learnable scalar</li>
-<li>recent work：suppress the branch at initialization &amp; apply Scaled Weight Standardization，能追上ResNet家族，但是没追上Eff家族</li>
-</ul>
-</li>
-<li>our NFNets’ main contributions <ul>
-<li>propose AGC：解决unstable问题，allow larger batch size and stronger augmentatons</li>
-<li>NFNets家族刷新SOTA：又快又准</li>
-<li>pretraining + finetuning的成绩也比batch normed models好</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Understanding Batch Normalization </p>
-<ul>
-<li>four main benefits<ul>
-<li>downscale the residual branch：从initialization就保证残差分支的scale比较小，使得网络has well-behaved gradients early in training，从而efficient optimization </li>
-<li>eliminates mean-shift：ReLU是不对称的，stacking layers以后数据分布会累积偏移</li>
-<li>regularizing effect：mini-batch作为subset对于全集是有偏的，这种noise可以看作是regularizer</li>
-<li>allows efficient large-batch training：数据分布稳定所以loss变化稳定，同时大batch更接近真实分布，因此我们可以使用更大的learning rate，但是这个property仅在使用大batch size的时候有效</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>NF-ResNets </p>
-<ul>
-<li>recovering the benefits of BN：对residual branch进行scale和mean-shift</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p>residual block：$h_{i+1} = h_i + \alpha f_i (h_i/\beta_i)$</p>
-</li>
-<li><p>$\beta_i = Var(h_i)$：对输入进行标准化（方差为1），这是个expected value，不是算出来的，结构定死就定死了</p>
-</li>
-<li><p>Scaled Weight Standardization &amp; scaled activation</p>
-<ul>
-<li>比原版的WS多了一个$\sqrt N$的分母<ul>
-<li>源码实现中比原版WS还多了learnable affine gain</li>
-</ul>
-</li>
-<li>使得conv-relu以后输出还是标准分布</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/weight.png" width="45%;"></p>
-</li>
-<li><p>$\alpha=0.2$：rescale</p>
-</li>
-<li><p>residual branch上，最终的输出为$\alpha*$标准分布，方差是$\alpha^2$</p>
-</li>
-<li><p>id path上，输出还是$h_{i}$，方差是$Var(h_i)$</p>
-<ul>
-<li><p>update这个block输出的方差为$Var(h_{i+1}) = Var(h_i)+\alpha^2$，来更新下一个block的 $\beta$</p>
-</li>
-<li><p>variance reset</p>
-<ul>
-<li>每个transition block以后，把variance重新设定为$1+\alpha^2$<ul>
-<li>在接下来的non-transition block中，用上面的update公式更新expected std</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>再加上additional regularization（Dropout和Stochastic Depth两种正则手段），就满足了BN benefits的前三条</p>
-<ul>
-<li>在batch size较小的时候能够catch up甚至超越batch normalized models<ul>
-<li>但是large batch size的时候perform worse</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>对于一个标准的conv-bn-relu，从workflow上看</p>
-<ul>
-<li>origin：input——一个free的conv weighting——BN（norm &amp; rescale）——activation<ul>
-<li>NFNet：input——standard norm——normed weighting &amp; activation——rescale</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>Adaptive Gradient Clipping for Efficient Large-Batch Training</p>
-<ul>
-<li><p>梯度裁剪：</p>
-<ul>
-<li>clip by norm：用一个clipping threshold $\lambda$ 进行rescale，training stability was extremely sensitive to 超参的选择，settings（model depth, the batch size, or the learning rate）一变超参就要重新调</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>clip by value：用一个clipping value进行上下限截断</p>
-</li>
-<li><p>AGC</p>
-<ul>
-<li><p>given 某层的权重$W \in R^{N<em>M}$ 和 对应梯度$G \in R^{N</em>M}$</p>
-</li>
-<li><p>ratio $\frac{||G||_F}{||W||_F}$ 可以看作是梯度变化大小的measurement</p>
-</li>
-<li><p>所以我们直观地想到将这个ratio进行限幅：所谓的adaptive就是在梯度裁剪的时候不是对所有梯度一刀切，而是考虑其对应权重大小，从而进行更合理的调节</p>
-<ul>
-<li><p>但是实验中发现unit-wise的gradient norm要比layer-wise的好：每个unit就是每行，对于conv weights就是(hxwxCin)中的一个</p>
-<p><img src="/2021/02/22/NFNet/clipping.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>scalar hyperparameter $\lambda$</p>
-<pre><code>  * the optimal value may depend on the choice of optimizer, learning rate and batch size
-  * empirically we found $\lambda$ should be smaller for larger batches
-</code></pre><ul>
-<li><p>ablations for AGC</p>
-<p><img src="/2021/02/22/NFNet/agc.png" width="50%;"></p>
-<ul>
-<li>用pre-activation NF-ResNet-50 和 NF-ResNet-200 做实验，batch size选择从256到4096，学习率从0.1开始基于batch size线性增长，超参$\lambda$的取值见右图<ul>
-<li>左图结论1：在batch size较小的情况下，NF-Nets能够追上甚至超越normed models的精度，但是batch size一大（2048）情况就恶化了，但是有AGC的NF-Nets则能够maintaining performance comparable or better than～～～</li>
-<li>左图结论2：the benefits of using AGC are smaller when the batch size is small</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>右图结论1：超参$\lambda$的取值比较小的时候，我们对梯度的clipping更strong，这对于使用大batch size训练的稳定性来说非常重要</li>
-</ul>
-</li>
-<li><p>whether or not AGC is beneficial for all layers</p>
-<pre><code>      * it is always better to not clip the final linear layer 
-  * 最开始的卷积不做梯度裁剪也能稳定训练
-</code></pre><ul>
-<li>最终we apply AGC to every layer except for the final linear layer</li>
-</ul>
-</li>
-<li><p>Normalizer-Free Architectures</p>
-</li>
-<li><p>begin with SE-ResNeXt-D model</p>
-</li>
-<li><p>about group width</p>
-<pre><code>      * set group width to 128
-</code></pre><ul>
-<li>the reduction in compute density means that 只减少了理论上的FLOPs，没有实际加速</li>
-</ul>
-</li>
-<li><p>about stages</p>
-<pre><code>      * R系列模型加深的时候是非线性增长，疯狂叠加stage3的block数，因为这一层resolution不大，channel也不是最多，兼顾了两侧计算量
-</code></pre><ul>
-<li>我们给F0设置为[1,2,6,3]，然后在deeper variants中对每个stage的block数用一个scalar N线形增长</li>
-</ul>
-</li>
-<li><p>about width</p>
-<pre><code>      * 仍旧对stage3下手，[256,512,1536,1536]
-      * roughly preserves the training speed
-</code></pre><ul>
-<li>一个论点：stage3 is the best place to add capacity，因为deeper enough同时have access to deeper levels同时又比最后一层有slightly higher resolution</li>
-</ul>
-</li>
-<li><p>about block</p>
-<pre><code>  * 实验发现最有用的操作是adding an additional 3 × 3 grouped conv after the first
-  * overview
-</code></pre><p>  <img src="/2021/02/22/NFNet/NFblock.png" width="50%;"></p>
-</li>
-<li><p>about scaling variants</p>
-<pre><code>      * eff系列采用的是R、W、D一起增长，因为eff的block比较轻量
-</code></pre><ul>
-<li><p>但是对R系列来说，只增长D和R就够了</p>
-</li>
-<li><p>补充细节</p>
-<pre><code>  * 在inference阶段使用比训练阶段slightly higher resolution
-</code></pre><ul>
-<li>随着模型加大increase the regularization strength：<ul>
-<li>scale the drop rate of Dropout</li>
-<li>调整stochastic depth rate和weight decay则not effective</li>
-</ul>
-</li>
-<li><p>se-block的scale乘个2</p>
-</li>
-<li><p>SGD params:</p>
-<ul>
-<li>Nesterov=True, momentum=0.9, clipnorm=0.01</li>
-<li>lr：<ul>
-<li>先warmup再余弦退火：increase from 0 to 1.6 over 5 epochs, then decay to zero with cosine annealing</li>
-<li>余弦退火cosine annealing<ul>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/NFNets.png" width="45%;"></p>
-</li>
-<li><p>summary</p>
-<ul>
-<li>总结来说，就是拿来一个SE-ResNeXt-D</li>
-<li>先做结构上的调整，modified width and depth patterns以及a second spatial convolution，还有drop rate，resolution</li>
-<li>再做对梯度的调整：除了最后一个线形分类层以外，全用AGC，$\lambda=0.01$</li>
-</ul>
-</li>
-<li><p>最后是训练上的trick：strong regularization and data augmentation</p>
-<p>  <img src="/2021/02/22/NFNet/ablation.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>detailed view of NFBlocks</p>
-<ul>
-<li>transition block：有下采样的block<ul>
-<li>残差branch上，bottleneck的narrow ratio是0.5</li>
-<li>每个stage的3x3 conv的group width永远是128，而group数目是在随着block width变的</li>
-<li>skip path接在 $\beta$ downscaling 之后</li>
-<li>skip path上是avg pooling + 1x1 conv</li>
-</ul>
-</li>
-<li><p>non-transition block：无下采样的block</p>
-<ul>
-<li>bottleneck-ratio仍旧是0.5</li>
-<li>3x3conv的group width仍旧是128</li>
-<li>skip path接在$\beta$ downscaling 之前</li>
-<li>skip path就是id</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/NFblocks.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>实验</p>
-<ul>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/09/repVGG/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/09/repVGG/" itemprop="url">repVGG</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-09T15:56:23+08:00">
-                2021-02-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/09/repVGG/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/09/repVGG/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RepVGG-Making-VGG-style-ConvNets-Great-Again"><a href="#RepVGG-Making-VGG-style-ConvNets-Great-Again" class="headerlink" title="RepVGG: Making VGG-style ConvNets Great Again"></a>RepVGG: Making VGG-style ConvNets Great Again</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>plain ConvNets <ul>
-<li>simply efficient but poor performance</li>
-</ul>
-</li>
-<li>propose a CNN architecture RepVGG<ul>
-<li>能够decouple为training-time和inference-time两个结构</li>
-<li>通过structure re-paramterization technique</li>
-<li>inference-time architecture has a VGG-like plain body</li>
-</ul>
-</li>
-<li>faster<ul>
-<li>83% faster than ResNet-50 or 101% faster than ResNet-101</li>
-</ul>
-</li>
-<li>accuracy-speed trade-off<ul>
-<li>reaches over 80% top-1 accuracy</li>
-<li>outperforms ResNets by a large margin</li>
-</ul>
-</li>
-<li>verify on classification &amp; semantic segmentation tasks</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>well-designed CNN architectures </p>
-<ul>
-<li>Inception，ResNet，DenseNet，NAS models</li>
-<li>deliver higher accuracy</li>
-<li>drawbacks <ul>
-<li>multi-branch designs：slow down inference and reduce memory utilization，对高并行化的设备不友好</li>
-<li>some components：depthwise &amp; channel shuffle，increase memory access cost </li>
-</ul>
-</li>
-<li>MAC(memory access cost) constitutes a large time usage in groupwise convolution：我的groupconv实现里cardinality维度上计算不并行</li>
-<li>FLOPs并不能precisely reflect actual speed，一些结构看似比old fashioned VGG/resnet的FLOPs少，但实际并没有快</li>
-</ul>
-</li>
-<li><p>multi-branch</p>
-<ul>
-<li>通常multi-branch model要比plain model表现好</li>
-<li>因为makes the model an implicit ensemble of numerous shallower models</li>
-<li>so that avoids gradient vanishing</li>
-<li>benefits are all for training</li>
-<li>drawbacks are undesired for inference</li>
-</ul>
-</li>
-<li><p>the proposed RepVGG</p>
-<ul>
-<li>advantages<ul>
-<li>plain architecture：no branches</li>
-<li>3x3 conv &amp; ReLU组成</li>
-<li>没有过重的人工设计痕迹</li>
-</ul>
-</li>
-<li>training time use identity &amp; 1x1 conv branches</li>
-<li><p>at inference time</p>
-<ul>
-<li>identity 可以看做degraded 1x1 conv</li>
-<li>1x1 conv 可以看做degraded 3x3 conv</li>
-<li>最终整个conv-bn branches能够整合成一个3x3 conv</li>
-<li>inference-time model只包含conv和ReLU：没有max pooling！！</li>
-<li>fewer memory units：分支会占内存，直到分支计算结束，plain结构的memory则是immediately released</li>
-</ul>
-<p><img src="/2021/02/09/repVGG/memory.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> <img src="/2021/02/09/repVGG/repvgg.png" width="45%;"></p>
-<ul>
-<li><p>training-time</p>
-<ul>
-<li>ResNet-like block<ul>
-<li>id + 1x1 conv + 3x3 conv multi-branches</li>
-<li>use BN in each branch</li>
-<li>with n blocks, the model can be interpreted as an ensemble of $3^n$ models</li>
-<li>stride2的block应该没有id path吧？？</li>
-</ul>
-</li>
-<li>simply stack serveral blocks to construct the training model</li>
-</ul>
-</li>
-<li><p>inference-time</p>
-<ul>
-<li><p>re-param</p>
-<ul>
-<li>inference-time BN也是一个线性计算</li>
-<li>两个1x1 conv都可以转换成中通的3x3 kernel，有权/无权</li>
-<li><p>要求各branch has the same strides &amp; padding pixel要对齐</p>
-<p><img src="/2021/02/09/repVGG/reparam.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>architectural specification </p>
-<ul>
-<li>variety：depth and width</li>
-<li>does not use maxpooling：只有一种operator：3x3 conv+relu</li>
-<li>head：GAP + fc / task specific</li>
-<li>5 stages<ul>
-<li>第一个stage处理high resolution，stride2</li>
-<li>第五个stage shall have more channels，所以只用一层，save parameters</li>
-<li>给倒数第二个stage最多层，考虑params和computation的balance</li>
-</ul>
-</li>
-<li>RepVGG-A：[1,2,4,14,1]，用来compete against轻量和中量级model</li>
-<li><p>RepVGG-B：deeper in s2,3,4，[1,4,6,16,1]，用来compete against high-performance ones</p>
-<p><img src="/2021/02/09/repVGG/architecture.png" width="45%;"></p>
-</li>
-<li><p>basic width：[64, 128, 256, 512]  </p>
-<ul>
-<li>width multiplier a &amp; b</li>
-<li>a控制前4个stage宽度，b控制最后一个stage</li>
-<li>[64a, 128a, 256a, 512b]  </li>
-<li><p>第一个stage的宽度只接受变小不接受变大，因为大resolution影响计算量，min(64,64a)</p>
-<p><img src="/2021/02/09/repVGG/variety.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>further reduce params &amp; computation</p>
-<ul>
-<li>groupwise 3x3 conv</li>
-<li>跳着层换：从第三开始，第三、第五、</li>
-<li>number of groups：1，2，4 globally </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>分支的作用</p>
-<p>  <img src="/2021/02/09/repVGG/branch.png" width="45%;"></p>
-</li>
-<li><p>结构上的微调</p>
-<ul>
-<li>id path去掉BN</li>
-<li>把所有的BN移动到add的后面</li>
-<li><p>每个path加上relu</p>
-<p><img src="/2021/02/09/repVGG/variants.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>ImageNet分类任务上对标其他模型</p>
-<ul>
-<li><p>simple augmentation </p>
-<p>  <img src="/2021/02/09/repVGG/simple.png" width="45%;"></p>
-</li>
-<li><p>strong：Autoaugment, label smoothing and mixup </p>
-<p>  <img src="/2021/02/09/repVGG/strong.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 </ol>
 
@@ -3998,7 +3349,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">122</span>
+                  <span class="site-state-item-count">125</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4011,7 +3362,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-count">63</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
