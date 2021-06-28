@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/old.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/vm.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/docker.png">
-<meta property="og:updated_time" content="2021-05-24T11:19:57.548Z">
+<meta property="og:updated_time" content="2021-05-28T09:32:40.884Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker">
 <meta name="twitter:description" content="shartup  部署方案  古早年代     虚拟机     docker       image镜像 &amp;amp; container容器 &amp;amp; registry仓库  镜像：相当于是一个 root 文件系统，提供容器运行时所需的程序、库、资源、配置等 容器：镜像运行时的实体，可以被创建、启动、停止、删除、暂停等 仓库：用来保存镜像 官方仓库：docker hub：https://hub">
@@ -438,16 +438,20 @@
 <li>docker container prune</li>
 </ul>
 </li>
+<li>提交镜像到远端仓库<ul>
+<li>docker tag [镜像id] [用户名]/[仓库]:[标签]    # 重命名</li>
+<li>docker login    # 登陆用户</li>
+<li>docker push </li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>案例</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 拉镜像</span></span><br><span class="line">docker pull 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示镜像</span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行指定镜像</span></span><br><span class="line">docker run -itd --name='test' 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看运行的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 进入容器</span></span><br><span class="line">docker exec -it 容器id或name /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 一顿操作完退出容器</span></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 将修改后的容器保存为镜像</span></span><br><span class="line">docker commit 容器id或name 新镜像名字</span><br><span class="line">docker images可以看到这个镜像了</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 保存镜像到本地</span></span><br><span class="line">docker save -o tf_torch.rar  tf_torch</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 还原镜像</span></span><br><span class="line">docker load --input tf_torch.tar</span><br></pre></td></tr></table></figure>
-<ol>
-<li>dockerfile</li>
-</ol>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 拉镜像</span></span><br><span class="line">docker pull 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示镜像</span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行指定镜像</span></span><br><span class="line">docker run -itd --name='test' 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看运行的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 进入容器</span></span><br><span class="line">docker exec -it 容器id或name /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 一顿操作完退出容器</span></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 将修改后的容器保存为镜像</span></span><br><span class="line">docker commit 容器id或name 新镜像名字</span><br><span class="line">docker images可以看到这个镜像了</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 保存镜像到本地</span></span><br><span class="line">docker save -o tf_torch.rar  tf_torch</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 还原镜像</span></span><br><span class="line">docker load --input tf_torch.tar</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名镜像</span></span><br><span class="line">docker tag 3db0b2f40a70 amberzzzz/tf1.14_torch1.4_cuda10.0:v1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 提交镜像</span></span><br><span class="line">docker push amberzzzz/tf1.14-torch0.5-cuda10.0:v1</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-
+<pre><code>4. dockerfile
+</code></pre>
       
     </div>
     
@@ -564,7 +568,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">125</span>
+                  <span class="site-state-item-count">127</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -577,7 +581,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

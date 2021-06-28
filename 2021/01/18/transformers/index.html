@@ -115,7 +115,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETR%20pipeline.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETRseg.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/UNETR.png">
-<meta property="og:updated_time" content="2021-05-21T08:33:26.134Z">
+<meta property="og:updated_time" content="2021-06-02T07:56:18.943Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="transformers">
 <meta name="twitter:description" content="startupreference1：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA reference2：https://zhuanlan.zhihu.com/p/308301901  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维">
@@ -1401,12 +1401,12 @@
 <li>第一步是patch partition：<ul>
 <li>将RGB图切成non-overlapping patches</li>
 <li>patches：token，basic element</li>
-<li>feature dimention：with patch size 4x4，dim=4x4x3=48</li>
+<li>feature input dim：with patch size 4x4，dim=4x4x3=48</li>
 </ul>
 </li>
 <li>然后是linear embedding layer<ul>
 <li>将raw feature re-projection到指定维度</li>
-<li>指定维度C</li>
+<li>指定维度C：default=96</li>
 </ul>
 </li>
 <li>接下来是Swin Transformer blocks<ul>
@@ -1906,7 +1906,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">125</span>
+                  <span class="site-state-item-count">127</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1919,7 +1919,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

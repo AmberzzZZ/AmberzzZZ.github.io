@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="目标检测，anchor-free," />
+  <meta name="keywords" content="目标检测，anchor-free, one-stage&two-stage," />
 
 
 
@@ -79,22 +79,23 @@
 
 
 
-<meta name="description" content="centerNet: Objects as Points 动机  anchor-based  exhaustive list of potential locations wasteful, inefficient, requires additional post-processing   our detector  center：use keypoint estimation to find">
-<meta name="keywords" content="目标检测，anchor-free">
+<meta name="description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
+<meta name="keywords" content="目标检测，anchor-free, one-stage&amp;two-stage">
 <meta property="og:type" content="article">
 <meta property="og:title" content="centerNet">
 <meta property="og:url" content="https://amberzzzz.github.io/2020/12/29/centerNet/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="centerNet: Objects as Points 动机  anchor-based  exhaustive list of potential locations wasteful, inefficient, requires additional post-processing   our detector  center：use keypoint estimation to find">
+<meta property="og:description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/tasks.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/backs.jpg">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/centerNet2.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/center.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/central.png">
-<meta property="og:updated_time" content="2020-12-30T02:13:22.081Z">
+<meta property="og:updated_time" content="2021-06-16T02:43:07.028Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="centerNet">
-<meta name="twitter:description" content="centerNet: Objects as Points 动机  anchor-based  exhaustive list of potential locations wasteful, inefficient, requires additional post-processing   our detector  center：use keypoint estimation to find">
+<meta name="twitter:description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/tasks.png">
 
 
@@ -359,7 +360,16 @@
       
 
       
-        <h2 id="centerNet-Objects-as-Points"><a href="#centerNet-Objects-as-Points" class="headerlink" title="centerNet: Objects as Points"></a>centerNet: Objects as Points</h2><ol>
+        <p>[papers]</p>
+<ul>
+<li><p>[centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归</p>
+</li>
+<li><p>[cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerNet，但是我觉得叫corner-centerNet更合适，它是基于cornerNet衍生的，在cornerNet的基础上再加一刀判定，基于角点pair的中心点是否是前景来决定是否保留这个框</p>
+</li>
+<li><p>[centerNet2] Probabilistic two-stage detection，utexas，</p>
+</li>
+</ul>
+<h2 id="centerNet-Objects-as-Points"><a href="#centerNet-Objects-as-Points" class="headerlink" title="centerNet: Objects as Points"></a>centerNet: Objects as Points</h2><ol>
 <li><p>动机</p>
 <ul>
 <li><p>anchor-based</p>
@@ -504,7 +514,122 @@
 </ul>
 </li>
 </ol>
-<h2 id="cornet-centerNet-Keypoint-Triplets-for-Object-Detection"><a href="#cornet-centerNet-Keypoint-Triplets-for-Object-Detection" class="headerlink" title="cornet-centerNet: Keypoint Triplets for Object Detection"></a>cornet-centerNet: Keypoint Triplets for Object Detection</h2><ol>
+<h2 id="centerNet2-Probabilistic-two-stage-detection"><a href="#centerNet2-Probabilistic-two-stage-detection" class="headerlink" title="centerNet2: Probabilistic two-stage detection"></a>centerNet2: Probabilistic two-stage detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>two-stage</li>
+<li>probabilistic interpretation</li>
+<li>the suggested pipeline<ul>
+<li>stage1：infer proper object-backgroud likelihood，专注前背景分离</li>
+<li>stage2：inform the overall score</li>
+</ul>
+</li>
+<li>verified on COCO<ul>
+<li>faster and more accurate than both one and two stage detectors</li>
+<li>outperform yolov4</li>
+<li>56.4 MAP</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>one-stage detectors<ul>
+<li>dense predict</li>
+<li>jointly predict class &amp; location</li>
+<li>anchor-based：RetinaNet用focal loss来deal with 前背景imbalance</li>
+<li>anchor-free：FCOS &amp; CenterNet不基于anchor基于grid，缓解imbalance</li>
+<li>deformable conv：AlignDet在output前面加一层deformable conv to get richer features</li>
+<li>sound probablilistic interpretation</li>
+<li>heavier separate classification and regression branches than two-stage models：如果类别特别多的情况，头会非常重，严重影响性能</li>
+<li>misaligned issue：一阶段预测是基于local feature，感受野、anchor settings都会影响与目标的对齐程度</li>
+</ul>
+</li>
+<li>two-stage detectors<ul>
+<li>first RPN generates coarse object proposals</li>
+<li>then per-region head to classify and refine</li>
+<li>ROI heads：Faster-RCNN用了两个fc层作为ROI heads</li>
+<li>cascaded：CascadeRCNN用了三个连续的Faster-RCNN，with a different positive threshold</li>
+<li>semantic branch：HTC用了额外的分割分支enhance the inter-stage feature flow</li>
+<li>decouple：TSD将cls&amp;pos两个ROI heads解耦</li>
+<li>weak RPN：因为尽可能提升召回率，proposal score也不准，丧失了一个clear的probabilistic interpretation</li>
+<li>independent probabilistic interpretation：两个阶段各训各的，最后的cls score仅用第二阶段的</li>
+<li>slow：proposals太多了所以slow down</li>
+</ul>
+</li>
+<li>other detectors<ul>
+<li>point-based：cornetNet预测&amp;组合两个角点，centerNet预测中心点并基于它回归长宽</li>
+<li>transformer：DETR直接预测a set of bounding boxes，而不是传统的结构化的dense output</li>
+</ul>
+</li>
+<li><p>网络结构</p>
+<ul>
+<li>one/two-stage detectors：image classification network + lightweight upsampling layers + heads</li>
+<li>point-based：FCN，有symmetric downsampling and upsampling layer，预测一个小stride的heatmap</li>
+<li>DETR：feature extraction + transformer decoder</li>
+</ul>
+</li>
+<li><p>our method</p>
+<p>  <img src="/2020/12/29/centerNet/centerNet2.png" width="40%;"></p>
+<ul>
+<li>第一个阶段<ul>
+<li>做二分类的one-stage detector，提前景，</li>
+<li>实现上就用region-level feature+classifier（FCN-based）</li>
+</ul>
+</li>
+<li>第二阶段<ul>
+<li>做position-based类别预测</li>
+<li>实现上既可以用一个Faster-RCNN，也可以用classifier</li>
+</ul>
+</li>
+<li>最终的loss由两个阶段合并得到，而不是分阶段训练</li>
+<li>跟former two-stage framework的主要不同是<ul>
+<li>加了joint probabilistic objective over both stages</li>
+<li>以前的二阶段RPN的用途主要是最大化recall，does not produce accurate likelihoods</li>
+</ul>
+</li>
+<li>faster and more accurate<ul>
+<li>首先是第一个阶段的proposal更少更准</li>
+<li>其次是第二个阶段makes full use of years of progress in two-stage detection，二阶段的设计站在伟人的肩膀上</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>joint class distribution<ul>
+<li>【第一阶段的前背景score】 乘上 【第二阶段的class score】</li>
+<li>$P(C_k) = \sum_o P(C_k|O_k=o)P(O_k=o)$</li>
+<li>maximum likelihood estimation<ul>
+<li>for annotated objects<ul>
+<li>退阶成independent maximum-likelihood</li>
+<li>$log P(C_k) = log P(C_k|O_k=1) + log P(O_k=1)$</li>
+</ul>
+</li>
+<li>for background class<ul>
+<li>不分解</li>
+<li>$log P(bg) = log( P(bg|O_k=1) * P(O_k=1) + P(O_k=0))$</li>
+<li>lower bounds，基于jensen不等式得到两个不等式</li>
+<li>$log P(bg) \ge P(O_k=1) * log( P(bg|O_k=1))$：如果一阶段前景率贼大，那么就</li>
+<li>$log P(bg) \ge P(O_k=0)$：</li>
+<li>optimize both bounds jointly works better</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>network design<ul>
+<li>experiment with 4 different designs</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="corner-centerNet-Keypoint-Triplets-for-Object-Detection"><a href="#corner-centerNet-Keypoint-Triplets-for-Object-Detection" class="headerlink" title="corner-centerNet: Keypoint Triplets for Object Detection"></a>corner-centerNet: Keypoint Triplets for Object Detection</h2><ol>
 <li><p>动机</p>
 <ul>
 <li><p>based on cornerNet</p>
@@ -583,7 +708,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/目标检测，anchor-free/" rel="tag"># 目标检测，anchor-free</a>
+            <a href="/tags/目标检测，anchor-free-one-stage-two-stage/" rel="tag"># 目标检测，anchor-free, one-stage&two-stage</a>
           
         </div>
       
@@ -692,7 +817,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">125</span>
+                  <span class="site-state-item-count">127</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -705,7 +830,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -748,7 +873,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#centerNet-Objects-as-Points"><span class="nav-number">1.</span> <span class="nav-text">centerNet: Objects as Points</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cornet-centerNet-Keypoint-Triplets-for-Object-Detection"><span class="nav-number">2.</span> <span class="nav-text">cornet-centerNet: Keypoint Triplets for Object Detection</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#centerNet-Objects-as-Points"><span class="nav-number">1.</span> <span class="nav-text">centerNet: Objects as Points</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#centerNet2-Probabilistic-two-stage-detection"><span class="nav-number">2.</span> <span class="nav-text">centerNet2: Probabilistic two-stage detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#corner-centerNet-Keypoint-Triplets-for-Object-Detection"><span class="nav-number">3.</span> <span class="nav-text">corner-centerNet: Keypoint Triplets for Object Detection</span></a></li></ol></div>
             
 
           </div>

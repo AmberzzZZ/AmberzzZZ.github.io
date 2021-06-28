@@ -276,6 +276,496 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/16/RFB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/16/RFB/" itemprop="url">RFB</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-16T20:07:00+08:00">
+                2020-12-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/16/RFB/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/16/RFB/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection"><a href="#RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection" class="headerlink" title="RFB: Receptive Field Block Net for Accurate and Fast Object Detection"></a>RFB: Receptive Field Block Net for Accurate and Fast Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>RF block：Receptive Fields </li>
+<li>strengthen the lightweight features using a hand-crafted mechanism：轻量，特征表达能力强</li>
+<li>assemble RFB to the top of SSD </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>lightweight </p>
+<ul>
+<li>enhance feature representation </li>
+</ul>
+</li>
+<li><p>人类</p>
+<ul>
+<li>群智感受野（pRF）的大小是其视网膜图中偏心率的函数</li>
+<li>感受野随着偏心率而增加</li>
+<li>更靠近中心的区域在识别物体时拥有更高的比重或作用</li>
+<li><p>大脑在对于小的空间变化不敏感</p>
+<p><img src="/2020/12/16/RFB/human.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>fixed sampling grid (conv)</p>
+<ul>
+<li>probably induces some loss in the feature discriminability as well as robustness </li>
+</ul>
+</li>
+<li><p>inception</p>
+<ul>
+<li>RFs of multiple sizes </li>
+<li>but at the same center</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li>with different atrous rates </li>
+<li>the resulting feature tends to be less distinctive </li>
+</ul>
+</li>
+<li><p>Deformable CNN </p>
+<ul>
+<li>sampling grid is flexible</li>
+<li><p>but all pixels in an RF contribute equally </p>
+<p><img src="/2020/12/16/RFB/RF.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>RFB</p>
+<ul>
+<li>varying kernel sizes</li>
+<li>applies dilated convolution layers to control their eccentricities </li>
+<li>组合来模拟human visual system </li>
+<li>concat</li>
+<li><p>1x1 conv for fusion</p>
+<p><img src="/2020/12/16/RFB/rfb.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>main contributions </p>
+<ul>
+<li>RFB module: enhance deep features of lightweight CNN networks</li>
+<li>RFB Net: gain on SSD</li>
+<li>assemble on MobileNet </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Receptive Field Block </p>
+<ul>
+<li>类似inception的multi-branch</li>
+<li><p>dilated pooling or convolution layer</p>
+<p><img src="/2020/12/16/RFB/RFBlock.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>RFB Net </p>
+<ul>
+<li><p>SSD-base</p>
+<p>  <img src="/2020/12/16/RFB/ssd.png" width="80%;"></p>
+</li>
+<li><p>头上有较大分辨率的特征图的conv层are replaced by the RFB module</p>
+</li>
+<li><p>特别头上的conv层就保留了，因为their feature maps are too small to apply filters with large kernels like 5 × 5</p>
+<p><img src="/2020/12/16/RFB/rfbnet.png" width="70%;"></p>
+</li>
+<li><p>stride2 module：每个conv stride2，那id path得变成1x1 conv？</p>
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/02/PANet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/02/PANet/" itemprop="url">PANet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-02T13:15:59+08:00">
+                2020-12-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/02/PANet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/02/PANet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="PANet-Path-Aggregation-Network-for-Instance-Segmentation"><a href="#PANet-Path-Aggregation-Network-for-Instance-Segmentation" class="headerlink" title="PANet: Path Aggregation Network for Instance Segmentation"></a>PANet: Path Aggregation Network for Instance Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>boost the information flow</li>
+<li>bottom-up path<ul>
+<li>shorten information path </li>
+<li>enhance  accurate localization </li>
+</ul>
+</li>
+<li>adaptive feature pooling <ul>
+<li>aggregate all levels</li>
+<li>avoiding arbitrarily assigned results </li>
+</ul>
+</li>
+<li>mask prediction head<ul>
+<li>fcn + fc</li>
+<li>captures different views, possess complementary properties </li>
+</ul>
+</li>
+<li>subtle extra computational</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>previous skills: fcn, fpn, residual, dense</li>
+<li>findings<ul>
+<li>高层特征类别准，底层特征定位准，但是高层和底层特征之间的path太长了，不利于双高</li>
+<li>past proposals make predictions based on one level</li>
+</ul>
+</li>
+<li>PANet <ul>
+<li>bottom-up path<ul>
+<li>shorten information path </li>
+<li>enhance  accurate localization </li>
+</ul>
+</li>
+<li>adaptive feature pooling <ul>
+<li>aggregate all levels</li>
+<li>avoiding arbitrarily assigned results </li>
+</ul>
+</li>
+<li>mask prediction head<ul>
+<li>fcn + fc</li>
+<li>captures different views, possess complementary properties </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>framework</p>
+<p> <img src="/2020/12/02/PANet/PAN.png" width="80%;"></p>
+<ul>
+<li>b: bottom-up path</li>
+<li>c: adaptive feature pooling </li>
+<li>e: fusion mask branch</li>
+</ul>
+</li>
+<li><p>bottom-up path</p>
+<ul>
+<li>fpn’s top-down path:<ul>
+<li>to propagate strong semantical information</li>
+<li>to ensure reasonable classification capability </li>
+<li>long path: red line, 100+ layers</li>
+</ul>
+</li>
+<li>bottom-up path:  <ul>
+<li>enhances the localization capability  </li>
+<li>short path: green line, less than 10 layers</li>
+</ul>
+</li>
+<li><p>for each level $N_l$</p>
+<ul>
+<li>input: $N_{l+1}$ &amp; $P_l$</li>
+<li>$N_{l+1}$ 3x3 conv &amp; $P_l$ id path - add - 3x3 conv</li>
+<li>channel 256</li>
+<li>ReLU after conv</li>
+</ul>
+<p><img src="/2020/12/02/PANet/bottom-up.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>adaptive feature pooling </p>
+<ul>
+<li><p>pool features from all levels, then fuse, then predict</p>
+</li>
+<li><p>steps</p>
+<ul>
+<li>map each proposal to all feature levels</li>
+<li>roi align</li>
+<li>go through one layer of the following sub-networks independently</li>
+<li>fusion operation (element-wise max or sum) </li>
+<li><p>例如，box branch是两个fc层，来自各个level的roi align之后的proposal features，先各自经过一个fc层，再share the following till the head，mask branch是4个conv层，来自各个level的roi align之后的proposal features，先各自经过一个conv层，再share the following till the head</p>
+<p><img src="/2020/12/02/PANet/fusion.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>fusion mask branch</p>
+<ul>
+<li>fc layers are location sensitive </li>
+<li>helpful to differentiate instances and recognize separate parts belonging to the same object </li>
+<li>conv分支<ul>
+<li>4个连续conv+1个deconv：3x3 conv，channel256，deconv factor=2</li>
+<li>predict mask of each class：output channel n_classes </li>
+</ul>
+</li>
+<li>fc分支<ul>
+<li>from conv分支的conv3输出</li>
+<li>2个连续conv，channel256，channel128</li>
+<li>fc，dim=28x28，特征图尺寸，用于前背景分类</li>
+</ul>
+</li>
+<li><p>final mask：add</p>
+<p><img src="/2020/12/02/PANet/mask.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>heavier head<ul>
+<li>4 consecutive 3x3 convs</li>
+<li>shared among reg &amp; cls</li>
+<li>在multi-task的情况下，对box的预测有效</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/11/17/CSPNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3023,491 +3513,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/bilinear-CNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/bilinear-CNN/" itemprop="url">bilinear CNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T10:01:49+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/bilinear-CNN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/bilinear-CNN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>17年的paper，引用量15，提出了网路结构，但是没分析为啥有效，垃圾</p>
-<h2 id="Bilinear-CNNs-for-Fine-grained-Visual-Recognition"><a href="#Bilinear-CNNs-for-Fine-grained-Visual-Recognition" class="headerlink" title="Bilinear CNNs for Fine-grained Visual Recognition"></a>Bilinear CNNs for Fine-grained Visual Recognition</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>fine-grained classification </li>
-<li>propose a pooled outer product of features derived from two CNNs <ul>
-<li>2 CNNs</li>
-<li>a bilinear layer</li>
-<li>a pooling layer</li>
-</ul>
-</li>
-<li>outperform existing models and fairly efficient </li>
-<li>effective at other image classification tasks such as material, texture, and scene recognition </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>fine-grained classification tasks require<ul>
-<li>recognition of highly localized attributes of objects </li>
-<li>while being invariant to their pose and location in the image </li>
-</ul>
-</li>
-<li>previous techniques <ul>
-<li>part-based models<ul>
-<li>construct representations by localizing parts </li>
-<li>more accurate but requires part annotations </li>
-</ul>
-</li>
-<li>holistic models<ul>
-<li>construct a representation of the entire image </li>
-<li>texture descriptors：FV，SIFT </li>
-</ul>
-</li>
-<li>STN：augment CNNs with parameterized image transformations </li>
-<li>attention：use segmentation as a weakly-supervised manner  </li>
-</ul>
-</li>
-<li>Our key insight is that several widely-used texture representations can be written as a pooled outer product of two suitably designed features <ul>
-<li>several widely-used texture representations</li>
-<li>two suitably designed features </li>
-</ul>
-</li>
-<li>the bilinear features are highly redundant <ul>
-<li>dimensionality reduction </li>
-<li>trade-off between accuracy </li>
-</ul>
-</li>
-<li><p>We also found that feature normalization and domain-specific fine-tuning offers additional benefits</p>
-</li>
-<li><p>combination</p>
-<ul>
-<li>concatenate：additional parameters to fuse</li>
-<li>an outer product：no parameters </li>
-<li>sum product：can achieve similar approximations  </li>
-</ul>
-</li>
-<li>“two-stream” architectures <ul>
-<li>one used to model two- factor variations such as “style” and “content” for images </li>
-<li>in our case is to model two factor variations in location and appearance of parts：但并不是explicit modeling因为最终是个分类头</li>
-<li>one used to analyze videos modeling the temporal aspect and the spatial aspect </li>
-</ul>
-</li>
-<li>dimension reduction <ul>
-<li>two 512-dim feature results in 512x512-dim</li>
-<li>earlier work projects one feature to a lower-dimensional space, e.g. 64-dim—&gt;512x64-dim</li>
-<li>we use compact bilinear pooling to generate low-dimensional embeddings (8-32x)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architecture</p>
-<p>  <img src="/2020/09/18/bilinear-CNN/BCNN.png" width="50%;"></p>
-<ul>
-<li>input $(l,I)$：takes an image and a location，location generally contains position and scale </li>
-<li>quadruple $B=(f_A, f_B, P, C)$</li>
-<li>A、B两个CNN：conv+pooling layers，</li>
-<li>P：pooling function<ul>
-<li>combined A&amp;B outputs using the matrix outer product</li>
-<li>average pooling</li>
-</ul>
-</li>
-<li>C：logistic regression or linear SVM <ul>
-<li>we found that linear models are effective on top of bilinear features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>CNN</p>
-<ul>
-<li><p>independent／partial shared／fully shared</p>
-<p><img src="/2020/09/18/bilinear-CNN/CNN.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>bilinear combination </p>
-<ul>
-<li><p>for each location</p>
-</li>
-<li><p>$bilinear(l,I,f_A,f_B)=f_A(l,I)^T f_B(l,I)$</p>
-</li>
-<li><p>pooling function combines bilinear features across all locations</p>
-</li>
-<li><p>$\Phi (I) = \sum_{l\in L} bilinear(l,I,f_A,f_B)$</p>
-</li>
-<li><p>same feature dimension K for A &amp; B，e.g. KxM &amp; KxN respectively，$\Phi(I)$ is size MxN</p>
-</li>
-<li><p>Normalization</p>
-<ul>
-<li>a signed square root：$y=sign(x)\sqrt {|x|}$</li>
-<li><p>follow a l2 norm：$z = \frac{y}{||y||_2}$</p>
-</li>
-<li><p>improves performance in practice  </p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>classification </p>
-<ul>
-<li>logistic regression or linear SVM  </li>
-<li>we found that linear models are effective on top of bilinear features</li>
-</ul>
-</li>
-<li><p>back propagation</p>
-<ul>
-<li><p>$\frac{dl}{dA}=B(\frac{dl}{dx})^T$，$\frac{dl}{dB}=A(\frac{dl}{dx})^T$</p>
-</li>
-<li><p><img src="/2020/09/18/bilinear-CNN/flow.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Relation to classical texture representations：放在这一节撑篇幅？？</p>
-<ul>
-<li>texture representations can be defined by the choice of the local features, the encoding function, the pooling function, and the normalization function <ul>
-<li>choice of local features：orderless aggregation with sum／max operation</li>
-<li>encoding function：A non-linear encoding is typically applied to the local feature before aggregation</li>
-<li>normalization：normalization of the aggregated feature is done to increase invariance </li>
-</ul>
-</li>
-<li>end-to-end trainable</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/14/label-smoothing/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/14/label-smoothing/" itemprop="url">label smoothing</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-14T11:42:35+08:00">
-                2020-09-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/14/label-smoothing/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/14/label-smoothing/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>动机</p>
-<ul>
-<li>to understand label smoothing<ul>
-<li>improving generalization </li>
-<li>improves model calibration </li>
-<li>changes the representations learned by the penultimate layer of the network</li>
-<li>effect on knowledge distillation of a student network</li>
-</ul>
-</li>
-<li>soft targets：a hard target and the uniform distribution of other classes</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>label smoothing implicitly calibrates the learned models  <ul>
-<li>能让confidences更有解释性——more aligned with the accuracies of their predictions</li>
-<li>label smoothing impairs distillation——teacher用了label smoothing，student会表现变差，this adverse effect results from loss of information in the digits</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>modeling</p>
-<ul>
-<li>penultimate layer：fc with activation<ul>
-<li>$p_k = \frac{e^{wx}}{\sum e^{wx}}$</li>
-</ul>
-</li>
-<li>outputs：loss<ul>
-<li>$H(y,p)=\sum_{k=1}^K -y_klog(p_k)$</li>
-</ul>
-</li>
-<li>hard targets：$y_k$ is 1 for the correct class and 0 for the rest</li>
-<li>label smoothing：$y_k^{LS} = y_k(1-\alpha)+ \alpha /K$</li>
-</ul>
-</li>
-<li><p>visualization schem </p>
-<ul>
-<li>将dimK activation vector投影到正交平面上，a dim2 vector per example</li>
-<li><p>clusters are much tighter because label smoothing encourages that each example in training set to be equidistant from all the other class’s templates</p>
-</li>
-<li><p>3 classes shows triangle structure since ‘equidistant’</p>
-</li>
-<li>predictions‘ absolute values are much bigger without LM, representing over-confident</li>
-<li>semantically similar classes are harder to separate，但是总体上cluster形态还是好一点</li>
-<li>training without label smoothing there is continuous degree of change between two semantically similar classes，用了LM以后就观察不到了——相似class之间的语义相关性被破坏了，’erasure of information’</li>
-<li>have similar accuracies despite qualitatively different clustering，对分类精度的提升不明显，但是从cluster形态上看更好看</li>
-</ul>
-</li>
-<li><p>model calibration </p>
-<ul>
-<li><p>making the confidence of its predictions more accurately represent their accuracy </p>
-</li>
-<li><p>metric：expected calibration error (ECE) </p>
-</li>
-<li><p>reliability diagram </p>
-<p>  <img src="/2020/09/14/label-smoothing/calibration.png" width="70%"></p>
-</li>
-<li><p>better calibration compared to the unscaled network </p>
-</li>
-<li><p>Despite trying to collapse the training examples to tiny clusters, these networks generalize and are calibrated：在训练集上的cluster分布非常紧凑，encourage每个样本都和其他类别的cluster保持相同的距离，但是在测试集上，样本的分布就比较松散了，不会限定在小小的一坨内，说明网络没有over-confident，representing the full range of confidences for each prediction </p>
-</li>
-</ul>
-</li>
-<li><p>knowledge distillation </p>
-<ul>
-<li><p>even when label smoothing improves the accuracy of the teacher network, teachers trained with label smoothing produce inferior student networks </p>
-</li>
-<li><p>As the representations collapse to small clusters of points, much of the information that could have helped distinguish examples is lost </p>
-<p>  <img src="/2020/09/14/label-smoothing/knowledge.png" width="40%"></p>
-</li>
-<li><p>看training set的scatter，LM会倾向于将一类sample集中成为相似的表征，sample之间的差异性信息丢了：Therefore a teacher with better accuracy is not necessarily the one that distills better</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3562,7 +3567,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">125</span>
+                  <span class="site-state-item-count">127</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3575,7 +3580,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
