@@ -98,7 +98,12 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/biLSTM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/FCE.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/matchingnetloss.png">
-<meta property="og:updated_time" content="2021-06-28T10:07:03.138Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/re-implement.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/cmp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/tendency.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/domain%20shift.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/22/few-shot/adaptation.png">
+<meta property="og:updated_time" content="2021-07-01T08:11:33.256Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="few-shot">
 <meta name="twitter:description" content="综述 few-shot  few-shot learning：通过少量样本学习识别模型 问题：过拟合&amp;amp;泛化性，数据增强和正则能在一定程度上缓解但不解决，还是推荐从大数据上迁移学习 共识： 样本量有限的情况下，不依靠外部数据很难得到不错的结果，当下所有的解决方案都是借助外部数据作为先验知识，构造学习任务 迁移数据也不是随便找的，数据集的domain difference越大，迁移效果越差（e">
@@ -418,7 +423,7 @@
 <li><p>papers</p>
 <ul>
 <li>[2015 siamese]：Siamese Neural Networks for One-shot Image Recognition，核心思想就是基于孪生网络构建similarity任务，用一个大数据集构造的same/diff pairs去训练，然后直接用在novel set上，metric是reweighted L1</li>
-<li>[2016 MatchingNet]：Matching Networks for One Shot Learning，本质上也是孪生网络+metric learning，监督的是support set S和test set B的相似度——在S下训练的模型在B的预测结果误差最小，网络上的创新是用了memory&amp;attention，train procedure的创新在于“test and train conditions must match”，</li>
+<li>[2016 MatchingNet]：Matching Networks for One Shot Learning，本质上也是孪生网络+metric learning，监督的是support set S和test set B的相似度——在S下训练的模型在B的预测结果误差最小，网络上的创新是用了memory&amp;attention，train procedure的创新在于“test and train conditions must match N-way-K-shot”，</li>
 <li>[2017 ProtoNet]：Prototypical Networks for Few-shot Learning，</li>
 <li>[2019 few-shot综述]：A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</li>
 </ul>
@@ -613,6 +618,8 @@
 </li>
 <li><p>Full Context Embeddings（FCE）</p>
 <ul>
+<li><p>简单的模式下f和g就是两个shared weights的CNN feature extractor，FCE是接在常规feature vector后面精心设计的一个结构</p>
+</li>
 <li><p>设计思路</p>
 <ul>
 <li>g：support set don’t get embedded individually</li>
@@ -664,6 +671,266 @@
 <li>task define：从全集中选取few unique classes(e.g. 5)，每个类别选取few examples(e.g. 1-5)，构成support set S，再从对应类别抽一个batch B，训练目标就是minimise the error predicting the labels in the batch B conditioned on the support set S</li>
 <li><p>batch B的预测过程就是figure1：需要$g(S(x_i,y_i))$和$f(\hat x)$计算$P(\hat y|\hat x, S)$，然后和$gt(\hat y)$计算log loss</p>
 <p><img src="/2021/06/22/few-shot/matchingnetloss.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>模式</p>
+<ul>
+<li>N-way-K-shot train</li>
+<li>one-shot test：用唯一的one-shot novel sample生成对应类别的feature vector，然后对每个test sample计算cosine distance，选择最近的作为其类别</li>
+</ul>
+</li>
+<li><p>comparing methods</p>
+<ul>
+<li>baseline classifier + NN</li>
+<li>MANN</li>
+<li>Convolutional Siamese Net + NN</li>
+<li>further finetuning：one-shot</li>
+</ul>
+</li>
+<li>结论<ul>
+<li>using more examples for k-shot classification helps all models</li>
+<li>5-way is easier than 20-way</li>
+<li>siamese net在5-shot的时候跟our method差不多，但是one-shot degrades rapidly </li>
+<li>FCE在简单数据集（Omniglot）上没啥用，在harder task（<em>mini</em>ImageNet）显著提升</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION"><a href="#A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION" class="headerlink" title="A CLOSER LOOK AT FEW-SHOT CLASSIFICATION"></a>A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>为主流方法提供一个consistent comparative analysis，并且发现：<ul>
+<li>deeper backbones significantly reduce differences</li>
+<li>reducing intra-class variation is an important factor when shallow backbone</li>
+</ul>
+</li>
+<li>propose a modified baseline method<ul>
+<li>achieves com- petitive performance</li>
+<li>verified on miniImageNet &amp; CUB</li>
+</ul>
+</li>
+<li>in realistic cross-domain settings<ul>
+<li>generalization analysis</li>
+<li>baseline method with standard fine-tuning win</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>three main categories of methods</p>
+<ul>
+<li>initialization based<ul>
+<li>aims to learn good model initialization</li>
+<li>to achieve rapid adaption with a limited number of training samples</li>
+<li>have difficulty in handling domain shifts</li>
+</ul>
+</li>
+<li>metric learning based<ul>
+<li>训练目标是learn to compare</li>
+<li>if a model can determine the similarity of two images, it can classify an unseen input image with the labeled instances：本质是similarity计算器，脱离label level</li>
+<li>花式训练策略：meta learning/graph</li>
+<li>花式距离metric：cosine/Euclidean</li>
+<li>turns out大可不必：<ul>
+<li>a simple baseline method with a distance- based classifier is competitive to the sophisticated algorithms</li>
+<li>simply reducing intra-class variation in a baseline method leads to competitive performance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>hallucination based<ul>
+<li>用base class训练一个生成模型，然后用生成模型给novel class造假数据</li>
+<li>通常和metric-based模型结合起来用，不单独分析</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>two main challenges 没法统一横向比较</p>
+<ul>
+<li>implementation details有差异，baseline approach被under-estimated：无法准确量化the relative performance gain</li>
+<li>lack of domain shift between base &amp; novel datasets：makes the evaluation scenarios unrealistic</li>
+</ul>
+</li>
+<li>our work<ul>
+<li>针对代表性方法conduct consistent comparative experiments on common ground<ul>
+<li>discoveries on deeper backbones</li>
+</ul>
+</li>
+<li>轻微改动baseline method获得显著提升<ul>
+<li>replace the linear classifier with distance-based classifier</li>
+</ul>
+</li>
+<li>practical sceneries with domain shift<ul>
+<li>发现这种现实场景下，那些代表性的few-shot methods反而干不过baseline method</li>
+</ul>
+</li>
+<li>open source code：<a href="https://github.com/wyharveychen/CloserLookFewShot" target="_blank" rel="noopener">https://github.com/wyharveychen/CloserLookFewShot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>baseline<ul>
+<li>standard transfer learning：pre-training + fine-tuning</li>
+<li>training stage<ul>
+<li>train a feature extractor $f_{\theta}$ and a classifier $C_{W_b}$</li>
+<li>use abundant base class labeled data</li>
+<li>standard CE loss</li>
+</ul>
+</li>
+<li>fine-tuning stage<ul>
+<li>fix feature extractor $f_{\theta}$</li>
+<li>train a new classifier $C_{W_n}$</li>
+<li>use the few labeled novel samples</li>
+<li>standard CE loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>baseline++<ul>
+<li>variant of the baseline：唯一的不同就在于classifier design</li>
+<li>显式地reduce intra-class varation among features during training，和center loss思路有点像，但是center loss的质心是滑动平均的，这里面的质心是learnable的</li>
+<li>training stage<ul>
+<li>write the weight matrix $W_b$ as $[w_1, w_2, …, w_c]$，类似每类的簇心</li>
+<li>for an input feature，compute cosine similarity</li>
+<li>multiply a class-wise learnable scalar to adjust origin [-1,1] value to fit softmax</li>
+<li>然后用softmax对similarity vector进行归一化，作为predict label</li>
+<li>the softmax function prevents the learned weight vectors collapsing to zeros：每类的预测distance都是0是网络比较容易陷入的局部最优解</li>
+</ul>
+</li>
+<li>【in fine-tuning stage？？】</li>
+</ul>
+</li>
+<li>meta-learning algorithms<ul>
+<li>three distance metric based methods：MatchingNet，ProtoNet，RelationNet</li>
+<li>one initialization based method：MAML</li>
+<li>meta-training stage<ul>
+<li>a collection of N-way-K-shot tasks</li>
+<li>使得模型$M(*|S)$学会的是一种学习模式——在有限数据下做预测</li>
+</ul>
+</li>
+<li>meta-testing stage<ul>
+<li>所有的novel data都作为对应类别的support set</li>
+<li>(class mean)</li>
+<li>模型就用这个新的support set来进行预测</li>
+</ul>
+</li>
+<li>Different meta-learning methods主要区别在于如何基于support set做预测，也就是classifier的设计<ul>
+<li>MatchingNet计算的是query和support set的每个cosine distance，然后mean per class</li>
+<li>ProtoNet是先对support features求class mean，然后Euclidean distance</li>
+<li>RelationNet先对support features求class mean，然后将距离计算模块替换成learnable relation module</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>three scenarios</p>
+<ul>
+<li>generic object recognition：mini-ImageNet，100类，600张per class，【64-base，16-val，20-novel】</li>
+<li>fine-grained image classification：CUB-200-2011，200类，总共11,788张，【random 100-base，50-val，50-novel】</li>
+<li>cross-domain adaptation：mini-ImageNet —&gt; CUB，【100-mini-ImageNet-base，50-CUB-val，50-CUB-test】</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>baseline和baseline++模型：train 400 epochs，batch size 16</li>
+<li>meta learning methods：<ul>
+<li>train 60000 episodes for 5-way-1-shot tasks，train 40000 episodes for 5-way-5-shot tasks</li>
+<li>use validation set to select the training episodes with the best acc</li>
+<li>k-shot for support set，16 instances for query set</li>
+</ul>
+</li>
+<li>Adam with 1e-3 initial lr</li>
+<li>standard data augmentation：crop，left-right flip，color jitter</li>
+</ul>
+</li>
+<li><p>testing stage</p>
+<ul>
+<li>average over 600 experiments</li>
+<li>each experiment randomly choose 5-way-k-shot support set + 16 instances query set</li>
+<li>meta learning methods直接基于support set给出对query set的预测结果</li>
+<li>baseline methods基于support set训练一个新的分类头，100 iterations，batch size 4</li>
+</ul>
+</li>
+<li><p>模型details</p>
+<ul>
+<li>baseline++的similarity乘上了class-wise learnable scalar </li>
+<li>MachingNet用了FCE classification layer without fine-tuning版本，也乘了class-wise learnable scalar </li>
+<li>RelationNet将L2 norm替换成softmax加速训练</li>
+<li>MAML使用了一阶梯度近似for efficiency</li>
+</ul>
+</li>
+<li><p>初步结果</p>
+<ul>
+<li><p>4-layer conv backbone</p>
+</li>
+<li><p>input size 84x84</p>
+</li>
+<li><p>origin和re-implementation的精度对比</p>
+<ul>
+<li>原始的baseline没加data augmentation，所以过拟合了精度差，被underestimated了</li>
+<li>MatchingNet加了那个scalar shift的改进以后精度有显著提升</li>
+<li><p>ProtoNet原论文是20-shot&amp;30-shot，本文主要比较1-shot和5-shot，精度都放出来了</p>
+<p><img src="/2021/06/22/few-shot/re-implement.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>our experiment setting下各模型的精度对比</p>
+<ul>
+<li>baseline++大幅提升精度，已经跟meta learning methods差不多了</li>
+<li>说明few-shot的key factor是reduce intra-class variation</li>
+<li><p>但是要注意的是这是在4-layer-conv的backbone setting下，deeper backbone can inherently reduce intra-class variation</p>
+<p><img src="/2021/06/22/few-shot/cmp.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>增加网络深度</p>
+<ul>
+<li>上面说了，deeper backbone能够隐式地降低类内距离</li>
+<li>deeper models<ul>
+<li>conv4</li>
+<li>conv6：相对于conv4那个模型，加了两层conv blocks without pooling</li>
+<li>resnet10：简化版resnet18，r18里面conv block的两层卷积换成一层</li>
+<li>resnet18：origin paper</li>
+<li>resnet34：origin paper</li>
+</ul>
+</li>
+<li><p>随着网络加深，各方法的精度差异缩小，baseline方法甚至反超了一些meta learning方法</p>
+<p><img src="/2021/06/22/few-shot/tendency.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>effect of domain shift</p>
+<ul>
+<li>一个现实场景：mini-ImageNet —&gt; CUB，收集general class data相对容易，收集fine-grained数据集则更困难</li>
+<li>用resnet18实验</li>
+<li>Baseline outperforms all meta-learning methods under this scenario</li>
+<li>因为meta learning methods的学习完全依赖于base support class，not able to adapt</li>
+<li>随着domain difference get larger，Baseline相对于其他方法的gap也逐渐拉大</li>
+<li><p>说明了在domain shift场景下，adaptation based method的必要性</p>
+<p><img src="/2021/06/22/few-shot/domain shift.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>further adapt meta-learning methods</p>
+<ul>
+<li>MatchingNet &amp; ProtoNet：跟baseline方法一样，fix feature extractor，然后用novel set train a new classifier</li>
+<li>MAML：not feasible to fix the feature，用novel set finetune整个网络</li>
+<li>RelationNet：features是conv maps而不是vector，randomly split一部分novel set作为训练集</li>
+<li><p>MatchingNet &amp; MAML都有大幅精度提升，尤其在domain shift场景下，但是ProtoNet会掉点，说明adaptation是影响精度的key factor，但是还没有完美解决方案</p>
+<p><img src="/2021/06/22/few-shot/adaptation.png" width="75%;"></p>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -848,7 +1115,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Siamese-Neural-Networks-for-One-shot-Image-Recognition"><span class="nav-number">2.</span> <span class="nav-text">Siamese Neural Networks for One-shot Image Recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MatchingNet-Matching-Networks-for-One-Shot-Learning"><span class="nav-number">3.</span> <span class="nav-text">MatchingNet: Matching Networks for One Shot Learning</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Siamese-Neural-Networks-for-One-shot-Image-Recognition"><span class="nav-number">2.</span> <span class="nav-text">Siamese Neural Networks for One-shot Image Recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MatchingNet-Matching-Networks-for-One-Shot-Learning"><span class="nav-number">3.</span> <span class="nav-text">MatchingNet: Matching Networks for One Shot Learning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION"><span class="nav-number">4.</span> <span class="nav-text">A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</span></a></li></ol></div>
             
 
           </div>

@@ -79,18 +79,28 @@
 
 
 
-<meta name="description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机 anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptive">
+<meta name="description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机  anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptiv">
 <meta name="keywords" content="目标检测，anchor-free&amp;anchor-based，tricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ATSS">
 <meta property="og:url" content="https://amberzzzz.github.io/2021/06/17/ATSS/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机 anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptive">
+<meta property="og:description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机  anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptiv">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2021-06-21T03:51:28.041Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/inconsistency.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/samples1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/samples.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/regress.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/ATSS.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/verification.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/kvalue.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/anchor%20setting.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/multi.png">
+<meta property="og:updated_time" content="2021-07-01T10:19:11.767Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ATSS">
-<meta name="twitter:description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机 anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptive">
+<meta name="twitter:description" content="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection 动机  anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap we propose ATSS adaptiv">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2021/06/17/ATSS/inconsistency.png">
 
 
 
@@ -355,7 +365,8 @@
 
       
         <h2 id="ATSS-Bridging-the-Gap-Between-Anchor-based-and-Anchor-free-Detection-via-Adaptive-Training-Sample-Selection"><a href="#ATSS-Bridging-the-Gap-Between-Anchor-based-and-Anchor-free-Detection-via-Adaptive-Training-Sample-Selection" class="headerlink" title="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection"></a>ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection</h2><ol>
-<li>动机<ul>
+<li><p>动机</p>
+<ul>
 <li>anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap</li>
 <li>we propose ATSS<ul>
 <li>adaptive training sample selection</li>
@@ -366,7 +377,8 @@
 <li>discuss tiling multiple anchors</li>
 </ul>
 </li>
-<li>论点<ul>
+<li><p>论点</p>
+<ul>
 <li>主流anchor-based方法<ul>
 <li>one-stage/two-stage</li>
 <li>tile a large number of preset anchors on the image</li>
@@ -385,7 +397,131 @@
 <li>主要区别1：anchor数量，RetinaNet是hxwx9，FCOS是hxwx1</li>
 <li>主要区别2：正样本定义，RetinaNet是与gt box的IOU大于一定阈值的anchor，FCOS是featuremap上所有落进框内的格子点</li>
 <li>主要区别3：回归方式，RetinaNet是回归gt相对pos anchor的相对偏移量，FCOS是预测四条边相对中心点的绝对距离</li>
-<li></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Difference Analysis of Anchor-based and Anchor-free Detection</p>
+<ul>
+<li><p>we focus on the last two differences：正负样本定义 &amp; 回归starting status</p>
+</li>
+<li><p>设定RetinaNet也是one square anchor per location，和FCOS保持一致</p>
+</li>
+<li><p>experiment setting</p>
+<ul>
+<li>MS COCO：80类前景，common split</li>
+<li>ImageNet pretrained ResNet-50</li>
+<li>resize input</li>
+<li>SGD，90K iterations，0.9 momentum，1e-4 weight decay，16 batch size，0.01 lr with 0.1 lr decay/60K</li>
+<li>testing：<ul>
+<li>0.05 score to filter out bg boxes</li>
+<li>output top 1000 detections per feature pyramid</li>
+<li>0.6 IoU thresh per class NMS to give final top 100 detections per image </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inconsistency removal</p>
+<ul>
+<li>五大improvements加在FCOS上进一步boost the gap</li>
+<li><p>我们将其逐步加在RetinaNet上，能够拉到37%，和FCOS还有0.8个点的差距</p>
+<p><img src="/2021/06/17/ATSS/inconsistency.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>分析essential difference</p>
+<ul>
+<li><p>训练一个检测模型，首先要分出正负样本，然后用正样本来回归</p>
+</li>
+<li><p>Classification</p>
+<ul>
+<li>RetinaNet用anchor boxes与gt box的IoU决定正负样本：best match anchor和大于一定IoU thresh的anchor是正样本，小于一定IoU thresh的anchor是负样本，其他的是ignore样本</li>
+<li><p>FCOS用spatial and scale constraints选择正负样本：gt box以内的所有像素作为候选正样本，然后去掉部分尺度不匹配的候选样本，正样本以外都是负样本，没有ignore</p>
+<p><img src="/2021/06/17/ATSS/samples1.png" width="45%;"></p>
+</li>
+<li><p>两个模型在两种样本选择策略上实验：Spatial and Scale Constraint相比较于IoU都会显著提点</p>
+</li>
+<li><p>当两种方法都使用Spatial and Scale Constraint策略选择正负样本，模型精度就没啥差别了</p>
+<p><img src="/2021/06/17/ATSS/samples.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Regression</p>
+<ul>
+<li>RetinaNet regresses from the anchor box with 4 offsets：回归gt box相对于anchor box的偏移量，regression starting status是个box</li>
+<li><p>FCOS regresses from the anchor point with 4 distances：回归gt box四条边相对于anchor center的距离，regression starting status是个point</p>
+<p><img src="/2021/06/17/ATSS/regress.png" width="45%;"></p>
+</li>
+<li><p>上面那个表说明了选择同样的正负样本，regression starting status就是个无关项，不影响精度</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Adaptive Training Sample Selection （ATSS）</p>
+<ul>
+<li><p>影响检测模型精度的essential difference在于how to define positive and negative training samples</p>
+</li>
+<li><p>previous strategies都有sensitive hyperparameters（anchors/scale），some outer objects may be neglected</p>
+</li>
+<li><p>we propose ATSS</p>
+<ul>
+<li>almost no hyper</li>
+<li><p>divides pos/neg samples according to data statistical characteristics </p>
+<p><img src="/2021/06/17/ATSS/ATSS.png" width="45%;"></p>
+</li>
+<li><p>对每个gt box，首先在每个level上，基于L2 center distance，找到k-closest anchor——k*L个candidates per gt box</p>
+</li>
+<li>计算每个candidates的mean &amp; var</li>
+<li>基于mean &amp; var 计算这个gt box的IoU thresh</li>
+<li>在candidates里面选取大于等于IoU thresh，同时anchor center在gt box内的，留作正样本</li>
+<li>如果一个acnhor box匹配了多个gt box，选择IoU大的那个作为标签</li>
+</ul>
+</li>
+<li><p>基于center distance选择anchor box：因为越靠近目标中心，越容易produce高品质框</p>
+</li>
+<li><p>用mean+var作为IoU thresh：</p>
+<ul>
+<li>higher mean indicates high-quality candidates，对应的IoU thresh应该高一点</li>
+<li>higher variation indicates level specific，mean+var作为thresh能将candidates里面IoU较高的筛选出来</li>
+</ul>
+</li>
+<li><p>limit the anchor center in object：anchor中心不在目标框内显然不是个好框，用于筛掉前两步里的漏网之鱼，双保险</p>
+</li>
+<li><p>fair between different objects</p>
+<ul>
+<li>统计下来每类目标都有差不多0.2kL个正样本，与尺度无关</li>
+<li>但是RetinaNet和FCOS都是大目标正样本多，小目标正样本少</li>
+</ul>
+</li>
+<li><p>hyperparam-free：只有一个k，【还有anchor-setting呢？？？】</p>
+</li>
+<li><p>verification</p>
+<ul>
+<li>lite version：被FCOS官方引用并称作center sampling，scale limit still exists in this version</li>
+<li>full version：本文版本</li>
+<li><p>两个方法选择candidates的方法完全一致，就是select final postives的方法不同</p>
+<p><img src="/2021/06/17/ATSS/verification.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>hyperparam的鲁棒性</p>
+<ul>
+<li><p>k在一定范围内（7-17）相对insensitive，太多了低质量框太多，太少了less statistical</p>
+<p>  <img src="/2021/06/17/ATSS/kvalue.png" width="45%;"></p>
+</li>
+<li><p>尝试不同的fix-ratio anchor scale和fix-scale anchor ratio，发现精度相对稳定，说明robust to anchor settings</p>
+<p>  <img src="/2021/06/17/ATSS/anchor setting.png" width="45%;"></p>
+</li>
+<li><p>multi-anchors settings</p>
+<ul>
+<li><p>RetinaNet在不同的anchor setting下，精度基本不变，说明主要正样本选的好，不管一个location绑定几个anchor结果都一样</p>
+<p><img src="/2021/06/17/ATSS/multi.png" width="45%;"></p>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
