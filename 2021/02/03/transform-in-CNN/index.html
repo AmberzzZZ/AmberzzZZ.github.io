@@ -87,26 +87,27 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="综述 几何变换 STN： 普通的CNN能够隐式的学习一定的平移、旋转不变性，让网络能够适应这种变换：降采样结构本身能够使得网络对变换不敏感 从数据角度出发，我们还会引入各种augmentation，强化网络对变化的不变能力 deepMind为网络设计了一个显式的变换模块来学习各种变化，将distorted的输入变换回去，让网络学习更简单的东西 参数量：就是变换矩阵的参数，通常是2x3的纺射变化矩阵">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/spacial%20transformer.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/spacial%20transformer.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pointwise%20transformation.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/transformation.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/interpolation.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/nearest.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/bilinear.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/error.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/deform.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/conv.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pooling.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pspooling.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/Illustration.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table1.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table2.png">
-<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table3.png">
-<meta property="og:updated_time" content="2021-03-17T06:28:59.548Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/transformation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/interpolation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/nearest.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/bilinear.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/error.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/deform.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/conv.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/pooling.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/pspooling.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Illustration.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/table1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/table2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/table3.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/mimic.png">
+<meta property="og:updated_time" content="2021-07-05T10:05:33.593Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="transform in CNN">
 <meta name="twitter:description" content="综述 几何变换 STN： 普通的CNN能够隐式的学习一定的平移、旋转不变性，让网络能够适应这种变换：降采样结构本身能够使得网络对变换不敏感 从数据角度出发，我们还会引入各种augmentation，强化网络对变化的不变能力 deepMind为网络设计了一个显式的变换模块来学习各种变化，将distorted的输入变换回去，让网络学习更简单的东西 参数量：就是变换矩阵的参数，通常是2x3的纺射变化矩阵">
-<meta name="twitter:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/spacial%20transformer.png">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/spacial%20transformer.png">
 
 
 
@@ -403,6 +404,14 @@
 <li>同时使用空间attention和通道attention机制：CBAM</li>
 </ul>
 </li>
+<li><p>papers</p>
+<ul>
+<li>[STN] STN: Spatial Transformer Networks，STN的变换是pre-defined的，是针对全局featuremap的变换</li>
+<li>[DCN 2017] Deformable Convolutional Networks ，DCN的变换是更随机的，是针对局部kernel分别进行的变化，基于卷积核添加location-specific shift</li>
+<li>[DCNv2 2018] Deformable ConvNets v2: More Deformable, Better Results，进一步消除irrelevant context，基于卷积核添加weighted-location-specific shift，提升performance</li>
+<li>[attention系列paper] [SENet &amp;SKNet &amp; CBAM &amp; GC-Net][<a href="https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/">https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/</a>]</li>
+</ul>
+</li>
 </ol>
 <h2 id="STN-Spatial-Transformer-Networks"><a href="#STN-Spatial-Transformer-Networks" class="headerlink" title="STN: Spatial Transformer Networks"></a>STN: Spatial Transformer Networks</h2><ol>
 <li><p>动机</p>
@@ -457,7 +466,7 @@
 <li>localisation network：predict transform parameters</li>
 <li>grid generator：基于predicted params生成sampling grid</li>
 <li><p>sampler：element-multiply</p>
-<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/spacial transformer.png" width="80%;"></p>
+<p><img src="/2021/02/03/transform-in-CNN/spacial transformer.png" width="80%;"></p>
 </li>
 </ul>
 </li>
@@ -479,7 +488,7 @@
 </li>
 <li><p>ouput map上任意一点一定来自变换前的某一点，反之不一定，input map上某一点可能是bg，被crop掉了，所以pointwise transformation写成反过来的：</p>
 <p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pointwise transformation.png" width="50%;"></p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/transformation.png" width="70%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/transformation.png" width="70%;"></p>
 </li>
 <li><p>target points构成的点集就是sampling points on the input feature map</p>
 </li>
@@ -492,13 +501,13 @@
 <li><p>对点集中每一点apply kernel</p>
 </li>
 <li><p>通用的插值表达式：</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/interpolation.png" width="70%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/interpolation.png" width="70%;"></p>
 </li>
 <li><p>最近邻kernel是个pulse函数</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/nearest.png" width="70%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/nearest.png" width="70%;"></p>
 </li>
 <li><p>bilinear kernel是个distance&gt;1的全mute掉，分段可导</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/bilinear.png" width="70%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/bilinear.png" width="70%;"></p>
 </li>
 </ul>
 </li>
@@ -517,7 +526,7 @@
 </ul>
 </li>
 <li><p>实验</p>
-<p> <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/error.png" width="70%;"></p>
+<p> <img src="/2021/02/03/transform-in-CNN/error.png" width="70%;"></p>
 <ul>
 <li>R、RTS、P、E：distortion ahead</li>
 <li>aff、proj、TPS：transformer predefined<ul>
@@ -561,7 +570,7 @@
 <ul>
 <li>learning offset for each bin partition of the previous RoI pooling </li>
 </ul>
-<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/deform.png" width="40%;"></p>
+<p><img src="/2021/02/03/transform-in-CNN/deform.png" width="40%;"></p>
 </li>
 </ul>
 </li>
@@ -594,7 +603,7 @@
 </ul>
 </li>
 <li>实现<ul>
-<li><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/conv.png" width="40%;"></li>
+<li><img src="/2021/02/03/transform-in-CNN/conv.png" width="40%;"></li>
 <li>offsets conv和特征提取conv是一样的kernel：same spatial resolution and dilation（N个position）</li>
 <li>the channel dimension 2N：因为是x和y两个方向的offset</li>
 </ul>
@@ -621,7 +630,7 @@
 </li>
 <li><p>实现</p>
 <ul>
-<li><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pooling.png" width="40%;"></li>
+<li><img src="/2021/02/03/transform-in-CNN/pooling.png" width="40%;"></li>
 <li>fc layer：k*k*2个element（sigmoid？）</li>
 </ul>
 </li>
@@ -630,7 +639,7 @@
 <li>fully convolutional  </li>
 <li>input feature map先通过卷积扩展成k*k*(C+1)通道</li>
 <li><p>对每个C+1(包含k<em>k个feature map)，conv出全图的offset(2\</em>k*k个)</p>
-<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pspooling.png" width="40%;"></p>
+<p><img src="/2021/02/03/transform-in-CNN/pspooling.png" width="40%;"></p>
 </li>
 </ul>
 </li>
@@ -668,22 +677,146 @@
 </ul>
 </li>
 </ul>
-<p><img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/Illustration.png" width="80%;"></p>
+<p><img src="/2021/02/03/transform-in-CNN/Illustration.png" width="80%;"></p>
 </li>
 </ul>
 </li>
 <li><p>实验</p>
 <ul>
 <li><p>Accuracy steadily improves when more deformable convolution layers are used：使用越多层deform conv越好，经验取了3</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table1.png" width="80%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/table1.png" width="80%;"></p>
 </li>
 <li><p>the learned offsets are highly adaptive to the image content：大目标的间距大，因为reception field大，consistent in different layers </p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table2.png" width="45%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/table2.png" width="45%;"></p>
 </li>
 <li><p>atrous convolution also improves：default networks have too small receptive fields，但是dilation需要手调到最优</p>
 </li>
 <li><p>using deformable RoI pooling alone already produces noticeable performance gains, using both obtains significant accuracy improvements</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/table3.png" width="80%;"></p>
+<p>  <img src="/2021/02/03/transform-in-CNN/table3.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Deformable-ConvNets-v2-More-Deformable-Better-Results"><a href="#Deformable-ConvNets-v2-More-Deformable-Better-Results" class="headerlink" title="Deformable ConvNets v2: More Deformable, Better Results"></a>Deformable ConvNets v2: More Deformable, Better Results</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>DCN能够adapt一定的geometric variations，但是仍存在extend beyond image content的问题</li>
+<li>to focus on pertinent image regions<ul>
+<li>increased modeling power<ul>
+<li>more deformable layers</li>
+<li>updated DCNv2 modules</li>
+</ul>
+</li>
+<li>stronger training<ul>
+<li>propose feature mimicking scheme</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>incorporated into Faster-RCNN &amp; Mask RCNN</li>
+<li>COCO for det &amp; set</li>
+</ul>
+</li>
+<li>still lightweight and easy to incorporate</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>DCNv1<ul>
+<li>deformable conv：在standard conv的基础上generate location-specific offsets which are learned from the preceding feature maps</li>
+<li>deformable pooling：offsets are learned for the bin positions in RoIpooling</li>
+<li>通过可视化散点图发现有部分散点落在目标外围</li>
+</ul>
+</li>
+<li>propose DCNv2<ul>
+<li>equip more convolutional layers with offset</li>
+<li>modified module<ul>
+<li>each sample not only undergoes a learned offset</li>
+<li>but also a learned feature amplitude</li>
+</ul>
+</li>
+<li>effective trainin<ul>
+<li>use RCNN as the teacher network since RCNN learns features unaffected by irrelevant info outside the ROI</li>
+<li>feature mimicking loss</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>stacking more deformable conv layers</p>
+<ul>
+<li>replace more regular conv layers by their deformable counterparts：<ul>
+<li>resnet50的stage3、4、5的3x3conv都替换成deformable conv：13个conv layer</li>
+<li>DCNv1是把stage5的3个resblock的3x3 conv替换成deformable conv：3个deconv layer</li>
+</ul>
+</li>
+<li>因为DCNv1里面在PASCAL上面实验发现再多的deconv精度就饱和了，但是DCNv2是在harder dataset COCO上面的best-acc-efficiency-tradeoff</li>
+</ul>
+</li>
+<li><p>modulated deformable conv</p>
+<ul>
+<li>modulate the input feature amplitudes from different spacial locations/bins<ul>
+<li>set the learnable offset &amp; scalar for the k-th location：$\Delta p_k$和$\Delta m_k$</li>
+<li>set the conv kernel dilation：$p_k$，resnet里面都是1</li>
+<li>the value for location p is：$y(p) = \sum_{k=1}^K w_k x(p+p_k+\Delta p_k)\Delta m_k$，bilinear interpolation</li>
+</ul>
+</li>
+<li>目的是抑制无关信号</li>
+<li>learnable offset &amp; scalar obtained via a separate conv layer over the same input feature map x</li>
+<li>输出有3K个channel：2K for xy-offset，K for scalar<ul>
+<li>offset的conv后面没激活函数，因为范围无限</li>
+<li>scalar的conv后面有个sigmoid，将range控制在[0,1]</li>
+<li>两个conv全0初始化</li>
+<li>两个conv layer的learning rate比existing layers小一个数量级</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>modulated deformable RoIpooling</p>
+<ul>
+<li>given an input ROI</li>
+<li>split into K(7x7) spatial bins</li>
+<li>average pooling over the sampling points for each bin计算bin的value</li>
+<li>the bin value is：$y(k) = \sum_{j=1}^{n_k} x(p_{kj}+\Delta p_k)\Delta m_k /n_k$，bilinear interpolation</li>
+<li>a sibling branch<ul>
+<li>2个1024d-fc：gaussian initialization with 0.01 std dev</li>
+<li>1个3Kd-fc：全0初始化</li>
+<li>last K channels + sigmoid</li>
+<li>learning rate跟existing layers保持一致</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>RCNN feature mimicking</p>
+<ul>
+<li>发现无论是conv还是deconv，error-bound都很大</li>
+<li>尽管从设计思路上，DCNv2是带有mute irrelevant的能力的，但是事实上并没做到</li>
+<li>说明such representation cannot be learned well through standard FasterRCNN training procedure：<ul>
+<li>说白了就是supervision力度不够</li>
+<li>需要additional guidance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>feature mimic loss</p>
+<ul>
+<li><p>enforced only on positive ROIs：因为背景类往往需要更长距离/更大范围的context信息</p>
+</li>
+<li><p>architecture</p>
+<ul>
+<li>add an additional RCNN branch</li>
+<li>RCNN input cropped images，generate 14x14 featuremaps，经过两个fc变成1024-d</li>
+<li>和FasterRCNN里对应的counterpart，计算cosine similarity</li>
+<li><p>这个太扯了不展开了</p>
+<p><img src="/2021/02/03/transform-in-CNN/mimic.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -814,7 +947,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -827,7 +960,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -870,7 +1003,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STN-Spatial-Transformer-Networks"><span class="nav-number">2.</span> <span class="nav-text">STN: Spatial Transformer Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deformable-Convolutional-Networks"><span class="nav-number">3.</span> <span class="nav-text">Deformable Convolutional Networks</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STN-Spatial-Transformer-Networks"><span class="nav-number">2.</span> <span class="nav-text">STN: Spatial Transformer Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deformable-Convolutional-Networks"><span class="nav-number">3.</span> <span class="nav-text">Deformable Convolutional Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deformable-ConvNets-v2-More-Deformable-Better-Results"><span class="nav-number">4.</span> <span class="nav-text">Deformable ConvNets v2: More Deformable, Better Results</span></a></li></ol></div>
             
 
           </div>

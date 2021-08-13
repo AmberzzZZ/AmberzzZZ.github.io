@@ -276,6 +276,1661 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/05/unet-vnet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/05/unet-vnet/" itemprop="url">unet & vnet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-05T09:38:21+08:00">
+                2019-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/05/unet-vnet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/05/unet-vnet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation"><a href="#U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation" class="headerlink" title="U-NET: Convolutional Networks for Biomedical Image Segmentation"></a>U-NET: Convolutional Networks for Biomedical Image Segmentation</h2><ol>
+<li><p>动机：</p>
+<ul>
+<li>train from very few images </li>
+<li>outperforms more precisely on segmentation tasks</li>
+<li>fast</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ul>
+<li>编码：a contracting path to capture context</li>
+<li>解码：a symmetric expanding path that enables precise localization</li>
+<li>实现：pooling operators &amp; upsampling operators</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li><p>when we talk about deep convolutional networks：</p>
+<ul>
+<li>larger and deeper</li>
+<li>millions of parameters </li>
+<li>millions of training samples </li>
+</ul>
+</li>
+<li><p>representative method：run a sliding-window and predict a pixel label based on its‘ patch</p>
+</li>
+<li>drawbacks：<ul>
+<li>calculating redundancy of overlapping patches</li>
+<li>big patch：more max-pooling layers that reduce the localization accuracy</li>
+<li>small patch：less involvement of context</li>
+</ul>
+</li>
+<li>metioned but not further explained：cascade structure</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>In order to localize, high resolution features from the contracting path are combined with the upsampled output. A successive convolution layer can then learn to assemble a more precise output based on this information. </p>
+<p> 理解：深层特征层感受野较大，带有全局信息，将其上采样用于提供localization information，而横向add过来特征层带有局部特征信息。两个3*3的conv block用于将两类信息整合，输出更精确的表达。</p>
+</li>
+<li><p>In the upsampling part we have also a large number of feature channels, which allow the network to propagate context information to higher resolution layers.  </p>
+<p> 理解：应该是字面意思吧，为上采样的卷积层保留更多的特征通道，就相当于保留了更多的上下文信息。</p>
+</li>
+<li><p>we use excessive data augmentation.</p>
+</li>
+</ol>
+</li>
+<li><p>细节：</p>
+<ol>
+<li><p>contracting path：</p>
+<ul>
+<li>typical CNN：blocks of [2 3*3 unpadded convs+ReLU+2*2 stride2 maxpooling]</li>
+<li>At each downsampling step we double the number of feature channels</li>
+</ul>
+</li>
+<li><p>expansive path：</p>
+<ul>
+<li>upsampling：<ul>
+<li>2*2 up-conv that half the channels</li>
+<li>concatenation the corresponding cropped feature map from the contracting path</li>
+<li>2 [3x3 conv+ReLU]</li>
+</ul>
+</li>
+<li>final layer：use a 1*1 conv to map the feature vectors to class vectors</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/unet.png" width="60%"></p>
+</li>
+<li><p>train：</p>
+<ul>
+<li>prefer larger input size to larger batch size</li>
+<li>sgd with 0.99 momentum so that the previously seen samples dominate the optimization</li>
+</ul>
+</li>
+<li><p>loss：softmax &amp; cross entropy </p>
+</li>
+<li><p>unbalanced weight：</p>
+<ul>
+<li>pre-compute the weight map base on the frequency of pixels for a certain class </li>
+<li>add the weight for a certain element to force the learning emphasis：e.g. the small separation borders </li>
+<li>initialization：Gaussian distribution </li>
+</ul>
+</li>
+<li><p>data augmentation：</p>
+<ul>
+<li>deformations </li>
+<li>“Drop-out layers at the end of the contracting path perform further implicit data augmentation”</li>
+</ul>
+</li>
+<li><p>metrics：“warping error”, the “Rand error” and the “pixel error”  for EM segmentation challenge  and average IOU for ISBI cell tracking challenge </p>
+</li>
+<li><p>prediction：</p>
+<p>按照论文的模型结构，<strong>输入和输出的维度是不一样的</strong>——在valid padding的过程中有边缘信息损失。</p>
+<p>那么如果我们想要预测黄框内的分割结果，需要输入一张更大的图（蓝框）作为输入，在图片边缘的时候，我们通过镜像的方式补全。</p>
+<p><img src="/2019/12/05/unet-vnet/predict.png" width="60%;"></p>
+<p><strong>因果关系：</strong></p>
+<ul>
+<li>首先因为内存限制，输入的不是整张图，是图片patch，</li>
+<li>为了保留上下文信息，使得预测更准确，我们给图片patch添加一圈border的上下文信息（实际感兴趣的是黄框区域）</li>
+<li>在训练时，为了避免重叠引入的计算，卷积层使用了valid padding</li>
+<li>因此在网络的输出层，输出尺寸才是我们真正关注的部分</li>
+<li>如果训练样本尺寸不那么huge，完全可以全图输入，然后使用same padding，直接预测全图mask</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>总结：</p>
+<ul>
+<li>train from very few images —-&gt; data augmentation</li>
+<li>fast —-&gt; full convolution layers</li>
+<li>precise —-&gt; global?</li>
+</ul>
+</li>
+</ol>
+<h2 id="V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation"><a href="#V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation" class="headerlink" title="V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation"></a>V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>entire 3D volume</li>
+<li>imbalance between the number of foreground and background voxels：dice coefficient</li>
+<li>limited data：apply random non-linear transformations and histogram matching</li>
+<li>fast and accurate</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>early approaches based on patches<ul>
+<li>local context</li>
+<li>challenging modailities</li>
+<li>efficiency issues</li>
+</ul>
+</li>
+<li>fully convolutional networks<ul>
+<li>2D so far</li>
+</ul>
+</li>
+<li>imbalance issue：the anatomy of interest occupies only a very small region of the scan thus predictions are strongly biased towards the background.<ul>
+<li>re-weighting</li>
+<li>dice coefficient claims to be better that above</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ul>
+<li>a compression path</li>
+<li><p>a decompression path</p>
+<p><img src="/2019/12/05/unet-vnet/vnet.png" width="55%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ul>
+<li><p>compression：</p>
+<ul>
+<li>add residual能够加速收敛</li>
+<li>resolution is reduced by [2*2*2 conv with stride 2]相比于maxpooling节省了bp所需switch map的memory消耗</li>
+<li>double the number of feature maps as we reduce their resolution</li>
+<li>PReLU</li>
+</ul>
+</li>
+<li><p>decompression：</p>
+<ul>
+<li>horizontal connections：1) gather fine grained detail that would be otherwise lost in the compression path  2) improve the convergence time </li>
+<li><p>residual conv：blocks of [5*5*5 conv with stride 1] 提取特征继续增大感受野</p>
+<p><img src="/2019/12/05/unet-vnet/receptive.png" width="50%"></p>
+</li>
+<li><p>up-conv：expands the spatial support of the lower resolution feature maps </p>
+<p><img src="/2019/12/05/unet-vnet/deconv.png" width="60%"></p>
+</li>
+<li><p>last layer：run [1*1*1conv with 2 channel+softmax] to obtain the voxelwise probabilistic segmentations of the foreground and background </p>
+</li>
+</ul>
+</li>
+<li><p>dice coefficient： [0,1] which we aim to maximise，assume $p_i$、$g_i$ belong to two <strong>binary volumes</strong></p>
+<script type="math/tex; mode=display">
+  D = \frac{2\sum_i^N p_i g_i}{\sum_i^N p_i^2 + \sum_i^N g_i^2}</script></li>
+<li><p>train：</p>
+<ul>
+<li>input fix size 128 × 128 × 64 voxels and a spatial resolution of 1 × 1 × 1.5 millimeters</li>
+<li>each mini-batch contains 2 volumes</li>
+<li>online augmentation：<ul>
+<li>randomly deformation</li>
+<li>vary the intensity distribution：随机选取样本的灰度分布作为当前训练样本的灰度分布</li>
+</ul>
+</li>
+<li>used a momentum of 0.99 and a initial learning rate of 0.0001 which decreases by one order of magnitude every 25K iterations</li>
+</ul>
+</li>
+<li><p>metrics：</p>
+<ul>
+<li>Dice coefficient</li>
+<li>Hausdorff distance of the predicted delineation to the ground truth annotation</li>
+<li>the score obtained on the challenge </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="dice-loss-amp-focal-loss"><a href="#dice-loss-amp-focal-loss" class="headerlink" title="dice loss &amp; focal loss"></a>dice loss &amp; focal loss</h2><ol>
+<li><p>CE &amp; BCE</p>
+<ul>
+<li><p>CE：categorical_crossentropy，针对所有类别计算，类别间互斥</p>
+<script type="math/tex; mode=display">
+CE(x) = -\sum_{i=1}^{n\_class}y_i log f_i(x)</script><blockquote>
+<p>$x$是输入样本，$y_i$是第$i$个类别对应的真实标签，$f_i(x)$是对应的模型输出值。</p>
+<p>对分类问题，$y_i$是one-hot，$f_i(x)$是个一维向量。最终得到一个数值。</p>
+</blockquote>
+</li>
+<li><p>BCE：binary_crossentropy，针对每个类别计算</p>
+<script type="math/tex; mode=display">
+BCE(x)_i = - [y_i log f_i(x) + (1-y_i)log(1-f_i(x))]</script><blockquote>
+<p>$i$是类别编号，最终得到一个维度为$n_class$的向量。</p>
+<p>再求类均值得到一个数值作为单个样本的loss。</p>
+</blockquote>
+<script type="math/tex; mode=display">
+BCE(x) = \frac{\sum_{i=1}^{n\_class}BCE_i(x)}{n\_class}</script></li>
+<li><p>batch loss：对batch中所有样本的loss求均值。</p>
+</li>
+<li><p>从公式上看，CE的输出通常是经过了softmax，softmax的某一个输出增大，必然导致其它类别的输出减小，因此在计算loss的时候关注正确类别的预测值是否被拉高即可。使用BCE的场景通常是使用sigmoid，类别间不会互相压制，因此既要考虑所属类别的预测概率够高，也要考虑不所属类别的预测概率足够低（这一项在softmax中被实现了故CE不需要这一项）。</p>
+</li>
+<li>场景：<ul>
+<li>二分类：只有一个输出节点，$f(x) \in (0,1)$，应该使用sigmoid+BCE作为最后的输出层配置。</li>
+<li>单标签多分类：应该使用softmax+CE的方案，BCE也同样适用。</li>
+<li>多标签多分类：multi-label每个标签的输出是相互独立的，因此常用配置是sigmoid+BCE。</li>
+</ul>
+</li>
+<li>对分割场景来说，输出的每一个channel对应一个类别的预测map，可以看成是多个channel间的单标签多分类（softmax+CE），也可以看成是每个独立通道类别map的二分类（sigmoid+BCE）。unet论文用了weighted的softmax+CE。vnet论文用了dice_loss。</li>
+</ul>
+</li>
+<li><p>re-weighting(WCE)</p>
+<p> 基于CE&amp;BCE，给了样本不同的权重。</p>
+<p> unet论文中提到了基于pixel frequency为不同的类别创建了weight map。</p>
+<p> 一种实现：基于每个类别的weight map，在实现CE的时候改成加权平均即可。</p>
+<p> 另一种实现：基于每个样本的weight map，作为网络的附加输入，在实现CE的时候乘在loss map上。</p>
+</li>
+<li><p>focal loss</p>
+<p> 提出是在目标检测领域，用于解决正负样本比例严重失调的问题。</p>
+<p> 也是一种加权，但是相比较于re-weighting，<strong>困难样本的权重由网络自行推断出</strong>，通过添加$(\alpha)$和$(-)^\lambda$这一加权项：</p>
+<script type="math/tex; mode=display">
+ focal\_loss(x)_i = -[\alpha y_i (1-p_i)^\lambda log (p_i)+(1-\alpha)(1-y_i)p_i^\lambda log(1-p_i)]</script><ul>
+<li><p>对于类别间不均衡的情况（通常负样本远远多于正样本），$(\alpha)$项用于平衡正负样本权重。</p>
+</li>
+<li><p>对于类内困难样本的挖掘，$(-)^\lambda$项用于调整简单样本和困难样本的权重，预测概率更接近真实label的样本（简单样本）的权重会衰减更快，预测概率比较不准确的样本（苦难样本）的权重则更高些。</p>
+<p>由于分割网络的输出的单通道／多通道的图片，直接使用focal loss会导致loss值很大。</p>
+<p>​    1. 通常与其他loss加权组合使用</p>
+<p>​    2. sum可以改成mean</p>
+<p>​    3.不建议在训练初期就加入，可在训练后期用于优化模型</p>
+<p>​    4. 公式中含log计算，可能导致nan，要对log中的元素clip</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    gamma = <span class="number">2.</span></span><br><span class="line">    alpha = <span class="number">0.25</span></span><br><span class="line">    <span class="comment"># score = alpha * y_true * K.pow(1 - y_pred, gamma) * K.log(y_pred) +            # this works when y_true==1</span></span><br><span class="line">    <span class="comment">#         (1 - alpha) * (1 - y_true) * K.pow(y_pred, gamma) * K.log(1 - y_pred)  # this works when y_true==0</span></span><br><span class="line">    pt_1 = tf.where(tf.equal(y_true, <span class="number">1</span>), y_pred, tf.ones_like(y_pred))</span><br><span class="line">    pt_0 = tf.where(tf.equal(y_true, <span class="number">0</span>), y_pred, tf.zeros_like(y_pred))</span><br><span class="line">    <span class="comment"># avoid nan</span></span><br><span class="line">    pt_1 = K.clip(pt_1, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    pt_0 = K.clip(pt_0, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    score = -K.sum(alpha * K.pow(<span class="number">1.</span> - pt_1, gamma) * K.log(pt_1)) -  \</span><br><span class="line">            K.sum((<span class="number">1</span> - alpha) * K.pow(pt_0, gamma) * K.log(<span class="number">1.</span> - pt_0))</span><br><span class="line">    <span class="keyword">return</span> score</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>dice loss</p>
+<p>dice定义两个mask的相似程度：</p>
+<script type="math/tex; mode=display">
+dice = \frac{2 * A \bigcap B}{|A|+|B|} = \frac{2 * TP}{2*TP + FN + FP}</script><ul>
+<li>分子是TP——只关注前景</li>
+<li><p>分母可以是$|A|$（逐个元素相加），也可以是平方形式$|A|^2$</p>
+</li>
+<li><p><strong>梯度：</strong>“使用dice loss有时会不可信，原因是对于softmax或log loss其梯度简言之是p-t ，t为目标值，p为预测值。而dice loss 为 2t2 / (p+t)2</p>
+<p> 如果p，t过小会导致梯度变化剧烈，导致训练困难。”</p>
+<p> 【详细解释下】交叉熵loss：$L=-(1-|t-p|)log(1-|t-p|)$，求导得到$\frac{\partial L}{\partial p}=-log(1-|t-p|)$，其实就可以简化看作$t-p$，很显然这个梯度是有界的，因此使用交叉熵loss的优化过程比较稳定。而dice loss的两种形式（不平方&amp;平方）：$L=\frac{2pt}{p+t}\ or\  L=\frac{2pt}{p^2+t^2}$，求导以后分别是$\frac{\partial L}{\partial p} = \frac{t^2+2pt}{(p+t)^2} \ or\ \frac{3tp^2+t^3}{(p^2+t^2)^2}$计算结果比较复杂，pt都很小的情况下，梯度值可能很大，可能导致训练不稳定，loss曲线混乱。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>  vnet论文中的定义在分母上稍有不同（see below）。smoothing的好处：</p>
+<ul>
+<li>避免分子除0</li>
+<li><p>减少过拟合</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">  	smooth = <span class="number">1.</span></span><br><span class="line">    intersection = K.sum(y_true * y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    union = K.sum(y_true, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) + K.sum(y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    <span class="keyword">return</span> K.mean( (<span class="number">2.</span> * intersection + smooth) / (union + smooth), axis=<span class="number">0</span>) </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef_loss</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">    <span class="number">1</span> - dice_coef(y_true, y_pred, smooth=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol>
+<li><p>iou loss</p>
+<p> dice loss衍生，intersection over union：</p>
+<script type="math/tex; mode=display">
+ iou = \frac{A \bigcap B}{A \bigcup B}</script><p> 分母上比dice少了一个intersection。</p>
+<ul>
+<li>“IOU loss的缺点同DICE loss，训练曲线可能并不可信，训练的过程也可能并不稳定，有时不如使用softmax loss等的曲线有直观性，通常而言softmax loss得到的loss下降曲线较为平滑。”</li>
+</ul>
+</li>
+<li><p>boundary loss</p>
+<p> dice loss和iou loss是基于<strong>区域面积匹配度</strong>去学习，我们也可以使用<strong>边界匹配度</strong>去监督网络的学习。</p>
+<p> 只对边界上的像素进行评估，和GT的边界吻合则为0，不吻合的点，根据其距离边界的距离评估它的Loss。</p>
+</li>
+<li><p>Hausdorff distance</p>
+<p> 用于度量两个点集之间的相似程度，denote 点集$A\{a_1, a_2, …, a_p\}$，点集$B\{b_1, b_2, …, b_p\}$：</p>
+<script type="math/tex; mode=display">
+ HD(A, B) = max\{hd(A,B), hd(B,A)\}\\
+ hd(A,B) = max_{a \in A} min_{b in B} ||a-b||\\
+ hd(B,A) = max_{b \in B} min_{a in A} ||b-a||</script><p> 其中HD(A,B)是Hausdorff distance的基本形式，称为双向距离</p>
+<p> hd(A,B)描述的是单向距离，首先找到点集A中每个点在点集B中距离最近的点作为匹配点，然后计算这些a-b-pair的距离的最大值。</p>
+<p> HD(A,B)取单向距离中的最大值，描述了两个点集合的最大不匹配程度。</p>
+</li>
+<li><p>mix loss</p>
+<ul>
+<li>BCE + dice loss：在数据较为平衡的情况下有改善作用，但是在数据极度不均衡的情况下，交叉熵损失会在几个训练之后远小于Dice 损失，效果会损失。</li>
+<li>focal loss + dice loss：数量级问题</li>
+</ul>
+</li>
+<li><p>MSE</p>
+<p> 关键点检测有时候也会采用分割框架，这时候ground truth是高斯map，dice是针对二值化mask的，这时候还可以用MSE。</p>
+</li>
+<li><p>ohnm</p>
+<p>online hard negative mining 困难样本挖掘</p>
+</li>
+<li><p>Tversky loss</p>
+<p>一种加权的dice loss，dice loss会平等的权衡FP（精度，假阳）和FN（召回，假阴），但是医学图像中病灶数目远少于背景数量，很可能导致训练结果偏向高精度但是低召回率，Tversky loss控制loss更偏向FN：</p>
+<script type="math/tex; mode=display">
+loss = 1-\frac{|PG|}{|PG|+\alpha|P\backslash G|+\beta|G\backslash P|}</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tversky_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    y_true_pos = K.flatten(y_true)</span><br><span class="line">    y_pred_pos = K.flatten(y_pred)</span><br><span class="line">    <span class="comment"># TP</span></span><br><span class="line">    true_pos = K.sum(y_true_pos * y_pred_pos)</span><br><span class="line">    <span class="comment"># FN</span></span><br><span class="line">    false_neg = K.sum(y_true_pos * (<span class="number">1</span>-y_pred_pos))</span><br><span class="line">    <span class="comment"># FP</span></span><br><span class="line">    false_pos = K.sum((<span class="number">1</span>-y_true_pos) * y_pred_pos)</span><br><span class="line">    alpha = <span class="number">0.7</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> - (true_pos + K.epsilon())/(true_pos + alpha * false_neg + (<span class="number">1</span>-alpha) * false_pos + K.epsilon())</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Lovasz hinge &amp; Lovasz-Softmax loss</p>
+<p>IOU loss衍生，jaccard loss只适用于离散情况，而网络预测是连续值，如果不使用某个超参将神经元输出二值化，就不可导。blabla</p>
+<p>不是很懂直接用吧：<a href="https://github.com/bermanmaxim/LovaszSoftmax" target="_blank" rel="noopener">https://github.com/bermanmaxim/LovaszSoftmax</a></p>
+</li>
+</ol>
+<h2 id="一些补充"><a href="#一些补充" class="headerlink" title="一些补充"></a>一些补充</h2><ol>
+<li><p>改进：</p>
+<ol>
+<li>dropout、batch normalization：从论文上看，unet只在最深层卷积层后面添加了dropout layer，BN未表，而common sense用每一个conv层后面接BN层能够替换掉dropout并能获得性能提升的。</li>
+<li>UpSampling2D、Conv2DTranspose：unet使用了上采样，vnet使用了deconv，但是“DeConv will produce image with checkerboard effect, which can be revised by upsample and conv”(<a href="https://distill.pub/2016/deconv-checkerboard/" target="_blank" rel="noopener">Reference</a>)。</li>
+<li>valid padding、same padding：unet论文使用图像patch作为输入，特征提取时使用valid padding，损失边缘信息。</li>
+<li>network blocks：unet用的conv block是两个一组的3*3conv，vnet稍微不同一点，可以尝试的block有ResNet／ResNext、DenseNet、DeepLab等。</li>
+<li>pretrained encoder：feature extraction path使用一些现有的backbone，可以加载预训练权重(<a href="https://arxiv.org/abs/1801.05746" target="_blank" rel="noopener">Reference</a>)，加速训练，防止过拟合。</li>
+<li>加入SE模块(<a href="https://zhuanlan.zhihu.com/p/36890585" target="_blank" rel="noopener">Reference</a>)：对每个通道的特征加权</li>
+<li>attention mechanisms：</li>
+<li>引用nn-Unet主要<strong>结构改进</strong>合集：“Just to provide some prominent examples: variations of encoder-decoder style architectures with skip connections, first introduced by the U-Net [12], include the introduction of residual connections [9], dense connections [6], at- tention mechanisms [10], additional loss layers [5], feature recalibration [13], and others [11]. </li>
+</ol>
+</li>
+<li><p>衍生：</p>
+<ol>
+<li><p>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation </p>
+</li>
+<li><p>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation"><a href="#TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation" class="headerlink" title="TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation"></a>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation</h2><ol>
+<li><p>动机：</p>
+<ul>
+<li>neural network initialized with pre-trained weights usually shows better performance than those trained from scratch on a small dataset. </li>
+<li>保留encoder-decoder的结构，同时充分利用迁移学习的优势</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>load pretrained weights</li>
+<li>用huge dataset做预训练</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ul>
+<li>用vgg11替换原始的encoder，并load pre-trained weights on ImageNet：</li>
+<li>最深层输入(maxpooling5)：use a single conv of 512 channels that <strong>serves as a bottleneck central part</strong> of the network</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/TernausNet.png" width="50%;">                      <img src="/2019/12/05/unet-vnet/vgg11.png" width="30%;"></p>
+<ul>
+<li><p>upsampling换成了convTranspose</p>
+</li>
+<li><p>loss function：IOU + BCE：</p>
+<script type="math/tex; mode=display">
+ L = BCE - log(IOU)</script></li>
+<li><p>inference：choose a <strong>threshold 0.3</strong>, all pixel values below which are set to be zero</p>
+</li>
+</ul>
+</li>
+<li><p>结论：</p>
+<ol>
+<li>converge faster</li>
+<li>better IOU</li>
+</ol>
+</li>
+</ol>
+<h2 id="nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation"><a href="#nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation" class="headerlink" title="nnU-Net: Breaking the Spell on Successful Medical Image Segmentation"></a>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>many proposed methods fail to generalize: 对于分割任务，从unet出来之后的几年里，在网络结构上已经没有多少的突破了，结构修改越多，反而越容易过拟合</li>
+<li>relies on just a simple U-Net architecture embedded in a robust training scheme</li>
+<li>automate necessary adaptations such as preprocessing, the exact patch size, batch size, and inference settings based on the properties of a given dataset: 更多的提升其实在于理解数据，针对数据采用适当的预处理和训练方法和技巧</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>the diversity and individual peculiarities of imaging datasets make it difficult to generalize </li>
+<li>prominent modifications focus on architectural modifications, merely brushing over all the other hyperparameters</li>
+<li>we propose: 使用基础版unet：nnUNet（no-new-Net）<ul>
+<li>a formalism for automatic adaptation to new datasets</li>
+<li>automatically designs and executes a network training pipeline </li>
+<li>without any manual fine-tuning</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素</p>
+<p>a segmentation task: $f_{\theta}(X) = \hat Y$,  in this paper we seek for a $g(X,Y)=\theta$.</p>
+<p>First we distinguish two type of hyperparameters:</p>
+<ul>
+<li>static params：in this case the network architecture and a robust training scheme </li>
+<li>dynamic params：those that need to be changed in dependence of $X$ and $Y$</li>
+</ul>
+<p>Second we define g——a set of heuristics rules covering the entire process of the task:</p>
+<ul>
+<li>预处理：resampling和normalization</li>
+<li>训练：loss，optimizer设置、数据增广</li>
+<li>推理：patch-based策略、test-time-augmentations集成和模型集成等</li>
+<li>后处理：增强单连通域等</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ol>
+<li><p>Preprocessing</p>
+<ul>
+<li>Image Normalization：<ul>
+<li>CT：$normed_intensity = (intensity  - fg_mean) / fg_standard_deviation$,   $fg$ for $[0.05,0.95]$ foreground intensity</li>
+<li>not CT：$normed_intensity = (intensity  - mean) / standard_deviation $</li>
+</ul>
+</li>
+<li>Voxel Spacing：<ul>
+<li>for each axis chooses the median as the target spacing</li>
+<li>image resampled with third order spline interpolation</li>
+<li>z-axis using nearest neighbor interpolation if ‘anisotropic spacing’ occurs</li>
+<li>mask resampled with third order spline interpolation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training Procedure </p>
+<ul>
+<li><p>Network Architecture：</p>
+<ul>
+<li><p>3 <strong>independent</strong> model：a 2D U-Net, a 3D U-Net and a cascade of two 3D U-Net  </p>
+<p>  <img src="/2019/12/05/unet-vnet/nnUnet.jpg" width="80%;"></p>
+</li>
+<li><p>padded convolutions：to achieve identical output and input shapes </p>
+</li>
+<li><p><strong>instance normalization</strong>：“BN适用于判别模型，比如图片分类模型。因为BN注重对每个batch进行归一化，从而保证数据分布的一致性，而判别模型的结果正是取决于数据整体分布。但是BN对batchsize的大小比较敏感，由于每次计算均值和方差是在一个batch上，所以如果batchsize太小，则计算的均值、方差不足以代表整个数据分布；IN适用于生成模型，比如图片风格迁移。因为图片生成的结果主要依赖于某个图像实例，所以对整个batch归一化不适合图像风格化，在风格迁移中使用Instance Normalization不仅可以加速模型收敛，并且可以保持每个图像实例之间的独立。”</p>
+</li>
+<li><p>Leaky ReLUs</p>
+</li>
+</ul>
+</li>
+<li><p>Network Hyperparameters：</p>
+<ul>
+<li>sets the batch size, patch size and number of pooling operations for each axis based on the memory consumption </li>
+<li>large patch sizes are favored over large batch sizes </li>
+<li>pooling along each axis is done until the voxel size=4</li>
+<li>start num of filters=30, double after each pooling</li>
+<li>If the selected patch size covers less than 25% of the voxels, train the 3D U-Net cascade on a downsampled version of the training data  to keep sufficient context </li>
+</ul>
+</li>
+<li><p>Network Training:</p>
+<ul>
+<li>five-fold cross-validation </li>
+<li>One epoch is defined as processing 250 batches </li>
+<li>loss = dice loss + cross-entropy loss </li>
+<li>Adam(lr=3e-4, decay=3e-5)</li>
+<li>lrReduce: EMA(train_loss), 30 epoch, factor=0.2</li>
+<li>earlyStop: earning rate drops below 10 6 or 1000 epochs are exceeded</li>
+<li>data augmentation: elastic deformations, random scaling and random rotations as well as <strong>gamma augmentation</strong>($g(x,y)=f(x,y)^{gamma}$)</li>
+<li>keep transformations in 2D-plane if ‘anisotropic spacing’ occurs</li>
+</ul>
+</li>
+<li><p>Inference </p>
+<ul>
+<li>sliding window with half the patch size: this increases the weight of the predictions close to the center relative to the borders</li>
+<li>ensemble:<ul>
+<li>U-Net configurations (2D, 3D and cascade)</li>
+<li>furthermore uses the five models (five-fold cross-validation)</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>Ablation studies</p>
+<p><img src="/2019/12/05/unet-vnet/nn-Unet Ablation studies.png" width="70%;"></p>
+</li>
+</ol>
+<h2 id="3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation"><a href="#3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation" class="headerlink" title="3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation"></a>3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learns from sparsely/full annotated volumetric images (user annotates some slices)</li>
+<li>provides a dense 3D segmentation </li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>要素</p>
+<ul>
+<li>3D operations </li>
+<li>avoid bottlenecks and use batch normalization for faster convergence</li>
+<li>on-the-fly elastic deformation</li>
+<li>train from scratch</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>neighboring slices show almost the same information </li>
+<li>many biomedical applications generalizes reasonably well because medical images comprises repetitive structures  </li>
+<li>thus we suggest dense-volume-segmentation-network that only requires some annotated 2D slices for training</li>
+<li><p>scenarios</p>
+<ul>
+<li>manual annotated 一部分slice，然后训练网络实现dense seg</li>
+<li>用一部分 sparsely annotated的dataset作为training set，然后训练的网络实现在新的数据集上dense seg</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/scenarios.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Network Architecture </p>
+<ul>
+<li><p>compression：2*3x3x3 convs(+BN)+relu+2x2x2 maxpooling</p>
+</li>
+<li><p>decompression：2x2x2 upconv+2*3x3x3 convs+relu</p>
+</li>
+<li><p>head：1x1x1 conv</p>
+</li>
+<li><p>concat shortcut connections</p>
+</li>
+<li><p>【QUESTION】avoid bottlenecks by doubling the number of channels already before max pooling</p>
+<p>  个人理解这个double channel是在跟原始的unet结构对比，原始unet每个stage的两个conv的filter num是一样的，然后进行max pooling会损失部分信息，但是分割任务本身是个dense prediction，所以增大channel来减少信息损失</p>
+<p>  但是不理解什么叫“avoid bottlenecks”</p>
+<p>  原文说是参考了《Rethinking the inception architecture for computer vision》大名鼎鼎的inception V3</p>
+<p>  可能对应的是“1. Avoid representational bottlenecks, especially early in the network.”，从输入到输出，要逐渐减少feature map的尺寸，同时要逐渐增加feature map的数量。</p>
+</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/3Dunet.png" width="50%;"></p>
+<ul>
+<li>input：132x132x116 voxel tile </li>
+<li>output：44x44x28</li>
+<li>BN：before each ReLU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p><strong>weighted softmax loss function</strong>：setting the weights of unlabeled pixels to zero makes it possible to learn from only the labelled ones and, hence, to generalize to the whole volume（是不是random set the loss zeros of some samples总能让网络更好的generalize？）</p>
+<ul>
+<li><p>Data</p>
+<ul>
+<li>manually annotated some orthogonal xy, xz, and yz slices </li>
+<li>annotation slices were sampled uniformly</li>
+</ul>
+</li>
+<li><p>ran on down-sampled versions of the original resolution by factor of two </p>
+</li>
+<li><p>labels：0: “inside the tubule”; 1: “tubule”; 2: “background”, and 3: “unlabeled”.  </p>
+</li>
+<li><p>Training</p>
+<ul>
+<li>rotation, scaling and gray value augmentation</li>
+</ul>
+</li>
+<li>a smooth dense deformation：random vector, normal distribution, B-spline interpolation <ul>
+<li>weighted cross-entropy loss：increase weights  “inside the tubule”, reduce weights “background”, set zero “unlabeled”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss"><a href="#2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss" class="headerlink" title="2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss"></a>2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss</h2><ol>
+<li><p>专业术语</p>
+<ul>
+<li>Vestibular Schwannoma(VS) tumors：前庭神经鞘瘤</li>
+<li>through-plane resolution：层厚</li>
+<li>isotropic resolution：各向同性</li>
+<li>anisotropic resolutions：各向异性</li>
+</ul>
+</li>
+<li><p>动机</p>
+<ul>
+<li><p>tumor的精确自动分割</p>
+</li>
+<li><p>challenge</p>
+<ul>
+<li>low contrast：hardness-weighted Dice loss functio </li>
+<li>small target region：attention module </li>
+<li>low through-plane resolution：2.5D</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>segment small structures from large image contexts<ul>
+<li>coarse-to-fine </li>
+<li>attention map </li>
+<li>Dice loss </li>
+<li>our method<ul>
+<li>end-to-end supervision on the learning of attention map </li>
+<li>voxel-level hardness- weighted Dice loss function </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CNN<ul>
+<li>2D CNNs ignore inter-slice correlation </li>
+<li>3D CNNs most applied to images with isotropic resolution requiring upsampling</li>
+<li>to balance the physical receptive field (in terms of mm rather than voxels)：memory rise</li>
+<li>our method<ul>
+<li>high in-plane resolution &amp; low through-plane resolution </li>
+<li>2.5D CNN combining 2D and 3D convolutions </li>
+<li>use inter-slice features </li>
+<li>more efficient than 3D CNNs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>数据<ul>
+<li>T2-weighted MR images of 245 patients with VS tumor</li>
+<li>high in-plane resolution around 0.4 mm×0.4 mm，512x512</li>
+<li>slice thickness and inter-slice spacing 1.5 mm，slice number 19 to 118</li>
+<li>cropped cube size：100 mm×50 mm×50 mm </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<ul>
+<li>five levels：L1、L2 use 2D，L3、L4、L5 use 3D</li>
+<li>After the first two max-pooling layers that downsample the feature maps only in 2D, the feature maps in L3 and the followings have a near- isotropic 3D resolution.  </li>
+<li>start channels：16</li>
+<li>conv block：conv-BN-pReLU</li>
+<li><p>add a spatial attention module to each level of the decoder </p>
+<p><img src="/2019/12/05/unet-vnet/2.5D UNet.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>spatial attention module </p>
+<ul>
+<li>A spatial attention map can be seen as a single-channel image of attention coefficient </li>
+<li>input：feature map with channel $N_l$</li>
+<li>conv1+ReLU： channel $N_l/2$</li>
+<li>conv2+Sigmoid：channel 1，outputs the attention map</li>
+<li>multiplied the feature map with the attention map</li>
+<li>a residual connection</li>
+<li>explicit supervision <ul>
+<li>multi-scale attention loss </li>
+<li>$L_{attention} = \frac{1}{L} \sum_{L} l(A_l, G_l^f)$</li>
+<li>$A_l$是每一层的attention map，$G_l^f$是每一层是前景ground truth average-pool到当前resolution的mask</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Voxel-Level Hardness-Weighted Dice Loss</p>
+<ul>
+<li><p>automatic hard voxel weighting：$w_i = \lambda * abs(p_i - g_i) + (1-\lambda)$</p>
+</li>
+<li><p>$\lambda \in [0,1]$，controls the degree of hard voxel weighting</p>
+</li>
+<li><p>hardness-weighted Dice loss (HDL) ：</p>
+<script type="math/tex; mode=display">
+  l(P,G) = 1.0 - \frac{1}{C}\sum_{C} \frac{2\sum_i w_i p_i g_i + \epsilon}{\sum_i w_i (p_i + g_i) + \epsilon}</script></li>
+<li><p>total loss：</p>
+<script type="math/tex; mode=display">
+  L = \frac{1}{L} \sum_{L} l(A_l, G_l^f) + l(P,G)</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning"><a href="#Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning" class="headerlink" title="Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning"></a>Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning</h2><p>只有摘要和一幅图</p>
+<p><img src="/2019/12/05/unet-vnet/two-pathway-unet.jpg" width="80%;"></p>
+<ul>
+<li>multi-parametric MR images：T1W、T2W、T1C</li>
+<li>two-pathway U-Net model<ul>
+<li>kernel 3 × 3 × 1 and 1 × 1 × 3 respectively</li>
+<li>to extract the in-plane and through-plane features of the anisotropic MR images</li>
+</ul>
+</li>
+<li>结论<ul>
+<li>The proposed two-pathway U-Net model outperformed the single-pathway U-Net model when segmenting VS using anisotropic MR images.</li>
+<li>multi-inputs（T1、T2）outperforms single-inputs</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/28/yolo系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/28/yolo系列/" itemprop="url">yolo系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-28T18:34:51+08:00">
+                2019-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/28/yolo系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/28/yolo系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li>[yolov1] Yolov1: You Only Look Once: Unified, Real-Time Object Detection</li>
+<li>[yolov2] Yolov2: YOLO9000: Better, Faster, Stronger</li>
+<li>[yolov3] Yolov3: An Incremental Improvement </li>
+<li>[yolov4] YOLOv4: Optimal Speed and Accuracy of Object Detection </li>
+<li>[poly-yolo] POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3 </li>
+<li>[scaled-yolov4] Scaled-YOLOv4: Scaling Cross Stage Partial Network </li>
+</ol>
+<h2 id="0-review"><a href="#0-review" class="headerlink" title="0. review"></a>0. review</h2><ol>
+<li><p>review0121：关于yolo loss</p>
+<p> 之前看keras版的yolo loss，包含分类的bce，回归的l2/mse，以及confidence的回归loss，其中conf loss被建模成单纯的0-1分类问题，用bce来实现。</p>
+<p> 事实上原版的yolo loss中，objectness是iou（pred和gt的iou），从意义上，不仅指示当前格子有无目标，还对当前的box prediction做了评估</p>
+<ul>
+<li>回传梯度</li>
+<li><p>不回传梯度</p>
+<p>iou是通过xywh计算的，scaled_yolov4中把这个梯度截断，只作为一个值，对confidence进行梯度回传，</p>
+<p>梯度不截断也没有问题，相当于对xywh再回传一个iou的loss</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection"><a href="#1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection" class="headerlink" title="1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection"></a>1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection</h2><ol>
+<li>动机:<ul>
+<li>end-to-end: 2 stages —-&gt; 1 stage</li>
+<li>real-time</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>past methods:  complex pipelines, hard to optimize(trained separately) <ul>
+<li>DPM use a sliding window and a classifier to evaluate an object at various locations </li>
+<li>R-CNN use region proposal and run classifier on the proposed boxes,  then post-processing </li>
+</ul>
+</li>
+<li>in this paper:  you only look once at an image <ul>
+<li>rebuild the framework as a <strong>single</strong> regression problem:  single stands for <strong>you don’t have to run classifiers on each patch</strong></li>
+<li><strong>straight</strong> from image pixels to bounding box coordinates and class probabilities:  straight stands for <strong>you obtain the bounding box and the classification results side by side, comparing to the previous serial pipeline </strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>advantages：</p>
+<ul>
+<li>fast &amp; twice the <strong>mean average precision</strong> of other real-time systems</li>
+<li>CNN sees the entire image thus encodes contextual information </li>
+<li>generalize better</li>
+</ul>
+</li>
+<li><p>disadvantage:</p>
+<ul>
+<li>accuracy: “ it struggles to precisely localize some objects, especially small ones”</li>
+</ul>
+</li>
+<li><p>细节：</p>
+<ul>
+<li><p>grid：</p>
+<p>Our system divides the input image into an S × S grid. </p>
+<p>If the center of an object falls into a grid cell, that grid cell is responsible for detecting that object. </p>
+<p><img src="/2019/11/28/yolo系列/grid.png" width="60%;"></p>
+</li>
+<li><p>prediction：</p>
+<p> Each grid cell predicts B bounding boxes,  confidence scores <strong>for these boxes</strong> , and C conditional class probabilities <strong>for each grid</strong></p>
+<p> that is an <script type="math/tex">S*S*(B*5+C)</script> tensor</p>
+<ul>
+<li>We normalize the bounding box width and height by the image width and height so that they fall between 0 and 1.</li>
+<li>We parametrize the bounding box x and y coordinates to be offsets of a particular grid cell so they are also bounded between 0 and 1. </li>
+</ul>
+</li>
+<li><p>at test time：</p>
+<p> We obtain the <strong>class-specific confidence</strong> for individual box by multiply the class probability and box confidence：</p>
+<script type="math/tex; mode=display">
+ Pr(Class_i | Object) * Pr(Object)* IOU^{truth}_{pred} = Pr(Class_i)* IOU^{truth}_{pred}</script></li>
+<li><p>network：</p>
+<p>the convolutional layers extract features from the image </p>
+<p>while the fully connected layers predict the probabilities and coordinates</p>
+<p><img src="/2019/11/28/yolo系列/network.png" width="60%"></p>
+</li>
+<li><p>training：</p>
+<p> activation：use a linear activation function for the final layer and leaky rectified linear activation all the other layers</p>
+<p> optimization：use sum-squared error, however it does not perfectly align with the goal of maximizing average precision</p>
+<p> ​    * weights equally the localization error and classification error：$\lambda_{coord}$</p>
+<p> ​    * weights equally the grid cells containing and not-containing objects：$\lambda_{noobj}$</p>
+<p> ​    * weights equally the large boxes and small boxes：square roots the h&amp;w insteand of the straight h&amp;w</p>
+<p> loss：pick the box predictor has the highest current IOU with the ground truth per grid cell</p>
+<p> avoid overfitting：dropout &amp; data augmentation</p>
+<p> ​    * use dropout after the first connected layer,</p>
+<p> ​    * introduce random scaling and translations of up to 20% of the original image size for data augmentation</p>
+<p> ​    * randomly adjust the exposure and saturation of the image by up to a factor of 1.5 in the HSV color space for data augmentation</p>
+</li>
+<li><p>inference：</p>
+<p> multiple detections：some objects locates near the border of multiple cells and <strong>can be well localized by multiple cells</strong>. <strong>Non-maximal suppression</strong> is proved critical, adding 2- 3% in mAP. </p>
+</li>
+</ul>
+</li>
+<li><p>Limitations：</p>
+<ul>
+<li>strong spatial constraints：decided by the settings of bounding boxes</li>
+<li><p>softmax classification：can only have one class for each grid </p>
+<blockquote>
+<p>“This spatial constraint lim- its the number of nearby objects that our model can pre- dict. Our model struggles with small objects that appear in groups, such as flocks of birds. “</p>
+<p>“ It struggles to generalize to objects in new or unusual aspect ratios or configurations. “</p>
+</blockquote>
+</li>
+<li><p>coarse bounding box prediction：the architecture has multiple downsampling layers</p>
+</li>
+<li><p>the loss function treats errors the same in small bounding boxes versus large bounding boxes：</p>
+<blockquote>
+<p>The same error has much greater effect on a small box’s IOU than a big box.</p>
+<p>“Our main source of error is incorrect localizations. “</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>Comparison：</p>
+<ul>
+<li>mAP among <strong>real-time detectors</strong> and <strong>Less Than Real-Time detectors</strong>：less mAP than fast-rcnn but much faster</li>
+<li>error analysis between yolo and fast-rcnn：greater localization error and less background false-positive</li>
+<li>combination analysis：[fast-rcnn+yolo] defeats [fast-rcnn+fast-rcnn] since YOLO makes different kinds of mistakes  with fast-rcnn</li>
+<li>generalizability：RCNN degrades more because the Selective Search is tuned for natural images, change of dataset makes the proposals get worse. YOLO degrades less because it models the size and shape of objects, change of dataset varies less at object level but more at pixel level.</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-Yolov2-YOLO9000-Better-Faster-Stronger"><a href="#2-Yolov2-YOLO9000-Better-Faster-Stronger" class="headerlink" title="2. Yolov2: YOLO9000: Better, Faster, Stronger"></a>2. Yolov2: YOLO9000: Better, Faster, Stronger</h2><ol>
+<li>动机：<ul>
+<li>run at varying sizes：offering an easy tradeoff between speed and accuracy</li>
+<li>recognize a wide variety of objects ：jointly train on object detection and classification, so that the model can predict objects that aren’t labelled in detection data</li>
+<li>better performance but still fast</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>Current object detection datasets are limited compared to classification datasets  <ul>
+<li>leverage the classification data to expand the scope of current detection system</li>
+<li>joint training algorithm making the object detectors working on both detection and classification data</li>
+</ul>
+</li>
+<li><strong>Better performance</strong> often hinges on larger networks or ensembling multiple models. However we want a more accurate detector that is <strong>still fast</strong></li>
+<li>YOLOv1’s shortcomings<ul>
+<li>more localization errors</li>
+<li>low recall</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ol>
+<li><p>better</p>
+<p> <img src="/2019/11/28/yolo系列/better.png" width="70%;"></p>
+</li>
+<li><p>faster</p>
+<ul>
+<li>backbone</li>
+</ul>
+</li>
+<li><p>stronger</p>
+<ul>
+<li><p>uses labeled detection images to learn to precisely localize objects </p>
+</li>
+<li><p>uses classification images to increase its vocabulary and robustness</p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>better：</p>
+<ol>
+<li><p>batch normalization：convergence &amp; regularization</p>
+<blockquote>
+<p>add batch normalization on all of the convolutional layers </p>
+<p>remove dropout from the model </p>
+</blockquote>
+</li>
+<li><p>high resolution classifier：pretrain a hi-res classifier </p>
+<blockquote>
+<p>first fine tune the classification network at the full 448 × 448 resolution for 10 epochs on ImageNet</p>
+<p>then fine tune the resulting network on detection </p>
+</blockquote>
+</li>
+<li><p>convolutional with anchor boxes：</p>
+<p>YOLOv1通过网络最后的<strong>全连接层</strong>，直接预测每个grid上bounding box的坐标</p>
+<p>而RPN基于先验框，使用最后一层<strong>卷积层</strong>，在特征图的各位置预测bounding box的offset和confidence</p>
+<blockquote>
+<p> “Predicting offsets instead of coordinates simplifies the problem and makes it easier for the network to learn”</p>
+</blockquote>
+<p>YOLOv2去掉了全连接层，也使用anchor box来回归bounding box</p>
+<blockquote>
+<p>eliminate one pooling layer to make the network output have higher resolution</p>
+<p>shrink the network input to 416<em>416 to obtain an odd number so that there is a <em>*single center cell</em></em> in the feature map</p>
+<p>predict class and objectness for every anchor box(offset prediction) instead of nothing(direct location&amp;scale prediction)</p>
+</blockquote>
+</li>
+<li><p>dimension clustering：</p>
+<p>what we want are priors that lead to good IOU scores, thus comes the distance metric：</p>
+<script type="math/tex; mode=display">
+d(box, centroid) = 1 - IOU(box, centroid)</script></li>
+<li><p>direct location prediction：</p>
+<p>YOLOv1 encounter model instability issue for predicting the (x, y) locations for the box</p>
+<p>RPN also takes a long time to stabilize  by predicting a (tx, ty) and obtain the (x, y) center coordinates indirectly because this formulation is unconstrained so any anchor box can end up at any point in the image：</p>
+<script type="math/tex; mode=display">
+x = t_x * w_a - x_a\\
+y = t_y * h_a - y_a</script><blockquote>
+<p>学习RPN：回归一个相对量，比盲猜回归一个绝对location（YOLOv1）更好学习</p>
+<p>学习YOLOv1：基于cell的预测，将bounding box限定在有限区域，不是全图飞（RPN）</p>
+</blockquote>
+<p>YOLOv2对每个cell，基于5个prior anchor size，预测5个bounding box，每个bounding box具有5维：</p>
+<script type="math/tex; mode=display">
+b_x = \sigma(t_x) + c_x\\
+b_y = \sigma(t_y) + c_y\\
+b_w = p_w e^{t_w}\\
+b_h = p_h e^{t_h}\\
+Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
+<li>$t_x\ \&amp;\ t_y$用于回归bounding box的位置，通过sigmoid激活函数被限定在0-1，通过上式能够间接得到bounding box的归一化位置（相对原图）</li>
+<li>$t_w\ \&amp;\ t_h$用于回归bounding box的尺度，输出应该不是0-1限定，$p_w\ \&amp;\ p_h$是先验框的归一化尺度，通过上式能够间接得到bounding box的归一化尺度（相对原图）</li>
+<li>$t_o$用于回归objectness，通过sigmoid限定在0-1之间，因为$Pr(object)\ \&amp;\ IOU(b,object)$都是0-1之间的值，IOU通过前面四个值能够求解，进而可以解耦objectness</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/regression.png" width="40%;"></p>
+</li>
+<li><p>fine-grained features：</p>
+<p>motive：小物体的检测依赖更加细粒度的特征</p>
+<p>cascade：Faster R-CNN and SSD both run their proposal networks at various feature maps in the network to get a range of resolutions</p>
+<p>【QUESTION】YOLOv2 simply adds a passthrough layer from an earlier layer at 26 × 26 resolution：</p>
+<blockquote>
+<p>latter featuremap —-&gt; upsampling</p>
+<p>concatenate with early featuremap</p>
+<p>the detector runs on top of this expanded feature map </p>
+</blockquote>
+<p>predicts a $N<em>N</em>(3*(4+1+80))$ tensor for each scale</p>
+</li>
+<li><p>multi-scale training：</p>
+<p>模型本身不限定输入尺寸：model only uses convolutional and pooling layers thus it can be resized on the fly </p>
+</li>
+</ol>
+<ul>
+<li>forces the network to learn to predict well across a variety of input dimensions <ul>
+<li>the same network can predict detections at different resolutions</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>loss：<strong>cited from the latter yolov3 paper</strong></p>
+<ul>
+<li>use sum of squared error loss for box coordinate(x,y,w,h)：then the gradient is $y_{true} - y_{pred}$</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>use logistic regression for objectness score：which should be 1 if the bounding box prior overlaps a ground truth object by more than any other bounding box prior<ul>
+<li>if a bounding box prior is not assigned to a ground truth object it incurs no loss(coordinate&amp;objectness)</li>
+</ul>
+</li>
+<li>use binary cross-entropy loss for multilabel classification</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>faster：</p>
+<ol>
+<li><p>darknet-19：</p>
+<p> YOLOv1中讨论过换VGG-16和YOLOv1使用的backbone对比，前者有map提升，但是耗时。</p>
+<p> YOLOv2的新backbone，参数更少，而且相对于VGG16在ImageNet上精度更高。</p>
+<p> <img src="/2019/11/28/yolo系列/darknet19.png" width="40%;"></p>
+</li>
+<li><p>training for classification：</p>
+<pre><code> * first train on ImageNet using 224*224
+
+ * then fine-tuning on 448*448
+</code></pre><ol>
+<li><p>training for detection：</p>
+<ul>
+<li><p>remove the last convolutional layer</p>
+</li>
+<li><p>add on three 3 × 3 convolutional layers with 1024 filters each followed by a final 1×1 convolutional layer with the number of outputs we need for detection </p>
+</li>
+<li>add a passthrough from the final 3 × 3 × 512 layer to the second to last convolutional layer so that our model can use fine grain features. </li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>stronger：</p>
+<p> jointly training：以后再填坑</p>
+<ul>
+<li>构造标签树</li>
+<li>classification sample用cls loss，detection sample用detect loss</li>
+<li>预测正确的classification sample给一个.3 IOU的假设值用于计算objectness loss</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="3-Yolov3-An-Incremental-Improvement"><a href="#3-Yolov3-An-Incremental-Improvement" class="headerlink" title="3. Yolov3: An Incremental Improvement"></a>3. Yolov3: An Incremental Improvement</h2><ol>
+<li><p>动机：</p>
+<p> nothing like super interesting, just a bunch of small changes that make it better</p>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>bounding box prediction：</p>
+<p> use anchor boxes and predicts offsets for each bounding box</p>
+<p> use sum of squared error loss for training</p>
+<p> predicts the objectness score for each bounding box using logistic regression</p>
+<p> one ground truth coresponds to one best box and one loss</p>
+</li>
+<li><p>class prediction：</p>
+<p> use binary cross-entropy loss for multilabel classification</p>
+</li>
+<li><p><strong>【NEW】prediction across scales：</strong></p>
+<p> the detector：a few more convolutional layers following the feature map, the last of which predicts a 3-d(for 3 priors) tensor encoding bounding box, objectness, and class predictions</p>
+<p> expanded feature map：upsampling the deeper feature map by 2X and concatenating with the former features</p>
+<blockquote>
+<p>“With the new multi-scale predictions, YOLOv3 has better perfomance on small objects and comparatively worse performance on medium and larger size objects “</p>
+</blockquote>
+</li>
+<li><p><strong>【NEW】feature extractor：</strong></p>
+<p> darknet-53 !</p>
+<p> <img src="/2019/11/28/yolo系列/darknet53.png" width="40%;"></p>
+</li>
+<li><p>training：common skills</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="4-一些补充"><a href="#4-一些补充" class="headerlink" title="4. 一些补充"></a>4. 一些补充</h2><ol>
+<li><p>metrics：mAP</p>
+<p> 最早由PASCAL VOC提出，输出结果是一个ranked list，每一项包含框、confidence、class，</p>
+<p> yolov3提到了一个“COCOs weird average mean AP metric ”</p>
+<ul>
+<li><p>IoU：预测框与ground truth的交并比，也被称为Jaccard指数，我们通常用其来判断每个检测的正确性。PASCAL VOC数据集用0.5为阈值来判定预测框是True Positive还是False Positive，COCO数据集则建议对不同的IoU阈值进行计算。</p>
+<p><img src="/2019/11/28/yolo系列/iou.png" width="20%;"></p>
+</li>
+<li><p>置信度：通过改变置信度阈值，我们可以改变一个预测框是Positive还是 Negative。</p>
+</li>
+<li><p>precision &amp; recall：precision = TP ／(TP + FP)，recall = TP／(TP + FN)。图片中我们没有预测到的每个部分都是Negative，因此计算True Negatives比较难办。但是我们只需要计算False Negatives，即我们模型所漏检的物体。</p>
+<p>  <img src="/2019/11/28/yolo系列/pr.png" width="30%;"></p>
+</li>
+<li><p>AP：不同的置信度下会得到不同的precision-recall。为了得到precision-recall曲线，首先对模型预测结果进行排序，按照各个预测值置信度降序排列。给定不同的置信度阈值，就有不同的ranked output，Recall和Precision仅在高于该rank值的预测结果中计算。这里共选择11个不同的recall（[0, 0.1, …, 0.9, 1.0]），那么AP就定义为在这11个recall下precision的平均值，其可以表征整个precision-recall曲线（曲线下面积）。给定recall下的precision计算，是通过一种插值的方式：</p>
+<script type="math/tex; mode=display">
+  AP = \frac{1}{11}\sum_{r\in\{0,0.1,...,1.0\}}p_{interp}(r) \\
+  p_{interp}(r) = max_{\tilde r: \tilde r > r} p(\tilde r)</script></li>
+<li><p>mAP：此度量指标在<strong>信息检索</strong>和<strong>目标检测</strong>领域有不同的计算方式。对于目标检测，对于各个类别，分别按照上述方式计算AP，取所有类别的AP平均值就是mAP。</p>
+<p>  <img src="/2019/11/28/yolo系列/map.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>eval：</p>
+<ol>
+<li>yolo_head输出：box_xy是box的中心坐标，(0~1)相对值；box_wh是box的宽高，(0~1)相对值；box_confidence是框中物体置信度；box_class_probs是类别置信度；</li>
+<li>yolo_correct_boxes函数：能够将box中心的相对信息转换成[y_min,x_min,y_max,x_max]的绝对值</li>
+<li>yolo_boxes_and_scores函数：输出网络预测的所有box</li>
+<li>yolo_eval函数：基于score_threshold、max_boxes两项过滤，类内NMS，得到最终输出</li>
+</ol>
+</li>
+</ol>
+<h2 id="4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection"><a href="#4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection" class="headerlink" title="4. YOLOv4: Optimal Speed and Accuracy of Object Detection"></a>4. YOLOv4: Optimal Speed and Accuracy of Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Practical testing the tricks of improving CNN</li>
+<li>some features<ul>
+<li>work for certain problems/dataset exclusively</li>
+<li>applicable to the majority of models, tasks, and datasets</li>
+<li>only increase the training cost  [bag-of-freebies]</li>
+<li>only increase the inference cost by a small amount but can significantly improve the accuracy  [bag-of-specials]</li>
+</ul>
+</li>
+<li>Optimal Speed and Accuracy </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>head：<ul>
+<li>predict classes and bounding boxes </li>
+<li>one-stage head<ul>
+<li>YOLO, SSD, RetinaNet </li>
+<li>anchor-free：CenterNet, CornerNet, FCOS  </li>
+</ul>
+</li>
+<li>two-stage head<ul>
+<li>R-CNN series </li>
+<li>anchor-free：RepPoints </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>neck：<ul>
+<li>collect feature maps from different stages </li>
+<li>FPN, PAN, BiFPN, NAS-FPN </li>
+</ul>
+</li>
+<li><p>backbone：</p>
+<ul>
+<li>pre-trained on ImageNet</li>
+<li>VGG, ResNet, ResNeXt, DenseNet</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/detector.png" width="70%;"></p>
+</li>
+<li><p>Bag of freebies</p>
+<ul>
+<li>data augmentation <ul>
+<li>pixel-wise adjustments<ul>
+<li>photometric distortions：brightness, contrast, hue, saturation, and noise </li>
+<li>geometric distortions：random scaling, cropping, flipping, and rotating </li>
+</ul>
+</li>
+<li>object-wise<ul>
+<li>cut：<ul>
+<li>to image：CutOut </li>
+<li>to featuremaps：DropOut, DropConnect, DropBlock </li>
+</ul>
+</li>
+<li>add：MixUp, CutMix, GAN </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>data imbalance for classification<ul>
+<li>two-stage：hard example mining </li>
+<li>one-stage：focal loss, soft label  </li>
+</ul>
+</li>
+<li>bounding box regression <ul>
+<li>MSE-regression：treat [x,y,w,h] as independent variables</li>
+<li>IoU loss：consider the integrity &amp; scale invariant </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Bag of specials <ul>
+<li>enlarging receptive field：improved SPP, ASPP, RFB</li>
+<li>introducing attention mechanism <ul>
+<li>channel-wise attention：SE, increase the inference time by about 10%</li>
+<li>point-wise attention：Spatial Attention Module (SAM), does not affect the speed of inference</li>
+</ul>
+</li>
+<li>strengthening feature integration<ul>
+<li>channel-wise level：SFAM</li>
+<li>point-wise level：ASFF </li>
+<li>scale-wise level：BiFPN </li>
+</ul>
+</li>
+<li>activation function：A good activation function can make the gradient more efficiently propagated</li>
+<li>post-processing：各种NMS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>choose a backbone —- CSPDarknet53 </p>
+<ul>
+<li>Higher input network size (resolution) – for detecting multiple small-sized objects </li>
+<li>More conv layers – for a higher receptive field to cover the increased size of input network </li>
+<li>More parameters – for greater capacity of a model to detect multiple objects of different sizes in a single image </li>
+</ul>
+</li>
+<li><p>add the SPP block over the CSPDarknet53 </p>
+<ul>
+<li>significantly increases the receptive field </li>
+<li>separates out the most significant context features  </li>
+<li>causes almost no re- duction of the network operation speed</li>
+</ul>
+</li>
+<li><p>use PANet as the method of parameter aggregation </p>
+<ul>
+<li>Modified PAN</li>
+<li><p>replace shortcut connection of PAN to concatenation </p>
+<p><img src="/2019/11/28/yolo系列/pan.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>use YOLOv3 (anchor based) head </p>
+</li>
+<li><p>Mosaic data augmentation</p>
+<ul>
+<li>mixes 4 training images </li>
+<li>allows detection of objects outside their normal context</li>
+<li><p>reduces the need for a large mini-batch size </p>
+<p><img src="/2019/11/28/yolo系列/mosaic.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Self-Adversarial Training (SAT) data augmentation</p>
+<ul>
+<li>1st stage alters images</li>
+<li>2nd stage train on the modified images</li>
+</ul>
+</li>
+<li><p>CmBN：a CBN modified version </p>
+<p>  <img src="/2019/11/28/yolo系列/cmbn.png" width="40%;"></p>
+</li>
+<li><p>modified SAM：from spatial-wise attention to point- wise attention </p>
+<p>  <img src="/2019/11/28/yolo系列/sam.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>Influence of different features on Classifier training </p>
+<ul>
+<li><p>Bluring和Swish没有提升</p>
+<p><img src="/2019/11/28/yolo系列/cls.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Influence of different features on Detector training </p>
+<ul>
+<li>IoU threshold, CmBN, Cosine annealing sheduler, CIOU有提升</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3"><a href="#POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3" class="headerlink" title="POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3"></a>POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>yoloV3’s weakness</p>
+<ul>
+<li>rewritten labels </li>
+<li>inefficient distribution of anchors </li>
+</ul>
+</li>
+<li><p>light backbone：</p>
+<ul>
+<li>stairstep upsampling </li>
+</ul>
+</li>
+<li>single scale output </li>
+<li>to extend instance segmentation <ul>
+<li>detect size-independent polygons defined on a polar grid </li>
+<li>real-time processing </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>yolov3</p>
+<ul>
+<li>real-time</li>
+<li>low precision cmp with RetinaNet, EfficientDet <ul>
+<li>low precision of the detection of big boxes </li>
+<li>rewriting of labels by each-other due to the coarse resolution </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper solution：</p>
+<ul>
+<li>解决yolo精度问题：propose a brand-new feature decoder with a single ouput tensor that goes to head with higher resolution</li>
+<li>多尺度特征融合：utilize stairstep upscaling</li>
+<li>实例分割：bounding polygon within a poly grid</li>
+</ul>
+</li>
+<li><p>instance segmentation</p>
+<ul>
+<li>two-stage：mask-rcnn</li>
+<li>one-stage：<ul>
+<li>top-down：segmenting this object within a bounding box</li>
+<li>bottom-up：start with clustering pixels</li>
+<li>direct methods：既不需要bounding box也不需要clustered pixels，PolarMask </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>cmp with PolarMask </p>
+<ul>
+<li>size-independent：尺度，大小目标都能检测</li>
+<li>dynamic number of vertices：多边形定点可变</li>
+</ul>
+</li>
+<li><p>yolov3 issues</p>
+<ul>
+<li><p>rewriting of labels：</p>
+<ul>
+<li>两个目标如果落在同一个格子里，在一个尺度上ground truth label只会保留一个box</li>
+<li><p>对越小的特征图，grid越大，这个问题越严重</p>
+<p><img src="/2019/11/28/yolo系列/rewriting.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>imbalanced distribution of anchors across output scales </p>
+<ul>
+<li>anchor如果选的不合理，会导致特征图尺度和anchor尺度不匹配</li>
+<li>most of the boxes will be captured by the middle output layer and the two other layers will be underused</li>
+<li>如上面车的case，大多数车的框很小，聚类出的给level0和level1的anchor shape还是很小，但是level0是稀疏grid<ul>
+<li>一方面，grid shape和anchor shape不匹配</li>
+<li>一方面，label rewriten问题会升级</li>
+</ul>
+</li>
+<li>反过来，如果dense grid上预测大目标，会受到感受野的制约</li>
+<li>一种解决方案是基于感受野首先对gt box分成三组，然后分别聚类，然后9选1</li>
+</ul>
+</li>
+<li><p>yolov3原文：YOLOv3 has relatively high $AP_{small}$ performance. However, it has comparatively worse performance on medium and larger size objects. More investigation is needed to get to the bottom of this.</p>
+<ul>
+<li>小目标performance更好，大目标worse，主要是就是因为coarse grid上存在label rewriten问题，存在部分gt box被抑制掉了。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture </p>
+<p>  <img src="/2019/11/28/yolo系列/poly-yolo.png" width="80%;"></p>
+<ul>
+<li><p>single output  </p>
+</li>
+<li><p>higher resolution：stride4</p>
+</li>
+<li><p>handle all the anchors at once </p>
+</li>
+<li><p>cross-scale fusion</p>
+<ul>
+<li>hypercolumn technique：add operation</li>
+<li><p>stairstep interpolation：x2 x2 …</p>
+<p><img src="/2019/11/28/yolo系列/hypercolumn.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SE-blocks</p>
+</li>
+<li>reduced the number of convolutional filters to 75%  in the feature extraction phase </li>
+</ul>
+</li>
+<li><p>bounding polygons </p>
+<ul>
+<li>extend the box tuple：$b_i=\{b_i^{x^1},b_i^{y^1},b_i^{x^2},b_i^{y^2},V_i\}$</li>
+<li>The center of a bounding box is used as the origin </li>
+<li>polygon tuple：$v_{i,j}=\{\alpha_{i,j},\beta_{i,j},\gamma_{i,j}\}$</li>
+<li>polar coordinate：distance &amp; oriented angle，相对距离（相对anchor box的对角线），相对角度（norm到[0,1]）</li>
+<li><p>polar cell：一定角度的扇形区域 内，如果sector内没有定点，conf=0</p>
+<p><img src="/2019/11/28/yolo系列/polar.png" width="80%;"></p>
+</li>
+<li><p>general shape：</p>
+<ul>
+<li>不同尺度，形状相同的object，在polar coord下表示是一样的</li>
+<li>distance*anchor box的对角线，转换成绝对尺度</li>
+<li>bounding box的两个对角预测，负责尺度估计，polygon只负责预测形状</li>
+<li>sharing values should make the learning easier</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>mix loss</p>
+<ul>
+<li>output：a*(4+1+3*n_vmax)</li>
+<li>box center loss：bce</li>
+<li>box wh loss：l2 loss</li>
+<li>conf loss：bce with ignore mask</li>
+<li>cls loss：bce</li>
+<li>polygon loss：$\gamma<em>(log(\frac{\alpha}{anchor^d})-\hat a)^2 + \gamma</em>bce(\beta,\hat{beta})+bce(\gamma, \hat \gamma)$</li>
+<li>auxiliary task learning：<ul>
+<li>任务间相互boost</li>
+<li>converge faster </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network"><a href="#Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network" class="headerlink" title="Scaled-YOLOv4: Scaling Cross Stage Partial Network"></a>Scaled-YOLOv4: Scaling Cross Stage Partial Network</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>model scaling method</li>
+<li>redesign yolov4 and propose yolov4-CSP</li>
+<li>develop scaled yolov4<ul>
+<li>yolov4-tiny</li>
+<li>yolov4-large</li>
+</ul>
+</li>
+<li>没什么技术细节，就是网络结构大更新</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>common technique changes depth &amp; width of the backbone</p>
+</li>
+<li><p>recently there are NAS</p>
+</li>
+<li><p>model scaling</p>
+<ul>
+<li><p>input size、width、depth对网络计算量呈现square, linear, and square increase</p>
+<p><img src="/2019/11/28/yolo系列/flop.png" width="50%;"></p>
+</li>
+<li><p>改成CSP版本以后，能够减少参数量、计算量，提高acc，缩短inference time</p>
+<p><img src="/2019/11/28/yolo系列/CSPflop.png" width="50%;"></p>
+</li>
+<li><p>检测的准确性高度依赖reception field，RF随着depth线性增长，随着stride倍数增长，所以一般先组合调节input size和stage，然后再根据算力调整depth和width</p>
+<p>  <img src="/2019/11/28/yolo系列/reception.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>backbone：CSPDarknet53 </p>
+</li>
+<li><p>neck：CSP-PAN，减少40%计算量，SPP</p>
+<p>  <img src="/2019/11/28/yolo系列/CSPpan.png" width="50%;"></p>
+</li>
+<li><p>yoloV4-tiny</p>
+<p>  <img src="/2019/11/28/yolo系列/tiny.png" width="40%;"></p>
+</li>
+<li><p>yoloV4-large：P456</p>
+<p>  <img src="/2019/11/28/yolo系列/large.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/13/triplet-center-loss论文/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2059,305 +3714,6 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/29/ssh-visualization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/29/ssh-visualization/" itemprop="url">ssh visualization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-29T18:33:00+08:00">
-                2018-12-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/29/ssh-visualization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/29/ssh-visualization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>ssh boocax@192.168.1.100</p>
-<p>密码：robot123</p>
-</li>
-<li><p>echo $ROS_MASTER_URI</p>
-<p>查看端口号11311</p>
-</li>
-<li><p>小车端：</p>
-<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
-<p>export ROS_IP=192.168.1.100</p>
-</li>
-<li><p>虚拟机端：</p>
-<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
-<p>export ROS_IP=172.16.128.142</p>
-</li>
-</ol>
-<h4 id=""><a href="#" class="headerlink" title=" "></a> </h4><h6 id="-1"><a href="#-1" class="headerlink" title="#"></a>#</h6><h4 id="-2"><a href="#-2" class="headerlink" title=" "></a> </h4><ol>
-<li><p>nav远程开启三个终端（代码重构以前）：</p>
-<p>move_base: roslaunch teleop_twist_joy real_nav.launch </p>
-<p>mapserver: rosrun map_server map_server catkin_ws2/src/patrol/map/p1.yaml </p>
-<p>amcl: roslaunch patrol real_loc.launch </p>
-</li>
-<li><p>本地可视化：rviz／rqt_graph / rosservice call /rostopic pub</p>
-<ul>
-<li><p>全局定位：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call /global_localization "&#123;&#125;"</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>设置导航目标点：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 相对base_link坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "base_link" &#125;, pose: &#123; position: &#123; x: 0.5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br><span class="line"></span><br><span class="line">// 相对map坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "map" &#125;, pose: &#123; position: &#123; x: 5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br></pre></td></tr></table></figure>
-<p>注意<strong>-1</strong>，否则循环发布。</p>
-</li>
-</ul>
-</li>
-</ol>
-<h4 id="-3"><a href="#-3" class="headerlink" title=" "></a> </h4><h6 id="-4"><a href="#-4" class="headerlink" title="#"></a>#</h6><h4 id="-5"><a href="#-5" class="headerlink" title=" "></a> </h4><p>往回备份：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r boocax@192.168.1.100:/home/boocax/catkin_ws2019 bkp/</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/04/Occupancy-Grid-Map/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/04/Occupancy-Grid-Map/" itemprop="url">Occupancy Grid Map</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-04T14:13:01+08:00">
-                2018-12-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/04/Occupancy-Grid-Map/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/04/Occupancy-Grid-Map/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>to be completed…</p>
-<ul>
-<li>Inverse Sensor Model</li>
-<li>Incremental Updating</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2412,7 +3768,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2425,7 +3781,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

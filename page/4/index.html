@@ -276,6 +276,363 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/21/equlization-loss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/21/equlization-loss/" itemprop="url">equlization loss</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-21T17:28:34+08:00">
+                2020-12-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/21/equlization-loss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/21/equlization-loss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/18/megDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/18/megDet/" itemprop="url">megDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-18T17:40:52+08:00">
+                2020-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/18/megDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/18/megDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="MegDet-A-Large-Mini-Batch-Object-Detector"><a href="#MegDet-A-Large-Mini-Batch-Object-Detector" class="headerlink" title="MegDet: A Large Mini-Batch Object Detector"></a>MegDet: A Large Mini-Batch Object Detector</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>past methods mainly come from novel framework or loss design</li>
+<li><p>this paper studies the mini-batch size</p>
+<ul>
+<li>enable training with a large mini-batch size</li>
+<li>warmup learning rate policy</li>
+<li>cross-gpu batch normalization</li>
+</ul>
+</li>
+<li><p>faster &amp; better acc</p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>potential drawbacks with small mini-batch sizes</p>
+<ul>
+<li><p>long training time</p>
+</li>
+<li><p>inaccurate statistics for BN：previous methods use fixed statistics from ImageNet which is a sub-optimal trade-off</p>
+</li>
+<li><p>positive &amp; negative training examples are more likely imblanced</p>
+</li>
+<li><p>加大batch size以后，正负样本比例有提升，所以yolov3会先锁着back开大batchsize做warmup</p>
+<p>  <img src="/2020/12/18/megDet/ratio.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>learning rate dilemma</p>
+<ul>
+<li>large min-batch size usually requires large learning rate </li>
+<li>large learning rate is likely leading to convergence failure</li>
+<li>a smaller learning rate often obtains inferior results </li>
+</ul>
+</li>
+<li><p>solution of the paper</p>
+<ul>
+<li>linear scaling rule </li>
+<li>warmup</li>
+<li>Cross-GPU Batch Normalization (CGBN) </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>warmup</p>
+<ul>
+<li>set up the learning rate small enough at the be- ginning</li>
+<li>then increase the learning rate with a constant speed after every iteration, until fixed</li>
+</ul>
+</li>
+<li><p>Cross-GPU Batch Normalization </p>
+<ul>
+<li>两次同步</li>
+<li><p>tensorpack里面有</p>
+<p><img src="/2020/12/18/megDet/CGBN.png" width="40%;"></p>
+<p><img src="/2020/12/18/megDet/Cross-GPU.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>一次同步</p>
+<ul>
+<li><p>异步BN：batch size 较小时，每张卡计算得到的统计量可能与整体数据样本具有较大差异</p>
+<p> <img src="/2020/12/18/megDet/unsync.png" width="40%;"></p>
+</li>
+<li><p>同步：</p>
+</li>
+<li><p>需要同步的是每张卡上计算的统计量，即BN层用到的均值$\mu$和方差$\sigma^2$</p>
+</li>
+<li><p>这样多卡训练结果才与单卡训练效果相当</p>
+</li>
+<li><p>两次同步：</p>
+</li>
+<li><p>第一次同步均值：计算全局均值</p>
+</li>
+<li><p>第二次同步方差：基于全局均值计算各自方差，再取平均</p>
+</li>
+<li><p>一次同步：</p>
+<ul>
+<li><p>核心在于方差的计算</p>
+</li>
+<li><p>首先均值：$\mu = \frac{1}{m} \sum_{i=1}^m x_i$</p>
+<ul>
+<li>然后是方差：<script type="math/tex; mode=display">
+  \sigma^2 = \frac{1}{m} \sum_{i=1}^m (x_i-\mu)^2 = \frac{1}{m} \sum_{i=1}^m x_i^2 - \mu^2\\
+  =\frac{1}{m} \sum_{i=1}^m x_i^2 - (\frac{1}{m} \sum_{i=1}^m x_i)^2</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>  * 计算每张卡的$\sum x_i$和$\sum x_i^2$，就可以一次性算出总均值和总方差
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/16/RFB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2772,747 +3129,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/data-aug/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/data-aug/" itemprop="url">data aug</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T13:46:07+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/data-aug/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/data-aug/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[mixup] mixup: BEYOND EMPIRICAL RISK MINIMIZATION：对不同类别的样本，不仅可以作为数据增广手段，还可以用于semi-supervised learning（MixMatch）</p>
-<p>[mixmatch] MixMatch: A Holistic Approach to Semi-Supervised Learning：针对半监督数据的数据增广</p>
-<p>[mosaic] from YOLOv4</p>
-<p>[AutoAugment] AutoAugment: Learning Augmentation Policies from Data：google</p>
-<p>[RandAugment] RandAugment: Practical automated data augmentation with a reduced search space：google</p>
-<h2 id="RandAugment-Practical-automated-data-augmentation-with-a-reduced-search-space"><a href="#RandAugment-Practical-automated-data-augmentation-with-a-reduced-search-space" class="headerlink" title="RandAugment: Practical automated data augmentation with a reduced search space"></a>RandAugment: Practical automated data augmentation with a reduced search space</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>AutoAugment<ul>
-<li>separate search phase</li>
-<li>run on a subset of a huge dataset</li>
-<li>unable to adjust the regularization strength based on model or dataset size</li>
-</ul>
-</li>
-<li><p>RandAugment</p>
-<ul>
-<li>significantly reduced search space</li>
-<li>can be used uniformly across tasks and datasets</li>
-<li>match or exceeds the previous val acc</li>
-</ul>
-<p><img src="/2020/09/18/data-aug/acc.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li><p>always select a transformation with uniform prob $\frac{1}{K}$</p>
-</li>
-<li><p>given N transformations for an image：there are $K^N$ potential policies</p>
-</li>
-<li><p>fixied magnitude schedule M：we choose Constant，因为只要一个hyper</p>
-<p>  <img src="/2020/09/18/data-aug/magnitude.png" width="50%"></p>
-</li>
-<li><p>run naive grid search</p>
-</li>
-</ul>
-</li>
-<li><p>疑问：这样每个op等概率，就不再data-specific了，也看不出自然图像更prefer color transformation这种结论了</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="AutoAugment-Learning-Augmentation-Policies-from-Data"><a href="#AutoAugment-Learning-Augmentation-Policies-from-Data" class="headerlink" title="AutoAugment: Learning Augmentation Policies from Data"></a>AutoAugment: Learning Augmentation Policies from Data</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>search for data augmentation policies</p>
-</li>
-<li><p>propose AutoAugment</p>
-<ul>
-<li>create a search space composed of augmentation sub-policies<ul>
-<li>one sub-policy is randomly choosed per image per mini-batch</li>
-<li>a sub-policy consists of two base operations </li>
-</ul>
-</li>
-<li><p>find the best policy：yields the highest val acc on the target dataset</p>
-</li>
-<li><p>the learned policy can transfer</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>data augmentation<ul>
-<li>to teach a model about invariance</li>
-<li>in data domain is easier than hardcoding it into model architecture</li>
-<li>currently dataset-specific and often do not transfer：<ul>
-<li>MNIST：elastic distortions, scale, translation, and rotation </li>
-<li>CIFAR &amp; ImageNet：random cropping, image mirroring and color shifting / whitening </li>
-<li>GAN：直接生成图像，没有归纳policy</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>we aim to automate the process of finding an effective data augmentation policy for a target dataset<ul>
-<li>each policy：<ul>
-<li>operations in certain order</li>
-<li>probabilities after applying</li>
-<li>magnitudes </li>
-</ul>
-</li>
-<li>use reinforcement learning as the search algorithm</li>
-</ul>
-</li>
-<li>contributions<ul>
-<li>SOTA on CIFAR &amp; ImageNet &amp; SVHN </li>
-<li>new insight on transfer learning：使用预训练权重没有显著提升的dataset上，使用同样的aug policies则会涨点</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li><p>search space of policies</p>
-<ul>
-<li>policy：a policy consists of 5 sub-policies </li>
-<li>sub-policy：each sub-policy consisting of two image operations</li>
-<li>operation：each operation is also associated with two hyperparameters<ul>
-<li>probability：of applying the operation，uniformly discrete into 11 values</li>
-<li>magnitude：of the operation，uniformly discrete into 10 values</li>
-</ul>
-</li>
-<li>a mini-batch share the same chosen sub-policy</li>
-</ul>
-</li>
-<li><p>operations：16 in total，mainly use PIL</p>
-<p>  <img src="/2020/09/18/data-aug/operations.png" width="80%"></p>
-<ul>
-<li><a href="https://blog.csdn.net/u011583927/article/details/104724419有各种operation的可视化效果" target="_blank" rel="noopener">https://blog.csdn.net/u011583927/article/details/104724419有各种operation的可视化效果</a></li>
-<li>shear是砍掉图像一个角的畸变</li>
-<li>equalize是直方图均衡化</li>
-<li>solarize是基于一定阈值的invert，高于阈值invert，低于阈值不变</li>
-<li>posterize也是一种像素值截断操作</li>
-<li>color是调整饱和度，mag&lt;1趋近灰度图</li>
-<li>sharpness决定图像模糊/锐化</li>
-<li>sample pairing：两张图加权求和，但是不改变标签</li>
-</ul>
-</li>
-<li><p>searching goal</p>
-<ul>
-<li>with $(16<em>10</em>11)^2$ choices of sub-policies</li>
-<li>we want 5</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>example</p>
-<ul>
-<li>一个sub-policy包含两个operation</li>
-<li>每个operation有一定的possibility做/不做</li>
-<li><p>每个operation有一定的magnitude决定做后的效果</p>
-<p><img src="/2020/09/18/data-aug/example.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>结论</p>
-<ul>
-<li><p>On CIFAR-10, AutoAugment picks mostly color-based transformations </p>
-</li>
-<li><p>on ImageNet, AutoAugment focus on color-based transformations as well, besides geometric transformation and rotate is commonly used </p>
-<ul>
-<li><p>one of the best policy</p>
-<p>  <img src="/2020/09/18/data-aug/imagenet.png" width="80%"></p>
-</li>
-<li><p>overall results</p>
-<p>  <img src="/2020/09/18/data-aug/imagenet2.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="mixup-BEYOND-EMPIRICAL-RISK-MINIMIZATION"><a href="#mixup-BEYOND-EMPIRICAL-RISK-MINIMIZATION" class="headerlink" title="mixup: BEYOND EMPIRICAL RISK MINIMIZATION"></a>mixup: BEYOND EMPIRICAL RISK MINIMIZATION</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>classification task</li>
-<li>memorization and sensitivity issue<ul>
-<li>reduces the memorization of corrupt labels</li>
-<li>increases the robustness to adversarial examples</li>
-<li>improves the generalization </li>
-<li>can be used to stabilize the training of GANs  </li>
-</ul>
-</li>
-<li>propose convex combinations of pairs of examples and their labels</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>ERM(Empirical Risk Minimization)：issue of generalization</p>
-<ul>
-<li>allows large neural networks to <em>memorize</em> (instead of generalize from) the training data even in the presence of strong regularization </li>
-<li>neural networks change their predictions drastically when evaluated on examples just outside the training distribution </li>
-</ul>
-</li>
-<li><p>VRM(Vicinal Risk Minimization)：introduce data augmentation</p>
-<ul>
-<li>e.g. define the vicinity of one image as the set of its horizontal reflections, slight rotations, and mild scalings </li>
-<li>vicinity share the same class </li>
-<li>does not model the vicinity relation across examples of different classes </li>
-</ul>
-</li>
-<li>ERM中的training set并不是数据的真实分布，只是用有限数据来近似真实分布，memorization也会最小化training error，但是对training seg以外的sample就leads to undesirable behaviour </li>
-<li>mixup就是VRM的一种，propose a generic vicinal distribution，补充vicinity relation across examples of different classes </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>mixup</p>
-<ul>
-<li><p>constructs virtual training examples </p>
-<script type="math/tex; mode=display">
-  x = \lambda x_i + (1-\lambda)x_j  \\
-  y = \lambda y_i + (1-\lambda)y_j</script></li>
-<li><p>use two examples drawn at random：raw inputs &amp; raw one-hot labels</p>
-</li>
-<li><p>理论基础：linear interpolations of feature vectors should lead to linear interpolations of the associated targets </p>
-</li>
-<li><p>hyper-parameter $\alpha$</p>
-<ul>
-<li>$\lambda = np.random.beta(\alpha, \alpha)$</li>
-</ul>
-</li>
-<li>controls the strength of interpolation  </li>
-</ul>
-</li>
-<li><p>初步结论</p>
-</li>
-<li><p>three or more examples mixup does not provide further gain but more computation </p>
-</li>
-<li><p>interpolating only between inputs with equal label did not lead to the performance gains </p>
-</li>
-<li><p><strong>key elemets——two inputs with different label</strong></p>
-</li>
-<li><p>vis</p>
-<ul>
-<li><p>decision boundaries有了一个线性过渡</p>
-<p>  <img src="/2020/09/18/data-aug/boundary.png" width="30%"></p>
-</li>
-<li><p>更准确 &amp; 梯度更小：error少所以loss小所以梯度小？？</p>
-<p>  <img src="/2020/09/18/data-aug/gradient.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>初步分类实验</p>
-<ul>
-<li>$\alpha \in [0.1, 0.4]$ leads to improved performance，largers leads to underfitting</li>
-<li>models with higher capacities and/or longer training runs are the ones to benefit the most from mixup</li>
-</ul>
-</li>
-<li><p>memorization of corrupted labels</p>
-<ul>
-<li>将数据集中一部分label换成random noise </li>
-<li>ERM直接过拟合，在corrupted sample上面training error最小，测试集上test error最大</li>
-<li>dropout有效防止过拟合，但是mixup outperforms它</li>
-<li><p>corrupted label多的情况下，dropout+mixup performs the best</p>
-<p><img src="/2020/09/18/data-aug/memorization.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>robustness to adversarial examples</p>
-<ul>
-<li>Adversarial examples are obtained by adding tiny (visually imperceptible) perturbations  </li>
-<li>常规操作data augmentation：produce and train on adversarial examples </li>
-<li>add significant computational：样本数量增多，梯度变化大</li>
-<li>mixup results in a smaller loss and gradient norm：因为mixup生成的假样本“更合理一点”，梯度变化更小</li>
-</ul>
-</li>
-<li><p>ablation study</p>
-<ul>
-<li><p>mixup is the best：绝对领先第二mix input + label smoothing</p>
-</li>
-<li><p>the effect of regularization </p>
-<ul>
-<li>ERM需要大weight decay，mixup需要小的——说明mixup本身的regularization effects更强</li>
-<li>高层特征mixup需要更大的weight decay——随着层数加深regularization effects减弱</li>
-<li><p>AC+RP最强</p>
-</li>
-<li><p>label smoothing和add Gaussian noise to inputs 相对比较弱</p>
-</li>
-<li>mix inputs only(SMOTE) shows no gain</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/09/18/data-aug/ablation.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="MixMatch-A-Holistic-Approach-to-Semi-Supervised-Learning"><a href="#MixMatch-A-Holistic-Approach-to-Semi-Supervised-Learning" class="headerlink" title="MixMatch: A Holistic Approach to Semi-Supervised Learning"></a>MixMatch: A Holistic Approach to Semi-Supervised Learning</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>semi-supervised learning</li>
-<li>unify previous methods</li>
-<li>proposed mixmatch<ul>
-<li>guessing low-entropy labels </li>
-<li>mixup labeled and unlabeled data </li>
-</ul>
-</li>
-<li>useful for differentially private learning</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>semi-supervised learning add a loss term computed on unlabeled data and encourages the model to generalize better to unseen data </li>
-<li>the loss term<ul>
-<li>entropy minimization：decision boundary应该尽可能远离数据簇，因此prediction on unlabeled data也应该是high confidence</li>
-<li>consistency regularization：增强前后的unlabeled data输出分布一致</li>
-<li>generic regularization：weight decay &amp; mixup</li>
-</ul>
-</li>
-<li>MixMatch unified all above<ul>
-<li>introduces a unified loss term for unlabeled data  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>given：a batch of labeled examples $X$ and a batch of labeled examples $U$</li>
-<li>augment+label guess：a batch of augmented labeled examples $X^{‘}$ and a batch of augmented labeled examples $U^{‘}$</li>
-<li>compute：separate labeled and unlabeled loss terms $L_X$ and $L_U$</li>
-<li><p>combine：weighted sum</p>
-<p><img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/overview.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>MixMatch</p>
-<ul>
-<li><p>data augmentation</p>
-<ul>
-<li>常规augmentation</li>
-<li>作用于每一个$x_b$和$u_b$</li>
-<li>$u_b$做$K$次增强</li>
-</ul>
-</li>
-<li><p>label guessing</p>
-<ul>
-<li>对增强的$K$个$u_b$分别预测，然后取平均</li>
-<li>average class prediction </li>
-</ul>
-</li>
-<li><p>sharpening</p>
-<ul>
-<li>reduce the entropy of the label distribution </li>
-<li>拉高最大prediction，拉小其他的</li>
-<li>$Sharpen (p, T)_i =\frac{p_i^{\frac{1}{T}}}{\sum^{N}_j p_j^{\frac{1}{T}}} $</li>
-<li>$T$趋近于0的时候，processed label就接近one-hot了</li>
-</ul>
-</li>
-<li><p>mixup</p>
-<ul>
-<li><p>slightly modified form of mixup to make the generated sample being more closer to the original</p>
-<p><img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/mixup.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>loss function</p>
-<ul>
-<li>labeled loss：typical cross-entropy loss  </li>
-</ul>
-</li>
-<li><p>unlabeled loss：<strong>squared L2，bounded and less sensitive to completely incorrect predictions</strong></p>
-</li>
-</ul>
-</li>
-<li><p>hyperparameters</p>
-<ul>
-<li><p>sharpening temperature $T$：fixed 0.5</p>
-<ul>
-<li>number of unlabeled augmentations $K$：fixed 2</li>
-<li>MixUp Beta parameter $\alpha$：0.75 for start</li>
-<li>unsupervised loss weight $\lambda_U$：100 for start</li>
-</ul>
-</li>
-<li><p>Algorithm </p>
-<p>  <img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/mixmatch.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<p>[mosaic] from YOLOv4</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/hrnet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/hrnet/" itemprop="url">hrnet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T12:18:47+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/hrnet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/hrnet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>动机</p>
-<ul>
-<li>human pose estimation</li>
-<li>high-resolution representations through<ul>
-<li>existing methods recover high-res feature from the low</li>
-<li>this methods maintain the high-res from start to the end</li>
-<li>repeated multi-scale fusions</li>
-</ul>
-</li>
-<li>more accurate and spatially more precise</li>
-<li>estimate on the high-res output</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>in parallel rather than in series：potentially spatially more precise</li>
-<li>repeated multi- scale fusions：boost both high&amp;low representations，more accurate</li>
-<li>pose estimation <ul>
-<li>probabilistic graphical model </li>
-<li>regression</li>
-<li>heatmap</li>
-</ul>
-</li>
-<li>High-to-low and low-to-high <ul>
-<li>Symmetric high-to-low and low-to-high </li>
-<li>Heavy high-to-low and light low-to-high </li>
-<li>Heavy high-to-low with dilated convolutions and further lighter low-to-high </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2020/09/18/hrnet/hrnet.png" width="50%;"></p>
-<ul>
-<li>four stages </li>
-<li>channels double when halve the res</li>
-<li>1st stage<ul>
-<li>4 residual units，bottleneck resblock</li>
-<li>width=64</li>
-<li>3x3 conv reducing width to C</li>
-</ul>
-</li>
-<li>2、3、4 stages<ul>
-<li>contain 1, 4, 3 exchange blocks respectively </li>
-<li>exchange block<ul>
-<li>conv：4 residual units，two 3x3 conv</li>
-<li>exchange unit</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>width<ul>
-<li>C：width of the high-resolution subnetworks in last three stages</li>
-<li>other three parallel subnetworks <ul>
-<li>HRNet-W32：64, 128, 256</li>
-<li>HRNet-W48：96, 192, 384  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>parallel multi-resolution subnetworks</p>
-<ul>
-<li>for one stage，one produce features with same-res and a extra lower one</li>
-<li><p>一个parallel代表一个scale</p>
-<p><img src="/2020/09/18/hrnet/parallel.png" width="30%;"></p>
-</li>
-</ul>
-</li>
-<li><p>repeated multi-scale fusion</p>
-<ul>
-<li>exchange unit </li>
-<li><p>multi-scale</p>
-<ul>
-<li>downsampling：3x3 s2 conv</li>
-<li>upsampling：nearest neighbor+1x1 conv</li>
-<li>identify connection </li>
-<li>more factors：consecutive layers</li>
-</ul>
-<p><img src="/2020/09/18/hrnet/exchange unit.png" width="50%;"></p>
-</li>
-<li><p>exchange block</p>
-<ul>
-<li>3 parallel convolution units + an exchange unit </li>
-<li><p>可以连续几个block</p>
-<p><img src="/2020/09/18/hrnet/exchange block.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>heatmap estimation</p>
-<ul>
-<li>from the last high-res exchange unit</li>
-<li>mse</li>
-<li>gt gassian map：std=1</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3567,7 +3183,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3580,7 +3196,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

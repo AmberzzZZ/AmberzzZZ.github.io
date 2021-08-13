@@ -79,23 +79,25 @@
 
 
 
-<meta name="description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
+<meta name="description" content="[papers]  [centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了center">
 <meta name="keywords" content="目标检测，anchor-free, one-stage&amp;two-stage">
 <meta property="og:type" content="article">
 <meta property="og:title" content="centerNet">
 <meta property="og:url" content="https://amberzzzz.github.io/2020/12/29/centerNet/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
+<meta property="og:description" content="[papers]  [centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了center">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/tasks.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/backs.jpg">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/centerNet2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/designs.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/real-time.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/center.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/central.png">
-<meta property="og:updated_time" content="2021-06-16T02:43:07.028Z">
+<meta property="og:updated_time" content="2021-07-07T04:31:25.653Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="centerNet">
-<meta name="twitter:description" content="[papers]  [centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerN">
+<meta name="twitter:description" content="[papers]  [centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归  [cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了center">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2020/12/29/centerNet/tasks.png">
 
 
@@ -362,7 +364,7 @@
       
         <p>[papers]</p>
 <ul>
-<li><p>[centerNet] centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归</p>
+<li><p>[centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归</p>
 </li>
 <li><p>[cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerNet，但是我觉得叫corner-centerNet更合适，它是基于cornerNet衍生的，在cornerNet的基础上再加一刀判定，基于角点pair的中心点是否是前景来决定是否保留这个框</p>
 </li>
@@ -527,7 +529,8 @@
 <li>verified on COCO<ul>
 <li>faster and more accurate than both one and two stage detectors</li>
 <li>outperform yolov4</li>
-<li>56.4 MAP</li>
+<li>extreme large model：56.4 mAP</li>
+<li>standard ResNeXt- 32x8d-101-DCN back：50.2 mAP</li>
 </ul>
 </li>
 </ul>
@@ -599,7 +602,7 @@
 </li>
 <li><p>方法</p>
 <ul>
-<li>joint class distribution<ul>
+<li>joint class distribution：先介绍怎么将一二阶段联动<ul>
 <li>【第一阶段的前背景score】 乘上 【第二阶段的class score】</li>
 <li>$P(C_k) = \sum_o P(C_k|O_k=o)P(O_k=o)$</li>
 <li>maximum likelihood estimation<ul>
@@ -621,9 +624,86 @@
 </li>
 </ul>
 </li>
-<li>network design<ul>
-<li>experiment with 4 different designs</li>
-<li></li>
+<li><p>network design：介绍怎么在one-stage detector的基础上改造出一个two-stage probabilistic detector</p>
+<ul>
+<li>experiment with 4 different designs for first-stage RPN</li>
+<li>RetinaNet<ul>
+<li>RetinaNet其实和two-stage的RPN高度相似核心区别在于：<ul>
+<li>a heavier head design：4-conv vs 1-conv<ul>
+<li>RetinaNet是backbone+fpn+individual heads</li>
+<li>RPN是backbone+fpn+shared convs+individual heads</li>
+</ul>
+</li>
+<li>a stricter positive and negative anchor definition：都是IoU-based anchor selection，thresh不一样</li>
+<li>focal loss</li>
+</ul>
+</li>
+<li>first-stage design<ul>
+<li>以上三点都在probabilistic model里面保留</li>
+<li>然后将separated heads改成shared heads</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>centerNet<ul>
+<li>模型升级<ul>
+<li>升级成multi-scale：use ResNet-FPN back，P3-P7</li>
+<li>头是FCOS那种头：individual heads，不share conv，然后cls branch预测centerness+cls，reg branch预测regress params</li>
+<li>正样本也是按照FCOS策略：position &amp; scale-based</li>
+</ul>
+</li>
+<li>升级模型进行one-stage &amp; two-stage实验：centerNet*</li>
+</ul>
+</li>
+<li>ATSS<ul>
+<li>是一个adaptive IoU thresh的方法，centerness来表示一个格子的score</li>
+<li>我们将centerness*classification score定义为这个模型的proposal score</li>
+<li>另外就是two-stage下还是将RPN的cls &amp; reg heads合并</li>
+</ul>
+</li>
+<li>GFL：还没看过，先跳过吧</li>
+<li>second-stage designs：FasterRCNN &amp; CascadeR- CNN</li>
+<li>deformable conv：这个在centerNetv1的ResNet和DLA back里面都用了，在v2里面，主要是用ResNeXt-32x8d-101-DCN，</li>
+</ul>
+</li>
+<li><p>hyperparameters for two-stage probabilistic model</p>
+<ul>
+<li>两阶段模型通常是用P2-P6，一阶段通常用P3-P7：我们用P3-P7</li>
+<li>increase the positive IoU threshold：0.5 to [0.6,0.7,0.8]</li>
+<li>maximum of 256 proposals （对比origin的1k）</li>
+<li>increase nms threshold from 0.5 to 0.7</li>
+<li>SGD，90K iterations</li>
+<li>base learning rate：0.02 for two-stage &amp; 0.01 for one-stage，0.1 decay</li>
+<li>multi-scale training：短边[640,800]，长边不超过1333</li>
+<li>fix-scale testing：短边用800，长边不超过1333</li>
+<li>first stage loss weight：0.5，因为one-stage detector通常用0.01 lr开始训练</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>4种design的对比</p>
+<ul>
+<li>所有的probabilistic model都比one-stage model强，甚至还快（因为简化了脑袋）</li>
+<li>所有的probabilistic FasterRCNN都比原始的RPN-based FasterRCNN强，也快（因为P3-P7比P2-P6的计算量小一半，而且第二阶段fewer proposals）</li>
+<li><p>CascadeRCNN-CenterNet design performs the best：所以以后就把它叫CenterNet2</p>
+<p><img src="/2020/12/29/centerNet/designs.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>和其他real-time models对比</p>
+<ul>
+<li>大多是real-time models都是一阶段模型</li>
+<li><p>可以看到二阶段不仅能够比一阶段模型还快，精度还更高</p>
+<p><img src="/2020/12/29/centerNet/real-time.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SOTA对比</p>
+<ul>
+<li>报了一个56.4%的sota，但是大家口碑上好像效果很差</li>
+<li>不放图了</li>
 </ul>
 </li>
 </ul>
@@ -817,7 +897,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -830,7 +910,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

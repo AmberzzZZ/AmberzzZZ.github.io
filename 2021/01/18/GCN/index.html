@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="入门科普," />
+  <meta name="keywords" content="图卷积，graph-conv," />
 
 
 
@@ -79,20 +79,21 @@
 
 
 
-<meta name="description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其领域（ker">
-<meta name="keywords" content="入门科普">
+<meta name="description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其邻域（ker">
+<meta name="keywords" content="图卷积，graph-conv">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GCN">
 <meta property="og:url" content="https://amberzzzz.github.io/2021/01/18/GCN/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其领域（ker">
+<meta property="og:description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其邻域（ker">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/graph-conv-layer.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/gcn.png">
-<meta property="og:updated_time" content="2021-01-18T07:13:57.138Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/GCN-CNN.png">
+<meta property="og:updated_time" content="2021-07-12T10:22:54.927Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GCN">
-<meta name="twitter:description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其领域（ker">
+<meta name="twitter:description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其邻域（ker">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2021/01/18/GCN/graph-conv-layer.png">
 
 
@@ -369,7 +370,7 @@
 </li>
 <li><p>特征学习</p>
 <ul>
-<li>可以类比CNN：对其领域（kernel）内特征进行线性变换（w加权），然后求和，然后激活函数</li>
+<li>可以类比CNN：对其邻域（kernel）内特征进行线性变换（w加权），然后求和，然后激活函数</li>
 <li>$H^{k+1} = f(H^{k},A) = \sigma(AH^{k}W^{k})$<ul>
 <li>H：running updating 特征矩阵，NxFk</li>
 <li>A：0-1邻接矩阵，NxN</li>
@@ -424,6 +425,88 @@
 </ul>
 </li>
 <li><p>应用场景</p>
+<p> [半监督 GCN]：SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</p>
+<p> [skin GCN]：Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</p>
+</li>
+</ol>
+<h2 id="Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><a href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks" class="headerlink" title="Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks"></a>Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>皮肤病：发病率高，experts少</li>
+<li>differential diagnosis：鉴别诊断，就是从众多疾病类别中跳出正确类别</li>
+<li>timely and accurate</li>
+<li>propose a DLS(deep learning system)<ul>
+<li>clinical images</li>
+<li>multi-label classification</li>
+<li>80 conditions</li>
+<li>incomplete image labels</li>
+<li>GCN</li>
+<li>Co-occurrence supervision</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>google的DLS<ul>
+<li>26中疾病</li>
+<li>建模成multi-class classification problem：破坏了类别间的correlation</li>
+</ul>
+</li>
+<li>our DLS<ul>
+<li>multi-label classification task over 80 conditions</li>
+<li>incomplete image labels：GCN that characterizes label co-occurrence supervision</li>
+<li>combine the classification network with the GCN</li>
+<li>数据量：136,462 clinical images</li>
+<li>精度：test on 12,378 user taken images，top-5 acc 93.6%</li>
+</ul>
+</li>
+<li>GCN<ul>
+<li>original application：<ul>
+<li>nodes classification，only a small subset of nodes had their labels available</li>
+<li>the graph structure is contructed from data</li>
+</ul>
+</li>
+<li>ML-GCN：<ul>
+<li>multi-label classification task</li>
+<li>图网络接收的输入是CNN学到的feature，而不是raw image</li>
+</ul>
+</li>
+<li>graph structure<ul>
+<li>节点代表labels</li>
+<li>边label_i —&gt; label_j表示当label_i激活的时候，label_j也激活</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview of our GCN-CNN approach</p>
+<ul>
+<li>一个trainable的CNN，将图片转化成feature vector</li>
+<li>一个GCN branch，propagates label co-occurrence and semantic embedding</li>
+<li><p>然后两个feature vector相乘，给出最终结果</p>
+<p><img src="/2021/01/18/GCN/GCN-CNN.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GCN branch </p>
+<ul>
+<li>two graph convolutional (GC) layers</li>
+<li>use the k-th order filter of spectral graph convolution</li>
+<li>GCN-1 takes order 1，convolves on direct neighbors</li>
+<li>GCN-2 takes order 2，convolves on direct neighbors &amp; indirect neighbors</li>
+<li>avoids over smoothing labe nodes</li>
+<li>build co-occurence graph using only training data<ul>
+<li>node embed semantic meaning to labels</li>
+<li>边的值定义有点像类别间的相关性强度：$e_{ij} = 1(\frac{C(i,j)}{C(i)+C(j)} \geq t)$，分子是有两种标签的样本量，分母是各自样本量</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ol>
 
@@ -443,7 +526,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/入门科普/" rel="tag"># 入门科普</a>
+            <a href="/tags/图卷积，graph-conv/" rel="tag"># 图卷积，graph-conv</a>
           
         </div>
       
@@ -523,8 +606,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -543,7 +635,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -556,7 +648,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -589,6 +681,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><span class="nav-number">1.</span> <span class="nav-text">Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

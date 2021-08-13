@@ -79,19 +79,20 @@
 
 
 
-<meta name="description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition">
+<meta name="description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [SPP] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognitio">
 <meta name="keywords" content="目标检测，two-stage">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RCNN系列">
 <meta property="og:url" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition">
+<meta property="og:description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [SPP] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognitio">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/R-CNN.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/warp.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/activations.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/feature%20maps.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/spp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/mapping.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/fastRCNN.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/smoothL1.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/fasterRCNN.png">
@@ -101,10 +102,13 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/pyramids.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/similar%20structs.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/FPNseg.png">
-<meta property="og:updated_time" content="2021-03-16T12:19:44.830Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/formulation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/outlier.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/quality.png">
+<meta property="og:updated_time" content="2021-07-14T05:05:50.723Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RCNN系列">
-<meta name="twitter:description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition">
+<meta name="twitter:description" content="综述 papers  [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation   [SPP] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognitio">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2020/01/08/RCNN系列/R-CNN.png">
 
 
@@ -372,12 +376,12 @@
         <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
 <li><p>papers</p>
 <p> [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation </p>
-<p> [] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</p>
-<p> [] Fast R-CNN: Fast Region-based Convolutional Network</p>
-<p> [] Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</p>
-<p> [] Mask R-CNN  </p>
-<p> [] FPN: Feature Pyramid Networks for Object Detection</p>
-<p> [] RFCN: </p>
+<p> [SPP] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</p>
+<p> [Fast R-CNN] Fast R-CNN: Fast Region-based Convolutional Network</p>
+<p> [Faster R-CNN] Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</p>
+<p> [Mask R-CNN] Mask R-CNN  </p>
+<p> [FPN] FPN: Feature Pyramid Networks for Object Detection</p>
+<p> [Cascade R-CNN] Cascade R-CNN: Delving into High Quality Object Detection</p>
 </li>
 </ol>
 <h2 id="R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation"><a href="#R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation" class="headerlink" title="R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation"></a>R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation</h2><ol>
@@ -576,49 +580,66 @@
 </ul>
 </li>
 </ol>
+<ul>
+<li><p>Training the Network</p>
+<ul>
+<li>Single-size training: fixed-size input (224×224) cropped from images, cropping for data augmentation<ul>
+<li>Multi-size training: rather than cropping, we resize the aforementioned 224×224 region to 180×180, then we train two fixed-size networks that share parameters by altenate epoch</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分析</p>
+<ul>
+<li><strong>50 bins vs. 30 bins: </strong>the gain of multi-level pooling is not simply due to more parameters, it is because the multi-level pooling is robust to the variance in object deformations and spatial layout<ul>
+<li><strong>multi-size vs. single-size:  </strong>multi results are more or less better than the single-size version</li>
+<li><strong>full vs. crop: </strong>shows the importance of maintaining the complete content</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>SPP-NET FOR OBJECT DETECTION</strong></p>
+<ul>
+<li><p>We extract the feature maps from the entire image only once </p>
+</li>
+<li><p>we apply the spatial pyramid pooling on each candidate window of the feature maps  </p>
+</li>
+<li><p>These representations are provided to the fully-connected layers of the network </p>
+</li>
+<li><p>SVM samples: We use the ground-truth windows to generate the positive samples, use the samples with IOU&lt;30% as the negative samples </p>
+</li>
+<li><p>multi-scale feature extraction: </p>
+<ul>
+<li>We resize the image at {480, 576, 688, 864, 1200}, and compute the feature maps of conv5 for each scale. <ul>
+<li>we choose a single scale s ∈ S such that the scaled candidate window has a number of pixels closest to 224×224. </li>
+<li>And we use the corresponding feature map to compute the feature for this window</li>
+<li>this is roughly equivalent to resizing the window to 224×224 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>fine-tuning:</p>
+<ul>
+<li>Since our features are pooled from the conv5 feature maps from windows of any sizes<ul>
+<li>for simplicity we only fine-tune the fully-connected layers </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Mapping a Window to Feature Maps**</p>
+<ul>
+<li><p>we project the corner point of a window onto a pixel in the feature maps, such that this corner point in the image domain is closest to the center of the receptive field of that feature map pixel.  </p>
+<p><img src="/2020/01/08/RCNN系列/mapping.png" width="50%;"></p>
+<p>​    确定原图上的两个角点（左上角和右下角），映射到 feature map上的两个对应点，使得映射点$(x^{‘}, y^{‘})$在原始图上<strong>感受野（上图绿色框）的中心点</strong>与$(x,y)$尽可能接近。</p>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ol>
-<pre><code>    * Training the Network
-
-        * Single-size training: fixed-size input (224×224) cropped from images, cropping for data augmentation
-        * Multi-size training: rather than cropping, we resize the aforementioned 224×224 region to 180×180, then we train two fixed-size networks that share parameters by altenate epoch
-
-4. 分析
-
-    * **50 bins vs. 30 bins: **the gain of multi-level pooling is not simply due to more parameters, it is because the multi-level pooling is robust to the variance in object deformations and spatial layout
-    * **multi-size vs. single-size:  **multi results are more or less better than the single-size version
-    * **full vs. crop: **shows the importance of maintaining the complete content
-
-5. **SPP-NET FOR OBJECT DETECTION**
-
-    * We extract the feature maps from the entire image only once 
-
-    * we apply the spatial pyramid pooling on each candidate window of the feature maps  
-
-    * These representations are provided to the fully-connected layers of the network 
-
-    * SVM samples: We use the ground-truth windows to generate the positive samples, use the samples with IOU&lt;30% as the negative samples 
-
-    * multi-scale feature extraction: 
-
-        * We resize the image at {480, 576, 688, 864, 1200}, and compute the feature maps of conv5 for each scale. 
-        * we choose a single scale s ∈ S such that the scaled candidate window has a number of pixels closest to 224×224. 
-        * And we use the corresponding feature map to compute the feature for this window
-        * this is roughly equivalent to resizing the window to 224×224 
-
-    * fine-tuning:
-
-        * Since our features are pooled from the conv5 feature maps from windows of any sizes
-        * for simplicity we only fine-tune the fully-connected layers 
-
-    * Mapping a Window to Feature Maps**
-
-        * we project the corner point of a window onto a pixel in the feature maps, such that this corner point in the image domain is closest to the center of the receptive field of that feature map pixel.  
-
-        &lt;img src=&quot;RCNN系列/mapping.png&quot; width=&quot;50%;&quot; /&gt;
-
-        ​    确定原图上的两个角点（左上角和右下角），映射到 feature map上的两个对应点，使得映射点$(x^{&#39;}, y^{&#39;})$在原始图上**感受野（上图绿色框）的中心点**与$(x,y)$尽可能接近。
-</code></pre><h2 id="Fast-R-CNN-Fast-Region-based-Convolutional-Network"><a href="#Fast-R-CNN-Fast-Region-based-Convolutional-Network" class="headerlink" title="Fast R-CNN: Fast Region-based Convolutional Network"></a>Fast R-CNN: Fast Region-based Convolutional Network</h2><ol>
+<h2 id="Fast-R-CNN-Fast-Region-based-Convolutional-Network"><a href="#Fast-R-CNN-Fast-Region-based-Convolutional-Network" class="headerlink" title="Fast R-CNN: Fast Region-based Convolutional Network"></a>Fast R-CNN: Fast Region-based Convolutional Network</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>improve training and testing speed</li>
@@ -1096,8 +1117,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
 </ul>
 </li>
 </ol>
-<p><strong>衍生应用：<lung nodules="" detection="" and="" segmentation="" using="" 3d="" mask-rcnn=""></lung></strong></p>
-<ol>
+<h2 id="衍生应用："><a href="#衍生应用：" class="headerlink" title="衍生应用："></a>衍生应用：<lung nodules="" detection="" and="" segmentation="" using="" 3d="" mask-rcnn=""></lung></h2><ol>
 <li>动机<ul>
 <li>3D volume detection and segmentation </li>
 <li>ROI ／ full scan</li>
@@ -1113,6 +1133,145 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
 <li>use focal loss improve class result</li>
 <li>use IOU loss improve mask result</li>
 <li>use heavy augmentation</li>
+</ul>
+</li>
+</ol>
+<h2 id="Cascade-R-CNN-Delving-into-High-Quality-Object-Detection"><a href="#Cascade-R-CNN-Delving-into-High-Quality-Object-Detection" class="headerlink" title="Cascade R-CNN: Delving into High Quality Object Detection"></a>Cascade R-CNN: Delving into High Quality Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>an detector trained with low IoU threshold usually produces noisy detections：低质量框issue</li>
+<li>但是又不能简单地提高IoU threshold<ul>
+<li>正样本会急剧减少，导致过拟合</li>
+<li>inference-time mismatch，训练阶段只有高质量框，但是测试阶段啥质量框都有</li>
+</ul>
+</li>
+<li>we propose Cascade R-CNN<ul>
+<li>multi-stage object detection architecture</li>
+<li>consists of a sequence of detectors trained with increasing IoU thresholds</li>
+<li>trained stage by stage</li>
+</ul>
+</li>
+<li>surpass all single-model on COCO</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>object detections two main tasks<ul>
+<li>recognition problem：foreground/backgroud &amp; object class</li>
+<li>localization problem：bounding box</li>
+<li>loose requirement for positives<ul>
+<li>an low IoU thresh(0.5) is required to define positives/negatives：looss</li>
+<li>noisy bounding boxes：close false positives</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>quality<ul>
+<li>将一个框和gt的IoU定义为它的quality</li>
+<li>将一个detector训练用的IoU thresh定义为它的quality</li>
+<li>detector的quality和input proposals的quality是相关的：a single detector work on a specific quality level of hypotheses</li>
+</ul>
+</li>
+<li>Cascade R-CNN<ul>
+<li>multi-stage extension of R-CNN</li>
+<li>sequentially more selective against close false positives</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>formulation</p>
+<p> <img src="/2020/01/08/RCNN系列/formulation.png" width="80%;"></p>
+<ul>
+<li>first stage：<ul>
+<li>proposal network H0</li>
+<li>applied to entire image</li>
+</ul>
+</li>
+<li>second stage<ul>
+<li>region-of-interest detection sub-network H1 (detection head)</li>
+<li>run on proposals</li>
+</ul>
+</li>
+<li>C和B是classification score &amp; bounding box regression</li>
+<li>we focus on modeling the second stage</li>
+</ul>
+</li>
+<li><p>bounding box regression 针对回归质量</p>
+<ul>
+<li>an image patch $x$</li>
+<li>a bounding box $b = (b_x, b_y, b_w, b_h)$</li>
+<li>use a regressor $f(x,b)$ to fit the target $g$<ul>
+<li>use L1 loss $L_{loc}(f(x_i,b_i), g_i)$</li>
+<li>compute on 相对量 &amp; std normalization</li>
+<li>invariant to scale and location</li>
+<li>results in minor adjustments on $b$：所以regression loss通常比cls loss小得多</li>
+</ul>
+</li>
+<li>Iterative BBox<ul>
+<li>a single regression step is not sufficient for accurate localization</li>
+<li>所以就搞了N个一样的regression heads串联</li>
+<li>但还是那个问题：一个regressor只针对某一个quality level的proposals是performance optimal的，但是每个iteration以后框的distribution是剧烈变化的</li>
+<li>所以迭代两次以上基本没有gain了</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>detection quality 针对分类质量</p>
+<ul>
+<li>an image patch x</li>
+<li>M foreground classes and 1 background</li>
+<li>use a classifier $h(x)$ to learn the target class label among M+1<ul>
+<li>use CE $L_{cls}(h(x_i),y_i)$</li>
+<li>the class label is determined by IoU thresh：如果image patch和gt box的IoU大于阈值，那么这个image patch的class label就是gt box的label，否则是背景</li>
+<li>the IoU thresh defines the quality of a detector</li>
+</ul>
+</li>
+<li>challenging<ul>
+<li>如果阈值调高了，positives里面包含更少的背景（高质量前景），但是样本量少</li>
+<li>如果阈值低了，前景样本多了，但是内容更加diversified，更难reject close false positives</li>
+<li>所以一个分类器在不同的IoU阈值下，要面临不同的问题，在inference阶段，it is very difficult to perform uniformly well over all IoU levels</li>
+</ul>
+</li>
+<li>Integral loss<ul>
+<li>训练好几个分类器，针对不同的IoU level，然后inference阶段ensemble</li>
+<li>还是没有解决高IoU阈值的那个分类器会因为样本量少过拟合的问题，而且高质量分类器在infernce阶段还是要处理所有的低质量框</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Cascade R-CNN</p>
+<ul>
+<li>Cascaded Bounding Box Regression<ul>
+<li>cascade specialized regressors</li>
+<li>differs from Iterative BBox<ul>
+<li>Iterative BBox是个后处理手段，一个regressor在0.5level的boxes上面优化，然后在inference proposals上面反复迭代</li>
+<li>Cascade R-CNN是个resampling method，多个不同的regressor级连，训练测试同操作同分布</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Cascaded Detection</p>
+<ul>
+<li>resamping manner<ul>
+<li>keep上一阶段的positives</li>
+<li>同时丢掉一些outliers</li>
+</ul>
+</li>
+<li>实现就是每个stage的IoU threshold逐渐提高</li>
+<li><p>loss还是所有proposals的cls loss + 定义为前景proposals的reg loss</p>
+</li>
+<li><p>outliers</p>
+<p> <img src="/2020/01/08/RCNN系列/outlier.png" width="40%;"></p>
+</li>
+<li><p>proposal quality</p>
+<p> <img src="/2020/01/08/RCNN系列/quality.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
@@ -1242,7 +1401,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">127</span>
+                  <span class="site-state-item-count">129</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1255,7 +1414,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-count">68</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1298,7 +1457,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation"><span class="nav-number">2.</span> <span class="nav-text">R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPP-net-Spatial-Pyramid-Pooling-in-Deep-Convolutional-Networks-for-Visual-Recognition"><span class="nav-number">3.</span> <span class="nav-text">SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fast-R-CNN-Fast-Region-based-Convolutional-Network"><span class="nav-number">4.</span> <span class="nav-text">Fast R-CNN: Fast Region-based Convolutional Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Faster-R-CNN-Towards-Real-Time-Object-Detection-with-Region-Proposal-Networks"><span class="nav-number">5.</span> <span class="nav-text">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mask-R-CNN"><span class="nav-number">6.</span> <span class="nav-text">Mask R-CNN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FPN-Feature-Pyramid-Networks-for-Object-Detection"><span class="nav-number">7.</span> <span class="nav-text">FPN: Feature Pyramid Networks for Object Detection</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation"><span class="nav-number">2.</span> <span class="nav-text">R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPP-net-Spatial-Pyramid-Pooling-in-Deep-Convolutional-Networks-for-Visual-Recognition"><span class="nav-number">3.</span> <span class="nav-text">SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fast-R-CNN-Fast-Region-based-Convolutional-Network"><span class="nav-number">4.</span> <span class="nav-text">Fast R-CNN: Fast Region-based Convolutional Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Faster-R-CNN-Towards-Real-Time-Object-Detection-with-Region-Proposal-Networks"><span class="nav-number">5.</span> <span class="nav-text">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mask-R-CNN"><span class="nav-number">6.</span> <span class="nav-text">Mask R-CNN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FPN-Feature-Pyramid-Networks-for-Object-Detection"><span class="nav-number">7.</span> <span class="nav-text">FPN: Feature Pyramid Networks for Object Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#衍生应用："><span class="nav-number">8.</span> <span class="nav-text">衍生应用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cascade-R-CNN-Delving-into-High-Quality-Object-Detection"><span class="nav-number">9.</span> <span class="nav-text">Cascade R-CNN: Delving into High Quality Object Detection</span></a></li></ol></div>
             
 
           </div>
