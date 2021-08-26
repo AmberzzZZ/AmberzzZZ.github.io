@@ -276,6 +276,582 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/08/group-normalization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/08/group-normalization/" itemprop="url">group normalization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-08T17:49:45+08:00">
+                2020-06-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/08/group-normalization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/08/group-normalization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Group-Normalization"><a href="#Group-Normalization" class="headerlink" title="Group Normalization"></a>Group Normalization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>for small batch size</li>
+<li>do normalization in channel groups</li>
+<li>batch-independent</li>
+<li>behaves stably over different batch sizes</li>
+<li>approach BN’s accuracy </li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/error.png" width="40%;"></p>
+</li>
+<li><p>论点</p>
+<ul>
+<li>BN<ul>
+<li>requires sufficiently large batch size (e.g. 32)</li>
+<li>Mask R-CNN frameworks use a batch size of 1 or 2 images because of higher resolution, where BN is “frozen” by transforming to a linear layer </li>
+<li>synchronized BN 、BR</li>
+</ul>
+</li>
+<li>LN &amp; IN<ul>
+<li>effective for training sequential models or generative models </li>
+<li>but have limited success in visual recognition </li>
+<li>GN能转换成LN／IN</li>
+</ul>
+</li>
+<li>WN<ul>
+<li>normalize the filter weights, instead of operating on features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>group</p>
+<ul>
+<li>it is not necessary to think of deep neural network features as unstructured vectors <ul>
+<li>第一层卷积核通常存在一组对称的filter，这样就能捕获到相似特征</li>
+<li>这些特征对应的channel can be normalized together</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>normalization</p>
+<ul>
+<li><p>transform the feature x：$\hat x_i = \frac{1}{\sigma}(x_i-\mu_i)$</p>
+</li>
+<li><p>the mean and the standard deviation：</p>
+<script type="math/tex; mode=display">
+  \mu_i=\frac{1}{m}\sum_{k\in S_i}x_k\\
+  \sigma_i=\sqrt {\frac{1}{m}\sum_{k\in S_i}(x_k-\mu_i)^2+\epsilon}</script></li>
+<li><p>the set $S_i$</p>
+<ul>
+<li>BN：<ul>
+<li>$S_i=\{k|k_C = i_C\}$</li>
+<li>pixels sharing the same channel index are normalized together </li>
+<li>for each channel, BN computes μ and σ along the (N, H, W) axes </li>
+</ul>
+</li>
+<li>LN<ul>
+<li>$S_i=\{k|k_N = i_N\}$</li>
+<li>pixels sharing the same batch index (per sample) are normalized together </li>
+<li>LN computes μ and σ along the (C,H,W) axes for each sample </li>
+</ul>
+</li>
+<li>IN<ul>
+<li>$S_i=\{k|k_N = i_N, k_C=i_C\}$</li>
+<li>pixels sharing the same batch index and the same channel index are normalized together </li>
+<li>LN computes μ and σ along the (H,W) axes for each sample </li>
+</ul>
+</li>
+<li>GN<ul>
+<li>$S_i=\{k|k_N = i_N, [\frac{k_C}{C/G}]=[\frac{i_C}{C/G}]\}$</li>
+<li>computes μ and σ along the (H, W ) axes and along a group of C/G channels </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>linear transform  </p>
+<ul>
+<li>to keep representational ability </li>
+<li><strong>per channel</strong></li>
+<li>scale and shift：$y_i = \gamma \hat x_i + \beta$</li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/gn.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>relation</p>
+<ul>
+<li>to LN<ul>
+<li>LN assumes <em>all</em> channels in a layer make “similar contributions” </li>
+<li>which is less valid with the presence of convolutions </li>
+<li>GN improved representational power over LN</li>
+</ul>
+</li>
+<li>to IN<ul>
+<li>IN can only rely on the spatial dimension for computing the mean and variance </li>
+<li>it misses the opportunity of exploiting the channel dependence</li>
+<li>【QUESTION】BN也没考虑通道间的联系啊，但是计算mean和variance时跨了sample</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>implementation</p>
+<ul>
+<li>reshape</li>
+<li>learnable $\gamma \&amp; \beta$</li>
+<li>computable mean &amp; var</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/code.png" width="50%;"></p>
+</li>
+<li><p>实验</p>
+<ul>
+<li>GN相比于BN，training error更低，但是val error略高于BN<ul>
+<li>GN is effective for easing optimization</li>
+<li>loses some regularization ability </li>
+<li>it is possible that GN combined with a suitable regularizer will improve results </li>
+</ul>
+</li>
+<li>选取不同的group数，所有的group&gt;1均好于group=1（LN）</li>
+<li>选取不同的channel数（C／G），所有的channel&gt;1均好于channel=1（IN）</li>
+<li>Object Detection  <ul>
+<li>frozen：因为higher resolution，batch size通常设置为2/GPU，这时的BN frozen成一个线性层$y=\gamma(x-\mu)/\sigma+beta$，其中的$\mu$和$sigma$是load了pre-trained model中保存的值，并且frozen掉，不再更新</li>
+<li>denote as BN*</li>
+<li>replace BN* with GN during fine-tuning </li>
+<li>use a weight decay of 0 for the γ and β parameters </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/02/regularization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/02/regularization/" itemprop="url">正则化</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-02T16:01:20+08:00">
+                2020-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/02/regularization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/02/regularization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>正则</p>
+<ul>
+<li><p>正则化是用来解决神经网络过拟合的问题，通过降低模型的复杂性和约束权值，迫使神经网络学习可泛化的特征</p>
+<ul>
+<li>正则化可以定义为我们为了减少泛化误差而不是减少训练误差而对训练算法所做的任何改变<ul>
+<li>对权重进行约束</li>
+<li>对目标函数添加额外项（间接约束权值）：L1 &amp; L2正则</li>
+<li>数据增强</li>
+<li>降低网络复杂度：dropout，stochastic depth</li>
+<li>early stopping</li>
+</ul>
+</li>
+<li>我们在对网络进行正则化时不考虑网络的bias：正则表达式只是权值的表达式，不包含bias<ul>
+<li>bias比weight具有更少的参数量</li>
+<li>对bias进行正则化可能引入太多的方差，引入大量的欠拟合</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>L1 &amp; L2：</p>
+<ul>
+<li><p>要惩罚的是神经网络中每个神经元的权重大小</p>
+</li>
+<li><p>L2关注的是权重的平方和，是要网络中的权重接近0但不等于0，“权重衰减”</p>
+<script type="math/tex; mode=display">
+  \frac{d}{dW}(\frac{\lambda}{2m}W^2) = \frac{\lambda}{m} W</script></li>
+<li><p>L1关注的是权重的绝对值，权重可能被压缩成0，权重更新时每次减去的是一个常量</p>
+<script type="math/tex; mode=display">
+  \frac{d}{dW}(\frac{\lambda}{m}W) = \frac{\lambda}{m} sgn(W)</script></li>
+<li><p>L1会趋向于产生少量的特征，而其他的特征都是0，而L2会选择更多的特征，这些特征都会接近于0</p>
+</li>
+</ul>
+</li>
+<li><p>dropout</p>
+<ul>
+<li>每个epoch训练的模型都是随机的</li>
+<li>在test的时候相当于ensemble多个模型</li>
+</ul>
+</li>
+<li><p>权重共享</p>
+</li>
+<li><p>数据增强</p>
+</li>
+<li><p>隐式正则化：其出现的目的不是为了正则化，而正则化的效果是其副产品，包括early stopping，BN，随机梯度下降</p>
+</li>
+</ul>
+</li>
+<li><p>dropout &amp; drop connect（[Reference][<a href="https://zhuanlan.zhihu.com/p/108024434]）" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/108024434]）</a></p>
+<ul>
+<li><p>dropout：</p>
+<ul>
+<li>2012年Hinton提出，在模型训练时以概率p随机让隐层节点的输出变成0，暂时认为这些节点不是网络结构的一部分，但是会把它们的权重保留下来（不更新）。</li>
+<li><p>标准dropout相当于在一层神经元之后再添加一个额外的层，这些神经元在训练期间以一定的概率将值设置为零，并在测试期间将它们乘以p。 </p>
+<p><img src="/2020/06/02/regularization/dropout.jpg" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>drop connect：</p>
+<ul>
+<li>不是随机的将隐层节点的输出变成0，而是将节点中的每个与其相连的输入权值以1-p的概率变成0。（一个是输出一个是输入）</li>
+<li>训练阶段，对每个example／mini-batch, 每个epoch都随机sample一个mask矩阵</li>
+<li><p>Dropconnect在测试期间采用了与标准dropout不同的方法。作者提出了dropconnect在每个神经元处的高斯近似，然后从这个高斯函数中抽取一个样本并传递给神经元激活函数。这使得dropconnect在测试时和训练时都是一种随机方法。</p>
+<p><img src="/2020/06/02/regularization/dropconnect.png" width="40%"></p>
+<p><img src="/2020/06/02/regularization/dropCinfer.jpg" width="80%"></p>
+</li>
+<li><p>伯努利分布：0-1分布</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>dropout &amp; drop connect 通常只作用于全连接层上：这俩是用来防止过多参数导致过拟合</p>
+<ul>
+<li><p>卷积层参数贼少，所以没必要，</p>
+</li>
+<li><p>针对卷积通道有spacial dropout：按照channel随机扔</p>
+</li>
+</ul>
+</li>
+<li><p>dropblock：是针对卷积层的正则化方法，相比较于dropout的random mute，能够更有效地remove掉部分语义信息，block size=1的时候退化成dropout</p>
+<p><img src="/2020/06/02/regularization/dropblock.png" width="60%"></p>
+</li>
+<li><p>papers</p>
+<p>[dropout] Improving neural networks by preventing co-adaptation of feature detectors，丢节点</p>
+<p>[drop connect] Regularization of neural networks using dropconnect，丢weight path</p>
+<p>[Stochastic Depth] Deep Networks with Stochastic Depth，丢layer</p>
+<p>[DropBlock] A regularization method for convolutional networks</p>
+</li>
+<li><p>drop大法一句话汇总</p>
+<ul>
+<li>dropout：各维度完全随机扔</li>
+<li>spacial dropout：按照channel随机扔</li>
+<li>stochastic depth：按照res block随机扔</li>
+<li>dropblock：在feature map上按照spacial块随机扔</li>
+<li>cutout：在input map上按照spacial块随机扔</li>
+<li>dropconnect：扔连接不扔神经元</li>
+</ul>
+</li>
+</ol>
+<h2 id="Deep-Networks-with-Stochastic-Depth"><a href="#Deep-Networks-with-Stochastic-Depth" class="headerlink" title="Deep Networks with Stochastic Depth"></a>Deep Networks with Stochastic Depth</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>propose a training procedure：stochastic depth，train short and test deep</li>
+<li>for each mini-batch<ul>
+<li>randomly drop a subset of layers  </li>
+<li>and bypass them with the identity function</li>
+</ul>
+</li>
+<li>short：reduces training time </li>
+<li>reg：improves the test error </li>
+<li>can increase the network depth </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>deeper</p>
+<ul>
+<li>expressiveness </li>
+<li>vanishing gradients </li>
+<li>diminishing feature reuse  </li>
+</ul>
+</li>
+<li><p>resnet </p>
+<ul>
+<li>skip connection</li>
+<li><p>when输入输出channel数不match：redefine id(·) as a linear projection to reduce the dimensions </p>
+<p><img src="/2020/06/02/regularization/resnet.png" width="60%"></p>
+</li>
+</ul>
+</li>
+<li><p>dropout</p>
+<ul>
+<li>Dropout reduces the effect known as “co- adaptation” of hidden nodes </li>
+<li>Dropout loses effectiveness when used in combination with Batch Normalization </li>
+</ul>
+</li>
+<li><p>our approach</p>
+<ul>
+<li>higher diversity </li>
+<li>shorter instead of thinner </li>
+<li>work with Batch Normalization</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>stochastic depth</p>
+<ul>
+<li>randomly dropping entire ResBlocks </li>
+<li>$H_l = ReLU(b_l Res_l(H_{l-1}) + id(H_{l-1}))$</li>
+</ul>
+</li>
+<li><p>survival probabilities </p>
+<ul>
+<li><p>$p_l = Pr(b_l=1)$</p>
+</li>
+<li><p>set uniformly / set following a linear decay rule </p>
+</li>
+<li><p>set $p_0=1, p_L=0.5$：</p>
+<script type="math/tex; mode=display">
+  p_l = 1 - \frac{l}{L}(1-p_L)</script></li>
+<li><p>intuition：the earlier layers extract low-level features that will be used by later layers and should therefore be more reliably present </p>
+<p><img src="/2020/06/02/regularization/stochastic.png" width="60%"></p>
+</li>
+</ul>
+</li>
+<li><p>Expected network depth </p>
+<ul>
+<li>$E(L) \approx 3L/4$</li>
+<li>approximately 25% of training time could be saved </li>
+</ul>
+</li>
+<li><p>during testing</p>
+<ul>
+<li>all res path are active  </li>
+<li>each res path is weighted by its survival probability</li>
+<li>$H_l^{Test} = ReLU(b_l Res_l(H_{l-1}, W_l) + id(H_{l-1}))$</li>
+<li>跟dropout一样</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/30/RetinaNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2822,636 +3398,11 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/30/SE-block/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/04/30/SE-block/" itemprop="url">SE block</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-30T14:11:38+08:00">
-                2020-04-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/04/30/SE-block/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/30/SE-block/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>图像特征的提取能力是CNN的核心能力，而SE block可以起到为CNN校准采样的作用。</p>
-<p>根据感受野理论，特征矩阵主要来自于样本的中央区域，处在边缘位置的酒瓶的图像特征很大概率会被pooling层抛弃掉。而SE block的加入就可以通过来调整特征矩阵，增强酒瓶特征的比重，提高它的识别概率。</p>
-<p><img src="/2020/04/30/SE-block/bottle.png" width="25%"></p>
-<ol>
-<li>[SE-Net] Squeeze-and-Excitation Networks</li>
-<li>[SC-SE] Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks </li>
-<li>[CMPE-SE] Competitive Inner-Imaging Squeeze and Excitation for Residual Network</li>
-</ol>
-<h2 id="SENet-Squeeze-and-Excitation-Networks"><a href="#SENet-Squeeze-and-Excitation-Networks" class="headerlink" title="SENet: Squeeze-and-Excitation Networks"></a>SENet: Squeeze-and-Excitation Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>prior research has investigated the spatial component to achieve more powerful representations </li>
-<li>we focus on the channel relationship instead</li>
-<li>SE-block：adaptively recalibrates channel-wise feature responses by explicitly modelling interdependencies between channels</li>
-<li>enhancing the representational power </li>
-<li>in a computationally efficient manner</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>stronger network：<ul>
-<li>deeper</li>
-<li>NiN-like bocks</li>
-</ul>
-</li>
-<li>cross-channel correlations in prior work<ul>
-<li>mapped as new combinations of features through 1x1 conv</li>
-<li>concentrated on the objective of reducing model and computational complexity</li>
-</ul>
-</li>
-<li>In contrast, we found this mechanism <ul>
-<li>can ease the learning process</li>
-<li>and significantly enhance the representational power of the network</li>
-</ul>
-</li>
-<li>Attention<ul>
-<li>Attention can be interpreted as a means of biasing the allocation of available computational resources towards the most informative components<ul>
-<li>Some works provide interesting studies into the combined use of spatial and channel attention </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>SE-block</p>
-<ul>
-<li><p>The channel relationships modelled by convolution are inherently implicit and local </p>
-</li>
-<li><p>we would like to provide it with access to global information</p>
-</li>
-<li><p>squeeze：using global average pooling </p>
-</li>
-<li><p>excitation：nonlinear &amp; non-mutually-exclusive using sigmoid</p>
-<ul>
-<li><p>bottleneck：a dimensionality-reduction layer $W_1$ with reduction ratio $r$ and ReLU and a dimensionality-increasing layer $W_2$</p>
-</li>
-<li><p>$s = F_{ex}(z,W) = \sigma (W_2 \delta(W_1 z))$</p>
-<p><img src="/2020/04/30/SE-block/seblock.png" width="70%"></p>
-</li>
-</ul>
-</li>
-<li><p>integration</p>
-<ul>
-<li>insert after the non-linearity following each convolution</li>
-<li>inception：take the transformation $F_{tr}$ to be an entire Inception module </li>
-<li><p>residual：take the transformation $F_{tr}$ to be the non-identity branch of a residual module</p>
-<p><img src="/2020/04/30/SE-block/integrate.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>model and computational complexity</p>
-<ul>
-<li>ResNet50 vs. SE-ResNet50：0.26% relative increase GFLOPs approaching ResNet10’s accuracy </li>
-<li>the additional parameters result solely from the two FC layers, among which  the final stage FC claims the majority due to being performed across the greatest number of channels</li>
-<li>the costly final stage of SE blocks could be removed at only a small cost in performance </li>
-</ul>
-</li>
-<li><p>ablations</p>
-<ul>
-<li>FC<ul>
-<li>removing the biases of the FC layers  in the excitation facilitates the modelling of channel dependencies </li>
-</ul>
-</li>
-<li>reduction ratio<ul>
-<li>performance is robust to a range of reduction ratios </li>
-<li>In practice, using an identical ratio throughout a network may not be optimal due to the distinct roles performed by different layers </li>
-</ul>
-</li>
-<li>squeeze<ul>
-<li>global average pooling vs. global max pooling：average pooling slightly better </li>
-</ul>
-</li>
-<li>excitation<ul>
-<li>Sigmoid vs. ReLU vs. tanh：<ul>
-<li>tanh：slightly worse</li>
-<li>ReLU：dramatically worse   </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>stages<ul>
-<li>each stages brings benefits </li>
-<li>combination make even better</li>
-</ul>
-</li>
-<li>integration strategy<ul>
-<li>fairly robust to their location, provided that they are applied prior to branch aggregation</li>
-<li>inside the residual unit：fewer channels, fewer parameters, comparable accuracy </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>primitive understanding <ul>
-<li>squeeze<ul>
-<li>the use of <strong>global information</strong> has a significant influence on the model performance</li>
-</ul>
-</li>
-<li>excitation<ul>
-<li>the distribution across different classes is very similar at the earlier layers  (general features)</li>
-<li>the value of each channel becomes much more class-specific at greater depth</li>
-<li>SE_5_2 exhibits an interesting tendency towards a saturated state in which most of the activations are close to one</li>
-<li>SE_5_3 exhibits a similar pattern emerges over different classes, up to a modest change in scale</li>
-<li>suggesting that SE_5_2 and SE_5_3 are less important than previous blocks in providing recalibration to the network (thus can be removed)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>APPENDIX</p>
-<ul>
-<li>在ImageNet上SOTA的模型是SENet-154，top1-err是18.68，被标记在了efficientNet论文的折线图上<ul>
-<li>SE-ResNeXt-152（64x4d）<ul>
-<li>input=(224,224)：top1-err是18.68</li>
-<li>input=320/299：top1-err是17.28</li>
-</ul>
-</li>
-<li>further difference<ul>
-<li>each bottleneck building block的第一个1x1 convs的通道数减半</li>
-<li>stem的第一个7x7conv换成了3个连续的3x3 conv</li>
-<li>1x1的s2 conv换成了3x3的s2 conv</li>
-<li>fc之前添加dropout layer</li>
-<li>label smoothing</li>
-<li>最后几个training epoch将BN层的参数冻住，保证训练和测试的参数一致</li>
-<li>64 GPUs，batch size=2048（32 per GPU）</li>
-<li>initial lr=1.0</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks"><a href="#SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks" class="headerlink" title="SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks"></a>SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>image segmentation task 上面SE-Net提出来主要是针对分类</li>
-<li>three variants of SE modules <ul>
-<li>squeezing spatially and exciting channel-wise (cSE)</li>
-<li>squeezing channel-wise and exciting spatially (sSE)</li>
-<li>concurrent spatial and channel squeeze &amp; excitation (scSE) </li>
-</ul>
-</li>
-<li>integrate within three different state-of-the- art F-CNNs (DenseNet, SD-Net, U-Net) </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>F-CNNs have become the tool of choice for many image segmentation tasks </li>
-<li>core：convolutions that capturing <strong>local spatial pattern along all input channels</strong> jointly </li>
-<li>SE block <strong>factors out the spatial dependency</strong> by global average pooling to learn a channel specific descriptor (later refered to as cSE /channel-SE)</li>
-<li>while for image segmentation, we hypothesize that the pixel-wise spatial information is more informative </li>
-<li>thus we propose sSE(spatial SE) and scSE(spatial and channel SE)</li>
-<li><p>can be seamlessly integrated by placing after every encoder and decoder block</p>
-<p><img src="/2020/04/30/SE-block/scse.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>cSE<ul>
-<li>GAP：embeds the global spatial information into a vector </li>
-<li>FC-ReLU-FC-Sigmoid：adaptively learns the importance  </li>
-<li>recalibrate</li>
-</ul>
-</li>
-<li>sSE<ul>
-<li>1x1 conv：generating a projection tensor representing the linearly combined representation for all channels C for a spatial location (i,j)</li>
-<li>Sigmoid：rescale </li>
-<li>recalibrate </li>
-</ul>
-</li>
-<li>scSE<ul>
-<li>by element-wise addition </li>
-<li>encourages the network to learn more meaningful feature maps ———- relevant both spatially and channel-wise</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>F-CNN architectures：</p>
-<ul>
-<li>4 encoder blocks, one bottleneck layer, 4 decoder blocks and a classification layer </li>
-<li>class imbalance：median frequency balancing ce</li>
-</ul>
-</li>
-<li><p>dice cmp：scSE &gt; sSE &gt; cSE &gt; vanilla</p>
-</li>
-<li><p>小区域类别的分割，观察到使用cSE可能会差于vanilla： might have got overlooked by only exciting the channels</p>
-</li>
-<li><p>定性分析：</p>
-<ul>
-<li>一些under segmented的地方，scSE improves with the inclusion </li>
-<li><p>一些over segmented的地方，scSE rectified the result</p>
-<p><img src="/2020/04/30/SE-block/qualitive.png" width="55%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network"><a href="#Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network" class="headerlink" title="Competitive Inner-Imaging Squeeze and Excitation for Residual Network"></a>Competitive Inner-Imaging Squeeze and Excitation for Residual Network</h2><ol>
-<li>动机<ul>
-<li>for residual network</li>
-<li>the residual architecture has been proved to be diverse and redundant</li>
-<li>model the competition between residual and identity mappings</li>
-<li>make the identity flow to control the complement of the residual feature maps</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>For analysis of ResNet, with the increase in depth, the residual network exhibits a certain amount of redundancy </li>
-<li><p>with the CMPE-SE mechanism, it makes residual mappings tend to provide more efficient supplementary for identity mappings</p>
-<p><img src="/2020/04/30/SE-block/cmpese.png" width="55%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>主要提出了三种变体：</p>
-<p><img src="/2020/04/30/SE-block/cmpeses.png" width="75%"></p>
-</li>
-<li><p>第一个变体：</p>
-<ul>
-<li>两个分支id和res分别GAP出一个vector，然后fc reduct by ratio，然后concat，然后channel back</li>
-<li>Implicitly, we can believe that the winning of the identity channels in this competition results in less weights of the residual channels </li>
-</ul>
-</li>
-<li><p>第二个变体：</p>
-<ul>
-<li><p>两种方案</p>
-<ul>
-<li>2x1 convs：对上下相应位置的元素求avg</li>
-<li>1x1 convs：对全部元素求avg，然后flatten</li>
-</ul>
-<p><img src="/2020/04/30/SE-block/sec.png" width="45%"></p>
-</li>
-</ul>
-</li>
-<li><p>第三个变体：</p>
-<ul>
-<li><p>两边的channel-wise vector叠起来，然后reshape成矩阵形式，然后3x3 conv，然后flatten</p>
-<p><img src="/2020/04/30/SE-block/trd.png" width="45%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>比较扯，不浪费时间分析了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/19/cv2-numpy-tobeadded/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/04/19/cv2-numpy-tobeadded/" itemprop="url">cv2&numpy&tobeadded</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-19T10:45:32+08:00">
-                2020-04-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/04/19/cv2-numpy-tobeadded/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/cv2-numpy-tobeadded/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li>矩阵乘法<ul>
-<li>np.dot(A,B)：真正的矩阵乘法</li>
-<li>np.multiply(A,B) &amp; np重载的*：element-wise product，矩阵中对应元素相乘</li>
-<li>cv的A.dot(B) &amp; cv重载的*：真正的矩阵乘法</li>
-<li>cv的A.mul(B) ：element-wise product，矩阵中对应元素相乘</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>图像旋转</p>
-<p> 通过仿射矩阵<code>cv2.getRotationMatrix2D</code>和仿射变换函数<code>cv2.warpAffine</code>来实现</p>
-<ul>
-<li><p>src：输入图像</p>
-</li>
-<li><p>M：变换矩阵</p>
-</li>
-<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
-</li>
-<li><p>flags：插值方法</p>
-</li>
-<li><p>borderMode：边界像素模式</p>
-</li>
-<li><p>borderValue：边界填充值，默认为0</p>
-<p>cv2.getRotationMatrix2D(center, angle, scale)：返回一个2x3的变换矩阵</p>
-</li>
-<li><p>center：旋转中心</p>
-</li>
-<li>angle：旋转角度，<strong>正值是逆时针旋转</strong></li>
-<li><p>scale：缩放因子</p>
-<p>cv2.warpAffine(src, M, dsize[, dst[, flags[, borderMode[, borderValue]]]]))：返回变换后的图像</p>
-</li>
-<li><p>src：输入图像</p>
-</li>
-<li><p>M：变换矩阵</p>
-</li>
-<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
-</li>
-<li><p>flags：插值方法</p>
-</li>
-<li><p>borderMode：边界像素模式</p>
-</li>
-<li><p>borderValue：边界填充值，默认为0</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rotate_img</span><span class="params">(angle, img, interpolation=cv2.INTER_LINEAR, points=[])</span>:</span></span><br><span class="line">    h, w = img.shape</span><br><span class="line">    rotataMat = cv2.getRotationMatrix2D((w/<span class="number">2</span>, h/<span class="number">2</span>), math.degrees(angle), <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># rotate_img1: 输出图像尺寸不变，超出原图像部分被cut掉</span></span><br><span class="line">    rotate_img1 = cv2.warpAffine(img, rotataMat, dsize=(w, h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">   	<span class="comment"># rotate_img2: 输出图像尺寸变大，保留超出原图像部分，新的坐标原点保证旋转中心仍旧位于图像中心</span></span><br><span class="line">    new_h = int(w*math.fabs(math.sin(angle)) + h*math.fabs(math.cos(angle)))</span><br><span class="line">    new_w = int(h*math.fabs(math.sin(angle)) + w*math.fabs(math.cos(angle)))</span><br><span class="line">    rotataMat[<span class="number">0</span>, <span class="number">2</span>] += (new_w - w) / <span class="number">2</span></span><br><span class="line">    rotataMat[<span class="number">1</span>, <span class="number">2</span>] += (new_h - h) / <span class="number">2</span></span><br><span class="line">    rotate_img2 = cv2.warpAffine(img, rotataMat, dsize=(new_w, new_h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 坐标点的变换</span></span><br><span class="line">    rotated_points = []</span><br><span class="line">    <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">        point = rotataMat.dot([[point[<span class="number">0</span>]], [point[<span class="number">1</span>]], [<span class="number">1</span>]])</span><br><span class="line">        rotated_points.append((int(point[<span class="number">0</span>]), int(point[<span class="number">1</span>])))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> rotate_img2, rotated_points</span><br></pre></td></tr></table></figure>
-<p>使用tips：</p>
-</li>
-<li><p>如果不修改仿射变换矩阵的平移参数，坐标原点的位置不发生改变</p>
-</li>
-<li><p>dsize指定的输出图像是从原点位置开始裁剪</p>
-</li>
-<li><p>坐标点的变换满足公式：</p>
-<script type="math/tex; mode=display">
-  dst(x,y) = src(M_{11}x+M_{12}y+M_{13}, M_{21}x+M_{22}y+M_{23})</script></li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>np.meshgrid(*xi,**kwargs)</p>
-<p> 这个函数神他妈坑，作用是Return coordinate matrices from coordinate vectors. Make N-D coordinate arrays for vectorized evaluations of N-D scalar/vector fields over N-D grids, given one-dimensional coordinate arrays x1, x2,…, xn. 但是尝试一下会发现：</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z)</span><br><span class="line">print(x.shape)       <span class="comment"># (20, 10, 30)</span></span><br></pre></td></tr></table></figure>
-<p> xy轴坐标是反过来的，这是因为optional args里面有一个indexing：</p>
-<p> <strong>indexing</strong> : {‘xy’, ‘ij’}, Cartesian (‘xy’, default) or matrix (‘ij’) indexing of output.</p>
-<p> 我们想要得到的坐标系和输入的轴一一对应，得指定参数<code>indexing=&#39;ij&#39;</code></p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z, indexing=<span class="string">'ij'</span>)</span><br><span class="line">print(x.shape)      <span class="comment"># (10, 20, 30)</span></span><br></pre></td></tr></table></figure>
-<p> 还有一个参数sparse，因为每根轴的坐标都是复制的，所以可以稀疏存储，此时函数返回值变化：</p>
-<p> <strong>sparse</strong> : bool, If True a sparse grid is returned in order to conserve memory. Default is False.</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y)</span><br><span class="line">print(xx)        <span class="comment"># a 20x10 list</span></span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y, sparse=<span class="keyword">True</span>)</span><br><span class="line">print(xx)        <span class="comment"># a 1*10 list</span></span><br><span class="line">print(yy)        <span class="comment"># a 20*1 list</span></span><br><span class="line"><span class="comment"># 所以整体上还是个20*10的矩阵</span></span><br></pre></td></tr></table></figure>
-<p> 二维可视化：</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">z = xx**<span class="number">2</span> + yy**<span class="number">2</span>            <span class="comment"># xx和yy既可以是dense convervation也可以是sparse convervation</span></span><br><span class="line">h = plt.contourf(x,y,z)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<ol>
-<li><p>np.tile(A,reps)</p>
-<p> 这个函数挺有用的，把数组沿着指定维度复制，比stack、concat啥的都优雅，能自动创建新的维度</p>
-<ul>
-<li>A：array_like, The input array.</li>
-<li>reps：array_like, The number of repetitions of <em>A</em> along each axis.</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>np.reshape(a, newshape, order=’C’)</p>
-<p> 这个函数贼常用，但是一般用于二维的时候没考虑重组顺序这件事</p>
-<ul>
-<li><p>order: {‘C’, ‘F’, ‘A’}, optional，简单理解，reshape的通用实现方式是先将真个array拉直，然后依次取数据填入指定维度，C是从最里面的维度开始拉直&amp;构造，F是从最外面的维度开始拉直&amp;构造，A for auto</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">a = np.arange(<span class="number">6</span>)</span><br><span class="line">array([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># C-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">       [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fortran-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>), order=<span class="string">'F'</span>)</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">4</span>, <span class="number">3</span>],</span><br><span class="line">       [<span class="number">2</span>, <span class="number">1</span>, <span class="number">5</span>]])</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>tf和keras里面也有reshape，是没有order参数的，默认是’C’</p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3501,7 +3452,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">129</span>
+                  <span class="site-state-item-count">131</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3514,7 +3465,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">68</span>
+                  <span class="site-state-item-count">70</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

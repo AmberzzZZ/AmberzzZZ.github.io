@@ -276,6 +276,355 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/15/dynamic-window-approach/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/15/dynamic-window-approach/" itemprop="url">dynamic window approach</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-15T19:39:54+08:00">
+                2018-11-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/15/dynamic-window-approach/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/15/dynamic-window-approach/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><strong>动态窗口：</strong></p>
+<p>窗口框的是速度空间的采样点$(v_t, w_t)$，一对$(v_t, w_t)$就代表一段轨迹，轨迹通过机器人底盘的运动学建模得到。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// base_local_planner的simple_trajectory_generator.cpp</span></span><br><span class="line"><span class="comment">// 直线模型</span></span><br><span class="line"><span class="keyword">double</span> dt = (current_time - last_time).toSec();</span><br><span class="line"><span class="keyword">double</span> delta_x = (vx * <span class="built_in">cos</span>(theta) - vy * <span class="built_in">sin</span>(theta)) * dt;</span><br><span class="line"><span class="keyword">double</span> delta_y = (vx * <span class="built_in">sin</span>(theta) + vy * <span class="built_in">cos</span>(theta)) * dt;</span><br><span class="line"><span class="keyword">double</span> delta_th = vth * dt;</span><br><span class="line"></span><br><span class="line">x += delta_x;</span><br><span class="line">y += delta_y;</span><br><span class="line">theta += delta_th;</span><br></pre></td></tr></table></figure>
+<p><strong>窗口的选择：</strong></p>
+<ol>
+<li><p>速度限制</p>
+<script type="math/tex; mode=display">
+(V, W) = \{v \in[v_{min}, v_{max}], w \in [w_{min}, w_{max}] \}</script></li>
+<li><p>加速度限制</p>
+<script type="math/tex; mode=display">
+(V, W) = \left\{
+\begin{array}
+& v \in[v_c - \dot{v}*\Delta t, v_c + \dot{v}*\Delta t], \\
+w \in [w_c - \dot{w}*\Delta t, w_c + \dot{w}*\Delta t] 
+\end{array}
+\right\}</script></li>
+<li><p>障碍物制动限制</p>
+<script type="math/tex; mode=display">
+(V, W) = \left\{
+v \leq \sqrt{2*dist(v,w)*\dot{v}}, 
+w \leq \sqrt{2*dist(v,w)*\dot{w}}
+\right\}</script><p>$dist(v,w)$表示采样点$(v, w)$对应轨迹上离障碍物最近的距离。</p>
+</li>
+</ol>
+<p>确定窗口后进行采样，可以得到一系列轨迹：</p>
+<p><img src="/2018/11/15/dynamic-window-approach/轨迹.png" alt=""></p>
+<p><strong>轨迹的选择：</strong></p>
+<p>原始论文中采用评价函数：</p>
+<script type="math/tex; mode=display">
+G(v,w) = \sigma [\alpha * heading(v, w) + \beta * dist(v,w) + \gamma * velocity(v,w)]</script><ol>
+<li>方位角评价函数：采用当前采样点设定下，达到模拟轨迹末端时机器人的朝向角与目标点朝向角的差距。</li>
+<li>空隙评价：当前模拟轨迹上与最近障碍物之间的距离。</li>
+<li>速度评价：采样点速度与最大速度的差距。</li>
+</ol>
+<p>上述评价函数要进行<strong>归一化</strong>。</p>
+<p>算法流程：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">BEGIN <span class="title">DWA</span><span class="params">(robotPose,robotGoal,robotModel)</span></span></span><br><span class="line"><span class="function">    laserscan </span>= readScanner()</span><br><span class="line">    allowable_v = generateWindow(robotV, robotModel)</span><br><span class="line">    allowable_w  = generateWindow(robotW, robotModel)</span><br><span class="line">	<span class="keyword">for</span> each v in allowable_v</span><br><span class="line">        <span class="keyword">for</span> each w in allowable_w</span><br><span class="line">            dist = find_dist(v,w,laserscan,robotModel)</span><br><span class="line">            breakDist = calculateBreakingDistance(v)</span><br><span class="line">            <span class="keyword">if</span> (dist &gt; breakDist)  <span class="comment">//can stop in time</span></span><br><span class="line">                heading = hDiff(robotPose,goalPose, v,w) </span><br><span class="line">                clearance = (dist-breakDist)/(dmax - breakDist) </span><br><span class="line">                cost = costFunction(heading,clearance, <span class="built_in">abs</span>(desired_v - v))</span><br><span class="line">                <span class="keyword">if</span> (cost &gt; optimal)</span><br><span class="line">                    best_v = v</span><br><span class="line">                    best_w = w</span><br><span class="line">                    optimal = cost</span><br><span class="line">	<span class="built_in">set</span> robot trajectory to best_v, best_w</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/14/A-star-algorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/14/A-star-algorithm/" itemprop="url">A-star algorithm</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-14T11:27:11+08:00">
+                2018-11-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/14/A-star-algorithm/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/14/A-star-algorithm/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>有目的性地寻找最佳路径，首先定义一个损失函数，表示节点消耗：</p>
+<script type="math/tex; mode=display">
+f = g+h</script><p>$g$表示起点到当前节点的已知消耗</p>
+<p>$h$表示对当前节点到终点消耗的猜测，<strong>估价函数</strong>有多种形式——启发式探索的核心</p>
+<p>算法流程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">初始化openList</span><br><span class="line">初始化closeList</span><br><span class="line">将起点放入openList</span><br><span class="line"><span class="keyword">while</span> openList非空：</span><br><span class="line">	找到开启列表上f最小的节点，记为q</span><br><span class="line">    找到q周围的子节点p，记其父节点为q</span><br><span class="line">    <span class="keyword">for</span> 每一个子节点p：</span><br><span class="line">    	<span class="keyword">if</span> p是终点：</span><br><span class="line">        	算法终止</span><br><span class="line">            </span><br><span class="line">        p.g = q.g + qp</span><br><span class="line">        p.h = h(p, terminate)</span><br><span class="line">        p.f = p.g + p.h</span><br><span class="line">        <span class="keyword">if</span> p已经在开启列表中且保存的f值小于当前计算值||p在关闭列表中：</span><br><span class="line">        	跳过该节点</span><br><span class="line">		<span class="keyword">else</span>：</span><br><span class="line">        	<span class="keyword">if</span> p已经在开启列表中：</span><br><span class="line">        		修改该节点的信息（父节点、fgh）</span><br><span class="line">			<span class="keyword">else</span>：</span><br><span class="line">            	将该节点加入openList</span><br><span class="line">	将q放入closeList</span><br></pre></td></tr></table></figure>
+<p>算法性能在细节上的优化：<a href="http://theory.stanford.edu/~amitp/GameProgramming/" target="_blank" rel="noopener">http://theory.stanford.edu/~amitp/GameProgramming/</a></p>
+<p><strong>序言：路径搜索算法的前世今生</strong></p>
+<p><strong>Dijkstra算法：</strong>从初始节点开始向外扩展，直到到达目标节点。算法保证能找到从初始点到目标点的最短路径。</p>
+<p><img src="/2018/11/14/A-star-algorithm/D算法.png" alt=""></p>
+<p><strong>最佳优先搜索BFS算法：</strong>算法能够评估任意节点到目标点的代价，并优先选择离目标最近的结点。启发式算法，比Dijkstra算法运行快得多，但是不能保证路径最短。</p>
+<p><img src="/2018/11/14/A-star-algorithm/BFS算法.png" alt=""></p>
+<p>如下面这种情况：</p>
+<p><img src="/2018/11/14/A-star-algorithm/D1.png" alt="D1">     <img src="/2018/11/14/A-star-algorithm/B1.png" alt="B1"></p>
+<p>因为BFS是基于贪心策略的，它只关注到尽可能向着目标点移动，而不考虑已花费的代价。Dijkstra算法则正相反，它会确保每一步都是最优的，但是为此要遍历周围全部的节点。</p>
+<p><strong>A*算法：</strong>将两种路径搜索算法的思想结合起来，考虑两个极端及其中间的情况：</p>
+<ul>
+<li><p>如果$h(n)$是0，只有$g(n)$起作用，那么算法演变为Dijkstra算法。</p>
+</li>
+<li><p>如果$h(n)$能够始终满足“比当前节点移动到目标节点的实际代价小”，那么算法保证能够找到最短路径。（$h(n)$越小，算法扩展的节点数就越多）</p>
+</li>
+<li>如果$h(n)$能够精确等于“当前节点移动到目标节点的实际代价”，那么算法将会仅仅扩展最优路径。而不扩展其他节点，算法运行非常快。</li>
+<li>如果$h(n)$有时会“比当前节点移动到目标节点的实际代价大”，那么此时算法不能保证最短路径了。</li>
+<li>如果$g(n)$比$h(n)$小的多，只有$h(n)$起作用，那么算法演变为BFS算法。</li>
+</ul>
+<p><strong>估价函数Heuristic function $h(a, b)$</strong> </p>
+<p>估价函数的选择可以follow以下的instructions：</p>
+<ol>
+<li><p>square grid that allows 4 directions：use Manhattan distance (L1)</p>
+<script type="math/tex; mode=display">
+dx = abs(a.x - b.x)\\
+dy = abs(a.y - b.y)\\
+dis = D*(dx+dy)</script></li>
+<li><p>square grid that allows 8 directions：use Diagonal distance (L∞)</p>
+<script type="math/tex; mode=display">
+dx = abs(a.x - b.x)\\
+dy = abs(a.y - b.y)\\
+dis = D*(dx+dy) + (D2 - 2*D)*min(dx, dy)</script><p>当$D = D2 =1$时，$dis = dx + dy -min(dx, dy) = max(dx, dy)$，这个距离称为切比雪夫距离。</p>
+<p>当$D = 1, D2 =\sqrt 2$时，这个距离称为<em>octile distance</em>。</p>
+</li>
+<li><p>square grid that allows any direcitons：use Euclidean distance (L2)</p>
+<script type="math/tex; mode=display">
+dx = abs(a.x - b.x)\\
+dy = abs(a.y - b.y)\\
+dis = D*\sqrt{dx*dx + dy*dy}</script><blockquote>
+<p>If A* is finding paths on the grid but you are allowing movement not on the grid, you may want to consider other representations of the map</p>
+</blockquote>
+<p>​    欧几里得距离并不适用于栅格地图，因为这会导致代价函数g和估价函数的不匹配（代价函数并不是连续的）。</p>
+<p>由于欧几里得距离引入了开根号计算，一些算法会直接用$dis = D<em>(dx</em>dx + dy<em>dy)$来代替，<em>*不建议！</em></em>，会引入尺度问题，$f = g + h$，其中代价函数会逐渐增长，估价函数则逐渐减小，平方会导致两个函数的变化速率不match，使得估价函数的权重过大，导致BFS。</p>
+</li>
+</ol>
+<p>code：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public <span class="function"><span class="keyword">function</span> <span class="title">manhattanHeuristic</span>(<span class="params">a:Object, b:Object</span>):<span class="title">Number</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> graph.distance(a, b) + simpleCost(a, b) - <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public <span class="function"><span class="keyword">function</span> <span class="title">simpleCost</span>(<span class="params">a:Object, b:Object</span>):<span class="title">Number</span> </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> c:<span class="built_in">Number</span> = costs[graph.nodeToString(b)];</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">isNaN</span>(c)) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    	<span class="keyword">return</span> c;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// simpleCost限定为小于等于1的数</span></span><br></pre></td></tr></table></figure>
+<p>此时$h(a,b) = dis(a,b)+c-1 \leq h^{*}(a,b)$，此时能够找到最优解。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/13/branch-and-bound/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1690,308 +2039,11 @@ d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/08/CSM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/10/08/CSM/" itemprop="url">CSM, Correlative Scan Matching</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-08T15:22:43+08:00">
-                2018-10-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/10/08/CSM/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/08/CSM/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>SLAM前端主要解决两个问题，一是从不同时刻的传感器输入中识别出同一个地图特征，二是计算每个当前时刻机器人相对该特征的位姿。</p>
-<p>vSLAM能够轻松解决前者，LidarSLAM解决后者无压力。本文讨论激光SLAM前端问题1——特征点匹配。目前两大常用思路：scan2scan——ICP，scan2map——CSM。</p>
-<p>basic的CSM算法思路如下：从前一帧机器人位姿开始，寻找最优刚性变换，使雷达点在栅格地图中的位置尽量对应于占据度为1的栅格。</p>
-<p>为了保持定位信息原有的数位精度，使用双线性插值方法来获取雷达点的地图值(占据度)，而不是使用其所在栅格的地图值来直接对应：</p>
-<p><img src="/2018/10/08/CSM/插值.png" alt="插值"></p>
-<p>$Pm$是雷达点，$P_{00}, P_{01}, P_{10}, P_{11}$是雷达点邻近的四个<strong>栅格中心</strong>点。于是得到地图值：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
-& =\frac{y-y_0}{y_1-y_0} \left ( \frac{x-x_0}{x_1-x_0}M(P_{11}) + \frac{x_1-x}{x_1-x_0}M(P_{01})\right)\\
-& +\frac{y_1-y}{y_1-y_0}\left ( \frac{x-x_0}{x_1-x_0}M(P_{10}) + \frac{x_1-x}{x_1-x_0}M(P_{00})\right)
-\end{align}</script><p>雷达点所在位置的地图值变化梯度：</p>
-<script type="math/tex; mode=display">
-\triangledown M(P_m) = \left [\frac{\delta M(P_m)}{\delta x}, \frac{\delta M(P_m)}{\delta y} \right]\\
-\frac{\delta M(P_m)}{\delta x} =\frac{y-y_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{01}))  +\frac{y_1-y}{(y_1-y_0)(x_1-x_0)}(M(P_{10})- M(P_{00}))\\
-\frac{\delta M(P_m)}{\delta y} =\frac{x-x_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{10}))  +\frac{x_1-x}{(y_1-y_0)(x_1-x_0)}(M(P_{01})- M(P_{00}))\\</script><p>记当前时刻的已有地图$M$，当前帧共输入$n$个雷达点$S_1, …, S_n$，其对应位置的占据度为$M(S_k)$，最优变换定义为$\xi = (\Delta x, \Delta y, \psi)^T$，则最优问题的最小二乘描述为：</p>
-<script type="math/tex; mode=display">
-\xi = argmin_{\xi} \sum_{k=1}^n[1-M(S_k(\xi))]^2</script><p>scan2map的鲁棒性更强，但是实时性上打了折扣。对此主要有两个改进措施：一是局部搜索，二是分辨率金字塔。</p>
-<p>一、局部搜索</p>
-<p>实际计算中会<strong>选定一个搜索区间</strong>，通常只在上一时刻地图位置的附近，对其中包含的全部可能位姿进行评分。</p>
-<p>上式（最小二乘表达式）只包含了雷达端点，考虑到传感器的噪点影响，<strong>局部极值</strong>影响大。</p>
-<ul>
-<li>基于模版的匹配：雷达端点及射线所在栅格构成的多边形区域，以此作为局部地图，进行map2map匹配。减少局部极值的影响，提高计算代价，同时考虑到动态目标，会引入新的局部极值。</li>
-</ul>
-<p><img src="/2018/10/08/CSM/模版.png" alt="模版"></p>
-<ul>
-<li><p>LM算法：迭代的方式求解最小二乘的最优解。</p>
-</li>
-<li><p>分支界定算法：基于广度优先搜索的算法，通过对解空间搜索树的分支进行扩展和剪枝，不断调整搜索方向，加快找到全局最优解的速度。界定核心：若当前分支的下界$C_{branch}$小于解空间上界$C_{HB}$，则进行拓展，否则进行裁剪，直至到达叶子结点，即找到最小代价解。</p>
-</li>
-</ul>
-<p>二、多分辨率金字塔</p>
-<p>两帧雷达点云的相似区域并不会影响匹配的最终结果，但会参与计算，导致搜索效率降低，需要更多的迭代次数达到收敛。</p>
-<p>当地图分辨率较低时，部分地图信息会被忽略，这种高、低分辨率下的差异，有助于对地图中的相似场景进行区分。实际使用中，首先将初始位姿对应的雷达点云与最上层（粗分辨率）的地图进行匹配，计算出当前分辨率下的位姿，并作为初始值进入次一级地图进行匹配，以此类推。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/08/16/leetcode95-二叉搜索树/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/16/leetcode95-二叉搜索树/" itemprop="url">leetcode95-二叉搜索树</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-16T19:41:25+08:00">
-                2018-08-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/08/16/leetcode95-二叉搜索树/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/08/16/leetcode95-二叉搜索树/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>96和95都是二叉搜索树，先做的96，求树的结构有几种，没注意结点大小关系，用<strong>动态规划</strong>来做，$dp[i] = dp[0]*dp[i-1] + … + dp[i-1]*dp[0]$。注意递归调用的时间复杂度，<strong>自底向上</strong>来算：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">numTrees</span><span class="params">(self, n)</span>:</span></span><br><span class="line">	res = [<span class="number">1</span>, <span class="number">1</span>]</span><br><span class="line">    <span class="keyword">if</span> n &lt; <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> res[n]</span><br><span class="line">    </span><br><span class="line">    res += [<span class="number">0</span>]*(n<span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>, n+<span class="number">1</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(i):</span><br><span class="line">            res[i] += res[j]*res[i<span class="number">-1</span>-j]</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">return</span> res[n]</span><br></pre></td></tr></table></figure>
-<p>95要列出结构了，才发现<strong>什么是二叉搜索树来着</strong>——左子树的结点值均小于根节点，右子树的结点值均大于根节点。按照惯例，求数量用DP，求枚举则用DFS：</p>
-<p>遍历每一个数字$i$作为根节点，那么$[1, 2, …, i-1]$构成其左子树，$[i+1, i+2, …, n]$构成其右子树。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generateTrees</span><span class="params">(self, n)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> n == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> self.dfs(<span class="number">1</span>,n)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dfs</span><span class="params">(self, b, e)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> b &gt; e:</span><br><span class="line">        <span class="keyword">return</span> [<span class="keyword">None</span>]</span><br><span class="line">    res = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(b, e+<span class="number">1</span>):</span><br><span class="line">        <span class="comment"># set as the root node</span></span><br><span class="line">        leftTrees = self.dfs(b, i<span class="number">-1</span>)</span><br><span class="line">        rightTrees = self.dfs(i+<span class="number">1</span>, e)</span><br><span class="line">        <span class="keyword">for</span> left <span class="keyword">in</span> leftTrees:</span><br><span class="line">            <span class="keyword">for</span> right <span class="keyword">in</span> rightTrees:</span><br><span class="line">                root = TreeNode(i)</span><br><span class="line">                root.left = left</span><br><span class="line">                root.right = right</span><br><span class="line">                res.append(root)</span><br><span class="line">	<span class="keyword">return</span> res</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/10/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/12/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2041,7 +2093,7 @@ M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">129</span>
+                  <span class="site-state-item-count">131</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2054,7 +2106,7 @@ M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">68</span>
+                  <span class="site-state-item-count">70</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,971 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/25/metric-learning系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/25/metric-learning系列/" itemprop="url">metric learning系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-25T12:05:22+08:00">
+                2020-09-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/25/metric-learning系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/25/metric-learning系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>参考：<a href="https://gombru.github.io/2019/04/03/ranking_loss/，博主实验下来觉得Triplet" target="_blank" rel="noopener">https://gombru.github.io/2019/04/03/ranking_loss/，博主实验下来觉得Triplet</a> Loss outperforms Cross-Entropy Loss</p>
+<h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>metric learning</p>
+<ul>
+<li>常规的cls loss系列(CE、BCE、MSE)的目标是predict a label</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>metric loss系列的目标则是predict relative distances between inputs<ul>
+<li>常用场景：人脸 &amp; fine-grained</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>relation between samples</p>
+<ul>
+<li>first get the embedded representation</li>
+<li>then compute the similarity score<ul>
+<li>binary (similar / dissimilar)</li>
+<li>regression (euclidian distance)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>大类：不管叫啥，主体上就两类，二元组和三元组</p>
+<ul>
+<li><p>common target：拉近类内距离，拉大类间距离</p>
+</li>
+<li><p>pairs</p>
+<ul>
+<li>anchor + sample<ul>
+<li>positive pairs：distance —&gt; 0</li>
+<li>negative pairs：disctance &gt; a margin</li>
+</ul>
+</li>
+<li><img src="/2020/09/25/metric-learning系列/pairs.png" width="50%;"></li>
+</ul>
+</li>
+<li>triplets<ul>
+<li>anchor + pos sample + neg sample</li>
+<li>target：(dissimilar distance - similar distance) —&gt; a margin</li>
+</ul>
+</li>
+<li><img src="/2020/09/25/metric-learning系列/triplet.png" width="50%;"></li>
+</ul>
+</li>
+<li><p>papers</p>
+<p>[siamese network] Signature Verification using a ‘Siamese’ Time Delay Neural Network：1993，lecun，孪生网络始祖，俩个子网络sharing weights，距离用的是cosine distance，loss直接优化距离，优化target是个定值cosine=1.0/-1.0</p>
+<p>[contrastive loss] Dimensionality Reduction by Learning an Invariant Mapping：2006，lecun，contrastive loss始祖，研究的是高维特征向量向低维映射的非线性层，距离用的是euclidean distance，loss优化的是squared distance，优化target是0和m，similar pairs仍旧会被推向一个定点，没有解决论文声称的uniform distribution</p>
+<p>[triplet-loss] Learning Fine-grained Image Similarity with Deep Ranking：2014，Google，用了三元组，提出了triplet-loss</p>
+<p>[facenet] FaceNet: A Unified Embedding for Face Recognition and Clustering：2015，Google，用来识别人脸，用了三元组和triplet-loss，squared euclidean distance，优化目标是同类和异类pair之间的相对距离，困难样本（semi-hard &amp; hard）对收敛起作用（加速／local minima），triplet-loss考虑了类间的离散性，但没有考虑类内的紧凑性</p>
+<p>[center-loss] A Discriminative Feature Learning Approach for Deep Face Recognition：2016，也是用在人脸任务上，优化目标是类内的绝对距离，而不是建模相对关系，center-loss直接优化的是类间的间凑性，类间的离散性靠的是softmax loss</p>
+<p>[triplet-center-loss] Triplet-Center Loss for Multi-View 3D Object Retrieval：2018，东拼西凑水论文</p>
+<p>[Hinge-loss] SVM margin</p>
+<p>[circle-loss] Circle Loss: A Unified Perspective of Pair Similarity Optimization：2020CVPR，旷视，提出了cls loss和metric loss的统一形式$minimize(s_n - s_p+m)$，在此基础上提出circle loss作为优化目标$(\alpha_n s_n - \alpha_p s_p) = m$，在toy scenario下展示了分类边界和梯度的改善。</p>
+<p>～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～</p>
+<p>[Hierarchical Similarity] Learning Hierarchical Similarity Metrics：2012CVPR，</p>
+<p>[Hierarchical Triplet Loss] Deep Metric Learning with Hierarchical Triplet Loss：2018ECCV，</p>
+<ul>
+<li>Hierarchical classicification应该单独做一个系列，tobeadded</li>
+</ul>
+</li>
+<li><p>一些待明确的问题</p>
+<ul>
+<li>anchor怎么选：facenet中说明，每个mini-batch中每个类别必须都有</li>
+<li>pairs怎么实现（困难的定义）：facenet中说明，hard distance sample in mini-batch</li>
+<li>hingeloss &amp; SVM推导</li>
+<li>常规使用？结合cls loss和metric loss还是只用metric loss：cls loss和metric loss本质上是一样的，都是希望同类样本输出一样，不同类样本输出不一样，只不过前者具有概率意义，后者具有距离意义。上面列出来的只有center loss是要跟cls loss结合起来用的，因为他只针对类内，不足以推动整个模型。</li>
+</ul>
+</li>
+</ol>
+<h2 id="Signature-Verification-using-a-‘Siamese’-Time-Delay-Neural-Network"><a href="#Signature-Verification-using-a-‘Siamese’-Time-Delay-Neural-Network" class="headerlink" title="Signature Verification using a ‘Siamese’ Time Delay Neural Network"></a>Signature Verification using a ‘Siamese’ Time Delay Neural Network</h2><ol>
+<li>动机<ul>
+<li>verification of written signatures </li>
+<li>propose Siamese <ul>
+<li>two identical sub-networks </li>
+<li>joined at their outputs </li>
+<li>measure the distance</li>
+</ul>
+</li>
+<li>verification process<ul>
+<li>a stored feature vector </li>
+<li>a chosen threshold</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>方法<ul>
+<li>network<ul>
+<li>two inputs：extracting features</li>
+<li>two sub-networks：share the same weights</li>
+<li>one output：cosine of the angle between two feature vectors </li>
+<li>target<ul>
+<li>two real signatures：cosine=1.0</li>
+<li>with one forgery：cosine=-0.9 and cosine=-1.0</li>
+</ul>
+</li>
+<li>dataset<ul>
+<li>50% genuine:genuine pairs</li>
+<li>40% genuine:forgery pairs</li>
+<li>10% genuine:zero-effort pairs</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src="/2020/09/25/metric-learning系列/siamese.png" width="40%;"></p>
+<h2 id="Dimensionality-Reduction-by-Learning-an-Invariant-Mapping"><a href="#Dimensionality-Reduction-by-Learning-an-Invariant-Mapping" class="headerlink" title="Dimensionality Reduction by Learning an Invariant Mapping"></a>Dimensionality Reduction by Learning an Invariant Mapping</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>dimensionality reduction</li>
+<li>propose Dimensionality Reduction by Learning an Invariant Mapping (DrLIM)<ul>
+<li>globally co- herent non-linear function</li>
+<li>relies solely on neighbor- hood relationships</li>
+<li>invariant to certain transformations of the inputs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>most existing dimensionality reduction techniques <ul>
+<li>they do not produce a function (or a mapping) from input to manifold </li>
+<li>new points with unknown relationships with training samples cannot be processed </li>
+<li>they tend to cluster points in output space </li>
+<li>a uniform distribution in the outer manifolds is desirable </li>
+</ul>
+</li>
+<li>proposed DrLIM <ul>
+<li>globally coherent non-linear function </li>
+<li>neighborhood relationships that are independent from any distance metric</li>
+<li>invariant to complicated non-linear trnasformations <ul>
+<li>lighting changes</li>
+<li>geometric distortions</li>
+</ul>
+</li>
+<li>can be used to map new samples </li>
+</ul>
+</li>
+<li>empoly contrastive loss <ul>
+<li>neighbors are pulled together </li>
+<li>non-neighbors are pushed apart</li>
+</ul>
+</li>
+<li>energy based model <ul>
+<li>euclidean distance  </li>
+<li>approximates the “semantic similarity”of the inputs in input space</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>contrastive loss </p>
+<ul>
+<li><p>conventional loss sum over samples</p>
+</li>
+<li><p>contrastive loss sum over pairs $(X_1, X_2, Y)$</p>
+<ul>
+<li>similar pairs：$Y=0$</li>
+<li>dissimilar：$Y=1$</li>
+</ul>
+</li>
+<li><p>euclidean distance </p>
+<ul>
+<li><p>$L = (1-Y)\sum L_s ||G_w(X_1)-G_w(X_2)||_2 + Y\sum L_d ||G_w(X_1)-G_w(X_2)||_2$</p>
+</li>
+<li><p>$L_s$ should results in low values for similar pairs </p>
+</li>
+<li>$L_d$ should results in high values for dissimilar pairs</li>
+<li>exact form：$L(W,Y,X_1,X_2) = (1-Y)\frac{1}{2}(D^2) + (Y)\frac{1}{2} \{max(0,m-D)\}^2$</li>
+</ul>
+<p><img src="/2020/09/25/metric-learning系列/contrastive loss.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>spring model analogy</p>
+<ul>
+<li>similar partial loss相当于给弹簧施加了一个恒定的力，向中心点挤压</li>
+<li><p>dissimilar partial loss只对圈内的点施力，推出圈外就不管了</p>
+<p><img src="/2020/09/25/metric-learning系列/spring.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="FaceNet-A-Unified-Embedding-for-Face-Recognition-and-Clustering"><a href="#FaceNet-A-Unified-Embedding-for-Face-Recognition-and-Clustering" class="headerlink" title="FaceNet: A Unified Embedding for Face Recognition and Clustering"></a>FaceNet: A Unified Embedding for Face Recognition and Clustering</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>face tasks</p>
+<ul>
+<li>face verification: is this the same person</li>
+<li>face recognition: who is the person</li>
+<li>clustering: find common people among the faces</li>
+</ul>
+</li>
+<li><p>learn a mapping</p>
+<ul>
+<li>compact Euclidean space</li>
+<li><p>where the Euclidean distance directly correspond to face similarity</p>
+<p><img src="/2020/09/25/metric-learning系列/face similarity.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>traditionally training classification layer</p>
+<ul>
+<li><p>generalizes well to new faces？                      <strong>indirectness</strong></p>
+</li>
+<li><p>large dimension feature representation         <strong>inefficiency</strong></p>
+</li>
+<li><p>use siamese pairs</p>
+<ul>
+<li>the loss encourages all faces of one identity to project onto a single point</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li>employ triplet loss<ul>
+<li>target：separate the positive pair from the negative by a distance margin </li>
+<li>allows the faces of one identity to live on a manifold</li>
+</ul>
+</li>
+<li>obtain face embedding<ul>
+<li>l2 norm</li>
+<li>a fixed d-dims hypersphere </li>
+</ul>
+</li>
+<li>large dataset  <ul>
+<li>to attain the appropriate invariances to pose, illumination, and other variational conditions</li>
+</ul>
+</li>
+<li><p>architecture</p>
+<ul>
+<li>explore two different deep network</li>
+</ul>
+<p><img src="/2020/09/25/metric-learning系列/facenet.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>input：三元组，consist of two matching face thumbnails and a non-matching one </p>
+</li>
+<li><p>ouput：特征描述，a compact 128-D embedding <strong>living on the fixed hypersphere $||f(x)||_2=1$</strong></p>
+</li>
+<li><p>triple-loss</p>
+<ul>
+<li>target：all anchor-pos distances are smaller than any anchor-neg distances with a least margin $\alpha$</li>
+<li>$L = \sum_i^N [||f(x_i^a) - f(x_i^p)||_2^2 - ||f(x_i^a) - f(x_i^n)||_2^2 + \alpha]$</li>
+<li>hard triplets </li>
+</ul>
+</li>
+<li><p>hard samples</p>
+<ul>
+<li>$argmax_{x_i^p}||f(x_i^a) - f(x_i^p)||_2^2$</li>
+<li>$argmin_{x_i^n}||f(x_i^a) - f(x_i^n)||_2^2$</li>
+<li>infeasible to compute over the whole set：mislabelled and poorly imaged faces would dominate the hard positives and negatives </li>
+<li>off-line：use recent checkpoint to compute on a subset</li>
+<li>online：select in mini-batch</li>
+</ul>
+</li>
+<li><p>mini-batch：</p>
+<ul>
+<li>每个类别都必须有正样本</li>
+<li>负样本是randomly sampled </li>
+</ul>
+</li>
+<li><p>hard sample</p>
+<ul>
+<li>use all anchor-positive pairs  </li>
+<li>selecting the hard negatives <ul>
+<li>hardest negatives can lead to bad local minima in early stage</li>
+<li>先pick semi-hard：$||f(x_i^a) - f(x_i^p)||_2^2 &lt; ||f(x_i^a) - f(x_i^n)||_2^2$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>network</p>
+<ul>
+<li>一种straight的网络，引入了1x1 conv先压缩通道</li>
+<li>Inception models：20x fewer params，5x fewer FLOPS</li>
+</ul>
+</li>
+<li><p>metric</p>
+<ul>
+<li>same／different是由a squared L2 distance决定</li>
+<li>因此测试结果是d的函数</li>
+<li>定义true accepts：圈内对的，$TA(d)=\{(i,j)\in P_{same}, with D(x_i,x_j)\leq d\}$</li>
+<li><p>定义false accepts：圈内错的，$FA(d)=\{(i,j)\in P_{diff}, with D(x_i,x_j)\leq d\}$</p>
+</li>
+<li><p>定义validation rate：$VAL(d) = \frac{|TA(d)|}{|P_{same}|}$</p>
+</li>
+<li>定义false accept rate：$FAR(d) = \frac{|FA(d)|}{|P_{diff}|}$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="A-Discriminative-Feature-Learning-Approach-for-Deep-Face-Recognition"><a href="#A-Discriminative-Feature-Learning-Approach-for-Deep-Face-Recognition" class="headerlink" title="A Discriminative Feature Learning Approach for Deep Face Recognition"></a>A Discriminative Feature Learning Approach for Deep Face Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>enhance the discriminationative power of the deeply learned features</li>
+<li>joint supervision <ul>
+<li>softmax loss</li>
+<li>center loss</li>
+</ul>
+</li>
+<li>two key learning objectives<ul>
+<li>inter-class dispension </li>
+<li>intra-class compactness </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>face recognition task requirement<ul>
+<li>the learned features need to be not only separable but also discriminative</li>
+<li>generalized enough for the new unseen samples</li>
+</ul>
+</li>
+<li>the softmax loss only encourage the separability of features <ul>
+<li>对分类边界、类内类间分布没有直接约束</li>
+</ul>
+</li>
+<li>contrastive loss &amp; triplet loss <ul>
+<li>training pairs or triplets dramatically grows </li>
+<li>slow convergence and instability </li>
+</ul>
+</li>
+<li>we propose<ul>
+<li>learn a center </li>
+<li>simultaneously update the center and optimize the distances </li>
+<li>joint supervision<ul>
+<li>softmax loss forces the deep features of different classes staying apart </li>
+<li>center loss efficiently pulls the deep features of the same class to their centers </li>
+<li>to be more discriminationative</li>
+</ul>
+</li>
+<li>the inter-class features differences are enlarged </li>
+<li>the intra-class features variations are reduced</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>softmax vis</p>
+<ul>
+<li>最后一层hidden layer使用两个神经元</li>
+<li>so that we can directly plot</li>
+<li><p>separable but still show significant intra-class variations</p>
+<p><img src="/2020/09/25/metric-learning系列/softmax.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>center loss</p>
+<ul>
+<li><p>$L_c = \frac{1}{2} \sum_1^m ||x_i - c_{y_i}||_2^2$</p>
+</li>
+<li><p>update class center on mini-batch：</p>
+<script type="math/tex; mode=display">
+  \frac{\partial L_c}{\partial x_i} = x_i - c_{y_i}\\
+  \Delta c_j = \frac{\sum_i^m \delta (y_i=j) * (c_j - x_i)}{1+\sum_i^m \delta (y_i=j)}</script></li>
+<li><p>joint supervision：</p>
+<script type="math/tex; mode=display">
+  L = L_{CE} + \lambda L_c</script><p><img src="/2020/09/25/metric-learning系列/joint supervision.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>discussion</p>
+<ul>
+<li>necessity of joint supervision <ul>
+<li>solely softmax loss —-&gt; large intra-class variations </li>
+<li>solely center loss —-&gt; features and centers will degraded to zeros </li>
+</ul>
+</li>
+<li>compared to contrastive loss and triplet loss<ul>
+<li>using pairs：suffer from dramatic data expansion </li>
+<li>hard mining：complex recombination </li>
+<li>optimizing target：<ul>
+<li>center loss直接针对intra-class compactness，类内用距离来约束，类间用softmax来约束</li>
+<li>contrastive loss也是直接优化绝对距离，类内&amp;类间都用距离来约束</li>
+<li>triplet loss是建模相对关系，类内&amp;类间都用距离来约束</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>architecture </p>
+<ul>
+<li>local convolution layer：当数据集在不同的区域有不同的特征分布时，适合用local-Conv，典型的例子就是人脸识别，一般人的面部都集中在图像的中央，因此我们希望当conv窗口滑过这块区域的时候，权重和其他边缘区域是不同的</li>
+<li><p>参数量暴增：kernel_size <em> kernel_size </em> output_size <em> output_size </em> input_channel * output_channel</p>
+<p><img src="/2020/09/25/metric-learning系列/centerlossnet.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>hyperparam：$\lambda$ and $\alpha$</p>
+<ul>
+<li>fix $\alpha=0.5$ and vary $\lambda$ from 0-0.1</li>
+<li>fix $\lambda=0.003$ and vary $\alpha$ from 0.01-1</li>
+<li><p>结论是remains stable across a large range，没有给出最佳／建议</p>
+<p><img src="/2020/09/25/metric-learning系列/hyper.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>我的实验</p>
+<ul>
+<li>加比不加训练慢得多</li>
+<li>在Mnist上测试同样的epoch加比不加准确率低</li>
+<li>之所以Center Loss是针对人脸识别的Loss是有原因的，个人认为<strong>人脸的中心性更强一些</strong>，也就是说一个人的所有脸取平均值之后的人脸我们还是可以辨识是不是这个人，所以Center Loss才能发挥作用</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Circle-Loss-A-Unified-Perspective-of-Pair-Similarity-Optimization"><a href="#Circle-Loss-A-Unified-Perspective-of-Pair-Similarity-Optimization" class="headerlink" title="Circle Loss: A Unified Perspective of Pair Similarity Optimization"></a>Circle Loss: A Unified Perspective of Pair Similarity Optimization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>pair similarity</li>
+<li>circular decision boundary</li>
+<li>unify cls-based &amp; metric-based data<ul>
+<li>class-level labels  </li>
+<li>pair-wise labels </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>there is no intrinsic difference between softmax loss &amp; metric loss</p>
+<ul>
+<li>minimize between-class similarity $s_n$</li>
+<li>maximize within- class similarity $s_p$</li>
+<li>reduce $s_n - s_p$</li>
+</ul>
+</li>
+<li><p>short-commings</p>
+<ul>
+<li>lack of flexibility：$s_p$和$s_n$的优化速度可能不同，一个快收敛了一个还很差，这时候用同样的梯度去更新就非常inefficient and irrational，就左图来说，下面的点相对上面的点，$s_n$更小（更接近op），$s_p$更小（更远离op），vice versa，但是决策平面对三个点相对于$s_n$和$s_p$的梯度都是一样的（1和-1）。</li>
+<li><p>ambiguous convergence status：用一个hard distance margin来描述decision boundary还不够discriminative，hard decision boundary上各点其实还是有差别的，假设存在一个optimum（$s_p=1 \ \&amp; \ s_n=0$），那么左图决策平面上两个点，相对optimum的意义明显不一样，决策平面应该是个围绕optimum的圆圈。</p>
+<p><img src="/2020/09/25/metric-learning系列/circle loss.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>propose circle loss</p>
+<ul>
+<li>independent weighting factors：离optimum越远的penalty strength越大，这一项直接以距离为优化目标的loss都是满足的</li>
+<li>different penalty strength：$s_p$和$s_n$ learn at different paces，类内加权，加权系数是learnable params</li>
+<li>$(\alpha_n s_n - \alpha_p s_p) = m$：yielding a circle shape </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>核心：$(\alpha_n s_n - \alpha_p s_p) = m$</p>
+</li>
+<li><p>self-paced weighting</p>
+<ul>
+<li><p>given optimum $O_p$ and $O_n$，for each similarity score：</p>
+<script type="math/tex; mode=display">
+  \begin{cases}
+  a_p^i = [O_p - s_p^i]_+ \\
+  a_n^j = [s_n^j - O_n]_+
+  \end{cases}</script></li>
+<li><p>cut-off at zero </p>
+</li>
+<li><p>对于远离optimum的点梯度放大，接近optimum的点（快收敛）梯度缩小</p>
+</li>
+<li><p>softmax里面通常不会对同类样本间做这种rescaling的，因为它希望所有样本value都达到贼大</p>
+</li>
+<li><p>Circle loss abandons the interpretation of classifying a sample to its target class with a large probability </p>
+</li>
+</ul>
+</li>
+<li><p>margin</p>
+<ul>
+<li>adding a margin m reinforces the optimization </li>
+<li>take toy scenario <ul>
+<li>最终整理成：$(s_n-0)^2 + (s_p-1)^2 = 2m^2$</li>
+<li>op target：$s_p &gt; 1-m$，$s_n &lt; m$</li>
+<li>relaxation factor $m$：controls the radius of the decision boundary </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>unified perspective </p>
+<ul>
+<li>tranverse all the similarity pairs：$\{s_p^i\}^K$和$\{s_n^j\}^N$</li>
+<li>to reduce $(s_n^j - s_p^i)$：$L_{uni}=log[1+\sum^K_i \sum^N_j exp(\lambda (s_n^j - s_p^i + m))]$</li>
+<li>解耦（不会同时是$s_p$和$s_n$）：$L_{uni}=log[1+\sum^N_j exp(\lambda (s_n^j + m))\sum^K_i exp(\lambda (-s_p^i))]$</li>
+<li>given class labels：<ul>
+<li>we get $(N-1)$ between-class similarity scores and $(1)$ within-class similarity score </li>
+<li>分母翻上去：$L = -log \frac{exp(\lambda (s_p-m))}{exp(\lambda (s_p-m)) + \sum^{N-1}_j exp(\lambda (s_n^j))}$</li>
+<li>就是softmax</li>
+</ul>
+</li>
+<li>given pair-wise labels：<ul>
+<li>triplet loss with hard mining：find pairs with large $s_n$ and low $s_p$</li>
+<li>use infinite：$L=lim_{\lambda \to \inf} \frac{1}{\lambda} L_{uni}$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>Face recognition <ul>
+<li>noisy and long-tailed data：去噪并且去掉稀疏样本</li>
+<li>resnet &amp; 512-d feature embeddings &amp; cosine distance </li>
+<li>$\lambda=256$，$m=0.25$</li>
+</ul>
+</li>
+<li>Person re-identification <ul>
+<li>$\lambda=128$，$m=0.25$</li>
+</ul>
+</li>
+<li>Fine-grained image retrieval <ul>
+<li>车集和鸟集</li>
+<li>bn-inception &amp; 512-d embeddings</li>
+<li>P-K sampling</li>
+<li>$\lambda=80$，$m=0.4$</li>
+</ul>
+</li>
+<li>hyper-params<ul>
+<li>the scale factor $\lambda$：<ul>
+<li>determines the largest scale of each similarity score </li>
+<li>Circle loss exhibits high robustness on $\lambda$</li>
+<li>the other two becomes unstable with larger  $\lambda$</li>
+<li>owing to the decay factor</li>
+</ul>
+</li>
+<li>the relaxation factor m：<ul>
+<li>determines the radius of the circular decision boundary </li>
+<li>surpasses the best performance of the other two in full range</li>
+<li>robustness </li>
+</ul>
+</li>
+<li><img src="/2020/09/25/metric-learning系列/circle hyper.png" width="50%;"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li>对人脸类任务，通常用训练好的模型生成一个人脸标准底库，然后每次推理的时候得到测试数据的特征向量，并在标准底库中搜索相似度最高的特征，完成人脸识别过程。</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/23/efficient周边/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/23/efficient周边/" itemprop="url">efficient周边</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-23T14:09:06+08:00">
+                2020-09-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/23/efficient周边/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/23/efficient周边/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>因为不是googlenet家族官方出品，所以放在外面</p>
+<p>[EfficientFCN] EfficientFCN: Holistically-guided Decoding for Semantic Segmentation：商汤，主要针对upsampling是局部感受野，重建失真多，分割精度差的问题，提出了Holistically-guided Decoder (HGD) ，用来recover the high-resolution (OS=8) feature maps，想法上接近SCSE-block，数学表达上接近bilinear-CNN，性能提升主要归因于eff back吧。</p>
+<h2 id="EfficientFCN-Holistically-guided-Decoding-for-Semantic-Segmentation"><a href="#EfficientFCN-Holistically-guided-Decoding-for-Semantic-Segmentation" class="headerlink" title="EfficientFCN: Holistically-guided Decoding for Semantic Segmentation"></a>EfficientFCN: Holistically-guided Decoding for Semantic Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Semantic Segmentation <ul>
+<li>dilatedFCN：computational complexity </li>
+<li>encoder-decoder：performance</li>
+</ul>
+</li>
+<li>proposed EfficientFCN <ul>
+<li>common back without dilated convolution </li>
+<li>holistically-guided decoder </li>
+</ul>
+</li>
+<li>balance performance and efficiency</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>key elements for semantic segmentation<ul>
+<li>high-resolution feature maps </li>
+<li>pre-trained weights</li>
+</ul>
+</li>
+<li>OS32 feature map：the fine-grained structural information is discarded </li>
+<li>dilated convolution：no extra parameters introduced but equire high computational complexity and memory consumption </li>
+<li>encoder-decoder based methods<ul>
+<li>repeated upsampling + skip connection procedure<ul>
+<li>upsampling</li>
+<li>concat／add</li>
+<li>successive convs</li>
+</ul>
+</li>
+<li>Even with the skip connections, lower-level high-resolution feature maps cannot provide abstractive enough features for achieving high- performance segmentation </li>
+<li>The  bilinear upsampling or deconvolution operations are conducted in a local manner(from a limited receptive filed)</li>
+<li>improvements<ul>
+<li>reweight：SE-block</li>
+<li>scales each feature channel but maintains the original spatial size and structures：【scse block对spacial有加权啊】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>propose EfficientFCN</p>
+<ul>
+<li>widely used classification model </li>
+<li>Holistically-guided Decoder (HGD) <ul>
+<li>take OS8, OS16, OS32 feature maps from backbone</li>
+<li>OS8和OS16用来spatially guiding the feature upsampling process </li>
+<li>OS32用来encode the global context然后基于guidance进行上采样</li>
+<li>linear assembly at each high-resolution spatial location：感觉就是对上采样特征图做了加权</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/09/23/efficient周边/FCN.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Holistically-guided Decoder </p>
+<ul>
+<li>multi-scale feature fusion </li>
+<li>holistic codebook generation<ul>
+<li>from high-level feature maps </li>
+<li>holistic codewords：without any spatial order </li>
+</ul>
+</li>
+<li><p>codeword assembly </p>
+<p><img src="/2020/09/23/efficient周边/hgd.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>multi-scale feature fusion </p>
+<ul>
+<li>we observe the fusion of multi-scale feature maps generally result in better performance </li>
+<li>compress：separate 1x1 convs</li>
+<li>bilinear downsamp／upsamp</li>
+<li>concatenate</li>
+<li>fused OS32 $m_{32}$ &amp; fused OS8 $m_8$</li>
+</ul>
+</li>
+<li><p>holistic codebook generation</p>
+<ul>
+<li>from $m_{32}$</li>
+<li>two separate 1x1 conv<ul>
+<li>a codeword based map $B \in R^{1024<em>(H/32)</em>(W/32)}$：每个位置用一个1024-dim的vector来描述</li>
+<li>n spatial weighting map $A\in R^{n<em>(H/32)</em>(W/32)}$：highlight 特征图上不同区域<ul>
+<li>softmax norm in spatial-dim</li>
+<li>$\widetilde A_i(x,y)=\frac{exp(A_i(x,y))}{\sum_{p,q} exp(A_i(p,q))}, i\in [0,n)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>codeword $c_i \in R^{1024}$<ul>
+<li>global description for each weighting map </li>
+<li>weighted average of B on all locations</li>
+<li>$c_i = \sum_{p,q} \widetilde A_i(p,q) B(p,q)$</li>
+<li>each codeword captures certain aspect of the global context </li>
+</ul>
+</li>
+<li>orderless high-level global features $C \in R^{1024*n}$<ul>
+<li>$C = [c_1, …, c_n]$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>codeword assembly </p>
+<ul>
+<li>raw guidance map $G \in R^{1024<em>(H/8)</em>(W/8)}$：1x1 conv on $m_8$</li>
+<li>fuse semantic-rich feature map $\overline B \in R^{1024}$：global average vector </li>
+<li>novel guidance feature map $\overline G = G \oplus \overline B $：location-wise addition【？？？？】</li>
+<li>linear assembly weights of the n codewords $W \in R^{n<em>(H/8)</em>(W/8)}$：1x1 conv on $\overline G$</li>
+<li>holistically-guided upsampled feature $\tilde f_8 = W^T C$：reshape &amp; dot</li>
+<li>final feature map $f_8$：concat $\tilde f_8$ and $G$</li>
+</ul>
+</li>
+<li><p>final segmentation</p>
+<ul>
+<li>1x1 conv</li>
+<li>further upsampling </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>numer of holistic codewords</p>
+<ul>
+<li>32-512：increase</li>
+<li>512-1024：slight drop</li>
+<li><p>we observe the number of codewords needed is approximately 4 times than the number of classes </p>
+<p><img src="/2020/09/23/efficient周边/n.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/data-aug/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2652,454 +3617,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/13/SSD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/08/13/SSD/" itemprop="url">SSD</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-13T17:27:30+08:00">
-                2020-08-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/08/13/SSD/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/13/SSD/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="SSD-Single-Shot-MultiBox-Detector"><a href="#SSD-Single-Shot-MultiBox-Detector" class="headerlink" title="SSD: Single Shot MultiBox Detector"></a>SSD: Single Shot MultiBox Detector</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>single network</li>
-<li>speed &amp; accuracy </li>
-<li>59 FPS / 74.3% mAP</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>prev methods</p>
-<ul>
-<li>two-stage：生成稀疏的候选框，然后对候选框进行分类与回归</li>
-<li>one-stage：均匀地在图片的不同位置，采用不同尺度和长宽比，进行密集抽样，然后利用CNN提取特征后直接进行分类与回归</li>
-</ul>
-</li>
-<li><p>fundamental speed improvement </p>
-<ul>
-<li>eliminating bounding box proposals </li>
-<li>eliminating feature resampling  </li>
-</ul>
-</li>
-<li>other improvements <ul>
-<li>small convolutional filter for bbox categories and offsets（针对yolov1的全连接层说）</li>
-<li>separate predictors by aspect ratio</li>
-<li>multiple scales</li>
-<li>这些操作都不是原创</li>
-</ul>
-</li>
-<li>The core of SSD is predicting category scores and box offsets for a fixed set of default bounding boxes using small convolutional filters applied to feature maps. </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Model</p>
-<ul>
-<li><p>Multi-scale feature maps for detection：采用了多尺度的特征图，逐渐用s2降维，大尺度特征图上有更多的单元，用来回归小物体</p>
-</li>
-<li><p>Convolutional predictors for detection：针对yolov1里面的fc层</p>
-</li>
-<li><p>Default boxes and aspect ratios：一个单元4种size的先验框，对每个先验框都预测一组4+(c+1)，其中的1可以看作背景类，也可以看做是有无目标的置信度，各用一个conv3x3的head</p>
-</li>
-<li><p>backbone</p>
-<ul>
-<li>参考：<a href="https://www.cnblogs.com/sddai/p/10206929.html" target="_blank" rel="noopener">https://www.cnblogs.com/sddai/p/10206929.html</a></li>
-</ul>
-</li>
-<li>VGG16前四个conv block保留<ul>
-<li>无dropout和fc</li>
-<li>conv5的池化由2x2-s2变成3x3-s1</li>
-<li>conv6和conv7是3x3x1024和1x1x1024的空洞卷积，输出19x19x1024</li>
-<li>conv8是1x1x256和3x3x512 s2的conv，输出10x10x512</li>
-<li>conv9都是1x1x128和3x3x256 s2的conv，输出5x5x256</li>
-<li>conv10、conv11都是1x1x128和3x3x256 s1 p0的conv，输出3x3x256、1x1x256</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Training <ul>
-<li>Matching strategy：match default box和gt box<ul>
-<li>首先为每一个gt box找到一个overlap最大的default box</li>
-<li>然后找到所有与gt box的overlap大于0.5的default box</li>
-<li>一个gt box可能对应多个default box</li>
-<li>一个default box只能对应一个gt box（overlap最大的）</li>
-</ul>
-</li>
-<li>Objective loss <ul>
-<li>loc loss：smooth L1，offsets like Faster R-CNN</li>
-<li>cls loss：softmax loss  </li>
-<li>weighted sum：$L = \frac{1}{N} (L_{cls} + \alpha L_{loc})$，<ul>
-<li>N is the number of matched default boxes</li>
-<li>loss=0 when N=0</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Choosing scales and aspect ratios for default boxes <ul>
-<li>每个level的feature map感受野不同，default box的尺寸也不同</li>
-<li>数量也不同，conv4、conv10和conv11是4个，conv7、conv8、conv9是6个</li>
-<li>ratio：{1,2,3,1/2,1/3}，4个的没有3和1/3</li>
-<li>L2 normalization for conv4：<ul>
-<li>$y_i = \frac{x_i}{\sqrt{\sum_{k=1}^n x_k^2}}$</li>
-<li>作用是将不同尺度的特征都归一化成模为1的向量</li>
-<li>scale：可以是固定值，也可以是可学习参数</li>
-<li>为啥只针对conv4？<a href="https://zhuanlan.zhihu.com/p/39399799" target="_blank" rel="noopener">作者的另一篇paper(ParseNet)中发现conv4和其他层特征的scale是不一样的</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>predictions<ul>
-<li>all default boxes with different scales and aspect ratio from all locations of many feature maps</li>
-<li>significant imbalance for positive/negative</li>
-<li>Hard negative mining<ul>
-<li>sort using the highest confidence loss</li>
-<li>pick the top ones with n/p at most 3:1</li>
-<li>faster optimization and a more stable training</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Data augmentation <ul>
-<li>sample a patch with specific IoU</li>
-<li>resize</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>性质<ul>
-<li>much worse performance on smaller objects, increasing the input size can help improve</li>
-<li>Data augmentation is crucial, resulting in a 8.8% mAP improvement</li>
-<li>Atrous is faster, 保留pool5不变的话，the result is about the same while the speed is about 20% slower</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/04/python多线程-多进程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/08/04/python多线程-多进程/" itemprop="url">python多线程&多进程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-04T17:23:05+08:00">
-                2020-08-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/08/04/python多线程-多进程/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/04/python多线程-多进程/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Reference：</p>
-<p><a href="https://www.cnblogs.com/kaituorensheng/p/4465768.html" target="_blank" rel="noopener">https://www.cnblogs.com/kaituorensheng/p/4465768.html</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/46368084" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/46368084</a></p>
-<p><a href="https://www.runoob.com/python3/python3-multithreading.html" target="_blank" rel="noopener">https://www.runoob.com/python3/python3-multithreading.html</a></p>
-<ol>
-<li><p>名词</p>
-<ul>
-<li><p>进程(process)和线程(thread)</p>
-<ul>
-<li>cpu在处理任务时，把时间分成若干个小时间段，这些时间段很小的，系统中有很多进程，每个进程中又包含很多线程，在同一时间段 内，电脑CPU只能处理一个线程，下一个时间段，可能又去执行别的线程了（时间片轮转，从而实现伪多任务），具体顺序取决于其调度逻辑</li>
-<li>多核cpu可以实现真正的并行，同一个时刻每个cpu上都可以跑一个任务</li>
-<li><p>多进程：每个进程分别执行指定任务，进程间互相独立，每个时刻并行的实际进程数取决于cpu数量</p>
-</li>
-<li><p>多线程：单个cpu同一时刻只能处理一个线程，一个任务可能由多个工人来完成，工人们相互协同，这则是多线程</p>
-</li>
-</ul>
-</li>
-<li><p>python的多进程：multiprocess模块</p>
-</li>
-<li><p>python的多线程：threading模块</p>
-</li>
-<li><p>每个进程在执行过程中拥有独立的内存单元，而一个进程的多个线程在执行过程中共享内存。</p>
-</li>
-</ul>
-</li>
-<li><p>多进程multiprocess</p>
-<ul>
-<li>母进程：当我们执行一个python脚本，if main下面实际运行的主体就是母进程</li>
-<li>子进程：我们使用multiprocess显式创建的进程，都是子进程</li>
-<li>join()方法：用来让母进程阻塞，等待所有子进程执行完成再结束</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>使用multiprocess的多进程，可以通过process方法和pool方法<ul>
-<li>process方法：适用进程较少时候，无法批量开启/关闭</li>
-<li>pool方法：批量管理</li>
-<li>参数：输入参数都差不多，第一个是要执行的函数方法target/func，第二个是输入参数args</li>
-</ul>
-</li>
-</ul>
-<p>  🌰Process方法：</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    print(<span class="string">'子进程: &#123;&#125; - 任务&#123;&#125;'</span>.format(os.getpid(), i))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">'当前母进程: &#123;&#125;'</span>.format(os.getpid()))</span><br><span class="line">    start = time.time()</span><br><span class="line">    p1 = Process(target=long_time_task, args=(<span class="number">1</span>,))</span><br><span class="line">    p2 = Process(target=long_time_task, args=(<span class="number">2</span>,))</span><br><span class="line">    print(<span class="string">'等待所有子进程完成。'</span>)</span><br><span class="line">    p1.start()</span><br><span class="line">    p2.start()</span><br><span class="line">    p1.join()</span><br><span class="line">    p2.join()</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>process方法使用Process实例化一个进程对象，然后调用它的start方法开启进程</p>
-<p>🌰Pool方法：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Pool, cpu_count</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    print(<span class="string">'子进程: &#123;&#125; - 任务&#123;&#125;'</span>.format(os.getpid(), i))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">True</span>     <span class="comment"># 用于演示pool适用于有返回值</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">"CPU内核数:&#123;&#125;"</span>.format(cpu_count()))        <span class="comment"># 4</span></span><br><span class="line">    print(<span class="string">'当前母进程: &#123;&#125;'</span>.format(os.getpid()))</span><br><span class="line">    start = time.time()</span><br><span class="line">    p = Pool(<span class="number">4</span>)</span><br><span class="line">    results = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        <span class="comment"># p.apply_async(long_time_task, args=(i,))</span></span><br><span class="line">        results.append(p.apply_async(long_time_task, args=(i,)))</span><br><span class="line">    print(<span class="string">'等待所有子进程完成。'</span>)</span><br><span class="line">    p.close()</span><br><span class="line">    p.join()</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((send - start)))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 查看返回值</span></span><br><span class="line">    <span class="keyword">for</span> res <span class="keyword">in</span> results:</span><br><span class="line">      print(res.get())</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>apply_async(func, args=(), kwds={}, callback=None)：向进程池提交需要执行的函数及参数，各个进程采用非阻塞（异步）的调用方式，即每个子进程只管运行自己的，不管其它进程是否已经完成。</p>
-</li>
-<li>close()：关闭进程池（pool），不再接受新的任务。</li>
-<li>join()：主进程阻塞等待子进程的退出， 调用join()之前必须先调用close()或terminate()方法，使其不再接受新的Process。</li>
-</ul>
-<ol>
-<li><p>多线程threading</p>
-<ul>
-<li>python的多线程是伪多线程，因为主进程只有一个，所以只用了单核，只是通过碎片化进程、调度、全局锁等操作，cpu利用率提升了</li>
-<li>所以我想并行处理百万量级的数据入库操作时，多进程的效率明显高于多线程</li>
-<li><p>【问题】从我观察上看多线程基本就是串行？？</p>
-<p>🌰threading</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'当子线程: &#123;&#125;'</span>.format(threading.current_thread().name))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    start = time.time()</span><br><span class="line">    print(<span class="string">'这是主线程：&#123;&#125;'</span>.format(threading.current_thread().name))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        t = threading.Thread(target=long_time_task, args=())</span><br><span class="line">        t.setDaemon(<span class="keyword">True</span>)</span><br><span class="line">        t.start()</span><br><span class="line">        t.join()</span><br><span class="line"></span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line"><span class="comment"># 继承&amp;有返回值的写法</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">8</span>**<span class="number">20</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyThread</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func, args , name=<span class="string">''</span>, )</span>:</span></span><br><span class="line">        threading.Thread.__init__(self)</span><br><span class="line">        self.func = func</span><br><span class="line">        self.args = args</span><br><span class="line">        self.name = name</span><br><span class="line">        self.result = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">'开始子进程&#123;&#125;'</span>.format(self.name))</span><br><span class="line">        self.result = self.func(self.args[<span class="number">0</span>],)</span><br><span class="line">        print(<span class="string">"结果: &#123;&#125;"</span>.format(self.result))</span><br><span class="line">        print(<span class="string">'结束子进程&#123;&#125;'</span>.format(self.name))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_result</span><span class="params">(self)</span>:</span></span><br><span class="line">        threading.Thread.join(self)  <span class="comment"># 等待线程执行完毕</span></span><br><span class="line">        <span class="keyword">return</span> self.result</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    start = time.time()</span><br><span class="line">    threads = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, <span class="number">3</span>):</span><br><span class="line">        t = MyThread(long_time_task, (i,), str(i))</span><br><span class="line">        threads.append(t)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">        t.start()</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">        t.join()</span><br><span class="line"></span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>join方法：等待所有进程执行完，主进程再执行完</p>
-</li>
-<li>setDaemon(True)：主线程执行完就退出</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3149,7 +3671,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">129</span>
+                  <span class="site-state-item-count">131</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3162,7 +3684,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">68</span>
+                  <span class="site-state-item-count">70</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
