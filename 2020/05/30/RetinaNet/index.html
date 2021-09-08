@@ -91,8 +91,9 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2020/05/30/RetinaNet/retinanet.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/05/30/RetinaNet/bg.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/05/30/RetinaNet/acc:time.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/05/30/RetinaNet/retinaMask.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/05/30/RetinaNet/retinaUnet.png">
-<meta property="og:updated_time" content="2020-09-02T07:36:51.000Z">
+<meta property="og:updated_time" content="2021-08-31T07:47:24.757Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RetinaNet">
 <meta name="twitter:description" content="[det] RetinaNet: Focal Loss for Dense Object Detection [det+instance seg] RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free  [det+semantic seg] Retina U-N">
@@ -585,7 +586,8 @@
 <pre><code>      &lt;img src=&quot;RetinaNet/gradient.png&quot; width=&quot;70%;&quot; /&gt;
 </code></pre></li>
 </ul>
-<h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
+<pre><code>​        
+</code></pre><h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>improve single-shot detectors to the same level as current two-stage techniques</li>
@@ -663,62 +665,94 @@ f(x) = \begin{cases}
 </li>
 </ul>
 </li>
+<li><p>mask module</p>
+<ul>
+<li><p>detection predictions are treated as mask proposals </p>
+</li>
+<li><p>extract the top N scored predictions </p>
+</li>
+<li><p>distribute the mask proposals to sample features from the appropriate layers </p>
+<script type="math/tex; mode=display">
+  k = [k_0 + log_2 \sqrt{wh}/224]</script><ul>
+<li>$k_0=4$，如果size小于224*224，proposal会被分配给P3，如果大于448*448，proposal会被分配给P5</li>
+<li>using more feature layers shows no performance boost</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>architecture </p>
+<ul>
+<li>r50&amp;r101 back：freezing all of the Batch Nor- malization layers </li>
+<li>fpn feature channel：256</li>
+<li>classification branch<ul>
+<li>4 conv layers：conv3x3+relu，channel256</li>
+<li>head：conv3x3+sigmoid，channel n_anchors*n_classes</li>
+</ul>
+</li>
+<li>regression branch<ul>
+<li>4 conv layers：conv3x3+relu，channel256</li>
+<li>head：conv3x3，channel n_anchors*4</li>
+</ul>
+</li>
+<li>aggregate the boxes to the FPN layers </li>
+<li>ROI-Align yielding 14x14 resolution features </li>
+<li><p>mask head</p>
+<ul>
+<li>4 conv layers：conv3x3</li>
+<li>a single transposed convolutional layer：convtranspose2d 2x2，to 28*28 resolution</li>
+<li>prediction head：conv1x1</li>
+</ul>
+<p><img src="/2020/05/30/RetinaNet/retinaMask.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>training</p>
+<ul>
+<li>min side &amp; max side：800&amp;1333</li>
+<li>limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly</li>
+<li>positive/ignore/negative：0.5，0.4</li>
+<li><p>focal loss for classification</p>
+<ul>
+<li><p>gaussian initialization</p>
+</li>
+<li><p>$\alpha=0.25, \lambda=2.0$</p>
+</li>
+<li><p>$FL=-\alpha_t(1-p_t)^\lambda log(p_t)$</p>
+<script type="math/tex; mode=display">
+ FL = 
+ \left\{
+ \begin{array}{lr}
+
+ -\alpha (1-p)^{\gamma}log(p),  \  \ y=1\\
+ -(1-\alpha) p^{\gamma}log(1-p),  \  \ y=0\\
+
+ \end{array}
+ \right.</script></li>
+<li><p>gamma项控制的是简单样本的衰减速度，alpha项控制的是正负样本比例，可以默认值下正样本的权重是0.25，负样本的权重是0.75，和想象中的给正样本更多权重不一样，因为alpha和gamma是耦合起来作用的，（可能检测场景下困难的负样本相比于正样本更少？背景就是比前景好学？不确定不确定。。。）</p>
+</li>
+</ul>
+</li>
+<li>self-adjusting L1 loss for box regression<ul>
+<li>limit running params：[0, 0.11]</li>
+</ul>
+</li>
+<li>mask loss<ul>
+<li>top-100 predicted boxes + ground truth boxes</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li>box confidence threshold 0.05</li>
+<li>nms threshold 0.4</li>
+<li>use top-50 boxes for mask prediction</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
-<pre><code>* mask module
-
-    * detection predictions are treated as mask proposals 
-
-    * extract the top N scored predictions 
-
-    * distribute the mask proposals to sample features from the appropriate layers 
-        $$
-        k = [k_0 + log_2 \sqrt{wh}/224]
-        $$
-
-        * $k_0=4$，如果size小于224\*224，proposal会被分配给P3，如果大于448\*448，proposal会被分配给P5
-        * using more feature layers shows no performance boost
-
-* architecture 
-
-    * r50&amp;r101 back：freezing all of the Batch Nor- malization layers 
-    * fpn feature channel：256
-    * classification branch
-        * 4 conv layers：conv3x3+relu，channel256
-        * head：conv3x3+sigmoid，channel n_anchors*n_classes
-    * regression branch
-        * 4 conv layers：conv3x3+relu，channel256
-        * head：conv3x3，channel n_anchors*4
-    * aggregate the boxes to the FPN layers 
-    * ROI-Align yielding 14x14 resolution features 
-    * mask head
-        * 4 conv layers：conv3x3
-        * a single transposed convolutional layer：convtranspose2d 2x2，to 28\*28 resolution
-        * prediction head：conv1x1
-
-    &lt;img src=&quot;RetinaNet/retinaMask.png&quot; width=&quot;70%;&quot; /&gt;
-
-* training
-
-    * min side &amp; max side：800&amp;1333
-    * limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly
-    * positive/ignore/negative：0.5，0.4
-    * focal loss for classification
-        * gaussian initialization
-        * $\alpha=0.25, \lambda=2.0$
-        * $FL=-\alpha_t(1-p_t)^\lambda log(p_t)$
-    * self-adjusting L1 loss for box regression
-        * limit running params：[0, 0.11]
-    * mask loss
-        * top-100 predicted boxes + ground truth boxes
-
-* inference
-
-    * box confidence threshold 0.05
-    * nms threshold 0.4
-    * use top-50 boxes for mask prediction
-</code></pre><h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
+<h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>localization<ul>
@@ -945,7 +979,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">131</span>
+                  <span class="site-state-item-count">134</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -958,7 +992,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

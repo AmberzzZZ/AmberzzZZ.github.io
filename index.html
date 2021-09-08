@@ -276,6 +276,893 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/01/MuST/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/01/MuST/" itemprop="url">MuST谷歌多任务自训练</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-01T15:35:24+08:00">
+                2021-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/01/MuST/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/01/MuST/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p>recollect</p>
+<p>  [SimCLR]</p>
+<p>  [MoCo]</p>
+</li>
+</ul>
+<h2 id="Multi-Task-Self-Training-for-Learning-General-Representations"><a href="#Multi-Task-Self-Training-for-Learning-General-Representations" class="headerlink" title="Multi-Task Self-Training for Learning General Representations"></a>Multi-Task Self-Training for Learning General Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learning general feature representations</li>
+<li>expect a single general model<ul>
+<li>相比较于training specialized models for various tasks</li>
+<li>harness from independent specialized teacher models</li>
+<li>with a multi-task pseudo dataset</li>
+<li>trained with multi-task learning</li>
+</ul>
+</li>
+<li>evalutate on 6 vision tasks<ul>
+<li>image recognition (classification, detection, segmentation)</li>
+<li>3D geometry estimation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>pretraining &amp; transfer learning</p>
+<ul>
+<li>transformer一般都是这个套路，BiT&amp;ViT</li>
+<li>pretraining<ul>
+<li>supervised / unsupervised</li>
+<li>learn feature representations</li>
+</ul>
+</li>
+<li>transfer learning<ul>
+<li>on downstream tasks</li>
+<li>the features may not necessarily be useful</li>
+<li>最典型的就是ImageNet pre-training并不能improve COCO segmentation，但是Objects365能够大幅提升</li>
+</ul>
+</li>
+<li>pretraining tasks必须要和downstream task align，learn specialized features，不然白费</li>
+</ul>
+</li>
+<li><p>learning general features</p>
+<ul>
+<li>a model simultaneously do well on multiple tasks</li>
+<li>NLP的bert是一个典型用多任务提升general ability的</li>
+<li>CV比较难这样做是因为标签variety，没有这样的大型multi-task dataset</li>
+</ul>
+</li>
+<li><p>multi-task learning</p>
+<ul>
+<li>shared backbone (如ResNet-FPN)</li>
+<li>small task-specific heads</li>
+</ul>
+</li>
+<li><p>self-training</p>
+<ul>
+<li>use a supervised model to generate pseudo labels on unlabeled data</li>
+<li>then a student model is trained on the pseudo labeled data</li>
+<li>在各类任务上都proved涨点</li>
+<li>但是迄今为止都是focused on a single task</li>
+</ul>
+</li>
+<li><p>in this work</p>
+<ul>
+<li><p>lack of large scale multi-task dataset的issue，通过self-training to fix，用pseudo label</p>
+</li>
+<li><p>specialized/general issue，通过多任务，训练目标就是六边形战士，absorb the knowledge of different tasks in the shared backbone</p>
+</li>
+<li><p>three steps</p>
+<ul>
+<li>trains specialized teachers independently on labeled datasets （分类、分割、检测、深度估计）</li>
+<li>the specialized teachers are then used to label a larger unlabeled dataset（ImageNet） to create a multi- task pseudo labeled dataset</li>
+<li><p>train a student model with multi-task learning</p>
+<p><img src="/2021/09/01/MuST/MuST.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>MuST的特质</p>
+<ul>
+<li>improve with more unlabeled data，数据越多general feature越好</li>
+<li>can improve upon already strong checkpoints，在海量监督高精度模型基础上fine-tune，仍旧能在downstream tasks涨点</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Specialized Teacher Models</p>
+<ul>
+<li>4 teacher models<ul>
+<li>classification：train from scratch，ImageNet</li>
+<li>detection：train from scratch，Object365</li>
+<li>segmentation：train from scratch，COCO</li>
+<li>depth estimation：fine-tuning from pre-trained checkpoint</li>
+</ul>
+</li>
+<li>pseudo labeling<ul>
+<li>unlabeled / partially labeled datasets</li>
+<li>for detection：hard score threshold of 0.5</li>
+<li>for segmentation：hard score threshold of 0.5</li>
+<li>for classification：soft labels——probs distribution</li>
+<li>for depth：直接用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Multi-Task Student Model</p>
+<ul>
+<li><p>模型结构</p>
+<p>  <img src="/2021/09/01/MuST/student.png" width="50%;"></p>
+<ul>
+<li>shared back<ul>
+<li>C5：for classification</li>
+<li>feature pyramids {P3,P4,P5,P6,P7}：for detection</li>
+<li>fused P2：for pixel-wise prediction，把feature pyramids rescale到level2然后sum</li>
+</ul>
+</li>
+<li>heads<ul>
+<li>classification head：ResNet design，GAP C5 + 线性层</li>
+<li>object detection task：Mask R-CNN design，RPN是2 hidden convs，Fast R-CNN是4 hidden convs + 1 fc</li>
+<li>pixel-wise prediction heads：3 hiddent convs + 1 linear conv head，分割和深度估计任务independent，不share heads</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Teacher-student training</p>
+<ul>
+<li>using the same architecture </li>
+<li>same data augmentation</li>
+<li>teacher和student的main difference就是dataset和labels</li>
+</ul>
+</li>
+<li><p>Learning From Multiple Teachers</p>
+<ul>
+<li>every image has supervision for all tasks</li>
+<li>labels may come from supervised or pseudo labels</li>
+<li>如果使用ImageNet数据集，classification就是真标签，det/seg/depth supervision则是伪标签</li>
+<li>balance the loss contribution<ul>
+<li>加权和，task-specific weights</li>
+<li>for ImageNet，use $w_i = \frac{b_slr_{it}}{b_{it}lr_{s}}$</li>
+<li>follow the scaling rule：lr和batch size成正比</li>
+<li>except for depth loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Cross Dataset Training</p>
+<ul>
+<li>training across ImageNet, object365 and COCO</li>
+<li>有标签的就用原标签，没有的用伪标签，supervised labels and pseudo labels are treated equally，而不是分别采样和训练</li>
+<li>balance the datasets：合在一起然后均匀采样</li>
+</ul>
+</li>
+<li><p>Transfer Learning</p>
+<ul>
+<li>得到general student model以后，fine-tune on 一系列downstream tasks</li>
+<li>这些downstream datasets与MuST model的训练数据都是not align的</li>
+<li>这个实验要证明的是supervised model（如teacher model）和self-supervised model（如用pseudo label训练出来的student model），在downstream tasks上迁移学习能performance是差不多的，【注意⚠️：如果迁移datasets前后align就不是这样了，pretrain显然会更好！！！】</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/GHM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/31/GHM/" itemprop="url">GHM</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-31T15:48:50+08:00">
+                2021-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/31/GHM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/31/GHM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>families:</p>
+<ul>
+<li>[class-imbalanced CE]</li>
+<li>[focal loss]</li>
+<li>[ohem]</li>
+</ul>
+<p>keras implementation:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">weightedCE_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.8</span></span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    wce = tf.where(y_true&gt;<span class="number">0.5</span>, alpha* , (<span class="number">1</span>-alpha)* )</span><br><span class="line">    <span class="keyword">return</span> wce</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.25</span></span><br><span class="line">		gamma = <span class="number">2</span></span><br><span class="line">		</span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># easy/hard reweight</span></span><br><span class="line">		fl = -K.pow(pt, gamma) * K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    fl = tf.where(y_true&gt;<span class="number">0.5</span>, alpha*fl, (<span class="number">1</span>-alpha)*fl)</span><br><span class="line">    <span class="keyword">return</span> fl</span><br><span class="line">  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ce_ohem</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">  	pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># sort loss</span></span><br><span class="line">    k = <span class="number">50</span></span><br><span class="line">    ohem_loss, indices = tf.nn.top_k(ce, k=k)   <span class="comment"># topk loss: [k,], topk indices: [k,], idx among 0-b</span></span><br><span class="line">    mask = tf.where(ce&gt;=ohem_loss[k<span class="number">-1</span>], tf.ones_like(ce), tf.zeros_like(ce))</span><br><span class="line">    <span class="keyword">return</span> mask*ce</span><br></pre></td></tr></table></figure>
+<h2 id="Gradient-Harmonized-Single-stage-Detector"><a href="#Gradient-Harmonized-Single-stage-Detector" class="headerlink" title="Gradient Harmonized Single-stage Detector"></a>Gradient Harmonized Single-stage Detector</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>one-stage detector<ul>
+<li>核心challenge就是imbalance issue</li>
+<li>imbalance between positives and negatives</li>
+<li>imbalance between easy and hard examples</li>
+<li>这两项都能归结为对梯度的作用：a term of the gradient</li>
+</ul>
+</li>
+<li>we propose a novel gradient harmonizing mechanism (GHM) <ul>
+<li>balance the gradient flow</li>
+<li>easy to embed in cls/reg losses like CE/smoothL1</li>
+<li>GHM-C for anchor classification</li>
+<li>GHM-R for bounding box refinement</li>
+</ul>
+</li>
+<li>proved substantial improvement on COCO<ul>
+<li>41.6 mAP</li>
+<li>surpass FL by 0.8</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>imbalance issue</p>
+<ul>
+<li><p>easy and hard：</p>
+<ul>
+<li>OHEM</li>
+<li>directly abandon examples</li>
+<li>导致训练不充分</li>
+</ul>
+</li>
+<li><p>positive and negative</p>
+<ul>
+<li>focal loss</li>
+<li>有两个超参，跟data distribution绑定</li>
+<li>not adaptive</li>
+</ul>
+</li>
+<li><p>通常正样本既是少量样本又是困难样本，而且可以通通归结为梯度分布不均匀的问题</p>
+<p>  <img src="/2021/08/31/GHM/gradients.png" width="50%;"></p>
+<ul>
+<li>大量样本只贡献很小的梯度，通常对应着大量负样本，总量多了也可能会引导梯度（左图）</li>
+<li>hard样本要比medium样本数量大，我们通常将其看作离群点，因为模型稳定以后这些hard examples仍旧存在，他们会影响模型稳定性（左图）</li>
+<li>GHM的目标就是希望不同样本的gradient contribution保持harmony，相比较于CE和FL，简单样本和outlier的total contribution都被downweight，比较harmony（右图）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>we propose gradient harmonizing mechanism (GHM)</p>
+<ul>
+<li>希望不同样本的gradient contribution保持harmony</li>
+<li>首先研究gradient density，按照梯度聚类样本，并相应reweight</li>
+<li>针对分类和回归设计GHM-C loss和GHM-R loss</li>
+<li>verified on COCO<ul>
+<li>GHM-C比CE好得多，sligtly better than FL</li>
+<li>GHM-R也比smoothL1好</li>
+<li>attains SOTA</li>
+</ul>
+</li>
+<li>dynamic loss：adapt to each batch</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Problem Description</p>
+<ul>
+<li><p>define gradient norm $g = |p - p^*|$</p>
+<p>  <img src="/2021/08/31/GHM/norm.png" width="40%;"></p>
+</li>
+<li><p>the distribution g from a converged model</p>
+<p>  <img src="/2021/08/31/GHM/distribution.png" width="40%;"></p>
+<ul>
+<li>easy样本非常多，不在一个数量级，会主导global gradient</li>
+<li>即使收敛模型也无法handle一些极难样本，这些样本梯度与其他样本差异较大，数量还不少，也会误导模型</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Gradient Density</p>
+<ul>
+<li>define gradient density $GD(g) = \frac{1}{l_{\epsilon}(g)} \sum_{k=1} \delta_{\epsilon}(g_k,g)$<ul>
+<li><img src="/2021/08/31/GHM/hyper.png" width="40%;"></li>
+<li>given a gradient value g</li>
+<li>统计落在中心value为$g$，带宽为$\epsilon$的范围内的梯度的样本量</li>
+<li>再用带宽去norm</li>
+</ul>
+</li>
+<li>define the gradient density harmony parameter $\beta_i = \frac{N}{GD(g_i)}$<ul>
+<li>N是总样本量</li>
+<li>其实就是与density成反比</li>
+<li>large density对应样本会被downweight</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GHM-C Loss</p>
+<ul>
+<li><p>将harmony param作为loss weight，加入现有loss</p>
+<p>  <img src="/2021/08/31/GHM/harmony.png" width="40%;"></p>
+</li>
+<li><p><img src="/2021/08/31/GHM/norm1.png" width="50%;"></p>
+<ul>
+<li>可以看到FL主要压简单样本（基于sample loss），GHM两头压（基于sample density）</li>
+<li>最终harmonize the total gradient contribution of different density group</li>
+<li>dynamic wrt mini-batch：使得训练更加efficient和robust</li>
+</ul>
+</li>
+<li><p>Unit Region Approximation</p>
+<ul>
+<li>将gradient norm [0,1]分解成M个unit region</li>
+<li>每个region的宽度$\epsilon = \frac{1}{M}$</li>
+<li>落在每个region内的样本数计作$R_{ind(g)}$，$ind(g)$是g所在region的start idx</li>
+<li>the approximate gradient density：$\hat {GD}(g) = \frac{R_{ind(g)}}{\epsilon} =R_{ind(g)}M $</li>
+<li><p>approximate harmony parameter &amp; loss：</p>
+<ul>
+<li>we can attain good performance with quite small M</li>
+<li>一个密度区间内的样本可以并行计算，计算复杂度O(MN)</li>
+</ul>
+<p><img src="/2021/08/31/GHM/approx.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>EMA</p>
+<ul>
+<li>一个mini-batch可能是不稳定的</li>
+<li>所以通过历史累积来更新维稳：SGDM和BN都用了EMA</li>
+<li>现在每个region里面的样本使用同一组梯度，我们对每个region的样本量应用了EMA<ul>
+<li>t-th iteraion</li>
+<li>j-th region</li>
+<li>we have $R_j^t$</li>
+<li>apply EMA：$S_j^t = \alpha S_j^(t-1) + (1-\alpha )R_j^t$</li>
+<li>$\hat GD(g) = S_{ind(g)} M$</li>
+</ul>
+</li>
+<li>这样gradient density会更smooth and insensitive to extreme data</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GHM-R loss</p>
+<ul>
+<li><p>smooth L1：</p>
+<p>  <img src="/2021/08/31/GHM/SL1.png" width="40%;"></p>
+<ul>
+<li>通常分界点设置成$\frac{1}{9}$</li>
+<li>SL1在线性部分的导数永远是常数，没法去distinguishing of examples</li>
+<li>用$|d|$作为gradient norm则存在inf</li>
+</ul>
+</li>
+<li><p>所以先改造smooth L1：Authentic Smooth L1</p>
+<p>  <img src="/2021/08/31/GHM/ASL.png" width="40%;"></p>
+<p>  <img src="/2021/08/31/GHM/ASL1.png" width="40%;"></p>
+<ul>
+<li>$\mu=0.02$</li>
+<li>梯度范围正好在[0,1)</li>
+</ul>
+</li>
+<li><p>define gradient norm as $gr = |\frac{d}{\sqrt{d^2+\mu^2}}|$</p>
+<ul>
+<li><p>观察converged model‘s gradient norm for ASL1，发现大量是outliers</p>
+<p>  <img src="/2021/08/31/GHM/gr.png" width="40%;"></p>
+</li>
+<li><p>同样用gradient density进行reweighting</p>
+<p>  <img src="/2021/08/31/GHM/GHMR.png" width="40%;"></p>
+</li>
+<li><p>收敛状态下，不同类型的样本对模型的gradient contribution</p>
+<p>  <img src="/2021/08/31/GHM/rcontrib.png" width="40%;"></p>
+<ul>
+<li>regression是对所有正样本进行计算，主要是针对离群点进行downweighting</li>
+<li>这里面的一个观点是：在regression task里面，并非所有easy样本都是不重要的，在分类task里面，easy样本大部分都是简单的背景类，但是regression分支里面的easy sample是前景box，而且still deviated from ground truth，仍旧具有充分的优化价值</li>
+<li>所以GHM-R主要是upweight the important part of easy samples and downweight the outliers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/R-FCN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/31/R-FCN/" itemprop="url">R-FCN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-31T15:20:07+08:00">
+                2021-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/31/R-FCN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/31/R-FCN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>reference：<a href="https://zhuanlan.zhihu.com/p/32903856" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/32903856</a></p>
+<p>引用量：4193</p>
+<h2 id="R-FCN-Object-Detection-via-Region-based-Fully-Convolutional-Networks"><a href="#R-FCN-Object-Detection-via-Region-based-Fully-Convolutional-Networks" class="headerlink" title="R-FCN: Object Detection via Region-based Fully Convolutional Networks"></a>R-FCN: Object Detection via Region-based Fully Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>region-based：<ul>
+<li>先框定region of interest的检测算法</li>
+<li>previous methods：Fast/Faster R-CNN，apply costly per-region subnetwork hundreds of times</li>
+</ul>
+</li>
+<li>fully convolutional <ul>
+<li>旨在解决Faster R-CNN第二阶段计算不共享，效率低的问题</li>
+</ul>
+</li>
+<li>we propose position-sensitive score maps<ul>
+<li>translation-invariance in image classification</li>
+<li>translation-variance in object detection</li>
+</ul>
+</li>
+<li>verified on PASCAL VOC</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>主流的两阶段检测架构</p>
+<ul>
+<li><p>two subnetworks</p>
+<ul>
+<li>a shared fully convolutional：这一部分提取通用特征，作用于全图</li>
+<li>an RoI-wise subnetwork：这一部分不能共享计算，作用于proposals，因为是要针对每个位置的ROI进行分类和回归</li>
+<li><p>也就是说，第一部分是位置不敏感的，第二部分是位置敏感的</p>
+<p><img src="/2021/08/31/R-FCN/region-based.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>网络越深越translation invariant，目标怎么扭曲、平移最终的分类结果都不变，多层pooling后的小feature map上也感知不到小位移，平移可变性（translation variance），对定位任务不友好</p>
+</li>
+<li><p>所以resnet-back-detector我们是把ROI Pooling放在stage4后面，跟一个RoI-wise的stage5</p>
+<ul>
+<li>improves accuracy</li>
+<li>lower speed due to RoI-wise</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>R-FCN</p>
+<ul>
+<li>要解决的根本问题是RoI-wise部分不共享，速度慢：300个proposal要计算300次</li>
+<li>单纯地将网络提前放到shared back里面不行，会造成translation invariant，位置精度会下降</li>
+<li><p>必须通过其他方法加强网络的平移可变性，所以提出了position-sensitive score map</p>
+<ul>
+<li>将全图划分为kxk个区域</li>
+<li>position-sensitive score map：生成kxkx(C+1)个特征图</li>
+<li>每个位置对应C+1个特征图</li>
+<li>做RoIPooling的时候，每个bin来自每个position对应的C+1个map（这咋想的，space dim到channel dim再到space dim？）</li>
+</ul>
+<p><img src="/2021/08/31/R-FCN/score map.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p> <img src="/2021/08/31/R-FCN/RFCN.png" width="70%;"></p>
+<ul>
+<li>two-stage<ul>
+<li>region proposal：RPN</li>
+<li>region classification：the R-FCN</li>
+</ul>
+</li>
+<li>R-FCN<ul>
+<li>全卷积</li>
+<li>输出conv层有kxkx(C+1)个channel<ul>
+<li>kxk对应grid positions</li>
+<li>C+1对应C个前景+background</li>
+</ul>
+</li>
+<li>最后是position-sensitive RoI pooling layer<ul>
+<li>aggregates from last conv and RPN？</li>
+<li>generate scores for each RoI</li>
+<li>each bin aggregates responses from对应的position的channel score maps，而不是全部通道</li>
+<li>force模型在通道上形成对不同位置的敏感能力</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>R-FCN architecture</p>
+<ul>
+<li>back：ResNet-101，pre-trained on ImageNet，block5 输出是2048-d</li>
+<li>然后接了random initialized 1x1 conv，降维</li>
+<li>cls brach<ul>
+<li>接$k^2(C+1)$的conv生成score maps</li>
+<li>然后是Position-sensitive RoI pooling<ul>
+<li>将每个ROI均匀切分成kxk个bins</li>
+<li>每个bin在对应的Position-sensitive score maps中找到唯一的通道，进行average pooling</li>
+<li>最终得到kxk的pooling map，C+1个通道</li>
+<li>将pooling map performs average pooling，得到C+1的vector，然后softmax</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>box branch<ul>
+<li>接$4k^2$的conv生成score maps</li>
+<li>Position-sensitive RoI pooling<ul>
+<li>得到kxk的pooling map，4个通道</li>
+<li>average pooling，得到4d vector，作为回归值$(t_x,t_y,t_w,t_h)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>there is no learnable layer after the ROI layer，enable nearly cost-free region-wise computation</li>
+</ul>
+</li>
+<li><p>Training</p>
+<ul>
+<li>R-FCN positives / negatives：和gt box的IoU&gt;0.5的proposasl</li>
+<li>adopt OHEM</li>
+<li>sort all ROI loss and select the highest 128</li>
+<li>其他settings基本和Faster-RCNN一致</li>
+</ul>
+</li>
+<li>Atrous and stride<ul>
+<li>特别地，对resnet的block5进行了改变</li>
+<li>stride2改成stride1</li>
+<li>所有的conv改成空洞卷积</li>
+<li>RPN是接在block4的输出上，所以不受空洞卷积的影响，只影响R-FCN head</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/23/Meta-Pseudo-Labels/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2696,825 +3583,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/mlp系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/27/mlp系列/" itemprop="url">mlp系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T14:39:20+08:00">
-                2021-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/27/mlp系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/mlp系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[papers]</p>
-<ul>
-<li>[MLP-Mixer] MLP-Mixer: An all-MLP Architecture for Vision，Google</li>
-<li>[ResMLP] ResMLP: Feedforward networks for image classification with data-efficient training，Facebook</li>
-</ul>
-<p>[references]</p>
-<p><a href="https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect</a></p>
-<p><a href="https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww</a></p>
-<h2 id="MLP-Mixer-An-all-MLP-Architecture-for-Vision"><a href="#MLP-Mixer-An-all-MLP-Architecture-for-Vision" class="headerlink" title="MLP-Mixer: An all-MLP Architecture for Vision"></a>MLP-Mixer: An all-MLP Architecture for Vision</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>image classification task</li>
-<li>neither of [CNN, attention] are necessary</li>
-<li>our proposed MLP-Mixer<ul>
-<li>仅包含multi-layer-perceptrons</li>
-<li>independently to image patches</li>
-<li>repeated applied across either spatial locations or feature channels</li>
-<li>two types<ul>
-<li>applied independently to image patches</li>
-<li>applied across patches</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/mixer.png" width="70%;"></p>
-<ul>
-<li>输入是token sequences<ul>
-<li>non-overlapping image patches</li>
-<li>linear projected to dimension C</li>
-</ul>
-</li>
-<li>Mixer Layer<ul>
-<li>maintain the input dimension</li>
-<li>channel-mixing MLP<ul>
-<li>operate on each token independently</li>
-<li>可以看作是1x1的conv</li>
-</ul>
-</li>
-<li>token-mixing MLP<ul>
-<li>operate on each channel independently</li>
-<li>take each spatial vectors (hxw)x1 as inputs</li>
-<li>可以看作是一个global depth-wise conv，s1，same pad，kernel size是(h,w)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>最后对token embedding做GAP，提取sequence vec，然后进行类别预测</li>
-</ul>
-</li>
-<li><p>idea behind Mixer</p>
-<ul>
-<li>clearly separate the per-location operations &amp; cross-location operations </li>
-<li>CNN是同时进行这俩的</li>
-<li>transformer的MSA同时进行这俩，MLP只进行per-location operations</li>
-</ul>
-</li>
-<li><p>Mixer Layer</p>
-<ul>
-<li><p>two MLP blocks</p>
-</li>
-<li><p>given input $X\in R^{SC}$，S for spatial dim，C for channel dim</p>
-<p>  <img src="/2021/05/27/mlp系列/blocks.png" width="70%;"></p>
-</li>
-<li><p>先是token-mixing MLP</p>
-<ul>
-<li>acts on S dim</li>
-<li>maps $R^S$ to $R^S$</li>
-<li>share across C-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>然后是channel-mixing MLP</p>
-<ul>
-<li>acts on C dim</li>
-<li>maps $R^C$ to $R^C$</li>
-<li>share across S-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>fixed width，更接近transformer/RNN，而不是CNN那种金字塔结构</p>
-</li>
-<li><p>不使用positional embeddings</p>
-<ul>
-<li>the token-mixing MLPs are sensitive to the order of the input tokens</li>
-<li>may learn to represent locations</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training"><a href="#ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training" class="headerlink" title="ResMLP: Feedforward networks for image classification with data-efficient training"></a>ResMLP: Feedforward networks for image classification with data-efficient training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>entirely build upon MLP</li>
-<li>alternates from a simple residual network<ul>
-<li>a linear layer to interact with image patches</li>
-<li>a two-layer FFN to interact independently with each patch</li>
-<li>affine transform替代LN是一个特别之处</li>
-</ul>
-</li>
-<li>trained with modern strategy<ul>
-<li>heavy data-augmentation </li>
-<li>optionally distillation</li>
-</ul>
-</li>
-<li>show good performace on ImageNet classification</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>strongly inspired by ViT but simpler<ul>
-<li>没有attention层，只有fc层+gelu</li>
-<li>没有norm层，因为much more stable to train，但是用了affine transformation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/ResMLP.png" width="70%;"></p>
-<ul>
-<li>takes flattened patches as inputs<ul>
-<li>typically N=16：16x16</li>
-</ul>
-</li>
-<li>linear project the patches into embeddings<ul>
-<li>form $N^2$ d-dim embeddings</li>
-</ul>
-</li>
-<li>ResMLP Layer<ul>
-<li>main the dim throughout $[N^2,d]$</li>
-<li>a simple linear layer<ul>
-<li>interaction between the patches</li>
-<li>applied to all channels independently</li>
-<li>类似depth-wise conv with global kernel的东西，线性！！</li>
-</ul>
-</li>
-<li>a two-layer-mlp<ul>
-<li>fc-GELU-fc</li>
-<li>independently applied to all patches</li>
-<li>非线性！！</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>average pooled $[d-dim]$ + linear classifier $cls-dim$</li>
-</ul>
-</li>
-<li><p>Residual Multi-Layer Perceptron Layer</p>
-<ul>
-<li>a linear layer + a FFN layer</li>
-<li>each layer is paralleled with a skip-connection</li>
-<li><p>没用LN，但是用了learnable affine transformation</p>
-<ul>
-<li>$Aff_{\alpha, \beta} (x) = Diag(\alpha) x + \beta$</li>
-<li>rescale and shifts the input component-wise：对每个patch，分别做affine变换</li>
-<li>在推理阶段可以与上一层线性层合并：no cost</li>
-<li>用了两次<ul>
-<li>第一个用在main path上用来替代LN：初值为identity transform(1,0)</li>
-<li>第二个在residual path里面，down scale to boost，用一个small value初始化</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>given input： $d\times N^2$ matrix $X$</p>
-<p>  <img src="/2021/05/27/mlp系列/mlp1.png" width="50%;"></p>
-<ul>
-<li>affine在d-dim上做</li>
-<li>第一个Linear layer在$N^2-dim$上做：参数量$N^2 \times N^2$</li>
-<li><p>第二、三个Linear layer在$d-dim$上做：参数量$d \times 4d$ &amp; $4d \times d$</p>
-<p><img src="/2021/05/27/mlp系列/mlp2.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/24/torch-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/24/torch-note/" itemprop="url">torch-note</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-24T15:23:48+08:00">
-                2021-05-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/24/torch-note/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/24/torch-note/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>torch.cuda.amp</p>
-<p> 自动混合精度：FloatTensor &amp; HalfTensor</p>
-</li>
-<li><p>torch.jit.script</p>
-<p> 将模型从纯Python程序转换为能够独立于Python运行的TorchScript程序</p>
-</li>
-<li><p>torch.nn.DataParallel</p>
-</li>
-<li><p>torch.flatten(input, start_dim=0, end_dim=-1)</p>
-<p> 展开start_dim到end_dim之间的dim成一维</p>
-</li>
-<li></li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/21/LV-ViT/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/21/LV-ViT/" itemprop="url">LV-ViT</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-21T16:42:11+08:00">
-                2021-05-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/21/LV-ViT/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/21/LV-ViT/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[LV-ViT 2021] Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet，新加坡国立&amp;字节，主体结构还是ViT，deeper+narrower+multi-layer-cnn-patch-projection+auxiliary label&amp;loss</p>
-<p>同等参数量下，能够达到与CNN相当的分类精度</p>
-<ul>
-<li>26M——84.4% ImageNet top1 acc</li>
-<li>56M——85.4% ImageNet top1 acc</li>
-<li>150M——86.2% ImageNet top1 acc</li>
-</ul>
-<p><img src="/2021/05/21/LV-ViT/recent.png" width="70%;"></p>
-<p>ImageNet &amp; ImageNet-1k：The ImageNet dataset consists of more than 14M images, divided into approximately 22k different labels/classes. However the <strong>ImageNet challenge is conducted on just 1k high-level categories</strong> (probably because 22k is just too much)</p>
-<h2 id="Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet"><a href="#Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet" class="headerlink" title="Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet"></a>Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>develop a bag of training techniques on vision transformers</li>
-<li>slightly tune the structure</li>
-<li>introduce token labeling——a new training objective</li>
-<li>ImageNet classificaiton task</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>former ViTs<ul>
-<li>主要问题就是需要大数据集pretrain，不然精度上不去</li>
-<li>然后模型也比较大，need huge computation resources</li>
-<li>DeiT和T2T-ViT探索了data augmentation/引入additional token，能够在有限的数据集上拉精度</li>
-</ul>
-</li>
-<li>our work<ul>
-<li>rely on purely ImageNet-1k data</li>
-<li>rethink the way of performing patch embedding</li>
-<li>introduce inductive bias</li>
-<li>we add a token labeling objective loss beside cls token predition</li>
-<li>provide practical advice on adjusting vision transformer structures</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview &amp; comparison</p>
-<ul>
-<li>主体结构不变，就是增加了两项</li>
-<li>a MixToken method</li>
-<li><p>a token labeling objective</p>
-<p><img src="/2021/05/21/LV-ViT/cmp.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>review the vision transformer</p>
-<ul>
-<li>patch embedding<ul>
-<li>将固定尺寸的图片转换成patch sequence，例如224x224的图片，patch size=16，那就是14x14个small patches</li>
-<li>将每个patch(16x16x3=768-dim) linear project成一个token(embedding-dim)</li>
-<li>concat a class token，构成全部的input tokens</li>
-</ul>
-</li>
-<li>position encoding<ul>
-<li>added to input tokens</li>
-<li>fixed sinusoidal / learnable</li>
-</ul>
-</li>
-<li>multi-head self-attention<ul>
-<li>用来建立long-range dependency</li>
-<li>multi-heads：所有attention heads的输出在channel-dim上concat，然后linear project回单个head的channel-dim</li>
-</ul>
-</li>
-<li>feed-forward layers<ul>
-<li>fc1-activation-fc2</li>
-</ul>
-</li>
-<li>score predition layer<ul>
-<li>只用了cls token对应的输出embedding，其他的discard</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training techniques</p>
-<ul>
-<li><p>network depth</p>
-<ul>
-<li>add more transformer blocks</li>
-<li>同时decrease the hidden dim of FFN</li>
-</ul>
-</li>
-<li><p>explicit inductive bias</p>
-<ul>
-<li>CNN逐步扩大感受野，擅长提取局部特征，具有天然的平移不变性等</li>
-<li>transformer被发现failed to capture the low-level and local structures</li>
-<li>we use convolutions with a smaller stride to provide an overlapped information for each nearby tokens</li>
-<li>在patch embedding的时候不是independent crop，而是有overlap</li>
-<li>然后用多层conv，逐步扩大感受野，smaller kernel size同时降低了计算量</li>
-</ul>
-</li>
-<li><p>rethinking residual connection</p>
-<ul>
-<li><p>给残差分支add a smaller ratio $\alpha$</p>
-<p>  <img src="/2021/05/21/LV-ViT/residual.png" width="40%;"></p>
-</li>
-<li><p>enhance the residual connection since less information will go to the residual branch</p>
-</li>
-<li><p>improve the generalization ability</p>
-</li>
-</ul>
-</li>
-<li><p>re-labeling</p>
-<ul>
-<li>label is not always accurate after cropping</li>
-<li><p>situations are worse on smaller images</p>
-</li>
-<li><p>re-assign each image with a K-dim score map，在1k类数据集上K=1000</p>
-</li>
-<li>cheap operation compared to teacher-student</li>
-<li>这个label是针对whole image的label，是通过另一个预训练模型获取</li>
-</ul>
-</li>
-<li><p>token-labeling</p>
-<ul>
-<li>based on the dense score map provided by re-labeling，we can assign each patch an individual label</li>
-<li>auxiliary token labeling loss<ul>
-<li>每个token都对应了一个K-dim score map</li>
-<li>可以计算一个ce</li>
-</ul>
-</li>
-<li>given<ul>
-<li>outputs of the transformer $[X^{cls}, X^1, …, X^N]$</li>
-<li>K-dim score map $[y^1, y^2, …, y^N]$ </li>
-<li>whole image label $y^{cls}$</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>auxiliary token labeling loss：$L_{aux} = \frac{1}{N} \sum_1^N CE(X^i, y^i)$</li>
-<li>cls loss：$L_{cls} = CE(X^{cls}, y^{cls})$</li>
-<li>total loss：$L_{total} = L_{cls}+\beta L_{aux}$，$\beta=0.5$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>MixToken</p>
-<ul>
-<li>从Mixup&amp;CutMix启发来的</li>
-<li>为了确保each token have clear content，我们基于token embedding进行mixup</li>
-<li>given<ul>
-<li>token sequence $T_1=[t^1_1, t^2_1, …, t^N_1]$ &amp; $T_2=[t^1_2, t^2_2, …, t^N_2]$</li>
-<li>token labels $y_1=[y^1_1, y^2_1, …, y^N_1]$ &amp; $Y_2=[y^1_2, y^2_2, …, y^N_2]$</li>
-<li>binary mask M</li>
-</ul>
-</li>
-<li>MixToken<ul>
-<li>mixed token sequence：$\hat T = T_1 \odot M + T_2 \odot (1-M)$</li>
-<li>mixed labels：$\hat Y = Y_1 \odot M + Y_2 \odot (1-M)$</li>
-<li>mixed cls label：$\hat {Y^{cls}} = \overline M y_1^{cls} + (1-\overline M) y_2^{cls}$，$\overline M$ is the average of $M$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>training details</p>
-<ul>
-<li>AdamW</li>
-<li>linear lr scaling：larger when use token labeling</li>
-<li>weight decay</li>
-<li><p>dropout：hurts small models，use Stochastic Depth instead</p>
-<p><img src="/2021/05/21/LV-ViT/hyper.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Training Technique Analysis</p>
-<ul>
-<li><p>more convs in patch embedding</p>
-<p>  <img src="/2021/05/21/LV-ViT/convs.png" width="50%;"></p>
-</li>
-<li><p>enhanced residual</p>
-<ul>
-<li><p>smaller scaling factor</p>
-<ul>
-<li>the weight get larger gradients in residual branch</li>
-<li>more information can be preserved in main branch</li>
-<li>better performance</li>
-<li>faster convergence</li>
-</ul>
-<p><img src="/2021/05/21/LV-ViT/enhanced residual.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>re-labeling</p>
-<ul>
-<li>use NFNet-F6 to re-label the ImageNet dataset and obtain the 1000-dimensional score map for each image</li>
-<li>NFNet-F6 is trained from scratch</li>
-<li>given input 576x576，获得的score map是18x18x1000（s32）</li>
-<li>store the top5 probs for each position to save storage</li>
-</ul>
-</li>
-<li><p>MixToken</p>
-<ul>
-<li>比baseline的CutMix method要好</li>
-<li><p>同时看到token labeling比relabeling要好</p>
-<p><img src="/2021/05/21/LV-ViT/MixToken.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>token labeling</p>
-<ul>
-<li>relabeling是在whole image上</li>
-<li>token labeling是进一步地，在token level添加label和loss</li>
-</ul>
-</li>
-<li><p>augmentation techniques</p>
-<ul>
-<li><p>发现MixUp会hurt</p>
-<p><img src="/2021/05/21/LV-ViT/aug.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Model Scaling</p>
-<ul>
-<li><p>越大越好</p>
-<p><img src="/2021/05/21/LV-ViT/scaling.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3569,7 +3637,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">131</span>
+                  <span class="site-state-item-count">134</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3582,7 +3650,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

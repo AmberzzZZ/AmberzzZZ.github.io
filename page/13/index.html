@@ -276,6 +276,593 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/07/PnP-Perspective-n-Point/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/PnP-Perspective-n-Point/" itemprop="url">PnP, Perspective-n-Point</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T10:21:11+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/07/PnP-Perspective-n-Point/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/07/PnP-Perspective-n-Point/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>PnP是求解3D到2D点对运动的方法，它描述了当知道n个3D空间点及其投影位置时，如何估计相机的位姿变换。最少只需要3个点对就可以估计相机的运动。</p>
+</blockquote>
+<p>该方法使用的条件是，参考点为世界坐标系下的特征点，其空间位置已知，并且知道query帧中对应参考点的像素坐标。</p>
+<p>PnP问题的求解方法有很多种：</p>
+<ul>
+<li>直接线性变换</li>
+<li>P3P</li>
+<li>非线性优化方法——Bundle Ajustment</li>
+</ul>
+<p>本节着眼于BA求解方法，其他方法暂时不做展开。</p>
+<h3 id="2-Bundle-Ajustment"><a href="#2-Bundle-Ajustment" class="headerlink" title="2. Bundle Ajustment"></a>2. Bundle Ajustment</h3><p>利用优化求解的思路是：<strong>最小化重投影误差</strong>——期望计算query帧的相机位姿$R, t$，它的李代数为$\xi$，空间特征点的坐标为$P_i = [X_i, Y_i, Z_i]^T$，其在query帧上的像素坐标为$u_i = [u_i, v_i]^T$，那么理论上：</p>
+<script type="math/tex; mode=display">
+s_i u_i = K exp(\xi^{\wedge})P_i</script><p>构建成最小二乘问题就是：寻找最优的相机位姿$\xi$，使得误差最小化：</p>
+<script type="math/tex; mode=display">
+\xi^* = argmin_{\xi} \frac{1}{2}\sum_{i=1}^{n}||u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i||^2_2</script><p>在使用优化库来求解之前，还有一个问题——每个误差项$e_i = u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i$的导数$J_i$。</p>
+<blockquote>
+<p>回忆<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>中讲过的，优化问题最终转化成为矩阵的线性求解$H\Delta x = g$，其中矩阵$H$是由单个误差项一阶展开$e(x+\Delta x) = e(x) + J\Delta x$中的雅可比矩阵$J_i$ 构成的稀疏对称阵。</p>
+</blockquote>
+<p>误差项是一个二维向量（像素坐标差），优化变量是一个六维向量（空间位姿李代数），因此$J$是一个2*6的矩阵。</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi} = \lim_{\delta \xi \rightarrow0} \frac{\partial e}{\partial P^{'}}\frac{\partial P^{'}}{\partial \delta \xi}</script><p>其中$P^{‘}$是特征点转换到相机坐标系下的空间坐标：</p>
+<script type="math/tex; mode=display">
+su = KP^{'}\\
+u = f_x \frac{X^{'}}{Z^{'}} + c_x\\
+v = f_y \frac{X^{'}}{Z^{'}} + c_y</script><p>因此误差项导数的第一项为：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P^{'}} = -
+\begin{bmatrix}
+\frac{\partial u}{\partial X^{'}} & \frac{\partial u}{\partial Y^{'}} & \frac{\partial u}{\partial Z^{'}}\\
+\frac{\partial v}{\partial X^{'}} & \frac{\partial v}{\partial Y^{'}} & \frac{\partial v}{\partial Z^{'}}
+\end{bmatrix}
+=-
+\begin{bmatrix}
+\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}}\\
+0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}\\
+\end{bmatrix}</script><p>误差项的第二项为变换后的点关于李代数的导数，参考<a href="https://amberzzzz.github.io/2018/05/12/%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8-%E6%9D%8E%E4%BB%A3%E6%95%B0/">李代数</a>节：</p>
+<script type="math/tex; mode=display">
+\frac{\partial TP}{\partial \delta \xi} = 
+\begin{bmatrix}
+I & -P^{'\wedge}\\
+0^T & 0^T
+\end{bmatrix}</script><p>其中$P^{‘\wedge}$是$P^{‘}$的反对称阵：</p>
+<script type="math/tex; mode=display">
+P^{'\wedge} = 
+\begin{bmatrix}
+0 & -Z^{'} & Y^{'}\\
+Z^{'} & 0 & -X^{'}\\
+-Y^{'} & X^{'} & 0
+\end{bmatrix}</script><p>因此得到完整的雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi} =\frac{\partial e}{\partial P^{'}}
+\begin{bmatrix}
+I & P^{'\wedge}
+\end{bmatrix}=-
+\begin{bmatrix}
+\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}} & |& -\frac{f_xX^{'}Y^{'}}{Z^{'2}} & f_x + \frac{f_xX^{'2}}{Z^{'2}} & -\frac{f_xY^{'}}{Z^{'}}\\
+0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}& | & - f_y - \frac{f_xY^{'2}}{Z^{'2}}  & \frac{f_yX^{'}Y^{'}}{Z^{'2}} &  \frac{f_yX^{'}}{Z^{'}}\\
+\end{bmatrix}</script><p>除了优化相机位姿以外，还可以同时优化特征点的空间位置$P$：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P} = \frac{\partial e}{\partial P^{'}} \frac{\partial P^{'}}{\partial P}</script><p>其中的第二项为：</p>
+<script type="math/tex; mode=display">
+P^{'} = exp(\xi^{\wedge})P = RP +t\\
+\therefore \frac{\partial P^{'}}{\partial P} = R^T</script><h3 id="3-优化库使用"><a href="#3-优化库使用" class="headerlink" title="3. 优化库使用"></a>3. 优化库使用</h3><p>构建图模型：</p>
+<ul>
+<li>优化变量1：节点1：query相机位姿（六维向量李代数）</li>
+<li>优化变量2：节点2：特征点空间位置（三维向量坐标描述）</li>
+<li>预测值：边n：根据当前estimate的优化量，投影到投影平面的像素坐标$z_i = h(\xi, P_i)$</li>
+<li>观测值：能够直接读出的，query帧上对应特征点的实际投影坐标$u_i$</li>
+</ul>
+<p>g2o中已经提供了相近的基类（在g2o/types/sba/types_six_dof_expmap.h中）：李代数位姿节点VertexSE3Expmap、空间点位置节点VertexSBAPointXYZ、投影方程边EdgeProjectXYZ2UV。</p>
+<p>边类里面要关注linearizeOplus函数，这个函数描述的是非线性函数进行线性化的过程中，求导的解析解（当然也可以使用数值解），最后函数给出的是每个节点的导数矩阵（$\frac{\partial e}{\partial \delta \xi} $和$\frac{\partial e}{\partial P_i}$） 。<strong>这点是Ceres库和g2o库的一点主要差别：Ceres都是使用自动的数值导数，g2o要自己求导</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> EdgeProjectXYZ2UV::linearizeOplus()</span><br><span class="line">&#123;</span><br><span class="line">    VertexSE3Expmap * vj = <span class="keyword">static_cast</span>&lt;VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">    VertexSBAPointXYZ* vi = <span class="keyword">static_cast</span>&lt;VertexSBAPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    _jacobianOplusXi = <span class="number">-1.</span>/z * tmp * T.rotation().toRotationMatrix();</span><br><span class="line"> </span><br><span class="line">    _jacobianOplusXj(<span class="number">0</span>,<span class="number">0</span>) = x*y/z^<span class="number">2</span> * cam-&gt;focal_length;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-OpenCV内置函数"><a href="#4-OpenCV内置函数" class="headerlink" title="4. OpenCV内置函数"></a>4. OpenCV内置函数</h3><p><strong>basic：</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line"></span><br><span class="line">Mat r, t, R;</span><br><span class="line">cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line">cv::Rodrigues ( r, R );     <span class="comment">// 旋转向量和旋转矩阵的转换</span></span><br></pre></td></tr></table></figure>
+<p><strong>advanced：</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> cv::solvePnPRansac( </span><br><span class="line">    InputArray objectPoints,      <span class="comment">// 3D空间坐标 vector&lt;cv::Point3f&gt; pts3d</span></span><br><span class="line">    InputArray imagePoints,       <span class="comment">// 2D像素坐标 vector&lt;cv::Point2f&gt; pts2d</span></span><br><span class="line">    InputArray cameraMatrix,      <span class="comment">// 相机内部参数矩阵 K</span></span><br><span class="line">    InputArray distCoeffs,        <span class="comment">// 畸变系数向量 cv::Mat()</span></span><br><span class="line">    OutputArray rvec,             <span class="comment">// 旋转向量</span></span><br><span class="line">    OutputArray tvec,             <span class="comment">// 平移向量</span></span><br><span class="line">    <span class="keyword">bool</span> useExtrinsicGuess = <span class="literal">false</span>, <span class="comment">// If true, the function uses the provided rvec and tvec values as initial</span></span><br><span class="line">    <span class="keyword">int</span> iterationsCount = <span class="number">100</span>,    <span class="comment">// Number of iterations</span></span><br><span class="line">    <span class="keyword">float</span> reprojectionError = <span class="number">8.0</span>,<span class="comment">// 重投影误差最大值</span></span><br><span class="line">    <span class="keyword">double</span> confidence = <span class="number">0.99</span>,</span><br><span class="line">    OutputArray inliers = noArray(), <span class="comment">// Output vector that contains indices of inliers in objectPoints and imagePoints .</span></span><br><span class="line">    <span class="keyword">int</span> flags = SOLVEPNP_ITERATIVE   <span class="comment">// method for solving PnP</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Ransac：考虑到我们提供的匹配里面存在误匹配的情况，OpenCV采用“随机采样一致性算法”（Random Sample Consensus），从现有匹配中随机取一部分用来估计运动（PnP的解析解法最少只需要三个点就能计算相对位姿），正确的匹配结果都是近似的，从而剔除误匹配。</li>
+<li>inlier：内点，函数最终给出的匹配可信的点。</li>
+<li>RANSAC只采用少数几个随机点来计算PnP，容易受到噪声影响。工程上通常使用RANSAC的解作为初值，再使用非线性优化方法求解最优值。</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Ransac粗匹配</span></span><br><span class="line">cv::solvePnPRansac( pts3d, pts2d, K, Mat(), rvec, tvec, <span class="literal">false</span>, <span class="number">100</span>, <span class="number">4.0</span>, <span class="number">0.99</span>, inliers );</span><br><span class="line">cv::Rodrigues ( rvec, R ); </span><br><span class="line">Eigen::Matrix3d rotation_matrix = R.at&lt;<span class="keyword">double</span>&gt;;</span><br><span class="line">T_c_r_estimated_ = SE3d(</span><br><span class="line">        SO3d(rotation_matrix),</span><br><span class="line">        Vector3d( tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"><span class="comment">// BA局部优化</span></span><br><span class="line">g2o::VertexSE3Expmap* pose <span class="keyword">new</span> g2o::VertexSE3Expmap();</span><br><span class="line">...</span><br><span class="line">pose-&gt;setEstimate(g2o::SE3Quat( T_c_r_estimated_.rotationMatrix(), T_c_r_estimated_.translation()));</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/05/karto-key-concepts/" itemprop="url">karto key concepts</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-05T13:17:58+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/karto-key-concepts/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/05/karto-key-concepts/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>基于极其标准的图优化SLAM框架来实现：</p>
+<p><img src="/2018/06/05/karto-key-concepts/1.png" alt="framework"></p>
+<p>提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。</p>
+<p>scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！</p>
+<h4 id="key-concepts："><a href="#key-concepts：" class="headerlink" title="key concepts："></a>key concepts：</h4><ul>
+<li><p>keyScan：机器人运动一定的距离或角度（关键帧），储存在sensorManager，无地图缓存。</p>
+</li>
+<li><p>look-up table查找表：查找表的意义就是相比于暴力匹配，不需要每次都重新计算每个激光数据信息，<strong>相同角度不同位置</strong>的激光数据信息只需要被索引一次。</p>
+</li>
+<li><p>response响应值：将查找表以一定的位移投到子图上，总共有n个点被查找表击中（hit），击中的每个点得分不同（score），累加得分并除以可以达到的最高分。</p>
+<script type="math/tex; mode=display">
+response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
+<li><p>协方差：文献专门用了一节计算协方差，但是没看到用在哪，是为了后面求误差做准备吗？？？</p>
+</li>
+<li><p>addScans添加顶点和边：边是误差值，添加的边约束来自两部分，</p>
+<p>（1）link to running scans，距当前帧一定范围内的激光数据链（RunningScan chain）。</p>
+<p>（2）link to other near chains，从当前节点开始广度优先遍历一定距离范围内所有节点，依据当前id从sensorManager中分别递增和递减寻找一定范围内的chain（不一定直接相连）。</p>
+</li>
+<li><p>回环检测：操作与添加边约束类似，位姿图上要<strong>去除那些和当前节点的时间相邻的节点</strong>。</p>
+<p>（1）找到一定距离范围内（near）和相连（adjacent）的节点添加进nearLinkedScans。</p>
+<p>（2）<code>MapperGraph::FindPossibleLoopClosure</code>：从sensorManager中从前到后，依据序号挑选与当前节点在一定距离范围内，且不在nearLinkedScans中的candidate。返回潜在chain。其中涉及两个参数：</p>
+<ul>
+<li>LoopSearchMaximumDistance：candidateScan与当前scan的距离必须在可容许的距离内。</li>
+<li>LoopMatchMinimumChainSize：chain中的节点数必须不小于限定值。</li>
+</ul>
+<p>（3）<code>MapperGraph::TryCloseLoop</code>：scan2map匹配，当response和covariance达到一定要求认为闭环检测到，得到correct pose（也就是认为candidateScan的pose才是当前帧的实际pose）。</p>
+<p>（4）add link to loop，构成全局闭环。</p>
+<p>（5）触发correctPose，进行spa优化。</p>
+</li>
+</ul>
+<p><img src="/2018/06/05/karto-key-concepts/graph opti.jpeg" alt=""></p>
+<h4 id="代码随手记："><a href="#代码随手记：" class="headerlink" title="代码随手记："></a>代码随手记：</h4><ol>
+<li><p>ROS上面提供三个开源包：nav2d_karto, open_karto, slam_karto。</p>
+<p>ROS Wiki上这么描述nav2d_karto这个package：Graph-based Simultaneous Localization and Mapping module. Includes OpenKarto GraphSLAM library by “SRI International”.</p>
+<p>open_karto：开源的karto包，实现底层的kartoslam</p>
+<p>slam_karto：ros层，应用层的kartoslam接口</p>
+</li>
+<li><p>The LaserRangeFinder contains parameters for physical laser sensor used by the mapper for scan matching Also contains information about the maximum range of the sensor and provides a threshold for limiting the range of readings.</p>
+<p>The optimal value for the range threshold depends on the angular resolution of the scan and the desired map resolution.</p>
+</li>
+<li><p>resolution：0.25 &amp; 0.5 &amp; 1 degree</p>
+<p>number of range readings (beams)：（maximumAngle - minimumAngle）／angularResolution + 1</p>
+</li>
+<li><p>GridStates：0 for Unknown，100 for Occupied， 255 for Free。</p>
+</li>
+<li><p>flipY：最开始机器人应该处在世界坐标系的原点，传感器坐标系与机器人baselink存在一个坐标变换，原始的传感器坐标系位置应该与地图坐标系重合，这就是world和grid之间的offset。flip是啥呢？？</p>
+</li>
+<li><p>LookupArray[index]：Create lookup tables for point readings <strong>at varying angles</strong> in grid. This is to speed up finding best angle/position for a localized range scan</p>
+</li>
+<li><p>MapperGraph：花式构造位姿图</p>
+</li>
+<li><p>CorrelationGrid：Implementation of a <strong>correlation</strong> grid used for scan matching</p>
+</li>
+<li><p>Region of Interest ROI：</p>
+</li>
+<li><p>smear：The point readings are smeared by this value in X and Y to create a smoother response. 个人理解这句话是说点容易生成突变，用以点为中心的一小片区域平滑一点。</p>
+</li>
+<li><p>ScanMatch：返回响应值response</p>
+<p>   前端匹配调用<code>m_pSequentialScanMatcher-&gt;MatchScan</code></p>
+<p>   闭环检测调用<code>m_pLoopScanMatcher-&gt;MatchScan</code></p>
+<p>   两个函数继承于<code>ScanMatcher::MatchScan</code>：</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::MatchScan(</span><br><span class="line">	LocalizedRangeScan* pScan, </span><br><span class="line">    <span class="keyword">const</span> LocalizedRangeScanVector&amp; rBaseScans, </span><br><span class="line">    Pose2&amp; rMean, </span><br><span class="line">    Matrix3&amp; rCovariance, </span><br><span class="line">    kt_bool doPenalize, </span><br><span class="line">    kt_bool doRefineMatch)    <span class="comment">// default is True, 决定是否做精匹配</span></span><br><span class="line"><span class="comment">// @return: strength of response (best response)</span></span><br></pre></td></tr></table></figure>
+<p>   其中会调用<code>ScanMatcher::CorrelateScan</code>方法。<code>ScanMatcher::CorrelateScan</code>方法中调用<code>ScanMatcher::GetResponse</code>方法计算响应值。</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::GetResponse(</span><br><span class="line">	kt_int32u angleIndex, </span><br><span class="line">	kt_int32s gridPositionIndex) <span class="keyword">const</span></span><br></pre></td></tr></table></figure>
+<p>   <code>GetResponse</code>的核心在<code>kt_int8u* pByte</code>和<code>const LookupArray* pOffsets</code>两个数据结构：</p>
+<ul>
+<li>前者是在correlationGrid范围内的real sensed占据情况。</li>
+<li><p>后者是lookup-table中（已知地图）读取的栅格占据情况，只包含占据的栅格，key是angular。</p>
+<p>计算response只要看地图上的占据点是否在观测中是否也是占据的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (kt_int32u i = <span class="number">0</span>; i &lt; pOffsets-&gt;GetSize(); i++)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ignore points that fall off the grid</span></span><br><span class="line">  kt_int32s pointGridIndex = gridPositionIndex + pAngleIndexPointer[i];</span><br><span class="line">  <span class="keyword">if</span> (!math::IsUpTo(pointGridIndex, m_pCorrelationGrid-&gt;GetDataSize()) || pAngleIndexPointer[i] == INVALID_SCAN)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uses index offsets to efficiently find location of point in the grid</span></span><br><span class="line">  response += pByte[pAngleIndexPointer[i]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终的response要normalize：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// normalize response</span></span><br><span class="line">response /= (nPoints * GridStates_Occupied);   <span class="comment">// GridStates_Occupied = 100,</span></span><br><span class="line">assert(<span class="built_in">fabs</span>(response) &lt;= <span class="number">1.0</span>);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>karto只在闭环的时候触发后端优化<code>CorrectPoses()</code>，ScanSolver的实现在Samples路径下的SpaSolver，调用了现有的BA求解器<a href="http://users.ics.forth.gr/~lourakis/sba/" target="_blank" rel="noopener">sba(A Generic Sparse Bundle Adjustment C/C++ Package Based on the Levenberg-Marquardt Algorithm)</a>。</p>
+</li>
+</ol>
+<h4 id="参数-amp-优化方向"><a href="#参数-amp-优化方向" class="headerlink" title="参数&amp;优化方向"></a><a href="http://docs.ros.org/jade/api/nav2d_karto/html/classkarto_1_1OpenMapper.html" target="_blank" rel="noopener">参数</a>&amp;优化方向</h4><ol>
+<li>闭环中candidate数量的调整：<ul>
+<li>减小LoopSearchMaximumDistance，进入candidate范围的节点数据减少</li>
+<li>减小LoopMatchMinimumChainSize，用来计算优化的candidate数量减少</li>
+<li>增大minimum_travel_distance和minimum_travel_heading，这样总体的节点数减少</li>
+</ul>
+</li>
+<li>Map_update_interval：发布地图的间隔，其主要过程是遍历当前所有节点数据，对每个栅格的占有状态进行判定，生成栅格地图。</li>
+<li>ScanBufferSize和ScanBufferMaximumScanDistance：控制buffer也就是chain的大小。chain不能太大也不能太小，太小会造成前端误差累积，太大会导致构建闭环的节点数不足。推荐值是ScanBufferMaximumScanDistance／minimum_travel_distance。</li>
+<li>位姿纠正中：<ul>
+<li>CorrelationSearchSpaceDimension：The size of the <strong>search grid</strong></li>
+<li>CorrelationSearchSpaceResolution：The size of the <strong>correlation grid</strong></li>
+</ul>
+</li>
+<li>回环检测中：<ul>
+<li>LoopSearchMaximumDistance：闭环检测的搜索距离，数值越大能越早发现闭环，也能容忍更大的偏离误差。</li>
+<li>LoopMatchMinimumResponseCoarse和LoopMatchMinimumResponseFine：粗匹配和精匹配的响应阈值，与闭环中candidate数量相关。阈值过低会导致candidate迅速被填满，真正好的点还没找到。阈值过高会导致回环失败（一直找不到回环点），地图上出现重影。</li>
+</ul>
+</li>
+</ol>
+<h4 id="CPU-Usage"><a href="#CPU-Usage" class="headerlink" title="CPU Usage"></a>CPU Usage</h4><p>算法资源占用的主要压力来源：</p>
+<ol>
+<li>地图更新</li>
+<li>回环检测</li>
+<li>SPA优化</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/04/leetcode79-单词搜索/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/04/leetcode79-单词搜索/" itemprop="url">leetcode79 单词搜索</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T14:07:56+08:00">
+                2018-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/04/leetcode79-单词搜索/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/04/leetcode79-单词搜索/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>挂一道很猥琐的题，二维网格中搜索单词，同一单元格不能重复使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">board =</span><br><span class="line">[</span><br><span class="line">  [&apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;E&apos;],</span><br><span class="line">  [&apos;S&apos;,&apos;F&apos;,&apos;C&apos;,&apos;S&apos;],</span><br><span class="line">  [&apos;A&apos;,&apos;D&apos;,&apos;E&apos;,&apos;E&apos;]</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">给定 word = &quot;ABCCED&quot;, 返回 true.</span><br><span class="line">给定 word = &quot;SEE&quot;, 返回 true.</span><br><span class="line">给定 word = &quot;ABCB&quot;, 返回 false.</span><br></pre></td></tr></table></figure>
+<p>没啥好算法，就是DFS，但是坑在于visited的存储，python数组默认浅拷贝，递归传进去再回到上一层网格状态就变了，之前一贯的做法就是新开一块内存空间，传新的数组进去，然而这次超时了，因为测试用例的二维数组尺寸贼大，终于有机会正视这个问题，并获取正确的打开方式：</p>
+<ul>
+<li><p>尺寸贼大的二维数组，每次只需要修改一个值，重新划空间拷贝再修改时间复杂度瞬间增大O(m*n)倍，很明显传原来的数组进去比较合适。</p>
+</li>
+<li><p>但是深层递归会修改传进去的参数，因此<strong>在每次递归之前先创建一个tmp，记录修改行为</strong>，递归函数进行完以后，再根据记录恢复原来的参数，保证本层参数不变。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">search_tail</span><span class="params">(board, word, h, w)</span>:</span></span><br><span class="line">    size = len(word)</span><br><span class="line">    char = word[<span class="number">0</span>]</span><br><span class="line">    height, width = len(board), len(board[<span class="number">0</span>])</span><br><span class="line">    exist = <span class="keyword">False</span></span><br><span class="line">    <span class="keyword">if</span> h - <span class="number">1</span> &gt;= <span class="number">0</span> <span class="keyword">and</span> board[h<span class="number">-1</span>][w] == char:</span><br><span class="line">        <span class="keyword">if</span> size == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            tmp = board[h<span class="number">-1</span>][w]</span><br><span class="line">            board[h<span class="number">-1</span>][w] = <span class="string">'INF'</span></span><br><span class="line">            exist = search_tail(board, word[<span class="number">1</span>:], h<span class="number">-1</span>, w)</span><br><span class="line">            <span class="keyword">if</span> exist:</span><br><span class="line">				<span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line">            board[h<span class="number">-1</span>][w] = tmp</span><br><span class="line">    <span class="keyword">if</span> h + <span class="number">1</span> &lt; height <span class="keyword">and</span> board[h+<span class="number">1</span>][w] == char:</span><br><span class="line">        ...</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后针对本题还有一个骚操作，很多人专门创建一个visited表来记录搜索路径，但是因为本题的二维数组限定存储字母，所以任意一个非字母都可以作为标志位，美滋滋又省下一个O(m*n)。</p>
+<p><img src="/2018/06/04/leetcode79-单词搜索/188ms.png" alt="188ms"></p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/01/kd-tree/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1993,764 +2580,6 @@ e_i(\xi + \delta \xi) = e(\xi) + J(\xi)\delta \xi</script><p>其中的<strong>�
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/02/graph-based-optimization/" itemprop="url">Graph-based Optimization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-02T15:32:59+08:00">
-                2018-05-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/02/graph-based-optimization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/02/graph-based-optimization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h3><p>基于图优化的slam主要分为以下三个部分：</p>
-<ul>
-<li>前端：基于传感器数据建图，<strong>匹配相邻帧</strong>，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。<strong>位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈</strong>。</li>
-<li>后端：<strong>优化</strong>图，<strong>基于历史信息的约束</strong>，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。</li>
-<li>宏观的闭环检测：根据闭环信息<strong>优化</strong>矫正整个拓扑图。</li>
-</ul>
-<p>这里面涉及到了<strong>两个优化</strong>，一个是后端局部优化，一个是全局闭环优化，两者计算的思路是一样的。</p>
-<h3 id="2-优化"><a href="#2-优化" class="headerlink" title="2 优化"></a>2 优化</h3><h4 id="2-1-全局闭环优化，用于矫正整个拓扑图"><a href="#2-1-全局闭环优化，用于矫正整个拓扑图" class="headerlink" title="2.1 全局闭环优化，用于矫正整个拓扑图"></a>2.1 全局闭环优化，用于矫正整个拓扑图</h4><p>前端后端完成的事情是<strong>探索并创建新的节点</strong>，获得新的测量值，添加新的位姿关系方程：</p>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{split}
-& x_0 + z_{01} = x_1\\
-& x_1 + z_{12} = x_2\\
-& ...\\
-& x_{k-1} + z_{k-1, k} = x_{k}\\
-\end{split}
-\end{eqnarray}</script><p>而全局闭环检测<strong>添加已知节点之间</strong>的位姿约束关系：</p>
-<script type="math/tex; mode=display">
-\begin{equation}
-x_i + z_{i j} = x_j, \ \ \ \ i,j\in [0, k]
-\end{equation}</script><p>再添加一个<strong>初始条件</strong>（不是必须的，但是后面实验表明固定一个顶点比不固定效果要好——相当于有一个明确可信的基准）：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><ul>
-<li>以上线性方程组中，<strong>闭环检测部分的方程中的两个结点都在前面出现过，因此不增加矩阵的秩</strong>，因此最终要求解包含$k$个方程$k+1$个未知数的线性方程组。</li>
-<li>闭环的关键性：如果没有闭环条件，方程组$Ax=b$左右两边秩是相等的——有唯一解，添加了闭环条件以后，相当于方程组左侧$A$的秩不变，但是右侧$b$的秩则增加了，$rank(A) &lt; rank(A, b)$——没有解析解，只有最优。</li>
-<li>实际上状态$\textbf x$是一个包含夹角$\theta$的向量$[x, y, \theta]$，实际相对位姿的计算<strong>并非简单的线性叠加</strong>：</li>
-</ul>
-<script type="math/tex; mode=display">
-\textbf x \oplus \Delta \textbf x = 
-\begin{pmatrix}
-x + \Delta x cos\theta - \Delta y sin \theta  \\
-y + \Delta x sin\theta + \Delta y cos \theta  \\
-normAngle(\theta + \Delta \theta)
-\end{pmatrix}</script><p><strong>举个栗子</strong>：</p>
-<blockquote>
-<p>机器人从起始位置$x_0=0$处出发，里程计测得它向前移动了1m，到达$x_1$，接着测得它向后移动了0.8m，到达$x_2$，这时通过闭环检测，发现他回到了起始位置。</p>
-</blockquote>
-<p>首先根据给出信息构建图：</p>
-<script type="math/tex; mode=display">
-x_0 + 1 = x_1\\
-x_1 - 0.8 = x_2</script><p>然后根据闭环条件添加约束：</p>
-<script type="math/tex; mode=display">
-x_2 = x_0</script><p>补充初始条件：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><p>使用<strong>最小二乘法</strong>求上述方程组的最优解，首先构建<strong>残差平方和函数</strong>：</p>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{split}
-& f_1 = x_0 = 0\\
-& f_2 = x_1 - x_0 - 1 = 0\\
-& f_3 = x_2 - x_1 + 0.8 = 0\\
-& f_4 = x_2 - x_0 = 0
-\end{split}
-\end{eqnarray}</script><script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 + (x_2-x_1+0.8)^2 + (x_2-x_0)^2</script><p>然后对每个参数<strong>求偏导</strong>：</p>
-<script type="math/tex; mode=display">
-\frac{\partial c}{\partial x_1} = -x_0 + 2x_1-x_2 -1.8=0\\
-\frac{\partial c}{\partial x_2} = -x_0 - x_1 +2x_2 + 0.8 = 0</script><p>解得$x_1 = 0.93, x_2 = 0.07$，可以看到闭环矫正了所有节点的位姿，优化了整个拓扑图。</p>
-<h4 id="2-2-后端局部优化，用于矫正局部地图"><a href="#2-2-后端局部优化，用于矫正局部地图" class="headerlink" title="2.2 后端局部优化，用于矫正局部地图"></a>2.2 后端局部优化，用于矫正局部地图</h4><p>再举个栗子：</p>
-<blockquote>
-<p>机器人从起始位置$x_0=0$处出发，并观测到其正前方2m处有一个路标$l_0$，里程计测得它向前移动了1m，到达$x_1$，这时观测到路标在其正前方0.8m处。</p>
-</blockquote>
-<p>首先根据前端信息建图 raw graph（这样建图明显是存在累积误差的）：</p>
-<script type="math/tex; mode=display">
-x_0 + 1 = x_1</script><p>然后添加闭环约束：</p>
-<script type="math/tex; mode=display">
-x_1 + 0.8 = l_0\\
-x_0 + 2 = l_0</script><p>初始条件：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><p>构建残差平方和：</p>
-<script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>求偏导求解：$x_1 = 1.07, l_0 = 1.93$，可以看到后端是对前端新添加进来的节点位姿做了矫正，消除部分测量误差。</p>
-<p>这里面涉及到两种传感器信息——里程计和激光雷达，两种传感器的精度是有差别的，我们对其的信任程度也应该不同，反映到公式中就是<strong>要为不同传感器信息赋予不同的权重</strong>。假设编码器信息更准确，那么：</p>
-<script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + \textbf{10}(x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>调整权重之后解得：$x_1 = 1.01, l_0 = 1.9$，可以看到<strong>计算结果会向着更信任的传感器的测量结果靠近</strong>。</p>
-<h4 id="2-3-严格推导"><a href="#2-3-严格推导" class="headerlink" title="2.3 严格推导"></a>2.3 严格推导</h4><p><strong>2.3.1 信息矩阵（误差权重矩阵)</strong></p>
-<p>图优化问题转化为最小二乘问题，首先是带权重的残差平方和函数的一般形式：</p>
-<script type="math/tex; mode=display">
-F(x) = \Sigma_{i,j} e(x_i, x_j, z_{i,j})^T\Omega_{i,j}e(x_i, x_j, z_{i,j})</script><script type="math/tex; mode=display">
-x^{*} = argminF(x)</script><p>其中的$\Omega_{i,j}$项就是上文提到的误差权重矩阵，它的正式名字叫<strong>信息矩阵</strong>。</p>
-<p>传感器的测量值，可以看作是以真值为中心的多元高斯分布：</p>
-<script type="math/tex; mode=display">
-f_x(x_1, x_2, ..., x_k) = \frac{1}{\sqrt{}(2\pi)^k|\Sigma|}exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))</script><p>协方差矩阵$\Sigma$对角线上的值表示每一维对应的方差，该方差值越大表示该维度不确定性越大，对应的信息权重应该越小。<strong>实际上拓扑图上每条边对应的信息矩阵就是对应测量协方差矩阵的逆</strong>。</p>
-<p><strong>2.3.2 非线性</strong></p>
-<p>上文已经提到，位姿变化非线性——<strong>非线性最小二乘问题</strong>，要采用迭代法求解。迭代法需要有一个<strong>好的初始假设值</strong>，然后在这个值附近<strong>增量式迭代</strong>寻找最优解。</p>
-<script type="math/tex; mode=display">
-f(x) = \Sigma e^T\Omega e\\
-最小二乘问题目标函数：min \frac{1}{2}||f(x)||_2^2</script><p>首先要将非线性函数转化成关于增量$\Delta x$的线性函数——泰勒展开，根据具体的展开形式又分为：</p>
-<ul>
-<li><p>一阶、二阶梯度法</p>
-<p>直接<strong>对目标函数</strong>在$x$附近进行泰勒展开：</p>
-<script type="math/tex; mode=display">
-||f(x+\Delta x)||_2^2 \approx ||f(x)||_2^2 +J(x) \Delta x = \frac{1}{2} \Delta x^T H \Delta x</script><p><strong>一阶梯度法（最速下降法）</strong>：只保留一阶梯度，并引入步长$\lambda$：</p>
-<script type="math/tex; mode=display">
-\Delta x^* = -\lambda J^T(x)</script><p><strong>二阶梯度法（牛顿法）</strong>：保留一阶和二阶梯度信息</p>
-<script type="math/tex; mode=display">
-J^T(x)+H\Delta x^*=0</script><p>最速下降法过于贪心，容易走出锯齿路线，增加迭代次数。牛顿法需要计算目标函数的二阶导数（Hessian矩阵），计算困难。</p>
-</li>
-</ul>
-<ul>
-<li><p>高斯牛顿法</p>
-<p><strong>对$f(x)$而不是目标函数$f(x)^2$</strong>在$x$附近进行一阶泰勒展开：</p>
-<script type="math/tex; mode=display">
-f(x+\Delta x) \approx f(x) + J(x) \Delta x</script><p>对应每一个误差函数$e_{ij}$：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-& e_{ij}(x_i+\Delta x_i, x_j+\Delta x_j) = e_{i,j}(x+\Delta x)  \\
-&\approx e_{ij} +\frac{\partial e_{ij}}{\partial x}\Delta x = e_{ij} +  J_{ij}\Delta x
-\end{split}</script><p>​            其中$J_{ij}$为初始值附近的雅可比矩阵（定义见卡尔曼滤波）。</p>
-<p>带入目标函数得到<strong>近似二阶展开</strong>：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-& F_{ij}(x+\Delta x) = e_{ij}(x+\Delta x)^T \Omega_{ij}e_{ij}(x+\Delta x)\\
-& \approx (e_{ij} +  J_{ij}\Delta x)^T \Omega_{ij}(e_{ij} +  J_{ij}\Delta x)\\
-& = \underbrace{e_{ij}^T\Omega_{ij}e_{ij}}_{c_{ij}} + 2\underbrace{e_{ij}^T\Omega_{ij}J_{ij}}_{b_{ij}^T}\Delta x + \Delta x^T \underbrace{J_{ij}^T\Omega_{ij}J_{ij}}_{H_{ij}}\Delta x\\
-& = c_{ij} + 2b_{ij}^T\Delta x + \Delta x^T H_{ij}\Delta x
-\end{split}</script><p>求解增量$\Delta x$：</p>
-<script type="math/tex; mode=display">
-2b + 2H\Delta x^* = 0\\
-高斯牛顿方程：H\Delta x^* = -b\\</script><p>对比牛顿法可见，<strong>高斯牛顿法用$J^TJ$作为二阶Hessian矩阵的近似，简化了计算</strong>。</p>
-<p>上述算法要求近似$H$矩阵是正定且可逆的，实际数据很难满足，因而在使用高斯牛顿算法时可能出现<strong>$H$为奇异矩阵或病态</strong>的情况，增量稳定性较差，导致算法不收敛。</p>
-<blockquote>
-<p>图形上来思考，就是近似后的梯度方向不再是梯度变化最快的方向，可能引起不稳定。</p>
-</blockquote>
-</li>
-</ul>
-<ul>
-<li><p>列文伯格—马夸尔特法</p>
-<p>为$\Delta x$添加一个信赖区域，不让它因为过大而使得近似$f(x+\Delta x) = f(x) + J(x)\Delta x$不准确。</p>
-<script type="math/tex; mode=display">
-\rho = \frac{f(x+\Delta x) - f(x)}{J(x) \Delta x}</script><p>可以看到如果$\rho$接近1，说明近似比较好。如果$\rho$比较大，说明实际减小的值远大于估计减小的值，需要放大近似范围，反之你懂的。</p>
-<script type="math/tex; mode=display">
-||D\Delta x_k||_2^2 \leq \mu</script><p>将每次迭代得到的$\Delta x$限定在一个半径为信赖区域的椭球中，根据$\rho$的大小修改信赖区域。于是问题转化成为了<strong>带不等式约束的优化问题</strong>：</p>
-<script type="math/tex; mode=display">
-min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2, \ \ s.t. ||D \Delta x ||^2 = \mu</script><p>用拉格朗日乘子转化成无约束问题：</p>
-<script type="math/tex; mode=display">
-min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2 + \frac{\lambda}{2}||D \Delta x ||^2</script><p>展开后得到如下形式：</p>
-<script type="math/tex; mode=display">
-(H + \lambda D^TD)\Delta x^* = -b</script><p>通常把$D$取值为单位阵$I$，得到更简化形式：</p>
-<script type="math/tex; mode=display">
-(H + \lambda I)\Delta x^* = -b</script><p>当$\lambda$较小时，$H$占主要地位，说明二次近似模型较好，LM算法更接近高斯牛顿法。当$\lambda$较大时，$\lambda I$占主要地位，LM算法更接近一阶梯度法。修正了线性方程组矩阵的病态问题，比高斯牛顿法更加健壮，但是收敛速度也更慢。</p>
-<blockquote>
-<p>图形上思考，LM算法修正了高斯牛顿法得到的梯度，以此固定一个搜索区域，在区域内寻找最优。</p>
-</blockquote>
-</li>
-</ul>
-<p><strong>2.3.3 稀疏矩阵</strong></p>
-<p>对于误差函数$e_{ij}$，它只和$e_i$和$e_j$有关，因此它的雅可比矩阵有如下结构（行数是$x$的维度，列数是拓扑图中节点映射关系的数目）：</p>
-<script type="math/tex; mode=display">
-J_{ij} = 
-\begin{bmatrix}
-0 & ... & 0 & \underbrace{\frac{\partial e_{i}}{\partial x_i}}_{A_{ij}} & 0 & ... &  \underbrace{\frac{\partial e_{j}}{\partial x_j}}_{B_{ij}} & 0 & ... & 0
-\end{bmatrix}</script><p>相应地$b_{ij}$是一个包含很多0的列向量：</p>
-<script type="math/tex; mode=display">
-\begin{split}
- b_{ij}^T& = e_{ij}^T \Omega_{ij} J_{ij}\\
-&= e_{ij}^T\Omega_{ij} (0 ... A_{ij}...B_{ij}...0)\\
-&=(0...e_{ij}^T\Omega_{ij}A_{ij}...e_{ij}^T\Omega_{ij}B_{ij}...0)
-\end{split}</script><p>$b = \Sigma_{ij} b_{ij}$：</p>
-<p><img src="/2018/05/02/graph-based-optimization/b.png" alt=""></p>
-<p>$H_{ij}$是一个包含很多0的对称阵：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-H_{ij}& = J_{ij}^T \Omega_{ij}J_{ij} \\
-& = 
-\begin{pmatrix}
-...\\
-A_{ij}^T\\
-...\\
-B_{ij}^T\\
-...
-\end{pmatrix}
-\Omega_{ij}
-\begin{pmatrix}
-... & A_{ij} & ... & B_{ij} & ...
-\end{pmatrix}\\
-& =
-\begin{pmatrix}
-    &  \\
-& A_{ij}^T\Omega{ij}A_{ij} & A_{ij}^T\Omega_{ij}B_{ij} & \\
-  & \\
-& B{ij}^T\Omega_{ij}A_{ij} & B_{ij}^T\Omega_{ij}B_{ij}& \\
-   & 
-\end{pmatrix}
-\end{split}</script><p>$H=\Sigma_{ij}H_{ij}$：</p>
-<p><img src="/2018/05/02/graph-based-optimization/H.png" alt=""></p>
-<p>梳理一下计算流程：$e_{ij} \to  J_{ij}  \to A_{ij}, B_{ij} \to b_{ij}, H_{ij} \to b, H \to \Delta x^* \to x$</p>
-<p><strong>2.3.4 误差函数</strong></p>
-<p>前面定义过位姿的非线性叠加，显然位姿误差也不是简单的线性加减关系：</p>
-<script type="math/tex; mode=display">
-e_{ij}(x_i, x_j) = t2v(Z_{ij}^{-1}(X_i^{-1}.X_j))</script><p>其中的$Z_{ij}$、$X_i$、$X_j$都是矩阵形式。$X_i^{-1}X_j$表示节点j到节点i之间的位姿差异$\hat Z_{ij}$，假设这个转移矩阵形式如下：</p>
-<script type="math/tex; mode=display">
-\hat Z_{ij} = 
-\begin{bmatrix}
-R_{2*2} & t_{2*1} \\
-0 & 1
-\end{bmatrix}</script><p>假设测量值$Z_{ij}$形式如下：</p>
-<script type="math/tex; mode=display">
-Z_{ij} = 
-\begin{bmatrix}
-R^{'} & t^{'}\\
-0 & 1
-\end{bmatrix}</script><p>分块矩阵的求逆过程如下：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}^{-1}& =
-\begin{bmatrix}
-\begin{bmatrix}
-I & t\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-R & 0\\
-0 & 1
-\end{bmatrix}
-\end{bmatrix}^{-1}=
-\begin{bmatrix}
-R & 0\\
-0 & 1
-\end{bmatrix}^{-1}
-\begin{bmatrix}
-I & t\\
-0 & 1
-\end{bmatrix}^{-1}\\
-& =\begin{bmatrix}
-R^T & 0\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-I & -t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^T & -R^Tt\\
-0 & 1
-\end{bmatrix}
-\end{split}</script><p>所以误差$e_{ij}$计算如下：</p>
-<script type="math/tex; mode=display">
-E_{ij} = Z_{ij}^{-1}\hat Z_{ij} = 
-\begin{bmatrix}
-R^{'} & t^{'}\\
-0 & 1
-\end{bmatrix}^{-1}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^{'T} & -R^{'T}t^{'}\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^{'T}R & R^{'T}(t-t^{'})\\
-0 & 1
-\end{bmatrix}</script><script type="math/tex; mode=display">
-e_{ij} = t2v(E_{ij})=
-\begin{bmatrix}
-R_z(t_{\hat z} - t_z)_{2*1}\\
-\theta_\hat z - \theta_z
-\end{bmatrix}_{3*1}=
-\begin{bmatrix}
-R_z(x_{\hat z} - x_z)\\
-R_z(y_{\hat z} - y_z)\\
-\theta_\hat z - \theta_z
-\end{bmatrix}=
-\begin{bmatrix}
-R_z[R_i(x_{j} - x_i) - x_z]\\
-R_z[R_i(y_{j} - y_{i}) - y_z]\\
-\theta_j - \theta_i - \theta_z
-\end{bmatrix}</script><p>求解雅可比矩阵$J_{ij}$：</p>
-<script type="math/tex; mode=display">
-A_{ij} = 
-\begin{bmatrix}
-\frac{\partial e_1}{\partial x_i} & \frac{\partial e_1}{\partial y_i} & \frac{\partial e_1}{\partial \theta_i}\\
-\frac{\partial e_2}{\partial x_i} & \frac{\partial e_2}{\partial y_i} & \frac{\partial e_2}{\partial \theta_i}\\
-\frac{\partial e_3}{\partial x_i} & \frac{\partial e_3}{\partial y_i} & \frac{\partial e_3}{\partial \theta_i}\\
-\end{bmatrix}=
-\begin{bmatrix}
--R_z^TR_i^T & 0 & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(x_j-x_i)\\
-0 & -R_z^TR_i^T  & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(y_j-y_i)\\
-0 & 0 & -1
-\end{bmatrix}</script><script type="math/tex; mode=display">
-B_{ij} = 
-\begin{bmatrix}
-R_z^TR_i^T & 0\\
-0 & 1
-\end{bmatrix}</script><p>累加$b$和$H$矩阵： </p>
-<script type="math/tex; mode=display">
-b_{[i]} += A_{ij}\Omega_{ij}e_{ij}\\
-b_{[j]} += B_{ij}^T\Omega_{ij}e_{ij}\\
-H_{[ii]} += A_{ij}^T\Omega_{ij}A_{ij}\\
-H_{[ij]} += A_{ij}^T\Omega_{ij}B_{ij}\\
-H_{[ji]} += B_{ij}^T\Omega_{ij}A_{ij}\\
-H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/29/关联分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/29/关联分析/" itemprop="url">关联分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-29T23:57:01+08:00">
-                2018-04-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/04/29/关联分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/29/关联分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h4><p><strong>频繁项集</strong>：集合，${a, b, c}$</p>
-<p><strong>关联规则</strong>：映射，$a\to b$</p>
-<p><strong>支持度</strong>：针对某个频繁项集，$support(频繁项集a) = \frac{freq(频繁项集a)}{freq(所有项集)}$</p>
-<p><strong>可信度</strong>：衡量某条关联规则，$confidence(a\to b) = \frac{support(a|b)}{support(a)}$</p>
-<p>对于包含N个元素的数据集，可能的集合有$2^N - 1$种，暴力遍历显然药丸，因此引入Apriori原理。</p>
-<p><strong>Apriori原理</strong>：减少可能的项集，避免指数增长。</p>
-<ul>
-<li>backwards：如果某个项集是频繁的，那么它的所有子集也是频繁的。</li>
-<li>forwards：如果一个项集是非频繁项集，那么它的所有超集也是非频繁的。</li>
-</ul>
-<h4 id="2-Apriori算法"><a href="#2-Apriori算法" class="headerlink" title="2 Apriori算法"></a>2 Apriori算法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori</span><span class="params">(dataSet, minSupport=<span class="number">0.5</span>)</span>:</span></span><br></pre></td></tr></table></figure>
-<p>算法思路：从单个项集开始检查，去掉那些不满足最小支持度的项集，然后对剩下的集合进行组合，得到包含两个元素的项集，重复扫描，然后将剩余项集组合成包含三个元素的集合，依次类推，直到所有项集都被去掉。</p>
-<ul>
-<li>为啥最后会得到空集：因为包含所有元素的项集一定不是频繁项集，否则根据Apriori原理，它的全部子集都是频繁项集。</li>
-<li>如何从包含k个元素的项集集合生成包含k+1个元素的项集集合：从k个元素的项集到k+1个元素项集的扩充，<strong>只允许有一个元素的不同</strong>，算法中为了避免重复结果，<strong>只对前k-1个元素相同的两个项集求并集</strong>。</li>
-</ul>
-<p>代码实现过程中发现了几个知识记录一下：</p>
-<ul>
-<li>map函数的返回值：python2下直接返回列表，python3下返回的是迭代器：</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">map(frozenset, C1)</span><br><span class="line"><span class="comment"># 返回 &lt;map object at 0x101e78940&gt; </span></span><br><span class="line"></span><br><span class="line">list(map(frozenset, C1))</span><br><span class="line"><span class="comment"># 返回 list[frozenset1(), frozenset2(), ...]</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>字典的update方法：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 将dict2的键值添加到dict1中，在涉及迭代操作时可以省略传递中间值</span><br><span class="line">dict1.update(dict2)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>set &amp; frozenset：set<strong>无排序</strong>且不重复，并且可变，因此unhashable。frozenset不可变，可以用作字典的key。</li>
-</ul>
-<h4 id="3-关联规则"><a href="#3-关联规则" class="headerlink" title="3 关联规则"></a>3 关联规则</h4><p>对一个包含k个元素的频繁项集，其中可能的关联规则有：</p>
-<script type="math/tex; mode=display">
-C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此延续Apriori的思路，关联规则也有一条类似的属性：</p>
-<ul>
-<li>如果某条规则的前件不满足最小可信度要求，那么它的所有子集也不满足最小可信度要求。</li>
-<li>对应的，如果某条规则的后件不满足最小可信度要求，那么它的所有超集也不满足。</li>
-</ul>
-<p>算法思路：对每个至少包含两个元素的频繁项集，从后部只包含一个元素的规则开始，对这些规则进行测试，接下来对所有剩余规则的后件进行组合，得到包含两个元素的后件（对应的补集就是前件），依次类推，直到测试完所有可能的后件。</p>
-<ul>
-<li>为啥只检查<strong>前后件互补</strong>的规则：因为一个频繁项集的所有子集也都是频繁项集，所以一个频繁项集中不互补的规则将是该频繁项集的某个子集的互补规则。</li>
-</ul>
-<h4 id="4-FP-growth算法"><a href="#4-FP-growth算法" class="headerlink" title="4 FP-growth算法"></a>4 FP-growth算法</h4><p>Apriori算法避免了暴力遍历子项集的指数式增长，但是对每一个新生成的频繁项集，都要扫描整个数据集，当数据集很大时，这种抛物线式增长的时间复杂度也不太令人满意。</p>
-<p>FP-growth算法借助一种称为<strong>FP树</strong>的数据结构存储数据，来抽象原始数据集：</p>
-<ul>
-<li><strong>项集</strong>以路径的方式存储在树中</li>
-<li><strong>相似项</strong>之间相连接成链表</li>
-</ul>
-<ul>
-<li>一个元素项可以在FP树中出现多次</li>
-<li>FP树存储的是元素的出现频率</li>
-<li>项集完全不同时，树才会分叉，否则会有复用路径</li>
-</ul>
-<p>​算法思路：首先遍历一遍原始数据集，记录元素的出现频率，去掉不满足最小支持度的元素。然后再遍历一遍剩下的集合元素，<strong>构建FP树</strong>。然后就可以通过FP树挖掘频繁项集。</p>
-<p>构建FP树：依次遍历每一个项集，首先将其中的非频繁项移除，并按照元素出现频率对过滤后的元素进行重排序。<strong>对过滤、排序后的集合</strong>，如果树中已存在现有元素，则增加现有元素的计数值，如果不存在，则向树中添加一个分支，新增节点的同时还要更新链表元素。主要就涉及两个数据结构：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义节点数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">treeNode</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, nameValue, numOccur, parentNode)</span>:</span></span><br><span class="line">        self.name</span><br><span class="line">        self.count</span><br><span class="line">        self.nodeLink   <span class="comment"># 链表信息，指向下一个相似项</span></span><br><span class="line">        self.parent</span><br><span class="line">        self.children</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line"><span class="comment"># 用于存储元素frequency以及链接相似项的字典数据结构</span></span><br><span class="line">freq = &#123;&#125;</span><br><span class="line">freq[node_name] = [frequency, node1, node2, ...]</span><br></pre></td></tr></table></figure>
-<ul>
-<li>因为集合中元素的出现频率可能相等，因此过滤排序的结果不唯一，生成的树结构也会有差异。</li>
-<li>第一次遍历删除非频繁元素时，发现字典在迭代过程中不能删除item，我转化成list暴力解决了，不知道有没有什么优雅的方式。</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">del</span> freq[item]</span><br><span class="line"><span class="comment"># 返回 RuntimeError: dictionary changed size during iteration</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> list(freq.keys()):</span><br><span class="line">    <span class="keyword">if</span> freq[item] &lt; minSupport:</span><br><span class="line">        <span class="keyword">del</span>(freq[item])</span><br></pre></td></tr></table></figure>
-<p>挖掘频繁项集：首先创建条件模式基，然后利用条件模式基，构建条件FP树。</p>
-<p><strong>1 条件模式基</strong>：以所查找元素项为结尾的<strong>前缀路径</strong>集合，并且每条前缀路径都与<strong>起始元素项</strong>的计数值相关联。（这里面用到了前面定义的parent和nodeLink属性）</p>
-<p><strong>2 构造条件FP树</strong>：与构造树的过程相同，使用的dataSet换成了条件模式基而已，函数参数count就是预留彩蛋。这样得到的就是<strong>指定频繁项的条件FP树</strong>。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">updateTree</span><span class="params">(cond_set, myTree, freq_header, count)</span>:</span></span><br><span class="line"><span class="comment"># cond_set: 一条path</span></span><br><span class="line"><span class="comment"># myTree: 根节点</span></span><br><span class="line"><span class="comment"># freq_header: dict[node_name] = [frequency, head_node]</span></span><br><span class="line"><span class="comment"># count: path对应的count</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>构造的条件FP树过滤掉了条件模式基中的一些元素：这些元素本身是频繁项，但是与指定元素组合的集合不是频繁的。</li>
-<li>相应地，条件树中剩余元素与指定频繁项组合的集合是频繁的。</li>
-</ul>
-<p><strong>3 迭代</strong>：从生成的条件FP树中，可以得到更复杂的频繁项。求解复杂频繁项的条件模式基，进而生成对应的条件FP树，就能得到更复杂的频繁项，依次类推进行迭代，直到FP树为空。</p>
-<p>​    </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/25/sublime注册码被无限次移除/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/25/sublime注册码被无限次移除/" itemprop="url">sublime注册码被无限次移除</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-25T16:48:16+08:00">
-                2018-04-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/04/25/sublime注册码被无限次移除/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/25/sublime注册码被无限次移除/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近不知道sublime3抽什么风，突然开始验证注册码了，输入一个valid code分分钟给你移除。</p>
-<p>收藏一个解决办法，有效性待验证：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># add the following to your host file(/private/etc/hosts)</span><br><span class="line">127.0.0.1 license.sublimehq.com</span><br><span class="line">127.0.0.1 45.55.255.55</span><br><span class="line">127.0.0.1 45.55.41.223</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2805,7 +2634,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">131</span>
+                  <span class="site-state-item-count">134</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2818,7 +2647,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

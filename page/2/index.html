@@ -276,6 +276,825 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/mlp系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/27/mlp系列/" itemprop="url">mlp系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T14:39:20+08:00">
+                2021-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/27/mlp系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/mlp系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[papers]</p>
+<ul>
+<li>[MLP-Mixer] MLP-Mixer: An all-MLP Architecture for Vision，Google</li>
+<li>[ResMLP] ResMLP: Feedforward networks for image classification with data-efficient training，Facebook</li>
+</ul>
+<p>[references]</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect</a></p>
+<p><a href="https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww</a></p>
+<h2 id="MLP-Mixer-An-all-MLP-Architecture-for-Vision"><a href="#MLP-Mixer-An-all-MLP-Architecture-for-Vision" class="headerlink" title="MLP-Mixer: An all-MLP Architecture for Vision"></a>MLP-Mixer: An all-MLP Architecture for Vision</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>image classification task</li>
+<li>neither of [CNN, attention] are necessary</li>
+<li>our proposed MLP-Mixer<ul>
+<li>仅包含multi-layer-perceptrons</li>
+<li>independently to image patches</li>
+<li>repeated applied across either spatial locations or feature channels</li>
+<li>two types<ul>
+<li>applied independently to image patches</li>
+<li>applied across patches</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/05/27/mlp系列/mixer.png" width="70%;"></p>
+<ul>
+<li>输入是token sequences<ul>
+<li>non-overlapping image patches</li>
+<li>linear projected to dimension C</li>
+</ul>
+</li>
+<li>Mixer Layer<ul>
+<li>maintain the input dimension</li>
+<li>channel-mixing MLP<ul>
+<li>operate on each token independently</li>
+<li>可以看作是1x1的conv</li>
+</ul>
+</li>
+<li>token-mixing MLP<ul>
+<li>operate on each channel independently</li>
+<li>take each spatial vectors (hxw)x1 as inputs</li>
+<li>可以看作是一个global depth-wise conv，s1，same pad，kernel size是(h,w)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>最后对token embedding做GAP，提取sequence vec，然后进行类别预测</li>
+</ul>
+</li>
+<li><p>idea behind Mixer</p>
+<ul>
+<li>clearly separate the per-location operations &amp; cross-location operations </li>
+<li>CNN是同时进行这俩的</li>
+<li>transformer的MSA同时进行这俩，MLP只进行per-location operations</li>
+</ul>
+</li>
+<li><p>Mixer Layer</p>
+<ul>
+<li><p>two MLP blocks</p>
+</li>
+<li><p>given input $X\in R^{SC}$，S for spatial dim，C for channel dim</p>
+<p>  <img src="/2021/05/27/mlp系列/blocks.png" width="70%;"></p>
+</li>
+<li><p>先是token-mixing MLP</p>
+<ul>
+<li>acts on S dim</li>
+<li>maps $R^S$ to $R^S$</li>
+<li>share across C-axis</li>
+<li>LN-FC-GELU-FC-residual</li>
+</ul>
+</li>
+<li><p>然后是channel-mixing MLP</p>
+<ul>
+<li>acts on C dim</li>
+<li>maps $R^C$ to $R^C$</li>
+<li>share across S-axis</li>
+<li>LN-FC-GELU-FC-residual</li>
+</ul>
+</li>
+<li><p>fixed width，更接近transformer/RNN，而不是CNN那种金字塔结构</p>
+</li>
+<li><p>不使用positional embeddings</p>
+<ul>
+<li>the token-mixing MLPs are sensitive to the order of the input tokens</li>
+<li>may learn to represent locations</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training"><a href="#ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training" class="headerlink" title="ResMLP: Feedforward networks for image classification with data-efficient training"></a>ResMLP: Feedforward networks for image classification with data-efficient training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>entirely build upon MLP</li>
+<li>alternates from a simple residual network<ul>
+<li>a linear layer to interact with image patches</li>
+<li>a two-layer FFN to interact independently with each patch</li>
+<li>affine transform替代LN是一个特别之处</li>
+</ul>
+</li>
+<li>trained with modern strategy<ul>
+<li>heavy data-augmentation </li>
+<li>optionally distillation</li>
+</ul>
+</li>
+<li>show good performace on ImageNet classification</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>strongly inspired by ViT but simpler<ul>
+<li>没有attention层，只有fc层+gelu</li>
+<li>没有norm层，因为much more stable to train，但是用了affine transformation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/05/27/mlp系列/ResMLP.png" width="70%;"></p>
+<ul>
+<li>takes flattened patches as inputs<ul>
+<li>typically N=16：16x16</li>
+</ul>
+</li>
+<li>linear project the patches into embeddings<ul>
+<li>form $N^2$ d-dim embeddings</li>
+</ul>
+</li>
+<li>ResMLP Layer<ul>
+<li>main the dim throughout $[N^2,d]$</li>
+<li>a simple linear layer<ul>
+<li>interaction between the patches</li>
+<li>applied to all channels independently</li>
+<li>类似depth-wise conv with global kernel的东西，线性！！</li>
+</ul>
+</li>
+<li>a two-layer-mlp<ul>
+<li>fc-GELU-fc</li>
+<li>independently applied to all patches</li>
+<li>非线性！！</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>average pooled $[d-dim]$ + linear classifier $cls-dim$</li>
+</ul>
+</li>
+<li><p>Residual Multi-Layer Perceptron Layer</p>
+<ul>
+<li>a linear layer + a FFN layer</li>
+<li>each layer is paralleled with a skip-connection</li>
+<li><p>没用LN，但是用了learnable affine transformation</p>
+<ul>
+<li>$Aff_{\alpha, \beta} (x) = Diag(\alpha) x + \beta$</li>
+<li>rescale and shifts the input component-wise：对每个patch，分别做affine变换</li>
+<li>在推理阶段可以与上一层线性层合并：no cost</li>
+<li>用了两次<ul>
+<li>第一个用在main path上用来替代LN：初值为identity transform(1,0)</li>
+<li>第二个在residual path里面，down scale to boost，用一个small value初始化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>given input： $d\times N^2$ matrix $X$</p>
+<p>  <img src="/2021/05/27/mlp系列/mlp1.png" width="50%;"></p>
+<ul>
+<li>affine在d-dim上做</li>
+<li>第一个Linear layer在$N^2-dim$上做：参数量$N^2 \times N^2$</li>
+<li><p>第二、三个Linear layer在$d-dim$上做：参数量$d \times 4d$ &amp; $4d \times d$</p>
+<p><img src="/2021/05/27/mlp系列/mlp2.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/24/torch-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/24/torch-note/" itemprop="url">torch-note</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-24T15:23:48+08:00">
+                2021-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/24/torch-note/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/24/torch-note/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>torch.cuda.amp</p>
+<p> 自动混合精度：FloatTensor &amp; HalfTensor</p>
+</li>
+<li><p>torch.jit.script</p>
+<p> 将模型从纯Python程序转换为能够独立于Python运行的TorchScript程序</p>
+</li>
+<li><p>torch.nn.DataParallel</p>
+</li>
+<li><p>torch.flatten(input, start_dim=0, end_dim=-1)</p>
+<p> 展开start_dim到end_dim之间的dim成一维</p>
+</li>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/21/LV-ViT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/21/LV-ViT/" itemprop="url">LV-ViT</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-21T16:42:11+08:00">
+                2021-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/21/LV-ViT/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/21/LV-ViT/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[LV-ViT 2021] Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet，新加坡国立&amp;字节，主体结构还是ViT，deeper+narrower+multi-layer-cnn-patch-projection+auxiliary label&amp;loss</p>
+<p>同等参数量下，能够达到与CNN相当的分类精度</p>
+<ul>
+<li>26M——84.4% ImageNet top1 acc</li>
+<li>56M——85.4% ImageNet top1 acc</li>
+<li>150M——86.2% ImageNet top1 acc</li>
+</ul>
+<p><img src="/2021/05/21/LV-ViT/recent.png" width="70%;"></p>
+<p>ImageNet &amp; ImageNet-1k：The ImageNet dataset consists of more than 14M images, divided into approximately 22k different labels/classes. However the <strong>ImageNet challenge is conducted on just 1k high-level categories</strong> (probably because 22k is just too much)</p>
+<h2 id="Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet"><a href="#Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet" class="headerlink" title="Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet"></a>Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>develop a bag of training techniques on vision transformers</li>
+<li>slightly tune the structure</li>
+<li>introduce token labeling——a new training objective</li>
+<li>ImageNet classificaiton task</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>former ViTs<ul>
+<li>主要问题就是需要大数据集pretrain，不然精度上不去</li>
+<li>然后模型也比较大，need huge computation resources</li>
+<li>DeiT和T2T-ViT探索了data augmentation/引入additional token，能够在有限的数据集上拉精度</li>
+</ul>
+</li>
+<li>our work<ul>
+<li>rely on purely ImageNet-1k data</li>
+<li>rethink the way of performing patch embedding</li>
+<li>introduce inductive bias</li>
+<li>we add a token labeling objective loss beside cls token predition</li>
+<li>provide practical advice on adjusting vision transformer structures</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview &amp; comparison</p>
+<ul>
+<li>主体结构不变，就是增加了两项</li>
+<li>a MixToken method</li>
+<li><p>a token labeling objective</p>
+<p><img src="/2021/05/21/LV-ViT/cmp.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>review the vision transformer</p>
+<ul>
+<li>patch embedding<ul>
+<li>将固定尺寸的图片转换成patch sequence，例如224x224的图片，patch size=16，那就是14x14个small patches</li>
+<li>将每个patch(16x16x3=768-dim) linear project成一个token(embedding-dim)</li>
+<li>concat a class token，构成全部的input tokens</li>
+</ul>
+</li>
+<li>position encoding<ul>
+<li>added to input tokens</li>
+<li>fixed sinusoidal / learnable</li>
+</ul>
+</li>
+<li>multi-head self-attention<ul>
+<li>用来建立long-range dependency</li>
+<li>multi-heads：所有attention heads的输出在channel-dim上concat，然后linear project回单个head的channel-dim</li>
+</ul>
+</li>
+<li>feed-forward layers<ul>
+<li>fc1-activation-fc2</li>
+</ul>
+</li>
+<li>score predition layer<ul>
+<li>只用了cls token对应的输出embedding，其他的discard</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training techniques</p>
+<ul>
+<li><p>network depth</p>
+<ul>
+<li>add more transformer blocks</li>
+<li>同时decrease the hidden dim of FFN</li>
+</ul>
+</li>
+<li><p>explicit inductive bias</p>
+<ul>
+<li>CNN逐步扩大感受野，擅长提取局部特征，具有天然的平移不变性等</li>
+<li>transformer被发现failed to capture the low-level and local structures</li>
+<li>we use convolutions with a smaller stride to provide an overlapped information for each nearby tokens</li>
+<li>在patch embedding的时候不是independent crop，而是有overlap</li>
+<li>然后用多层conv，逐步扩大感受野，smaller kernel size同时降低了计算量</li>
+</ul>
+</li>
+<li><p>rethinking residual connection</p>
+<ul>
+<li><p>给残差分支add a smaller ratio $\alpha$</p>
+<p>  <img src="/2021/05/21/LV-ViT/residual.png" width="40%;"></p>
+</li>
+<li><p>enhance the residual connection since less information will go to the residual branch</p>
+</li>
+<li><p>improve the generalization ability</p>
+</li>
+</ul>
+</li>
+<li><p>re-labeling</p>
+<ul>
+<li>label is not always accurate after cropping</li>
+<li><p>situations are worse on smaller images</p>
+</li>
+<li><p>re-assign each image with a K-dim score map，在1k类数据集上K=1000</p>
+</li>
+<li>cheap operation compared to teacher-student</li>
+<li>这个label是针对whole image的label，是通过另一个预训练模型获取</li>
+</ul>
+</li>
+<li><p>token-labeling</p>
+<ul>
+<li>based on the dense score map provided by re-labeling，we can assign each patch an individual label</li>
+<li>auxiliary token labeling loss<ul>
+<li>每个token都对应了一个K-dim score map</li>
+<li>可以计算一个ce</li>
+</ul>
+</li>
+<li>given<ul>
+<li>outputs of the transformer $[X^{cls}, X^1, …, X^N]$</li>
+<li>K-dim score map $[y^1, y^2, …, y^N]$ </li>
+<li>whole image label $y^{cls}$</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>auxiliary token labeling loss：$L_{aux} = \frac{1}{N} \sum_1^N CE(X^i, y^i)$</li>
+<li>cls loss：$L_{cls} = CE(X^{cls}, y^{cls})$</li>
+<li>total loss：$L_{total} = L_{cls}+\beta L_{aux}$，$\beta=0.5$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MixToken</p>
+<ul>
+<li>从Mixup&amp;CutMix启发来的</li>
+<li>为了确保each token have clear content，我们基于token embedding进行mixup</li>
+<li>given<ul>
+<li>token sequence $T_1=[t^1_1, t^2_1, …, t^N_1]$ &amp; $T_2=[t^1_2, t^2_2, …, t^N_2]$</li>
+<li>token labels $y_1=[y^1_1, y^2_1, …, y^N_1]$ &amp; $Y_2=[y^1_2, y^2_2, …, y^N_2]$</li>
+<li>binary mask M</li>
+</ul>
+</li>
+<li>MixToken<ul>
+<li>mixed token sequence：$\hat T = T_1 \odot M + T_2 \odot (1-M)$</li>
+<li>mixed labels：$\hat Y = Y_1 \odot M + Y_2 \odot (1-M)$</li>
+<li>mixed cls label：$\hat {Y^{cls}} = \overline M y_1^{cls} + (1-\overline M) y_2^{cls}$，$\overline M$ is the average of $M$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>training details</p>
+<ul>
+<li>AdamW</li>
+<li>linear lr scaling：larger when use token labeling</li>
+<li>weight decay</li>
+<li><p>dropout：hurts small models，use Stochastic Depth instead</p>
+<p><img src="/2021/05/21/LV-ViT/hyper.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Training Technique Analysis</p>
+<ul>
+<li><p>more convs in patch embedding</p>
+<p>  <img src="/2021/05/21/LV-ViT/convs.png" width="50%;"></p>
+</li>
+<li><p>enhanced residual</p>
+<ul>
+<li><p>smaller scaling factor</p>
+<ul>
+<li>the weight get larger gradients in residual branch</li>
+<li>more information can be preserved in main branch</li>
+<li>better performance</li>
+<li>faster convergence</li>
+</ul>
+<p><img src="/2021/05/21/LV-ViT/enhanced residual.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>re-labeling</p>
+<ul>
+<li>use NFNet-F6 to re-label the ImageNet dataset and obtain the 1000-dimensional score map for each image</li>
+<li>NFNet-F6 is trained from scratch</li>
+<li>given input 576x576，获得的score map是18x18x1000（s32）</li>
+<li>store the top5 probs for each position to save storage</li>
+</ul>
+</li>
+<li><p>MixToken</p>
+<ul>
+<li>比baseline的CutMix method要好</li>
+<li><p>同时看到token labeling比relabeling要好</p>
+<p><img src="/2021/05/21/LV-ViT/MixToken.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>token labeling</p>
+<ul>
+<li>relabeling是在whole image上</li>
+<li>token labeling是进一步地，在token level添加label和loss</li>
+</ul>
+</li>
+<li><p>augmentation techniques</p>
+<ul>
+<li><p>发现MixUp会hurt</p>
+<p><img src="/2021/05/21/LV-ViT/aug.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model Scaling</p>
+<ul>
+<li><p>越大越好</p>
+<p><img src="/2021/05/21/LV-ViT/scaling.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/19/memory-bank/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2931,1284 +3750,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/22/NFNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/22/NFNet/" itemprop="url">NFNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-22T10:37:57+08:00">
-                2021-02-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/22/NFNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/22/NFNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="NFNet-High-Performance-Large-Scale-Image-Recognition-Without-Normalization"><a href="#NFNet-High-Performance-Large-Scale-Image-Recognition-Without-Normalization" class="headerlink" title="NFNet: High-Performance Large-Scale Image Recognition Without Normalization"></a>NFNet: High-Performance Large-Scale Image Recognition Without Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>NF：<ul>
-<li>normalization-free</li>
-<li>aims to match the test acc of batch-normalized networks<ul>
-<li>attain new SOTA 86.5%</li>
-<li>pre-training + fine-tuning上也表现更好89.2%</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>batch normalization<ul>
-<li>不是完美解决方案</li>
-<li>depends on batch size</li>
-</ul>
-</li>
-<li>non-normalized networks<ul>
-<li>accuracy</li>
-<li>instabilities：develop adaptive gradient clipping</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>vast majority models<ul>
-<li>variants of deep residual + BN</li>
-<li>allow deeper, stable and regularizing</li>
-</ul>
-</li>
-<li>disadvantages of batch normalization<ul>
-<li>computational expensive</li>
-<li>introduces discrepancy between training &amp; testing models &amp; increase params</li>
-<li>breaks the independence among samples</li>
-</ul>
-</li>
-<li>methods seeks to replace BN<ul>
-<li>alternative normalizers </li>
-<li>study the origin benefits of BN</li>
-<li>train deep ResNets without normalization layers  </li>
-</ul>
-</li>
-<li>key theme when removing normalization<ul>
-<li>suppress the scale of the residual branch</li>
-<li>simplest way：apply a learnable scalar</li>
-<li>recent work：suppress the branch at initialization &amp; apply Scaled Weight Standardization，能追上ResNet家族，但是没追上Eff家族</li>
-</ul>
-</li>
-<li>our NFNets’ main contributions <ul>
-<li>propose AGC：解决unstable问题，allow larger batch size and stronger augmentatons</li>
-<li>NFNets家族刷新SOTA：又快又准</li>
-<li>pretraining + finetuning的成绩也比batch normed models好</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Understanding Batch Normalization </p>
-<ul>
-<li>four main benefits<ul>
-<li>downscale the residual branch：从initialization就保证残差分支的scale比较小，使得网络has well-behaved gradients early in training，从而efficient optimization </li>
-<li>eliminates mean-shift：ReLU是不对称的，stacking layers以后数据分布会累积偏移</li>
-<li>regularizing effect：mini-batch作为subset对于全集是有偏的，这种noise可以看作是regularizer</li>
-<li>allows efficient large-batch training：数据分布稳定所以loss变化稳定，同时大batch更接近真实分布，因此我们可以使用更大的learning rate，但是这个property仅在使用大batch size的时候有效</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>NF-ResNets </p>
-<ul>
-<li>recovering the benefits of BN：对residual branch进行scale和mean-shift</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p>residual block：$h_{i+1} = h_i + \alpha f_i (h_i/\beta_i)$</p>
-</li>
-<li><p>$\beta_i = Var(h_i)$：对输入进行标准化（方差为1），这是个expected value，不是算出来的，结构定死就定死了</p>
-</li>
-<li><p>Scaled Weight Standardization &amp; scaled activation</p>
-<ul>
-<li>比原版的WS多了一个$\sqrt N$的分母<ul>
-<li>源码实现中比原版WS还多了learnable affine gain</li>
-</ul>
-</li>
-<li>使得conv-relu以后输出还是标准分布</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/weight.png" width="45%;"></p>
-</li>
-<li><p>$\alpha=0.2$：rescale</p>
-</li>
-<li><p>residual branch上，最终的输出为$\alpha*$标准分布，方差是$\alpha^2$</p>
-</li>
-<li><p>id path上，输出还是$h_{i}$，方差是$Var(h_i)$</p>
-<ul>
-<li><p>update这个block输出的方差为$Var(h_{i+1}) = Var(h_i)+\alpha^2$，来更新下一个block的 $\beta$</p>
-</li>
-<li><p>variance reset</p>
-<ul>
-<li>每个transition block以后，把variance重新设定为$1+\alpha^2$<ul>
-<li>在接下来的non-transition block中，用上面的update公式更新expected std</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>再加上additional regularization（Dropout和Stochastic Depth两种正则手段），就满足了BN benefits的前三条</p>
-<ul>
-<li>在batch size较小的时候能够catch up甚至超越batch normalized models<ul>
-<li>但是large batch size的时候perform worse</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>对于一个标准的conv-bn-relu，从workflow上看</p>
-<ul>
-<li>origin：input——一个free的conv weighting——BN（norm &amp; rescale）——activation<ul>
-<li>NFNet：input——standard norm——normed weighting &amp; activation——rescale</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>Adaptive Gradient Clipping for Efficient Large-Batch Training</p>
-<ul>
-<li><p>梯度裁剪：</p>
-<ul>
-<li>clip by norm：用一个clipping threshold $\lambda$ 进行rescale，training stability was extremely sensitive to 超参的选择，settings（model depth, the batch size, or the learning rate）一变超参就要重新调</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>clip by value：用一个clipping value进行上下限截断</p>
-</li>
-<li><p>AGC</p>
-<ul>
-<li><p>given 某层的权重$W \in R^{N<em>M}$ 和 对应梯度$G \in R^{N</em>M}$</p>
-</li>
-<li><p>ratio $\frac{||G||_F}{||W||_F}$ 可以看作是梯度变化大小的measurement</p>
-</li>
-<li><p>所以我们直观地想到将这个ratio进行限幅：所谓的adaptive就是在梯度裁剪的时候不是对所有梯度一刀切，而是考虑其对应权重大小，从而进行更合理的调节</p>
-<ul>
-<li><p>但是实验中发现unit-wise的gradient norm要比layer-wise的好：每个unit就是每行，对于conv weights就是(hxwxCin)中的一个</p>
-<p><img src="/2021/02/22/NFNet/clipping.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>scalar hyperparameter $\lambda$</p>
-<pre><code>  * the optimal value may depend on the choice of optimizer, learning rate and batch size
-  * empirically we found $\lambda$ should be smaller for larger batches
-</code></pre><ul>
-<li><p>ablations for AGC</p>
-<p><img src="/2021/02/22/NFNet/agc.png" width="50%;"></p>
-<ul>
-<li>用pre-activation NF-ResNet-50 和 NF-ResNet-200 做实验，batch size选择从256到4096，学习率从0.1开始基于batch size线性增长，超参$\lambda$的取值见右图<ul>
-<li>左图结论1：在batch size较小的情况下，NF-Nets能够追上甚至超越normed models的精度，但是batch size一大（2048）情况就恶化了，但是有AGC的NF-Nets则能够maintaining performance comparable or better than～～～</li>
-<li>左图结论2：the benefits of using AGC are smaller when the batch size is small</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>右图结论1：超参$\lambda$的取值比较小的时候，我们对梯度的clipping更strong，这对于使用大batch size训练的稳定性来说非常重要</li>
-</ul>
-</li>
-<li><p>whether or not AGC is beneficial for all layers</p>
-<pre><code>      * it is always better to not clip the final linear layer 
-  * 最开始的卷积不做梯度裁剪也能稳定训练
-</code></pre><ul>
-<li>最终we apply AGC to every layer except for the final linear layer</li>
-</ul>
-</li>
-<li><p>Normalizer-Free Architectures</p>
-</li>
-<li><p>begin with SE-ResNeXt-D model</p>
-</li>
-<li><p>about group width</p>
-<pre><code>      * set group width to 128
-</code></pre><ul>
-<li>the reduction in compute density means that 只减少了理论上的FLOPs，没有实际加速</li>
-</ul>
-</li>
-<li><p>about stages</p>
-<pre><code>      * R系列模型加深的时候是非线性增长，疯狂叠加stage3的block数，因为这一层resolution不大，channel也不是最多，兼顾了两侧计算量
-</code></pre><ul>
-<li>我们给F0设置为[1,2,6,3]，然后在deeper variants中对每个stage的block数用一个scalar N线形增长</li>
-</ul>
-</li>
-<li><p>about width</p>
-<pre><code>      * 仍旧对stage3下手，[256,512,1536,1536]
-      * roughly preserves the training speed
-</code></pre><ul>
-<li>一个论点：stage3 is the best place to add capacity，因为deeper enough同时have access to deeper levels同时又比最后一层有slightly higher resolution</li>
-</ul>
-</li>
-<li><p>about block</p>
-<pre><code>  * 实验发现最有用的操作是adding an additional 3 × 3 grouped conv after the first
-  * overview
-</code></pre><p>  <img src="/2021/02/22/NFNet/NFblock.png" width="50%;"></p>
-</li>
-<li><p>about scaling variants</p>
-<pre><code>      * eff系列采用的是R、W、D一起增长，因为eff的block比较轻量
-</code></pre><ul>
-<li><p>但是对R系列来说，只增长D和R就够了</p>
-</li>
-<li><p>补充细节</p>
-<pre><code>  * 在inference阶段使用比训练阶段slightly higher resolution
-</code></pre><ul>
-<li>随着模型加大increase the regularization strength：<ul>
-<li>scale the drop rate of Dropout</li>
-<li>调整stochastic depth rate和weight decay则not effective</li>
-</ul>
-</li>
-<li><p>se-block的scale乘个2</p>
-</li>
-<li><p>SGD params:</p>
-<ul>
-<li>Nesterov=True, momentum=0.9, clipnorm=0.01</li>
-<li>lr：<ul>
-<li>先warmup再余弦退火：increase from 0 to 1.6 over 5 epochs, then decay to zero with cosine annealing</li>
-<li>余弦退火cosine annealing<ul>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/NFNets.png" width="45%;"></p>
-</li>
-<li><p>summary</p>
-<ul>
-<li>总结来说，就是拿来一个SE-ResNeXt-D</li>
-<li>先做结构上的调整，modified width and depth patterns以及a second spatial convolution，还有drop rate，resolution</li>
-<li>再做对梯度的调整：除了最后一个线形分类层以外，全用AGC，$\lambda=0.01$</li>
-</ul>
-</li>
-<li><p>最后是训练上的trick：strong regularization and data augmentation</p>
-<p>  <img src="/2021/02/22/NFNet/ablation.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>detailed view of NFBlocks</p>
-<ul>
-<li>transition block：有下采样的block<ul>
-<li>残差branch上，bottleneck的narrow ratio是0.5</li>
-<li>每个stage的3x3 conv的group width永远是128，而group数目是在随着block width变的</li>
-<li>skip path接在 $\beta$ downscaling 之后</li>
-<li>skip path上是avg pooling + 1x1 conv</li>
-</ul>
-</li>
-<li><p>non-transition block：无下采样的block</p>
-<ul>
-<li>bottleneck-ratio仍旧是0.5</li>
-<li>3x3conv的group width仍旧是128</li>
-<li>skip path接在$\beta$ downscaling 之前</li>
-<li>skip path就是id</li>
-</ul>
-<p><img src="/2021/02/22/NFNet/NFblocks.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>实验</p>
-<ul>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/09/repVGG/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/09/repVGG/" itemprop="url">repVGG</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-09T15:56:23+08:00">
-                2021-02-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/09/repVGG/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/09/repVGG/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RepVGG-Making-VGG-style-ConvNets-Great-Again"><a href="#RepVGG-Making-VGG-style-ConvNets-Great-Again" class="headerlink" title="RepVGG: Making VGG-style ConvNets Great Again"></a>RepVGG: Making VGG-style ConvNets Great Again</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>plain ConvNets <ul>
-<li>simply efficient but poor performance</li>
-</ul>
-</li>
-<li>propose a CNN architecture RepVGG<ul>
-<li>能够decouple为training-time和inference-time两个结构</li>
-<li>通过structure re-paramterization technique</li>
-<li>inference-time architecture has a VGG-like plain body</li>
-</ul>
-</li>
-<li>faster<ul>
-<li>83% faster than ResNet-50 or 101% faster than ResNet-101</li>
-</ul>
-</li>
-<li>accuracy-speed trade-off<ul>
-<li>reaches over 80% top-1 accuracy</li>
-<li>outperforms ResNets by a large margin</li>
-</ul>
-</li>
-<li>verify on classification &amp; semantic segmentation tasks</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>well-designed CNN architectures </p>
-<ul>
-<li>Inception，ResNet，DenseNet，NAS models</li>
-<li>deliver higher accuracy</li>
-<li>drawbacks <ul>
-<li>multi-branch designs：slow down inference and reduce memory utilization，对高并行化的设备不友好</li>
-<li>some components：depthwise &amp; channel shuffle，increase memory access cost </li>
-</ul>
-</li>
-<li>MAC(memory access cost) constitutes a large time usage in groupwise convolution：我的groupconv实现里cardinality维度上计算不并行</li>
-<li>FLOPs并不能precisely reflect actual speed，一些结构看似比old fashioned VGG/resnet的FLOPs少，但实际并没有快</li>
-</ul>
-</li>
-<li><p>multi-branch</p>
-<ul>
-<li>通常multi-branch model要比plain model表现好</li>
-<li>因为makes the model an implicit ensemble of numerous shallower models</li>
-<li>so that avoids gradient vanishing</li>
-<li>benefits are all for training</li>
-<li>drawbacks are undesired for inference</li>
-</ul>
-</li>
-<li><p>the proposed RepVGG</p>
-<ul>
-<li>advantages<ul>
-<li>plain architecture：no branches</li>
-<li>3x3 conv &amp; ReLU组成</li>
-<li>没有过重的人工设计痕迹</li>
-</ul>
-</li>
-<li>training time use identity &amp; 1x1 conv branches</li>
-<li><p>at inference time</p>
-<ul>
-<li>identity 可以看做degraded 1x1 conv</li>
-<li>1x1 conv 可以看做degraded 3x3 conv</li>
-<li>最终整个conv-bn branches能够整合成一个3x3 conv</li>
-<li>inference-time model只包含conv和ReLU：没有max pooling！！</li>
-<li>fewer memory units：分支会占内存，直到分支计算结束，plain结构的memory则是immediately released</li>
-</ul>
-<p><img src="/2021/02/09/repVGG/memory.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> <img src="/2021/02/09/repVGG/repvgg.png" width="45%;"></p>
-<ul>
-<li><p>training-time</p>
-<ul>
-<li>ResNet-like block<ul>
-<li>id + 1x1 conv + 3x3 conv multi-branches</li>
-<li>use BN in each branch</li>
-<li>with n blocks, the model can be interpreted as an ensemble of $3^n$ models</li>
-<li>stride2的block应该没有id path吧？？</li>
-</ul>
-</li>
-<li>simply stack serveral blocks to construct the training model</li>
-</ul>
-</li>
-<li><p>inference-time</p>
-<ul>
-<li><p>re-param</p>
-<ul>
-<li>inference-time BN也是一个线性计算</li>
-<li>两个1x1 conv都可以转换成中通的3x3 kernel，有权/无权</li>
-<li><p>要求各branch has the same strides &amp; padding pixel要对齐</p>
-<p><img src="/2021/02/09/repVGG/reparam.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>architectural specification </p>
-<ul>
-<li>variety：depth and width</li>
-<li>does not use maxpooling：只有一种operator：3x3 conv+relu</li>
-<li>head：GAP + fc / task specific</li>
-<li>5 stages<ul>
-<li>第一个stage处理high resolution，stride2</li>
-<li>第五个stage shall have more channels，所以只用一层，save parameters</li>
-<li>给倒数第二个stage最多层，考虑params和computation的balance</li>
-</ul>
-</li>
-<li>RepVGG-A：[1,2,4,14,1]，用来compete against轻量和中量级model</li>
-<li><p>RepVGG-B：deeper in s2,3,4，[1,4,6,16,1]，用来compete against high-performance ones</p>
-<p><img src="/2021/02/09/repVGG/architecture.png" width="45%;"></p>
-</li>
-<li><p>basic width：[64, 128, 256, 512]  </p>
-<ul>
-<li>width multiplier a &amp; b</li>
-<li>a控制前4个stage宽度，b控制最后一个stage</li>
-<li>[64a, 128a, 256a, 512b]  </li>
-<li><p>第一个stage的宽度只接受变小不接受变大，因为大resolution影响计算量，min(64,64a)</p>
-<p><img src="/2021/02/09/repVGG/variety.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>further reduce params &amp; computation</p>
-<ul>
-<li>groupwise 3x3 conv</li>
-<li>跳着层换：从第三开始，第三、第五、</li>
-<li>number of groups：1，2，4 globally </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>分支的作用</p>
-<p>  <img src="/2021/02/09/repVGG/branch.png" width="45%;"></p>
-</li>
-<li><p>结构上的微调</p>
-<ul>
-<li>id path去掉BN</li>
-<li>把所有的BN移动到add的后面</li>
-<li><p>每个path加上relu</p>
-<p><img src="/2021/02/09/repVGG/variants.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>ImageNet分类任务上对标其他模型</p>
-<ul>
-<li><p>simple augmentation </p>
-<p>  <img src="/2021/02/09/repVGG/simple.png" width="45%;"></p>
-</li>
-<li><p>strong：Autoaugment, label smoothing and mixup </p>
-<p>  <img src="/2021/02/09/repVGG/strong.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/03/transform-in-CNN/" itemprop="url">transform in CNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-03T14:04:06+08:00">
-                2021-02-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/03/transform-in-CNN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/03/transform-in-CNN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li>几何变换<ul>
-<li>STN：<ul>
-<li>普通的CNN能够隐式的学习一定的平移、旋转不变性，让网络能够适应这种变换：降采样结构本身能够使得网络对变换不敏感</li>
-<li>从数据角度出发，我们还会引入各种augmentation，强化网络对变化的不变能力</li>
-<li>deepMind为网络设计了一个显式的变换模块来学习各种变化，将distorted的输入变换回去，让网络学习更简单的东西</li>
-<li>参数量：就是变换矩阵的参数，通常是2x3的纺射变化矩阵，也就是6个参数</li>
-</ul>
-</li>
-<li>deformable conv：<ul>
-<li>based on STN</li>
-<li>针对分类和检测分别提出deformable convolution和deformable RoI pooling：</li>
-<li>感觉deformable RoI pooling和guiding anchor里面的feature adaption是一个东西</li>
-<li>参数量：regular kernel params 3x3 + deformable offsets 3x3x2</li>
-<li>what’s new？<ul>
-<li>个人认为引入更多的参数引入的变化</li>
-<li>首先STN是从output到input的映射，使用变换矩阵M通常只能表示depictable transformation，且全图只有1个transformation</li>
-<li>其次STN的sampling kernel也是预定义的算法，对kernel内的所有pixel使用相同的变化，也就是1个weight factor</li>
-<li>deformable conv是从input到output的映射，映射可以是任意的transformation，且3x3x2的参数最多可以包含3x3种transformation</li>
-<li>sampling kernel对kernel内的每个点，也可以有不同的权重，也就是3x3个weight factor</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>还有啥跟形变相关的</li>
-</ul>
-</li>
-<li>attention机制<ul>
-<li>spatial attention：STN，sSE</li>
-<li>channel attention：SENet</li>
-<li>同时使用空间attention和通道attention机制：CBAM</li>
-</ul>
-</li>
-<li><p>papers</p>
-<ul>
-<li>[STN] STN: Spatial Transformer Networks，STN的变换是pre-defined的，是针对全局featuremap的变换</li>
-<li>[DCN 2017] Deformable Convolutional Networks ，DCN的变换是更随机的，是针对局部kernel分别进行的变化，基于卷积核添加location-specific shift</li>
-<li>[DCNv2 2018] Deformable ConvNets v2: More Deformable, Better Results，进一步消除irrelevant context，基于卷积核添加weighted-location-specific shift，提升performance</li>
-<li>[attention系列paper] [SENet &amp;SKNet &amp; CBAM &amp; GC-Net][<a href="https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/">https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/</a>]</li>
-</ul>
-</li>
-</ol>
-<h2 id="STN-Spatial-Transformer-Networks"><a href="#STN-Spatial-Transformer-Networks" class="headerlink" title="STN: Spatial Transformer Networks"></a>STN: Spatial Transformer Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>传统卷积：lack the ability of spacially invariant</li>
-<li>propose a new learnable module<ul>
-<li>can be inserted into CNN</li>
-<li>spatially manipulate the data</li>
-<li>without any extra supervision</li>
-<li>models learn to be invariant to transformations</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>spatially invariant<ul>
-<li>the ability of being invariant to large transformations of the input data</li>
-</ul>
-</li>
-<li>max-pooling<ul>
-<li>在一定程度上spatially invariant</li>
-<li>因为receptive fields are fixed and local and small</li>
-<li>必须叠加到比较深层的时候才能实现，intermediate feature layers对large transformations不太行</li>
-<li>是一种pre-defined mechanism，跟sample无关</li>
-</ul>
-</li>
-<li>spatial transformation module<ul>
-<li>conditioned on individual samples</li>
-<li>dynamic mechanism</li>
-<li>produce a transformation and perform it on the entire feature map </li>
-</ul>
-</li>
-<li>task场景<ul>
-<li>distorted digits分类：对输入做tranform能够simplify后面的分类任务</li>
-<li>co-localisation：</li>
-<li>spatial attention</li>
-</ul>
-</li>
-<li>related work<ul>
-<li>生成器用来生成transformed images，从而判别器能够学习分类任务from transformation supervision</li>
-<li>一些methods试图从网络结构、feature extractors的角度的获得invariant representations，while STN aims to achieve this by manipulating the data</li>
-<li>manipulating the data通常就是基于attention mechanism，crop涉及differentiable问题</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation </p>
-<ul>
-<li>localisation network：predict transform parameters</li>
-<li>grid generator：基于predicted params生成sampling grid</li>
-<li><p>sampler：element-multiply</p>
-<p><img src="/2021/02/03/transform-in-CNN/spacial transformer.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>localisation network</p>
-<ul>
-<li>input feature map $U \in R^{h<em>w</em>c}$</li>
-<li>same transformation is applied to each channel</li>
-<li>generate parameters of transformation $\theta$：1-d vector</li>
-<li>fc / conv + final regression layer</li>
-</ul>
-</li>
-<li><p>parameterised sampling grid</p>
-<ul>
-<li><p>sampling kernel</p>
-</li>
-<li><p>applied by pixel</p>
-</li>
-<li><p>general affine transformation：cropping，translation，rotation，scale，skew</p>
-</li>
-<li><p>ouput map上任意一点一定来自变换前的某一点，反之不一定，input map上某一点可能是bg，被crop掉了，所以pointwise transformation写成反过来的：</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pointwise transformation.png" width="50%;"></p>
-<p>  <img src="/2021/02/03/transform-in-CNN/transformation.png" width="70%;"></p>
-</li>
-<li><p>target points构成的点集就是sampling points on the input feature map</p>
-</li>
-</ul>
-</li>
-<li><p>differentiable image sampling </p>
-<ul>
-<li><p>通过上一步的矩阵transformation，得到input map上需要保留的source point set</p>
-</li>
-<li><p>对点集中每一点apply kernel</p>
-</li>
-<li><p>通用的插值表达式：</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/interpolation.png" width="70%;"></p>
-</li>
-<li><p>最近邻kernel是个pulse函数</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/nearest.png" width="70%;"></p>
-</li>
-<li><p>bilinear kernel是个distance&gt;1的全mute掉，分段可导</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/bilinear.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>STN：Spatial Transformer Networks </p>
-<ul>
-<li>把spatial transformer嵌进CNN去：learn how to actively transform the features to help minimize the overall cost</li>
-<li>computationally fast</li>
-<li>几种用法<ul>
-<li>feed the output of the localization network $\theta$ to the rest of the network：因为transform参数explicitly encodes目标的位置姿态信息</li>
-<li>place multiple spatial transformers at increasing depth：串行能够让深层的transformer学习更抽象的变换</li>
-<li>place multiple spatial transformers in parallel：并行的变换使得每个变换针对不同的object</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<p> <img src="/2021/02/03/transform-in-CNN/error.png" width="70%;"></p>
-<ul>
-<li>R、RTS、P、E：distortion ahead</li>
-<li>aff、proj、TPS：transformer predefined<ul>
-<li>aff：给定角度？？</li>
-<li>TPS：薄板样条插值</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Deformable-Convolutional-Networks"><a href="#Deformable-Convolutional-Networks" class="headerlink" title="Deformable Convolutional Networks"></a>Deformable Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>CNN：fixed geometric structures</li>
-<li>enhance the transformation modeling capability<ul>
-<li>deformable convolution</li>
-<li>deformable RoI pooling</li>
-</ul>
-</li>
-<li>without additional supervision</li>
-<li>share similiar spirit with STN</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>to accommodate geometric variations </p>
-<ul>
-<li>data augmentation is limited to model large, unknown transformations </li>
-<li>fixed receptive fields is undesirable for high level CNN layers that encode the semantics </li>
-<li>使用大量增广的数据，枚举不全，而且收敛慢，所需网络参数量大</li>
-<li>对于提取语义特征的高层网络来讲，固定的感受野对不同目标不友好</li>
-</ul>
-</li>
-<li><p>introduce two new modules </p>
-<ul>
-<li>deformable convolution<ul>
-<li>learning offsets for each kernel via additional convolutional layers </li>
-</ul>
-</li>
-<li><p>deformable RoI pooling</p>
-<ul>
-<li>learning offset for each bin partition of the previous RoI pooling </li>
-</ul>
-<p><img src="/2021/02/03/transform-in-CNN/deform.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>operate on the 2D spatial domain </li>
-<li>remains the same across the channel dimension </li>
-</ul>
-</li>
-<li><p>deformable convolution</p>
-<ul>
-<li>正常的卷积：<ul>
-<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n)$</li>
-<li>$p_n \in R\{(-1,-1),(-1,0),…, (0,0), (1,1)\}$</li>
-</ul>
-</li>
-<li>deformable conv：with offsets $\Delta p_n$<ul>
-<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n + \Delta p_n)$</li>
-<li>offset value is typically fractional </li>
-<li>bilinear interpolation：<ul>
-<li>$x(p) = \sum_q G(q,p)x(q)$</li>
-<li>其中$G(q,p)$是条件：$G(q,p)=max(0, 1-|q_x-p_x|)*max(0, 1-|q_y-p_y|)$</li>
-<li>只计算和offset点距离小于1个单位的邻近点</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>实现<ul>
-<li><img src="/2021/02/03/transform-in-CNN/conv.png" width="40%;"></li>
-<li>offsets conv和特征提取conv是一样的kernel：same spatial resolution and dilation（N个position）</li>
-<li>the channel dimension 2N：因为是x和y两个方向的offset</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>deformable RoI pooling</p>
-<ul>
-<li><p>RoI pooling converts an input feature map of arbitrary size into fixed size features </p>
-</li>
-<li><p>常规的RoI pooling</p>
-<ul>
-<li>divides ROI into k*k bins and for each bin：$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p)/n_{ij}$</li>
-<li>对feature map上划分到每个bin里面所有的点</li>
-</ul>
-</li>
-<li><p>deformable RoI pooling：with offsets $\Delta p_{ij}$</p>
-<ul>
-<li>$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p+\Delta p_{ij})/n_{ij}$</li>
-<li>scaled normalized offsets：$\Delta p_{ij} = \gamma \Delta p_{ij} (w,h) $</li>
-<li>normalized offset value is fractional </li>
-<li>bilinear interpolation on the pooled map as above</li>
-</ul>
-</li>
-<li><p>实现</p>
-<ul>
-<li><img src="/2021/02/03/transform-in-CNN/pooling.png" width="40%;"></li>
-<li>fc layer：k*k*2个element（sigmoid？）</li>
-</ul>
-</li>
-<li><p>position sensitive RoI Pooling</p>
-<ul>
-<li>fully convolutional  </li>
-<li>input feature map先通过卷积扩展成k*k*(C+1)通道</li>
-<li><p>对每个C+1(包含k<em>k个feature map)，conv出全图的offset(2\</em>k*k个)</p>
-<p><img src="/2021/02/03/transform-in-CNN/pspooling.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>deformable convNets</p>
-<ul>
-<li>initialized with zero weights</li>
-<li>learning rates are set to $\beta$ times of the learning rate for the existing layers <ul>
-<li>$\beta=1.0$ for conv</li>
-<li>$\beta=0.01$ for fc</li>
-</ul>
-</li>
-<li>feature extraction<ul>
-<li>back：ResNet-101 &amp; Aligned-Inception-ResNet </li>
-<li>withoutTop：A randomly initialized 1x1 conv is added at last to reduce the channel dimension to 1024 </li>
-<li>last block<ul>
-<li>stride is changed from 2 to 1</li>
-<li>the dilation of all the convolution filters with kernel size&gt;1 is changed from 1 to 2</li>
-</ul>
-</li>
-<li>Optionally last block<ul>
-<li>use deformable conv in res5a,b,c</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>segmentation and detection<ul>
-<li>deeplab predicts 1x1 score maps</li>
-<li>Category-Aware RPN run region proposal with specific class</li>
-<li>modified faster R-CNN：add ROI pooling at last conv</li>
-<li>optional faster R-CNN：use deformable ROI pooling</li>
-<li>R-FCN：state-of-the-art detector</li>
-<li>optional R-FCN：use deformable ROI pooling</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/02/03/transform-in-CNN/Illustration.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>Accuracy steadily improves when more deformable convolution layers are used：使用越多层deform conv越好，经验取了3</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table1.png" width="80%;"></p>
-</li>
-<li><p>the learned offsets are highly adaptive to the image content：大目标的间距大，因为reception field大，consistent in different layers </p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table2.png" width="45%;"></p>
-</li>
-<li><p>atrous convolution also improves：default networks have too small receptive fields，但是dilation需要手调到最优</p>
-</li>
-<li><p>using deformable RoI pooling alone already produces noticeable performance gains, using both obtains significant accuracy improvements</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table3.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Deformable-ConvNets-v2-More-Deformable-Better-Results"><a href="#Deformable-ConvNets-v2-More-Deformable-Better-Results" class="headerlink" title="Deformable ConvNets v2: More Deformable, Better Results"></a>Deformable ConvNets v2: More Deformable, Better Results</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>DCN能够adapt一定的geometric variations，但是仍存在extend beyond image content的问题</li>
-<li>to focus on pertinent image regions<ul>
-<li>increased modeling power<ul>
-<li>more deformable layers</li>
-<li>updated DCNv2 modules</li>
-</ul>
-</li>
-<li>stronger training<ul>
-<li>propose feature mimicking scheme</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>incorporated into Faster-RCNN &amp; Mask RCNN</li>
-<li>COCO for det &amp; set</li>
-</ul>
-</li>
-<li>still lightweight and easy to incorporate</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>DCNv1<ul>
-<li>deformable conv：在standard conv的基础上generate location-specific offsets which are learned from the preceding feature maps</li>
-<li>deformable pooling：offsets are learned for the bin positions in RoIpooling</li>
-<li>通过可视化散点图发现有部分散点落在目标外围</li>
-</ul>
-</li>
-<li>propose DCNv2<ul>
-<li>equip more convolutional layers with offset</li>
-<li>modified module<ul>
-<li>each sample not only undergoes a learned offset</li>
-<li>but also a learned feature amplitude</li>
-</ul>
-</li>
-<li>effective trainin<ul>
-<li>use RCNN as the teacher network since RCNN learns features unaffected by irrelevant info outside the ROI</li>
-<li>feature mimicking loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>stacking more deformable conv layers</p>
-<ul>
-<li>replace more regular conv layers by their deformable counterparts：<ul>
-<li>resnet50的stage3、4、5的3x3conv都替换成deformable conv：13个conv layer</li>
-<li>DCNv1是把stage5的3个resblock的3x3 conv替换成deformable conv：3个deconv layer</li>
-</ul>
-</li>
-<li>因为DCNv1里面在PASCAL上面实验发现再多的deconv精度就饱和了，但是DCNv2是在harder dataset COCO上面的best-acc-efficiency-tradeoff</li>
-</ul>
-</li>
-<li><p>modulated deformable conv</p>
-<ul>
-<li>modulate the input feature amplitudes from different spacial locations/bins<ul>
-<li>set the learnable offset &amp; scalar for the k-th location：$\Delta p_k$和$\Delta m_k$</li>
-<li>set the conv kernel dilation：$p_k$，resnet里面都是1</li>
-<li>the value for location p is：$y(p) = \sum_{k=1}^K w_k x(p+p_k+\Delta p_k)\Delta m_k$，bilinear interpolation</li>
-</ul>
-</li>
-<li>目的是抑制无关信号</li>
-<li>learnable offset &amp; scalar obtained via a separate conv layer over the same input feature map x</li>
-<li>输出有3K个channel：2K for xy-offset，K for scalar<ul>
-<li>offset的conv后面没激活函数，因为范围无限</li>
-<li>scalar的conv后面有个sigmoid，将range控制在[0,1]</li>
-<li>两个conv全0初始化</li>
-<li>两个conv layer的learning rate比existing layers小一个数量级</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>modulated deformable RoIpooling</p>
-<ul>
-<li>given an input ROI</li>
-<li>split into K(7x7) spatial bins</li>
-<li>average pooling over the sampling points for each bin计算bin的value</li>
-<li>the bin value is：$y(k) = \sum_{j=1}^{n_k} x(p_{kj}+\Delta p_k)\Delta m_k /n_k$，bilinear interpolation</li>
-<li>a sibling branch<ul>
-<li>2个1024d-fc：gaussian initialization with 0.01 std dev</li>
-<li>1个3Kd-fc：全0初始化</li>
-<li>last K channels + sigmoid</li>
-<li>learning rate跟existing layers保持一致</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>RCNN feature mimicking</p>
-<ul>
-<li>发现无论是conv还是deconv，error-bound都很大</li>
-<li>尽管从设计思路上，DCNv2是带有mute irrelevant的能力的，但是事实上并没做到</li>
-<li>说明such representation cannot be learned well through standard FasterRCNN training procedure：<ul>
-<li>说白了就是supervision力度不够</li>
-<li>需要additional guidance</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>feature mimic loss</p>
-<ul>
-<li><p>enforced only on positive ROIs：因为背景类往往需要更长距离/更大范围的context信息</p>
-</li>
-<li><p>architecture</p>
-<ul>
-<li>add an additional RCNN branch</li>
-<li>RCNN input cropped images，generate 14x14 featuremaps，经过两个fc变成1024-d</li>
-<li>和FasterRCNN里对应的counterpart，计算cosine similarity</li>
-<li><p>这个太扯了不展开了</p>
-<p><img src="/2021/02/03/transform-in-CNN/mimic.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4263,7 +3804,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">131</span>
+                  <span class="site-state-item-count">134</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4276,7 +3817,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

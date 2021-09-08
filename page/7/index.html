@@ -276,6 +276,783 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/23/FCOS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/23/FCOS/" itemprop="url">FCOS</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-23T10:33:41+08:00">
+                2020-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/23/FCOS/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/23/FCOS/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="FCOS-Fully-Convolutional-One-Stage-Object-Detection"><a href="#FCOS-Fully-Convolutional-One-Stage-Object-Detection" class="headerlink" title="FCOS: Fully Convolutional One-Stage Object Detection"></a>FCOS: Fully Convolutional One-Stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>anchor free</li>
+<li>proposal free</li>
+<li>avoids the complicated computation related to anchor boxes<ul>
+<li>calculating overlapping during training</li>
+</ul>
+</li>
+<li>avoid all hyper-parameters related to anchor boxes<ul>
+<li>size &amp; shape</li>
+<li>positive／ignored／negative </li>
+</ul>
+</li>
+<li>leverage as many foreground samples as possible</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>anchor-based detectors</p>
+<ul>
+<li>detection performance is sensitive to anchor settings</li>
+<li>encounter difficulties in cases with large shape variations</li>
+<li>hamper the generalization ability of detectors </li>
+<li>dense propose：the excessive number of negative samples aggravates the imbalance </li>
+<li>involve complicated computation：such as calculating the IoU with gt boxes</li>
+</ul>
+</li>
+<li><p>FCN-based detector</p>
+<ul>
+<li>predict a 4D vector plus a class category at each spatial location on a level of feature maps</li>
+<li>do not work well when applied to overlapped bounding boxes</li>
+<li><p><strong>with FPN this ambiguity can be largely eliminated</strong></p>
+<p><img src="/2020/06/23/FCOS/fcn-based.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>anchor-free detector</p>
+<ul>
+<li>yolov1：only the points near the center are used，low recall  </li>
+<li>CornerNet：complicated post-processing to match the pairs of corners</li>
+<li>DenseBox：difficulty in handling overlapping bounding boxes </li>
+</ul>
+</li>
+<li><p>this methos</p>
+<ul>
+<li>use FPN to deal with ambiguity</li>
+<li>dense predict：<strong>use all points in a ground truth bounding box</strong> to predict the bounding box</li>
+<li>introduce “center-ness” branch to predict the deviation of a pixel to the center of its corresponding bounding box</li>
+<li>can be used as a RPN in two-stage detectors and can achieve significantly better performance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>ground truth boxes，$B_i=(x_0, y_0, x_1, y_1, c)$，corners + cls</p>
+</li>
+<li><p>anchor-free：each location (x,y)，map into abs input image (xs+[s/2], ys+[s/2])</p>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p>positive sample：if a location falls into any ground-truth box</p>
+</li>
+<li><p>ambiguous sample：location falls into multiple gt boxes，<strong>choose the box with minimal area</strong></p>
+</li>
+<li><p>regression target：l t r b distance，location to the four sides</p>
+<ul>
+<li><p>cls branch</p>
+<ul>
+<li>C binary classifiers </li>
+<li>C-dims vector p</li>
+</ul>
+</li>
+<li>focal loss<ul>
+<li>$\frac{1}{N_{pos}} \sum_{x,y}L_{cls}(p_{x,y}, c_{x,y}^*)$</li>
+</ul>
+</li>
+<li><p>calculate on both positive/negative samples</p>
+</li>
+<li><p>box reg branch</p>
+<ul>
+<li>4-dims vector t</li>
+</ul>
+</li>
+<li>IOU loss<ul>
+<li>$\frac{1}{N_{pos}} \sum_{x,y}1_{\{c_{x,y}^<em>&gt;0\}}L_{reg}(t_{x,y}, t_{x,y}^</em>)$</li>
+</ul>
+</li>
+<li>calculate on positive samples</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li><p>choose the location with p &gt; 0.05 as positive samples</p>
+</li>
+<li><p>two possible issues  </p>
+<ul>
+<li>large stride makes BPR low, which is actually not a problem in FCOS</li>
+</ul>
+</li>
+<li><p>overlaps gt boxes cause ambiguity, which can be greatly resolved with multi-level prediction </p>
+</li>
+<li><p>FPN</p>
+<ul>
+<li>P3, P4, P5：1x1 conv from C3, C4, C5, top-down connections</li>
+</ul>
+</li>
+<li><p>P6, P7: stride2 conv from P5, P6</p>
+</li>
+<li><p>limit the bbox regression for each level</p>
+<ul>
+<li>$m_i$：maximum distance for each level</li>
+</ul>
+</li>
+<li>if a location’s gt bbox satifies：$max(l^<em>,t^</em>,r^<em>,b^</em>)&gt;m_i$ or $max(l^<em>,t^</em>,r^<em>,b^</em>)&lt;m_{i-1}$，it is set as a negative sample，not regress at current level<ul>
+<li>objects with different sizes are assigned to different feature levels：largely alleviate一部分box overlapping问题</li>
+</ul>
+</li>
+<li><p>for other overlapping cases：simply choose the gt box with minimal area</p>
+</li>
+<li><p>sharing heads between different feature levels </p>
+</li>
+<li><p>to regress different size range：use $exp(s_ix)$</p>
+<ul>
+<li>trainable scalar $s_i$</li>
+</ul>
+</li>
+<li>slightly improve</li>
+</ul>
+</li>
+<li><p>center-ness</p>
+<ul>
+<li><p>low-quality predicted bounding boxes are produced by locations far away from the center of an object</p>
+<ul>
+<li><p>predict the “center-ness” of a location </p>
+</li>
+<li><p>normalized distance </p>
+<script type="math/tex; mode=display">
+  centerness^* = \sqrt {\frac{min(l^*,r^*)}{max(l^*,r^*)}* \frac{min(t^*,b^*)}{max(t^*,b^*)}}</script></li>
+</ul>
+</li>
+<li><p>sqrt to slow down the decay</p>
+</li>
+<li><p>[0,1] use bce loss</p>
+</li>
+<li><p>when inference center-ness is mutiplied with the class score：can down-weight the scores of bounding boxes far from the center of an object, then filtered out by NMS</p>
+<ul>
+<li>an alternative of the center-ness：use of only the central portion of ground-truth bounding box as positive samples，实验证明两种方法结合效果最好</li>
+</ul>
+</li>
+<li><p>architecture</p>
+<ul>
+<li>two minor differences from the standard RetinaNet<ul>
+<li>use <strong>Group Normalization</strong> in the <strong>newly added convolutional layers</strong> except for the last prediction layers </li>
+<li>use P5 instead of C5 to produce P6&amp;P7</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/06/23/FCOS/architecture.png" width="70%;"></p>
+<p>​    </p>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/22/FCIS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/22/FCIS/" itemprop="url">FCIS</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-22T15:19:55+08:00">
+                2020-06-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/22/FCIS/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/22/FCIS/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Fully-Convolutional-Instance-aware-Semantic-Segmentation"><a href="#Fully-Convolutional-Instance-aware-Semantic-Segmentation" class="headerlink" title="Fully Convolutional Instance-aware Semantic Segmentation"></a>Fully Convolutional Instance-aware Semantic Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>instance segmentation：<ul>
+<li>实例分割比起检测，需要得到目标更精确的边界信息</li>
+<li>比起语义分割，需要区分不同的物体</li>
+</ul>
+</li>
+<li>detects and segments simultanously</li>
+<li>FCN + instance mask proposal</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>FCNs do not work for the instance-aware semantic segmentation task <ul>
+<li>convolution is translation invariant：权值共享，一个像素值对应一个响应值，与位置无关</li>
+</ul>
+</li>
+<li>instance segmentation operates on region level <ul>
+<li>the same pixel can have different semantics in different regions </li>
+<li>Certain translation-variant property is required </li>
+</ul>
+</li>
+<li>prevalent method<ul>
+<li>step1: an FCN is applied on the whole image to generate shared feature maps </li>
+<li>step2: a pooling layer warps each region of interest into fixed-size per-ROI feature maps </li>
+<li>step3: use fc layers to convert the per-ROI feature maps to per-ROI masks </li>
+<li><strong>the translation-variant property is introduced in the fc layer(s) in the last step</strong></li>
+<li>drawbacks <ul>
+<li>the ROI pooling step losses spatial details </li>
+<li>the fc layers over-parametrize the task </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>InstanceFCN<ul>
+<li>position-sensitive score maps</li>
+<li>sliding windows </li>
+<li>sub-tasks are separated and the solution is not end-to-end </li>
+<li>blind to the object categories：前背景分割</li>
+</ul>
+</li>
+<li><p>In this work</p>
+<ul>
+<li>extends InstanceFCN</li>
+<li>end-to-end </li>
+<li>fully convolutional </li>
+<li>operates on box proposals instead of sliding windows</li>
+<li>per-ROI computation does not involve any warping or resizing operations</li>
+</ul>
+<p><img src="/2020/06/22/FCIS/FCIS.png" width="60%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>position-sensitive score map</p>
+<ul>
+<li>FCN<ul>
+<li>predict a single score map</li>
+<li>predict each pixel’s likelihood score of belonging to each category</li>
+</ul>
+</li>
+<li>at instance level<ul>
+<li>the same pixel can be foreground on one object but background on another </li>
+<li>a single score map per-category is insufficient to distinguish these two cases</li>
+</ul>
+</li>
+<li>a fully convolutional solution for instance mask proposal <ul>
+<li>k x k evenly partitioned cells of object </li>
+<li>thus obtain k x k position-sensitive score maps </li>
+<li>Each score represents 当前像素在<strong>当前位置（score map在cells中的位置）</strong>上属于某个物体实例的似然得分</li>
+<li>assembling (copy-paste) </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>jointly and simultaneously</p>
+<ul>
+<li>The same set of score maps are shared for the two sub-tasks </li>
+<li>For each pixel in a ROI, there are two tasks:  <ul>
+<li>detection：whether it belongs to an object bounding box </li>
+<li>segmentation：whether it is inside an object instance’s boundary </li>
+<li>separate：two 1x1 conv heads</li>
+<li>fuse：inside and outside <ul>
+<li>high inside score and low outside score：detection+, segmentation+</li>
+<li>low inside score and high outside score：detection+, segmentation-</li>
+<li>low inside score and low outside score：detection-, segmentation-</li>
+<li>detection score<ul>
+<li>average pooling over all pixels‘ likelihoods for each class</li>
+<li>max(detection score) represent the object</li>
+</ul>
+</li>
+<li>segmentation <ul>
+<li>softmax(inside, outside) for each pixel to distinguish fg／bg</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>All the per-ROI components are implemented through convs</p>
+<ul>
+<li>local weight sharing property：a regularization mechanism </li>
+<li>without involving any feature warping, resizing or fc layers </li>
+<li>the per-ROI computation cost is negligible</li>
+</ul>
+<p><img src="/2020/06/22/FCIS/fuse.png" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>architecture </p>
+<ul>
+<li>ResNet back produce features with 2048 channels</li>
+<li>a 1x1 conv reduces the dimension to 1024</li>
+<li>x16 output stride：conv5 stride is decreased from 2 to 1, the dilation is increased from 1 to 2</li>
+<li>head1：joint det conf &amp; segmentation<ul>
+<li>1x1 conv，generates $2k^2(C+1)$ score maps</li>
+<li>2 for inside／outside</li>
+<li>$k^2$ for $k^2$个position</li>
+<li>$(C+1)$ for fg／bg</li>
+</ul>
+</li>
+<li>head2：bbox regression <ul>
+<li>1x1 conv，$4k^2$ channels</li>
+</ul>
+</li>
+<li>RPN to generate ROIs</li>
+<li>inference<ul>
+<li>300 ROIs </li>
+<li>pass through the bbox regression obtaining another 300 ROIs </li>
+<li>pass through joint head to obtain detection score&amp;fg mask for all categories </li>
+<li>mask voting：每个ROI (with max det score) 只包含当前类别的前景，还要补上框内其他类别背景<ul>
+<li>for current ROI, find all the ROIs (from the 600) with IoU scores higher than 0.5 </li>
+<li>their fg masks are averaged per-pixel and weighted by the classification score </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training</p>
+<ul>
+<li>ROI positive／negative：IoU&gt;0.5</li>
+<li>loss<ul>
+<li>softmax detection loss over C+1 categories</li>
+<li>softmax segmentation loss over the gt fg mask, on positive ROIs</li>
+<li>bbox regression loss, , on positive ROIs</li>
+</ul>
+</li>
+<li>OHEM：among the 300 proposed ROIs on one image, 128 ROIs with the highest losses are selected to back-propagate their error gradients</li>
+<li>RPN：<ul>
+<li>9 anchors  </li>
+<li>sharing feature between FCIS and RPN </li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/06/22/FCIS/architecture.png" width="70%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>metric：mAP</p>
+</li>
+<li><p>FCIS (translation invariant)：</p>
+<ul>
+<li>set k=1，achieve the worst mAP</li>
+<li>indicating the position sensitive score map is vital for this method</li>
+</ul>
+</li>
+<li><p>back</p>
+<ul>
+<li>50-101：increase</li>
+<li>101-152：saturate</li>
+</ul>
+</li>
+<li><p>tricks</p>
+<p>  <img src="/2020/06/22/FCIS/tricks.png" width="40%"></p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>* r
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/11/天池脊柱MRI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/11/天池脊柱MRI/" itemprop="url">天池脊柱MRI</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-11T22:26:59+08:00">
+                2020-06-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/11/天池脊柱MRI/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/11/天池脊柱MRI/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>MRI</p>
+<p> T1加权相上面密度高的骨头会比较亮(就是高信号)，还有脂肪和甲状腺也是高信号，水份一般都是无信号，<br> T2加权相里水是高信号所以水比较亮，因为很多的病变有水肿，所以T2加权相通俗可以说是看病变(毕竟比较明显)，</p>
+<p> 视觉直观上来看，T1看解剖，T2看病变</p>
+<p> ——怎么fusion一个case（标注只有一张）</p>
+</li>
+<li><p>数据集</p>
+<p> T1、T2矢状位，T2轴状位，</p>
+<p> 关键点：基于T2矢状位的中间帧，</p>
+<p> 标注范围：从胸12（T12）腰1（L1）间的椎间盘开始，到腰5（L5）骶1（S1）间的椎间盘结束</p>
+<p> 类别：椎块有编号（T12到L5），间盘通过上下椎块的编号表示（T12-L1到L5-S1）</p>
+<p> 病灶：</p>
+<pre><code> * 椎块有两类：正常V1和退行性病变V2，
+ * 椎间盘有7类：正常V1，退行性改变V2，弥漫性膨出，非对称性膨出，突出，脱出，疝出V7
+</code></pre><p> json结构：</p>
+<ul>
+<li>uid，dim，spacing等一些header info</li>
+<li>annotation：<ul>
+<li>slice：难道不是T2矢状位的中间帧吗？</li>
+<li>point：关键点坐标，病灶类别，关键点类别</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>评估指标</p>
+<ul>
+<li><p>distance&lt;8mm</p>
+</li>
+<li><p>TP：多个命中取最近的，其余忽略</p>
+</li>
+<li>FP：假阳性，distance超出所有gt的8mm圈圈／落进圈圈但是类别错了</li>
+<li>FN：假阴性，gt点没有被TP</li>
+<li>precision：TP/(TP+FP)</li>
+<li>recall：TP/(TP+FN)</li>
+<li>AP</li>
+<li>MAP</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/08/group-normalization/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1158,7 +1935,8 @@
 <pre><code>      &lt;img src=&quot;RetinaNet/gradient.png&quot; width=&quot;70%;&quot; /&gt;
 </code></pre></li>
 </ul>
-<h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
+<pre><code>​        
+</code></pre><h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>improve single-shot detectors to the same level as current two-stage techniques</li>
@@ -1236,62 +2014,94 @@ f(x) = \begin{cases}
 </li>
 </ul>
 </li>
+<li><p>mask module</p>
+<ul>
+<li><p>detection predictions are treated as mask proposals </p>
+</li>
+<li><p>extract the top N scored predictions </p>
+</li>
+<li><p>distribute the mask proposals to sample features from the appropriate layers </p>
+<script type="math/tex; mode=display">
+  k = [k_0 + log_2 \sqrt{wh}/224]</script><ul>
+<li>$k_0=4$，如果size小于224*224，proposal会被分配给P3，如果大于448*448，proposal会被分配给P5</li>
+<li>using more feature layers shows no performance boost</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>architecture </p>
+<ul>
+<li>r50&amp;r101 back：freezing all of the Batch Nor- malization layers </li>
+<li>fpn feature channel：256</li>
+<li>classification branch<ul>
+<li>4 conv layers：conv3x3+relu，channel256</li>
+<li>head：conv3x3+sigmoid，channel n_anchors*n_classes</li>
+</ul>
+</li>
+<li>regression branch<ul>
+<li>4 conv layers：conv3x3+relu，channel256</li>
+<li>head：conv3x3，channel n_anchors*4</li>
+</ul>
+</li>
+<li>aggregate the boxes to the FPN layers </li>
+<li>ROI-Align yielding 14x14 resolution features </li>
+<li><p>mask head</p>
+<ul>
+<li>4 conv layers：conv3x3</li>
+<li>a single transposed convolutional layer：convtranspose2d 2x2，to 28*28 resolution</li>
+<li>prediction head：conv1x1</li>
+</ul>
+<p><img src="/2020/05/30/RetinaNet/retinaMask.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>training</p>
+<ul>
+<li>min side &amp; max side：800&amp;1333</li>
+<li>limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly</li>
+<li>positive/ignore/negative：0.5，0.4</li>
+<li><p>focal loss for classification</p>
+<ul>
+<li><p>gaussian initialization</p>
+</li>
+<li><p>$\alpha=0.25, \lambda=2.0$</p>
+</li>
+<li><p>$FL=-\alpha_t(1-p_t)^\lambda log(p_t)$</p>
+<script type="math/tex; mode=display">
+ FL = 
+ \left\{
+ \begin{array}{lr}
+
+ -\alpha (1-p)^{\gamma}log(p),  \  \ y=1\\
+ -(1-\alpha) p^{\gamma}log(1-p),  \  \ y=0\\
+
+ \end{array}
+ \right.</script></li>
+<li><p>gamma项控制的是简单样本的衰减速度，alpha项控制的是正负样本比例，可以默认值下正样本的权重是0.25，负样本的权重是0.75，和想象中的给正样本更多权重不一样，因为alpha和gamma是耦合起来作用的，（可能检测场景下困难的负样本相比于正样本更少？背景就是比前景好学？不确定不确定。。。）</p>
+</li>
+</ul>
+</li>
+<li>self-adjusting L1 loss for box regression<ul>
+<li>limit running params：[0, 0.11]</li>
+</ul>
+</li>
+<li>mask loss<ul>
+<li>top-100 predicted boxes + ground truth boxes</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li>box confidence threshold 0.05</li>
+<li>nms threshold 0.4</li>
+<li>use top-50 boxes for mask prediction</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
-<pre><code>* mask module
-
-    * detection predictions are treated as mask proposals 
-
-    * extract the top N scored predictions 
-
-    * distribute the mask proposals to sample features from the appropriate layers 
-        $$
-        k = [k_0 + log_2 \sqrt{wh}/224]
-        $$
-
-        * $k_0=4$，如果size小于224\*224，proposal会被分配给P3，如果大于448\*448，proposal会被分配给P5
-        * using more feature layers shows no performance boost
-
-* architecture 
-
-    * r50&amp;r101 back：freezing all of the Batch Nor- malization layers 
-    * fpn feature channel：256
-    * classification branch
-        * 4 conv layers：conv3x3+relu，channel256
-        * head：conv3x3+sigmoid，channel n_anchors*n_classes
-    * regression branch
-        * 4 conv layers：conv3x3+relu，channel256
-        * head：conv3x3，channel n_anchors*4
-    * aggregate the boxes to the FPN layers 
-    * ROI-Align yielding 14x14 resolution features 
-    * mask head
-        * 4 conv layers：conv3x3
-        * a single transposed convolutional layer：convtranspose2d 2x2，to 28\*28 resolution
-        * prediction head：conv1x1
-
-    &lt;img src=&quot;RetinaNet/retinaMask.png&quot; width=&quot;70%;&quot; /&gt;
-
-* training
-
-    * min side &amp; max side：800&amp;1333
-    * limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly
-    * positive/ignore/negative：0.5，0.4
-    * focal loss for classification
-        * gaussian initialization
-        * $\alpha=0.25, \lambda=2.0$
-        * $FL=-\alpha_t(1-p_t)^\lambda log(p_t)$
-    * self-adjusting L1 loss for box regression
-        * limit running params：[0, 0.11]
-    * mask loss
-        * top-100 predicted boxes + ground truth boxes
-
-* inference
-
-    * box confidence threshold 0.05
-    * nms threshold 0.4
-    * use top-50 boxes for mask prediction
-</code></pre><h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
+<h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>localization<ul>
@@ -2648,756 +3458,6 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/18/Receptive-Field/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/18/Receptive-Field/" itemprop="url">Receptive Field</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-18T18:49:40+08:00">
-                2020-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/18/Receptive-Field/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/18/Receptive-Field/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ul>
-<li><p>感受野</p>
-<p>  除了卷积和池化，其他层并不影响感受野大小</p>
-<p>  感受野与卷积核尺寸kernel_size和步长stride有关</p>
-<p>  递归计算：</p>
-<script type="math/tex; mode=display">
-  N\_RF = kernel\_size + (cur\_RF-1)*stride</script><p>  其中$cur_RF$是当前层（start from 1），$kernel_size$、$stride$是当前层参数，$N_RF$是上一层的感受野。</p>
-</li>
-</ul>
-<ul>
-<li><p>感受野计算器</p>
-<p>  <a href="https://fomoro.com/research/article/receptive-field-calculator" target="_blank" rel="noopener">https://fomoro.com/research/article/receptive-field-calculator</a></p>
-</li>
-</ul>
-<h2 id="Understanding-the-Effective-Receptive-Field-in-Deep-Convolutional-Neural-Networks"><a href="#Understanding-the-Effective-Receptive-Field-in-Deep-Convolutional-Neural-Networks" class="headerlink" title="Understanding the Effective Receptive Field in Deep Convolutional Neural Networks"></a>Understanding the Effective Receptive Field in Deep Convolutional Neural Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>effective receptive field </p>
-</li>
-<li><p>the effect of nonlinear activations, dropout, sub-sampling and skip connections on it </p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>it is critical for each output pixel to have a big receptive field, such that no important information is left out when making the prediction</li>
-<li>deeper network：increase the receptive field size linearly  </li>
-<li>Sub-sampling：increases the receptive field size multiplicatively</li>
-<li>it is easy to see that pixels at the center of a receptive field have a much larger impact on an output：前向传播的时候，中间位置的像素点有更多条path通向output</li>
-</ul>
-</li>
-<li><p>方法看不懂直接看结论</p>
-<ul>
-<li><p><strong>dropout</strong> does not change the Gaussian ERF shape </p>
-</li>
-<li><p><strong>Subsampling</strong> and dilated convolutions turn out to be effective ways to increase receptive field size quickly </p>
-</li>
-<li><p><strong>Skip-connections</strong> make ERFs smaller </p>
-</li>
-<li><p>ERFs are Gaussian distributed</p>
-<ul>
-<li>uniformly和随机初始化都是perfect Gaus- sian shapes </li>
-<li><p>加上非线性激活函数以后是near Gaussian shapes </p>
-<p><img src="/2020/05/18/Receptive-Field/gaussian.png" width="50%;"></p>
-</li>
-<li><p>with different nonlinearities </p>
-<p><img src="/2020/05/18/Receptive-Field/activation.png" width="25%;"></p>
-</li>
-</ul>
-</li>
-<li><p>$\sqrt n$ absolute growth and $1/\sqrt n$ relative shrinkage：RF是随着layer线性增长的，ERF在log上0.56的斜率，约等于$\sqrt n$ </p>
-<p>  <img src="/2020/05/18/Receptive-Field/growth.png" width="50%;"></p>
-</li>
-<li><p>Subsampling &amp; dilated convolution increases receptive field</p>
-<ul>
-<li>The reference baseline is a convnet with 15 dense convolution layers </li>
-<li>Subsampling：replace 3 of the 15 convolutional layers with stride-2 convolution </li>
-<li><p>dilated：replace them with dilated convolution with factor 2,4 and 8，rectangular ERF shape </p>
-<p><img src="/2020/05/18/Receptive-Field/subsamp.png" width="25%;"></p>
-</li>
-</ul>
-</li>
-<li><p>evolves during training </p>
-<ul>
-<li>as the networks learns, the ERF gets bigger, and at the end of training is significantly larger than the initial ERF</li>
-<li>classification<ul>
-<li>32*32 cifar 10</li>
-<li>theoretical receptive field of our network is actually 74 × 74 </li>
-</ul>
-</li>
-<li>segmentation<ul>
-<li>CamVid dataset  </li>
-<li>the theoretical receptive field of the top convolutional layer units is quite big at 505 × 505</li>
-</ul>
-</li>
-<li><p>实际的ERF都很小，都没到原图大小</p>
-<p><img src="/2020/05/18/Receptive-Field/evolve.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>increase the effective receptive field  </p>
-<ul>
-<li>New Initialization：<ul>
-<li>makes the weights at the center of the convolution kernel to have a smaller scale, and the weights on the outside to be larger</li>
-<li>30% speed-up of training </li>
-<li>其他效果不明显</li>
-</ul>
-</li>
-<li>Architecturalchanges<ul>
-<li>sparsely connect each unit to a larger area </li>
-<li>dilated convolution or even not grid-like </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>g</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/18/SqueezeNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/18/SqueezeNet/" itemprop="url">SqueezeNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-18T11:27:56+08:00">
-                2020-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/18/SqueezeNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/18/SqueezeNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="SQUEEZENET-ALEXNET-LEVEL-ACCURACY-WITH-50X-FEWER-PARAMETERS-AND-lt-0-5MB-MODEL-SIZE"><a href="#SQUEEZENET-ALEXNET-LEVEL-ACCURACY-WITH-50X-FEWER-PARAMETERS-AND-lt-0-5MB-MODEL-SIZE" class="headerlink" title="SQUEEZENET: ALEXNET-LEVEL ACCURACY WITH 50X FEWER PARAMETERS AND &lt;0.5MB MODEL SIZE"></a>SQUEEZENET: ALEXNET-LEVEL ACCURACY WITH 50X FEWER PARAMETERS AND &lt;0.5MB MODEL SIZE</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Smaller CNN</li>
-<li>achieve AlexNet-level accuracy</li>
-<li>model compression </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>model compression<ul>
-<li>SVD</li>
-<li>sparse matrix </li>
-<li>quantization (to 8 bits or less)  </li>
-</ul>
-</li>
-<li>CNN microarchitecture<ul>
-<li>extensively 3x3 filters</li>
-<li>1x1 filters  </li>
-<li>higher level building blocks</li>
-<li>bypass connections </li>
-<li>automated designing approaches</li>
-</ul>
-</li>
-<li>this paper eschew automated approaches  </li>
-<li>propose and evaluate the SqueezeNet architecture with and without model compression</li>
-<li>explore the impact of design choices </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architectural design strategy</p>
-<ul>
-<li>Replace 3x3 filters with 1x1 filters</li>
-<li>Decrease the number of input channels to 3x3 filters （squeeze）</li>
-<li>Downsample late in the network so that convolution layers have large activation maps：large activation maps (due to delayed downsampling) can lead to higher classification accuracy </li>
-</ul>
-</li>
-<li><p>the fire module</p>
-<ul>
-<li>squeeze：1x1 convs</li>
-<li>expand：mix of 1x1 and 3x3 convs, same padding</li>
-<li>relu</li>
-<li><p>concatenate</p>
-<p><img src="/2020/05/18/SqueezeNet/fire.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>the SqueezeNet</p>
-<ul>
-<li>a standalone convolution layer (conv1)</li>
-<li>followed by 8 Fire modules (fire2-9)</li>
-<li>ending with a final conv layer (conv10)</li>
-<li>stride2 max-pooling after layers conv1, fire4, fire8, and conv10</li>
-<li>dropout with a ratio of 50% is applied after the fire9 module</li>
-<li><p>GAP</p>
-<p><img src="/2020/05/18/SqueezeNet/squeezenet.png" width="60%"></p>
-</li>
-</ul>
-<p><img src="/2020/05/18/SqueezeNet/dimension.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>understand the impact</p>
-<ul>
-<li><p>each Fire module has three dimensional hyperparameters, to simplify：</p>
-<ul>
-<li>define $base_e$：the number of <em>expand</em> filters in the first Fire module </li>
-<li>for layer i：$e_i=base_e + (incr_e*[\frac{i}{freq}])$</li>
-<li>expand ratio $pct_{3x3}$：the percentage of 3x3 filters in expand layers</li>
-<li>squeeze ratio $SR$：the number of filters in the squeeze layer／the number of filters in the expnad layer</li>
-<li>normal setting：$base_e=128, incre_e=128, pct_{3x3}=0.5, freq=2, SR=0.125$</li>
-</ul>
-</li>
-<li><p>SR</p>
-<ul>
-<li>increasing SR leads to higher accuracy and larger model size</li>
-<li>Accuracy plateaus at 86.0% with SR=0.75 </li>
-<li>further increasing provides no improvement  </li>
-</ul>
-</li>
-<li><p>pct</p>
-<ul>
-<li>increasing pct leads to higher accuracy and larger model size</li>
-<li>Accuracy plateaus at 85.6% with pct=50%</li>
-<li>further increasing provides no improvement  </li>
-</ul>
-<p><img src="/2020/05/18/SqueezeNet/SR.png" width="60%"></p>
-</li>
-<li><p>bypass</p>
-<ul>
-<li>Vanilla </li>
-<li>simple bypass：when in &amp; out channels have the same dimensions</li>
-<li>complex bypass：includes a 1x1 convolution layer </li>
-<li><strong>alleviate the representational bottleneck introduced by squeeze layers</strong></li>
-<li>both yielded accuracy improvements</li>
-<li>simple bypass enabled higher accuracy </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/14/Hausdorff-Distance/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/14/Hausdorff-Distance/" itemprop="url">Hausdorff Distance</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-14T10:10:07+08:00">
-                2020-05-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/14/Hausdorff-Distance/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/14/Hausdorff-Distance/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks"><a href="#Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks" class="headerlink" title="Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks"></a>Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>novel loss function to reduce HD directly </li>
-<li>propose three methods </li>
-<li>2D&amp;3D，ultra &amp; MR &amp; CT</li>
-<li>lead to approximately 18 − 45% reduction in HD without degrading other segmentation performance criteria </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>HD is one of the most informative and useful criteria because it is an indicator of the largest segmentation error </li>
-<li>current segmentation algorithms rarely aim at minimizing or reducing HD directly <ul>
-<li>HD is determined <strong>solely</strong> by the largest error instead of the overall segmentation performance </li>
-<li>HD‘s sensitivity to noise and outliers  —&gt; modified version</li>
-<li>the optimization diffculty</li>
-</ul>
-</li>
-<li>thus we propose an “HD- inspired” loss function </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>denotations</p>
-<ul>
-<li>probability：$q$</li>
-<li>binary mask：$\bar p$、$\bar q$</li>
-<li>boundary：$\delta p$、$\delta q$</li>
-<li><p>single hd：$hd(\bar p, \bar q)$、$hd(\bar q, \bar p)$</p>
-<p><img src="/2020/05/14/Hausdorff-Distance/start.png" width="40%"></p>
-</li>
-</ul>
-</li>
-<li><p>based on distance transforms </p>
-<ul>
-<li><p>distance map $d_p$：define the distance map as the unsigned distance to the boundary $\delta p$</p>
-<script type="math/tex; mode=display">
-  DT_X[i,j] = min_{[k,l]\in X}d([i,j], [k,l])</script><p>  距离场定义为：每个点到目标区域(X)的距离的最小值</p>
-<p>  <img src="/2020/05/14/Hausdorff-Distance/dt.png" width="40%"></p>
-</li>
-<li><p>HD based on DT：</p>
-<script type="math/tex; mode=display">
-  hd_{DT}(\delta p, \delta q) = max((\bar p \triangle \bar q)\circ d_p)\\
-  \bar p \triangle \bar q = |\bar p - \bar q|</script><ul>
-<li>finally have：<script type="math/tex; mode=display">
-  HD_{DT}(\delta p, \delta q) = max(hd_{DT}(\delta p, \delta q), hd_{DT}(\delta q, \delta p))</script></li>
-</ul>
-</li>
-<li><p>modified loss version of HD：</p>
-<script type="math/tex; mode=display">
-  Loss_{DT}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}+d_q^{\alpha}))</script><ul>
-<li>penalizely focus on areas instead of single point</li>
-<li>$\alpha$ determines how strongly we penalize larger errors</li>
-<li>use possibility instead of thresholded value</li>
-<li>use $(p-q)^2$ instead of $|p-q|$</li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{DT}$：Pearson correlation coefficient above 0.99</li>
-<li><p>$Loss_{DT}$：Pearson correlation coefficient above 0.93</p>
-<p><img src="/2020/05/14/Hausdorff-Distance/correlation.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>drawback </p>
-<ul>
-<li><p><strong>high computational</strong> cost especially in 3D </p>
-</li>
-<li><p>$q$ changes along with training process thus $d_q$ changes while $d_p$ remains</p>
-</li>
-<li><p>modified one-sided HD (OS)：</p>
-<script type="math/tex; mode=display">
-  Loss_{DT-OS}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}))</script></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>HD using Morphological Operations</p>
-<ul>
-<li><p>morphological erosion：</p>
-<script type="math/tex; mode=display">
-  S \ominus B = \{z\in \Omega | B(z) \subseteq S\}</script><p>  腐蚀操作定义为：在原始二值化图的前景区域，以每个像素为中心点，run structure element block B，如果B完全在原图内，则当前中心点在腐蚀后也是前景。</p>
-</li>
-<li><p>HD based on erosion：</p>
-<script type="math/tex; mode=display">
-  HD_{ER}(\delta p, \delta q)=2r^*\\
-  where\ r^* = min_r \{(\bar p \triangle \bar q) \ominus B_r = \varnothing\}</script><ul>
-<li>$HD_{ER}$ is a lower bound of the true value</li>
-<li>can be computed more efficiently using convolutional operations </li>
-</ul>
-</li>
-<li><p>modifid loss version：</p>
-<script type="math/tex; mode=display">
-  Loss_{ER}(q,p) = \frac{1}{|\Omega|}\sum_k \sum_{\Omega}((p-q)^2 \ominus_k B)k^{\alpha}</script><ul>
-<li>k successive erosions </li>
-<li><strong>cross-shaped kernel</strong> whose elements sum to one followed by a <strong>soft thresholding</strong> at 0.50</li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{ER}$：Pearson correlation coefficient above 0.91</li>
-<li>$Loss_{ER}$：Pearson correlation coefficient above 0.83</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>HD using circular-shaped convolutional kernel </p>
-<ul>
-<li><p>circular-shaped kernel</p>
-<p>   <img src="/2020/05/14/Hausdorff-Distance/circle.png" width="40%"></p>
-</li>
-<li><p>HD based on circular-shaped kernel：</p>
-<script type="math/tex; mode=display">
-  hd_{CV}(\delta p, \delta q)=max(r_1, r_2)\\
-  where \ r_1=max_r (max_{\Omega}f_h(\bar p ^C * B_r)\circ(\bar q \backslash \bar p))\\
-  where \ r_2=max_r (max_{\Omega}f_h(\bar p * B_r)\circ(\bar p \backslash \bar q))\\</script><ul>
-<li>$\bar p^C$：complement 补集</li>
-<li>$f_h$：hard thresholding setting all values below 1 to zero </li>
-</ul>
-</li>
-<li><p>modified loss version：</p>
-<script type="math/tex; mode=display">
-  Loss_{CV}(q,p)=\frac{1}{|\Omega|}\sum_{r\in R}r^{\alpha}\sum_{\Omega}[f_s(Br*\bar p^C)\circ f_{\bar q\backslash \bar p} + f_s(B_r * \bar p) \circ f_{\bar p \backslash \bar q}\\
-  +f_s(Br*\bar q^C)\circ f_{\bar p\backslash \bar q} + f_s(B_r * \bar q) \circ f_{\bar q \backslash \bar p}]</script><ul>
-<li>soft thresholding</li>
-<li><script type="math/tex; mode=display">f_{\bar p\backslash \bar q} = (p-q)^2*p</script></li>
-</ul>
-</li>
-<li><p>correlations</p>
-<ul>
-<li>$HD_{CV}$：Pearson correlation coefficient above 0.99</li>
-<li>$Loss_{CV}$：Pearson correlation coefficient above 0.88</li>
-</ul>
-</li>
-<li><p>computation：</p>
-<ul>
-<li>kernel size<ul>
-<li>$HD_{ER}$ is computed using small fixed convolutional kernels (of size 3)</li>
-<li>$Loss_{CV}$ require applying filters of increasing size(we use a maximum kernel radius of 18 pixels in 2D and 9 voxels in 3D)</li>
-</ul>
-</li>
-<li>steps<ul>
-<li>choose R based on the expected range of segmentation errors </li>
-<li>set R = {3, 6, . . . 18} for 2D images and R = {3,6,9} for 3D </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>standard Unet</li>
-<li>augment our HD-based loss term with a DSC loss term for more stable training</li>
-<li>reweight both loss after every epoch</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>d</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3452,7 +3512,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">131</span>
+                  <span class="site-state-item-count">134</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3465,7 +3525,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
