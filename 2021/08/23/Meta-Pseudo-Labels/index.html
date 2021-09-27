@@ -93,7 +93,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/08/23/Meta-Pseudo-Labels/UDA.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/08/23/Meta-Pseudo-Labels/CE.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/08/23/Meta-Pseudo-Labels/TSA.png">
-<meta property="og:updated_time" content="2021-08-26T09:43:40.029Z">
+<meta property="og:updated_time" content="2021-09-14T06:23:17.109Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Meta Pseudo Labels">
 <meta name="twitter:description" content="papers  [MPL 2021] Meta Pseudo Labels  [UDA 2009] Unsupervised Data Augmentation for Consistency Training  [Entropy Minimization 2004] Semi-supervised Learning by Entropy Minimization   Meta Pseudo La">
@@ -494,7 +494,9 @@
 </li>
 <li><p>overall algorithm</p>
 <p>  <img src="/2021/08/23/Meta-Pseudo-Labels/algorithm.png" width="90%;"></p>
-</li>
+<pre><code>  * 这里面有一处下标写错了，就是teacher的UDA gradient，是在unlabeled data上面算的，那两个$x_l$得改成$x_u$
+  * UDA loss论文里使用两个predicted logits的散度，这里是CE
+</code></pre></li>
 </ul>
 </li>
 </ul>
@@ -776,7 +778,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">134</span>
+                  <span class="site-state-item-count">138</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -789,7 +791,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
