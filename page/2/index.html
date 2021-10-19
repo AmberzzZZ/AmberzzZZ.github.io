@@ -276,6 +276,266 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/12/soft-teacher/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/12/soft-teacher/" itemprop="url">soft teacher</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-12T12:25:09+08:00">
+                2021-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/12/soft-teacher/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/12/soft-teacher/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>keywords：semi-supervised, curriculum, pseudo labels, </p>
+<h2 id="End-to-End-Semi-Supervised-Object-Detection-with-Soft-Teacher"><a href="#End-to-End-Semi-Supervised-Object-Detection-with-Soft-Teacher" class="headerlink" title="End-to-End Semi-Supervised Object Detection with Soft Teacher"></a>End-to-End Semi-Supervised Object Detection with Soft Teacher</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>end-to-end training：相比较于其他方法的multi-stage</p>
+</li>
+<li><p>semi-supervised：用外部unlabeled数据，以及pseudo-label based approach</p>
+</li>
+<li><p>propose two techniques</p>
+<ul>
+<li>soft teacher mechanism：pseudo样本的classification loss用teacher model的prediction score来加权</li>
+<li>box jittering mechanism：挑选reliable pseudo boxes</li>
+</ul>
+</li>
+<li><p>verified</p>
+<ul>
+<li>use SWIN-L as baseline</li>
+<li>metric on COCO：60.4 mAP</li>
+<li><p>if pretrained with Object365：61.3 mAP</p>
+<p><img src="/2021/08/12/soft-teacher/swin.png" width="90%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>we present this end-to-end pseudo-label based semi-supervised object detection framework<ul>
+<li>simultaneously performs<ul>
+<li>pseudo-labeling：teacher</li>
+<li>training detector use the current pseudo-labels &amp; a few training sample：student</li>
+</ul>
+</li>
+<li>teacher is an exponential moving average (EMA) of the student model</li>
+<li>mutually enforce each other</li>
+<li>soft teacher approach<ul>
+<li>teacher model的作用是给student model生成的box candidates打分，</li>
+<li>高于一定阈值的为前景，但是可能有部分前景被归类为背景，所以用这个score作为reliability measure，给标记为背景框的cls loss进行加权</li>
+</ul>
+</li>
+<li>reliability measure</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview </p>
+<p> <img src="/2021/08/12/soft-teacher/overview.png" width="80%"></p>
+<ul>
+<li>两个model：student和teacher</li>
+<li>teacher model用来生成pseudo labels：two set of pseudo boxes，一个用于class branch，一个用于regression branch</li>
+<li>student model用supervised&amp;unsupervised sample的loss来更新</li>
+<li>teacher model用student model的EMA来更新</li>
+<li>two crucial designs<ul>
+<li>soft teacher</li>
+<li>box jittering</li>
+</ul>
+</li>
+<li>整体的工作流程就是，每个training iteration，先按照一定比例抽取labeled&amp;unlabeled sample构成data batch，然后用teacher model生成unlabeled data的pseudo label（thousands of box candidates+NMS+score filter），然后将其作为unlabeled sample的ground truth，训练student model，overall loss是supervised loss和unsupervised loss的加权和</li>
+<li>在训练开始阶段，两个模型都是随机初始化的，teacher模型随着student模型的更新而更新</li>
+<li>FixMatch：<ul>
+<li>输入给teacher模型的样本使用weak aug</li>
+<li>输入给student模型的样本使用strong aug</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>soft teacher</p>
+<ul>
+<li><p>detector的pseudo-label质量很重要</p>
+</li>
+<li><p>所以用score thresh=0.9去定义box candidates的前/背景</p>
+</li>
+<li><p>但是这时候如果用传统的IoU来定义student model的box candidates的pos/neg，会有一部分前景框被当作背景</p>
+</li>
+<li><p>to alleviate </p>
+<ul>
+<li>assess the reliability of each student-generated box candidate to be a real background</li>
+<li>given a student-generated box candidate，用teacher model的detection head去预测这个框的background score</li>
+</ul>
+</li>
+<li><p>overall unsupervised cls loss</p>
+<script type="math/tex; mode=display">
+  L_u^{cls} = \frac{1}{N_b^{fg}} \sum_i^{N_b^{fg}} l_{cls} (b_i^{fg}, G_{cls}) + \sum_j^{N_b^{bg}}w_j l_{cls} (b_j^{bg}, G_{cls})\\
+  w_j = \frac{r_j}{\sum_{k=1}^{N_b^{bg}}r_k}</script><ul>
+<li>$G_{cls}$是the set of boxes teacher generated for classification，就是teacher model预测的top1000经过nms和score filter之后的boxes</li>
+<li>$b_i^{fg}$是student candidates中被assign为前景的框，$b_i^{bg}$是student candidates中被assign为背景的框，assign的原则就是score&gt;0.9</li>
+<li>$w_j$是对assign为背景的框的加权</li>
+<li>$r_k$是reliability score，是student model通过hard score thresh assign为背景的框，用teacher model的detection head去预测的bg score</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>box jittering</p>
+<ul>
+<li><p>fg score thresh和box iou并不呈现strong positive correlation，说明基于这个原则产生的框pseudo-labels并不一定适合box regression</p>
+</li>
+<li><p>localization reliability：</p>
+<ul>
+<li>衡量一个pseudo box的consistency</li>
+<li>given a pseudo box，sample一系列jitter box around it，再用teacher model去预测这些jitter box得到refined boxes</li>
+<li>refined box和pseudo box的variance越小，说明这个框的localization reliability越高</li>
+</ul>
+<script type="math/tex; mode=display">
+\hat b_i = refine(jitter(b_i))\\
+\overline \sigma_i = \frac{1}{4} \sum_1^4 \hat \sigma_k\\
+\hat \sigma_k = \frac{\sigma_k}{0.5 (h(b_i)+w(b_i))}</script><ul>
+<li>$\hat b_i$是refined boxes</li>
+<li>$\sigma_k$是refine boxes的四个坐标基于原始box的标准差</li>
+<li>$\hat \sigma_k$是上面那个标准差基于原始box的尺度进行归一化</li>
+<li>$\overline\sigma$是refine boxes四个坐标的normed std的平均值</li>
+<li>只计算teacher box candidates里面，fg score&gt;0.5的那部分</li>
+</ul>
+</li>
+<li><p>overall unsupervised reg loss</p>
+<script type="math/tex; mode=display">
+  L_u^{reg} = \frac{1}{N_b^{fg}} \sum_1^{N_b^{fg}} l_{reg} (b_i^{fg}, G_{reg})</script><ul>
+<li>$b_i^{fg}$是student candidates中被assign为前景的框，即cls score&gt;0.9那些预测框</li>
+<li>$G_{cls}$是the set of boxes teacher generated for regression，就是jittered reliability大于一定阈值的candidates</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overall unsupervised loss：cls loss和reg loss之和，然后用样本数进行norm</p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/07/13/GNN-GCN/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3618,273 +3878,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/15/optimizers优化器/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/15/optimizers优化器/" itemprop="url">optimizers优化器</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-15T10:01:53+08:00">
-                2021-03-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/15/optimizers优化器/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/15/optimizers优化器/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="0-overview"><a href="#0-overview" class="headerlink" title="0. overview"></a>0. overview</h2><p>keywords：SGD, moment, Nesterov, adaptive, ADAM, Weight decay</p>
-<ol>
-<li>优化问题Optimization<ul>
-<li>to minimize目标函数</li>
-<li>grandient decent<ul>
-<li>gradient<ul>
-<li>numerical：数值法，approx，slow</li>
-<li>analytical：解析法，exact，fast</li>
-</ul>
-</li>
-<li>Stochastic<ul>
-<li>用minibatch的梯度来approximate全集</li>
-<li>$\theta_{k+1} = \theta_k - v_{t+1}(x_i,y_i)$</li>
-</ul>
-</li>
-<li>classic optimizers：SGD，Momentum，Nesterov‘s momentum</li>
-<li>adaptive optimizers：AdaGrad，Adadelta，RMSProp，Adam</li>
-</ul>
-</li>
-<li>Newton</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>modern optimizers for large-batch<pre><code>  * AdamW
-</code></pre><ul>
-<li>LARS</li>
-<li>LAMB</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>common updating steps</p>
-<p> for current step t：</p>
-<p> step1：计算直接梯度，$g_t = \nabla f(w_t)$</p>
-<p> step2：计算一阶动量和二阶动量，$m_t \&amp; V_t$</p>
-<p> step3：计算当前时刻的下降梯度，$\eta_t = \alpha m_t/\sqrt {V_t}$</p>
-<p> step4：参数更新，$w_{t+1} = w_t - \eta_t$</p>
-<ul>
-<li>各种优化算法的主要差别在step1和step2上</li>
-</ul>
-</li>
-<li><p>滑动平均/指数加权平均/moving average/EMA</p>
-<ul>
-<li>局部均值，与一段时间内的历史相关</li>
-<li>$v_t = \beta v_{t-1}+(1-\beta)\theta_t$，大致等于过去$1/(1-\beta)$个时刻的$\theta$的平均值，但是在起始点附近偏差较大</li>
-<li>$v_{tbiased} = \frac{v_t}{1-\beta^t}$，做了bias correction</li>
-<li>t越大，越不需要修正，两个滑动均值的结果越接近</li>
-<li><p>优缺点：不用保存历史，但是近似</p>
-<p><img src="/2021/03/15/optimizers优化器/moving average.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>SGD</p>
-<ul>
-<li>SGD没有动量的概念，$m_t=g_t$，$V_t=I^2$，$w_{t+1} = w_t - \alpha g_t$</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>仅依赖当前计算的梯度<ul>
-<li>缺点：下降速度慢，可能陷在local optima上持续震荡</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>SGDW (with weight decay)</p>
-<ul>
-<li>在权重更新的同时进行权重衰减</li>
-<li>$w_{t+1} = (1-\lambda)w_t - \alpha g_t$</li>
-<li>在SGD form的优化器中weight decay等价于在loss上L2 regularization</li>
-<li>但是在adaptive form的优化器中是不等价的！！因为historical func（ERM）中regularizer和gradient一起被downscale了，因此not as much as they would get regularized in SGDW</li>
-</ul>
-</li>
-<li><p>SGD with Momentum</p>
-<ul>
-<li>引入一阶动量，$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$，使用滑动均值，抑制震荡</li>
-<li>梯度下降的主要方向是此前累积的下降方向，略微向当前时刻的方向调整</li>
-</ul>
-</li>
-<li><p>SGD with Nesterov Acceleration</p>
-<ul>
-<li>look ahead SGD-momentum</li>
-<li>在local minima的时候，四周没有下降的方向，但是如果走一步再看，可能就会找到优化方向</li>
-<li>先跟着累积动量走一步，求梯度：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
-<li>用这个点的梯度方向来计算滑动平均，并更新梯度</li>
-</ul>
-</li>
-<li><p>Adagrad</p>
-<ul>
-<li>引入二阶动量，开启“自适应学习率”，$V_t = \sum_0^t g_k^2$，度量历史更新频率</li>
-<li>对于经常更新的参数，我们已经积累了大量关于它的知识，不希望被单个样本影响太大，希望学习速率慢一些；对于偶尔更新的参数，我们了解的信息太少，希望能从每个偶然出现的样本身上多学一些，即学习速率大一些</li>
-<li>$\eta_t = \alpha m_t / \sqrt{V_t}$，本质上为每个参数，对学习率分别rescale</li>
-<li>缺点：二阶动量单调递增，导致学习率单调衰减，可能会使得训练过程提前结束</li>
-</ul>
-</li>
-<li><p>AdaDelta/RMSProp</p>
-<ul>
-<li>参考momentum，对二阶动量也计算滑动平均，$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
-<li>避免了二阶动量持续累积、导致训练过程提前结束</li>
-</ul>
-</li>
-<li><p>Adam</p>
-<ul>
-<li>集大成者：把一阶动量和二阶动量都用起来，Adaptive Momentum<ul>
-<li>SGD-M在SGD基础上增加了一阶动量</li>
-<li>AdaGrad和AdaDelta在SGD基础上增加了二阶动量</li>
-</ul>
-</li>
-<li>一阶动量滑动平均：$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$</li>
-<li>二阶动量滑动平均：$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
-</ul>
-</li>
-<li><p>Nadam</p>
-<ul>
-<li>look ahead Adam</li>
-<li>把Nesterov的one step try加上：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
-<li>再Adam更新两个动量</li>
-</ul>
-</li>
-<li><p>经验超参</p>
-<ul>
-<li>$momentum=0.9$</li>
-<li>$\beta_1=0.9$</li>
-<li>$\beta_2=0.999$</li>
-<li>$m_0 = 0$</li>
-<li>$V_0 = 0$</li>
-<li>上面的图上可以看出，初期的$m_t$和$V_t$会无限接近于0，此时可以进行误差修正：$factor=\frac{1}{1-\beta^t}$</li>
-</ul>
-</li>
-<li><p>AdamW</p>
-<ul>
-<li>在adaptive methods中，解耦weight-decay和loss-based gradient在ERM过程中的绑定downscale的关系</li>
-<li>实质就是将导数项后移</li>
-</ul>
-<p><img src="/2021/03/15/optimizers优化器/AdamW.png" width="80%;"></p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3939,7 +3932,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3952,7 +3945,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

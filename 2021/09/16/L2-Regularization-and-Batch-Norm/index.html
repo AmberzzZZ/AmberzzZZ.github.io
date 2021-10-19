@@ -88,7 +88,7 @@
 <meta property="og:description" content="reference： https://blog.janestreet.com/l2-regularization-and-batch-norm/ https://zhuanlan.zhihu.com/p/56142484 https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html 解释了之前的一个疑点：  在keras自定义的BN层">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/09/16/L2-Regularization-and-Batch-Norm/lr.png">
-<meta property="og:updated_time" content="2021-09-16T10:38:58.713Z">
+<meta property="og:updated_time" content="2021-10-08T10:08:57.862Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="L2 Regularization and Batch Norm">
 <meta name="twitter:description" content="reference： https://blog.janestreet.com/l2-regularization-and-batch-norm/ https://zhuanlan.zhihu.com/p/56142484 https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html 解释了之前的一个疑点：  在keras自定义的BN层">
@@ -409,7 +409,7 @@
 <li>在loss的基础上加一个regularization term，$L_{\lambda}(w)=L(w)+\lambda ||w||^2_2$</li>
 <li>loss是每个样本经过一系列权重运算，$L(w)=\sum_N l_i (y(X_i;w,\gamma,\beta))$</li>
 <li>当使用normalization layer的时候：$y(X_i;w,\alpha,\beta)=y(X_i;\alpha w,\gamma,\beta)$，即loss term不会变</li>
-<li>$L_{\lambda}(\alpha w)=L(w)+\lambda \alpha^2||w||^2_2$</li>
+<li>$L_{\lambda}(\alpha w)=L(w)+\lambda||w||^2_2$</li>
 <li>在有normalization layer的时候，L2 penalty还是能够通过reg term force权重的scale越来越小，但是不会影响优化进程（不影响main objective value），因为loss term不变</li>
 </ul>
 </li>
@@ -419,10 +419,18 @@
 <li><p>所以weights在变小，同时梯度在变大！</p>
 <p><img src="/2021/09/16/L2-Regularization-and-Batch-Norm/lr.png" width="70%;"></p>
 </li>
-<li><p>这也就相当于学习率在变大，这与我们的初衷相悖——我们希望更稳定的模型</p>
+<li><p>在减小weight scale的时候，网络的梯度会变大，等价于学习率在变大，会引起震荡不稳定</p>
 </li>
 <li>所以在设定hyper的时候，如果我们要适当加大weight decay $\lambda$，就要反比scale学习率</li>
-<li></li>
+</ul>
+</li>
+<li><p>Effect of Regularization on the Scale of Weights</p>
+<ul>
+<li>during training the scale of weights will change<ul>
+<li>the gradients of the loss function will cause the norm of the weights to grow</li>
+<li>the regularization term causes the weights to shrink</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -554,7 +562,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -567,7 +575,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,390 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/12/三维刚体运动-李代数/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/12/三维刚体运动-李代数/" itemprop="url">三维刚体运动 & 李代数</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-12T15:02:30+08:00">
+                2018-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/12/三维刚体运动-李代数/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/12/三维刚体运动-李代数/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="0-向量"><a href="#0-向量" class="headerlink" title="0. 向量"></a>0. 向量</h4><ul>
+<li><p>坐标：首先确定一个坐标系，也就确定了一组基$(e_1, e_2, e_3)$，那么向量$a$的坐标为：</p>
+<script type="math/tex; mode=display">
+a = [e_1, e_2, e_3]
+\begin{bmatrix}
+a_1\\
+a_2\\
+a_3
+\end{bmatrix} = a_1e_1 + a_2e_2 + a_3e_3</script></li>
+<li><p>内积：对向量$a, b \in R^3$，其内积为：</p>
+<script type="math/tex; mode=display">
+a \cdot b = a^Tb = \Sigma a_ib_i = |a||b|cos<a,b></script><p>内积可以描述向量间的投影关系。</p>
+</li>
+<li><p>外积：</p>
+<script type="math/tex; mode=display">
+a \times b = 
+\begin{vmatrix}
+i & j & k\\
+a_1 & a_2 & a_3\\
+b_1 & b_2 & b_3
+\end{vmatrix}=
+\begin{bmatrix}
+0 & -a_3 & a_2\\
+a_3 & 0 & -a_1\\
+-a_2 & a_1 & 0
+\end{bmatrix}b=a^{\wedge}b</script><p>外积的方向垂直与这两个向量，大小为$|a||b|sin<a,b>$。</a,b></p>
+<p>外积可以表示向量的旋转，向量$a$到$b$的<strong>旋转向量</strong>，外积的方向是旋转向量的方向，大小由夹角决定。</p>
+</li>
+</ul>
+<h4 id="1-旋转矩阵R与变换矩阵T"><a href="#1-旋转矩阵R与变换矩阵T" class="headerlink" title="1. 旋转矩阵R与变换矩阵T"></a>1. 旋转矩阵R与变换矩阵T</h4><ul>
+<li><p>通常设置固定的世界坐标系$O_w$和运动的相机坐标系$O_c$，相机运动是<strong>刚体运动</strong>，两个坐标系之间的变换称为<strong>欧式变换</strong>。</p>
+</li>
+<li><p>旋转矩阵$R$：可以描述相机的旋转</p>
+<p><strong>坐标系旋转</strong>前后同一个向量的坐标变换关系：</p>
+<script type="math/tex; mode=display">
+a =\begin{bmatrix}
+a_1\\
+a_2\\
+a_3
+\end{bmatrix}=
+\begin{bmatrix}
+e_1^T\\
+e_2^T\\
+e_3^T
+\end{bmatrix}
+\begin{bmatrix}
+e_1^{'} & e_2^{'}& e_3^{'}
+\end{bmatrix} 
+\begin{bmatrix}
+a_1^{'}\\
+a_2^{'}\\
+a_3^{'}
+\end{bmatrix}=
+Ra^{'}</script><p>不难验证<strong>旋转矩阵是行列式为1的正交矩阵</strong>，因此可以把旋转矩阵的集合<strong>特殊正交群</strong>定义如下：</p>
+<script type="math/tex; mode=display">
+SO(n) = \{R \in R^{n*n} | RR^T=I, det(R)=1\}</script><p>相反的旋转：</p>
+<script type="math/tex; mode=display">
+a = Ra^{'}\\
+a^{'} = R^{-1}a = R^Ta</script></li>
+<li><p>欧式变换：包括旋转和平移</p>
+<script type="math/tex; mode=display">
+a^{'} = Ra + t</script></li>
+<li><p>齐次坐标：射影几何的概念，每个分量同乘一个非零常数仍然表示同一个点：</p>
+<script type="math/tex; mode=display">
+\tilde{x} = [x,y,z,w]^T=[x/w, y/w, z/w, 1]^T</script></li>
+<li><p>齐次变换矩阵$T$：使得欧式变换仍旧保持线性关系：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+a^{'}\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+R & t\\
+0 &1
+\end{bmatrix}
+\begin{bmatrix}
+a\\
+1
+\end{bmatrix} =T
+\begin{bmatrix}
+a\\
+1
+\end{bmatrix}</script><p>变换矩阵的集合<strong>特殊欧式群</strong>：</p>
+<script type="math/tex; mode=display">
+SE(3) = \left\{T=
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix} \in R^{4*4} | R\in SO(3), t \in R^3
+\right\}</script></li>
+</ul>
+<h4 id="2-旋转向量-Axis-Angle"><a href="#2-旋转向量-Axis-Angle" class="headerlink" title="2. 旋转向量 Axis-Angle"></a>2. 旋转向量 Axis-Angle</h4><p>一个旋转只有3个自由度，旋转矩阵R要用9的参数来描述，显然是冗余的。一种紧凑的方式——任何旋转都可以用一个旋转轴$n$和一个旋转角$\theta$来刻画：</p>
+<script type="math/tex; mode=display">
+R = cos\theta I + (1-cos\theta)nn^T + sin\theta n^{\wedge}\\
+\theta = arccos(\frac{tr(R)-1}{2})\\</script><p>旋转轴上的向量在旋转后不发生改变，因此有：</p>
+<script type="math/tex; mode=display">
+Rn = n</script><p>转轴$n$是旋转矩阵$R$的特征值1对应的特征向量，可以由此来计算转轴$n$。</p>
+<h4 id="3-欧拉角-rpy"><a href="#3-欧拉角-rpy" class="headerlink" title="3. 欧拉角 rpy"></a>3. 欧拉角 rpy</h4><p>把旋转分解到3个轴上，rpy角的旋转顺序是ZYX：</p>
+<ul>
+<li>首先绕物体的Z轴旋转，得到偏航角yaw</li>
+<li>然后绕旋转之后的Y轴旋转，得到俯仰角pitch</li>
+<li>绕旋转之后的X轴旋转，得到滚转角roll</li>
+</ul>
+<p>万向锁问题：在俯仰角为$\pm 90^{\circ}$时，第一次和第三次旋转使用同一根轴，丢了自由度——<strong>奇异性问题</strong>。</p>
+<h4 id="4-四元数-q"><a href="#4-四元数-q" class="headerlink" title="4. 四元数 q"></a>4. 四元数 q</h4><p>四元数是一种扩展的负数，由一个实部和三个虚部组成，可以把三个虚部脑补成空间中的三根轴：</p>
+<script type="math/tex; mode=display">
+q = q_0 + q_1i + q_2j + q_3k\\
+\left\{
+\begin{split}
+& i^2 = j^2=k^2=-1\\
+& ij = k, ji = -k\\
+& jk = i, kj = -i\\
+& ki=j, ik=-j
+\end{split}
+\right.</script><ul>
+<li><p>乘以$i$对应着绕$i$轴旋转$180^{\circ}$</p>
+</li>
+<li><p>任意的旋转可以由两个互为相反数的四元数表示</p>
+</li>
+<li><p>与旋转向量$n = [n_x, n_y, n_z]^T, \theta$转换关系：</p>
+<script type="math/tex; mode=display">
+q = [cos\frac{\theta}{2}, n_xsin\frac{\theta}{2}, n_ysin\frac{\theta}{2}, n_zsin\frac{\theta}{2}]^T\\
+\left\{
+\begin{split}
+& \theta = 2arccos q_0\\
+& [n_x, n_y, n_z]^T = [q_1, q_2, q_3]^T/sin\frac{\theta}{2}
+\end{split}
+\right.</script></li>
+<li><p>与旋转矩阵$R$的关系：</p>
+<script type="math/tex; mode=display">
+R = 
+\begin{bmatrix}
+1-2q_2^2 - 2q_3^2 & 2q_1q_2-2q_0q_3 & 2q_1q_3+2q_0q_2\\
+ 2q_1q_2+2q_0q_3  & 1-2q_1^2 - 2q_3^2 &  2q_2q_3-2q_0q_1\\
+ 2q_1q_3-2q_0q_2 &  2q_2q_3+2q_0q_1 & 1-2q_1^2 - 2q_2^2 
+\end{bmatrix}\\
+q_0 = \frac{\sqrt{tr(R)+1}}{2}, q_1 = \frac{R_{23}-R_{32}}{4q_0}, q_2 = \frac{R_{31}-R_{13}}{4q_0}, q_3 = \frac{R_{12}-R_{21}}{4q_0}</script></li>
+<li><p>表示旋转：</p>
+<p>空间中点$p = [x, y,z]^T\in R^3$，已知旋转轴角$n,\theta$，旋转之后点坐标变为$p^{‘}$，如果用旋转矩阵描述：</p>
+<script type="math/tex; mode=display">
+p^{'} = Rp</script><p>四元数$q = [cos\frac{\theta}{2}, nsin\frac{\theta}{2}]$，那么旋转后的点$p^{‘}$可以表示为：</p>
+<script type="math/tex; mode=display">
+p^{'} = qpq^{-1}</script></li>
+</ul>
+<h4 id="5-李群"><a href="#5-李群" class="headerlink" title="5. 李群"></a>5. 李群</h4><p>上面提到了旋转矩阵构成的特殊正交群$SO(3)$和由变换矩阵构成的特殊欧式群$SE(3)$：</p>
+<script type="math/tex; mode=display">
+SO(n) = \left\{R \in R^{n*n} | RR^T=I, det(R)=1\right\}
+\\
+SE(3) = \left\{T=
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix} \in R^{4*4} | R\in SO(3), t \in R^3
+\right\}</script><ul>
+<li>$SO(n)$和$SE(n)$对<strong>加法不封闭，对乘法是封闭</strong>的。</li>
+<li>群是一种集合$A$加上一种运算$\ \cdot \ $的代数结构，记作$G = (A, \ \cdot \ )$，群内元素满足封闭性、结合律、幺元、可逆四个条件。</li>
+<li>李群是指具有连续性质的群。刚体在空间中能够连续地运动，因此$SO(n)$和$SE(n)$是李群。</li>
+</ul>
+<h4 id="6-李代数"><a href="#6-李代数" class="headerlink" title="6. 李代数"></a>6. 李代数</h4><p><strong>6.1 引入</strong></p>
+<p>对任意旋转矩阵$R$，都满足$RR^T=I$。把它写成关于时间的函数$R(t)$有：</p>
+<script type="math/tex; mode=display">
+R(t)R(t)^T = I</script><p>对等式两边求导：</p>
+<script type="math/tex; mode=display">
+\dot R(t)R(t)^T + R(t)\dot R(t)^T=0\\
+\dot R(t)R(t)^T =-\big(\dot R(t)R(t)^T \big)^T</script><p>可以看出$\dot R(t)R(t)^T $是一个<strong>反对称阵</strong>，对任意一个反对称阵，都可以找到一个与之对应的<strong>向量</strong>：</p>
+<script type="math/tex; mode=display">
+a^{\wedge} = A, A^{\vee}=a</script><p>于是可以找到一个三维向量$\phi(t) \in R^3$与之对应：</p>
+<script type="math/tex; mode=display">
+\dot R(t)R(t)^T  = \phi(t)^{\wedge}\\
+\dot R(t) = \phi(t)^{\wedge}R(t)</script><p>可以看到，<strong>每对旋转矩阵求一次导数，只需左乘一个反对称阵$\phi(t)^{\wedge}$即可</strong>。</p>
+<p>求解上面的微分方程，可以得到$R(t) = exp(\phi^{\wedge}t)$。也就是说$\phi$描述了$R$在局部的导数关系。</p>
+<p><strong>6.2 李代数</strong></p>
+<ul>
+<li><p>每个李群都有与之对应的李代数。李代数描述了李群的局部性质。</p>
+</li>
+<li><p>李代数由一个集合$V$，一个数域$F$，和一个二元运算<strong>李括号</strong>$[,]$组成，记作$( V, F, [,])$。李代数的元素满足封闭性、双线性、自反性、雅可比等价四条性质。</p>
+</li>
+<li><p>上一节的$\phi$就是$SO(3)$对应的李代数$so(3)$，两者的关系由<strong>指数映射</strong>给定：</p>
+<script type="math/tex; mode=display">
+R = exp(\phi^{\wedge})\\
+so(3) = \left\{ \phi \in R^3, \Phi = \phi^{\wedge} \in R^{3*3}\right\}</script></li>
+<li><p>$SE(3)$对应的李代数$se(3)$位于$R^6$空间中：</p>
+<script type="math/tex; mode=display">
+se(3) = \left\{ \xi = 
+\begin{bmatrix}
+\rho\\
+\phi
+\end{bmatrix}
+\in R^6, \rho \in so(3), \xi^{\wedge} =
+\begin{bmatrix}
+\phi^{\wedge} & \rho\\
+0^T & 0
+\end{bmatrix} \in R^{4*4}
+\right\}</script></li>
+<li><p>指数映射</p>
+<p>由于$\phi$是一个三维向量，因此可以写作$\theta a$的形式，$a$是一个单位向量，因此具有以下性质：</p>
+<script type="math/tex; mode=display">
+a^{\wedge}a^{\wedge} = aa^T-I\\
+a^{\wedge}a^{\wedge}a^{\wedge} = -a^{\wedge}</script><p>对$so(3)$李代数的指数映射做泰勒展开，可以得到：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+&R= exp(\phi^{\wedge}) = exp(\theta a^{\wedge})=\Sigma_{n=0}^{\infty}\frac{1}{n!} (\theta a^{\wedge})^n\\
+& =cos\theta I + (1-cos\theta)aa^T+sin\theta a^{\wedge}
+\end{split}</script><p>可以看到$so(3)$实际上就是旋转向量组成的空间，指数映射即是罗德里格斯公式。</p>
+<p>指数映射是一个<strong>满射</strong>，每个$SO(3)$中的元素，都可以找到至少一个$so(3)$元素与之对应（$\theta + 2k\pi$）。</p>
+<p>$se(3)$上的指数映射为：</p>
+<script type="math/tex; mode=display">
+T = exp(\xi^{\wedge}) = 
+\begin{bmatrix}
+R & J\rho\\
+0 &1
+\end{bmatrix}\\
+J = \frac{sin\theta}{\theta}I + (1-\frac{sin\theta}{\theta})aa^T + \frac{1-cos\theta}{\theta}a^{\wedge}</script></li>
+</ul>
+<p><strong>6.3 李代数求导 </strong></p>
+<ul>
+<li><p>两个李代数指数映射乘积的完整形式由BCH公式给出：</p>
+<script type="math/tex; mode=display">
+ln(exp(A)exp(B)) = A+B + \frac{1}{2}[A, B] + \frac{1}{12}[A,[A,B]] + ...</script></li>
+<li><p>对$ln(exp(\phi_1^{\wedge})exp(\phi_2^{\wedge}))^{\vee}$，当$\phi_1$或$\phi_2$为小量时，BCH公式给出了线性近似表达：</p>
+<script type="math/tex; mode=display">
+ln(exp(\phi_1^{\wedge})exp(\phi_2^{\wedge}))^{\vee} = 
+\left\{
+\begin{split}
+J_l(\phi_2)^{-1}\phi_1 + \phi_2\ \ \ \ \ \ \phi_1为小量\\
+J_r(\phi_1)^{-1}\phi_2 + \phi_1\ \ \ \ \ \ \phi_2为小量\\
+\end{split}
+\right.</script><p>BCH近似雅可比$J_l$就是上一节的$J$：</p>
+<script type="math/tex; mode=display">
+J_l = J = \frac{sin\theta}{\theta}I + (1-\frac{sin\theta}{\theta})aa^T + \frac{1-cos\theta}{\theta}a^{\wedge}\\
+J_l^{-1} = \frac{\theta}{2}cot\frac{\theta}{2}I + (1-\frac{\theta}{2}cot\frac{\theta}{2})aa^T - \frac{\theta}{2}a^{\wedge}\\
+J_r(\phi) = J_l(-\phi)</script><p>由以上公式说明了<strong>李群乘法</strong>和<strong>李代数加法</strong>的近似转换关系。</p>
+</li>
+<li><p>在$SO(3)、SE(3)$上没有良好定义的加法，而李代数由向量组成，有良好的加法运算。因此在计算位姿的导数时，通常使用李代数解决，李代数求导的两种思路：</p>
+<ul>
+<li>李代数求导$\delta \phi$：用李代数表示姿态，然后转化成对李代数求导$\phi + \delta \phi$</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{split}
+&\frac{\partial (Rp)}{\partial R} = \frac{\partial(exp(\phi^{\wedge})p)}{\partial \phi}\\
+&= lim \frac{exp((\phi+\delta\phi)^{\wedge})p-exp(\phi^{\wedge})p}{\partial \phi}\\
+&=-(Rp)^{\wedge}J_l
+\end{split}</script><ul>
+<li>扰动模型$\Delta R$：对$R$进行扰动，然后对扰动求导$\Delta R R$</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{split}
+&\frac{\partial (Rp)}{\partial R} = lim \frac{exp(\varphi^{\wedge})exp(\phi^{\wedge})p-exp(\phi^{\wedge})p}{\partial \varphi}= -(Rp)^{\wedge}\\
+& \frac{\partial Tp}{\partial \delta \xi} = 
+\begin{bmatrix}
+I & -(Rp+t)^{\wedge}\\
+0 & 0
+\end{bmatrix} = (Tp)^{\odot}
+\end{split}</script></li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/10/c-for-record/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2220,7 +2604,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2233,7 +2617,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

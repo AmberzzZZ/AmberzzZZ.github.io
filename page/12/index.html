@@ -276,6 +276,211 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/13/branch-and-bound/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/13/branch-and-bound/" itemprop="url">branch and bound</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-13T18:21:19+08:00">
+                2018-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/13/branch-and-bound/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/13/branch-and-bound/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>一个栗子：整数规划问题欲求$max\ z = 5x_1 + 8x_2$</p>
+<script type="math/tex; mode=display">
+\left\{
+\begin{align}
+ &   x_1 + x_2 \leq 6 \nonumber\\ 
+ &   5x_1 + 9x_2 \leq 45 \nonumber\\ 
+ & x_1\geq0, x_2\geq0 \nonumber\\ 
+ & x_1,x_2为整数 \nonumber
+\end{align}   
+\right.</script><p>根据方程组可以绘制下图：</p>
+<p><img src="/2018/11/13/branch-and-bound/规划.png" alt=""></p>
+<p>于是可以得到实数空间上的最优解：$x_1 = 2.25, x_2 = 3.75, z_0 = 41.25$。——<strong>松弛问题</strong></p>
+<p>由于存在整数限定条件：</p>
+<ol>
+<li>最优解$0 \leq z^{*} \leq 41$，且必为整数</li>
+<li>x_2的最优解不在3和4之间，因为限定为整数</li>
+</ol>
+<p>一、分支</p>
+<p>于是问题可以拆分为：$max\ z = 5x_1 + 8x_2$</p>
+<script type="math/tex; mode=display">
+p1\left\{
+\begin{align}
+ &   x_1 + x_2 \leq 6 \nonumber\\
+ &   5x_1 + 9x_2 \leq 45 \nonumber\\
+ & x_1\geq0, x_2\geq0 \nonumber\\
+& x_2\leq 3 \nonumber
+\end{align}   
+\right.\\</script><script type="math/tex; mode=display">
+p2\left\{
+\begin{align}
+ &   x_1 + x_2 \leq 6 \nonumber\\
+ &   5x_1 + 9x_2 \leq 45 \nonumber\\
+ & x_1\geq0, x_2\geq0 \nonumber\\
+& x_2\geq 4 \nonumber
+\end{align}   
+\right.\\</script><p>问题拆分的实质是将$x_2$在3和4之间的小数部分划掉了，将可行域拆分成$x_2 \leq 3$ 和$x_3 \geq 4$，但是没有排除任何整数可行解。——<strong>分支</strong></p>
+<p>二、定界</p>
+<p>子问题$p1$的最优解为：$x_1 = 3, x_2=3, z^{*}=39$</p>
+<p>子问题$p2$的最优解为：$x_1 = 1.8, x_2=4, z^{*}=41$</p>
+<p>也就是说，子问题$p1$的整个参数空间上，能够取得的最优解为39，子问题$p2$上则为41，显然最优解应该位于子问题$p2$所在的参数空间中，且$39\leq z^{<em>} \leq41$。——<em>*定界</em></em></p>
+<p>三、迭代</p>
+<p>对$p2$参数空间再分支，参数$x_1$可以拆分为$x_1 \leq 1$和$x_1 \geq 2$：</p>
+<script type="math/tex; mode=display">
+p3\left\{
+\begin{align}
+ &   x_1 + x_2 \leq 6 \nonumber\\
+ &   5x_1 + 9x_2 \leq 45 \nonumber\\
+ & x_1\geq0, x_2\geq0 \nonumber\\
+ & x_1\leq 1 \nonumber\\
+& x_2\geq 4 \nonumber
+\end{align}   
+\right.\\</script><script type="math/tex; mode=display">
+p4\left\{
+\begin{align}
+ &   x_1 + x_2 \leq 6 \nonumber\\
+ &   5x_1 + 9x_2 \leq 45 \nonumber\\
+ & x_1\geq0, x_2\geq0 \nonumber\\
+ & x_1\geq 2 \nonumber \\
+& x_2\geq 4 \nonumber
+\end{align}   
+\right.\\</script><p>四、总结</p>
+<p>分支定界算法的总体流程如下：</p>
+<ol>
+<li>先求解相应的松弛问题，得到最优解，检查其是否符合原问题约束，若符合则为最优解，否则进行下一步。</li>
+<li>定界，取各分支中目标函数最大的作为上界$U_z$，取其余分支中目标函数中最大的作为下界$L_z$。$L_z \leq z^{*} \leq U_z$。</li>
+<li>分支，否则选择一个不符合原问题条件的变量，构建子问题。</li>
+<li>对各分支，有序地，进行步骤1。</li>
+</ol>
+<p>在求解对应的松弛问题时，通常会有以下几种情况：</p>
+<ol>
+<li>松弛问题没有可行解，那么原问题也没有可行解。</li>
+<li>松弛问题的最优解也满足原问题约束，那么该解也是原问题的最优解，算法终止。</li>
+<li>松弛问题的最优解小于现有下界，那么应该对该子问题进行剪枝。</li>
+</ol>
+<p>五、DFS</p>
+<p>对一颗搜索树，不用计算每一层全部节点的score（BFS），我们会维护一个优先队列，其中按照score的大小存放节点，然后选择score最大的节点（the most promising child）进行分支。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/30/trifles-with-arduino/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1782,285 +1987,6 @@ M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/30/状态估计/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/30/状态估计/" itemprop="url">状态估计</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-30T16:14:04+08:00">
-                2018-06-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/30/状态估计/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/30/状态估计/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h4><ul>
-<li>经典的SLAM模型由一个运动方程和一个观测方程构成：<script type="math/tex; mode=display">
-\left\{
-\begin{split}
-& x_k = f(x_{k-1}, u_k) + w_k\\
-& z_{k,j} = h(y_i, x_k) + v_{kj}
-\end{split}
-\right.</script>其中，$x_k$表示相机的位姿，可以用变换矩阵或李代数来表示，$y_i$表示路标，也就是图像中的特征点，$w_k$和$v_{kj}$表示噪声项，假设满足零均值的高斯分布。</li>
-</ul>
-<ul>
-<li>我们希望通过带噪声的观测数据$z$和输入数据$u$推断位姿$x$和地图$y$的概率分布。主要采用两大类方法，一类是滤波方法：基于当前状态来估计下一状态，忽略历史；一类是非线性优化方法，使用所有时刻的数据估计新状态的最优分布。 <ul>
-<li>滤波方法主要分为扩展卡尔曼滤波和粒子滤波两大类。</li>
-<li>非线性优化根据实现细节的不同主要分为滑动窗口法和Pose Graph法。</li>
-</ul>
-</li>
-</ul>
-<h4 id="2-非线性优化"><a href="#2-非线性优化" class="headerlink" title="2. 非线性优化"></a>2. 非线性优化</h4><ul>
-<li><p>非线性优化基于历史，同时也作用于历史，因此把所有待估计的变量放在一个状态变量中：</p>
-<script type="math/tex; mode=display">
-x = \{x_1, ..., x_N, y_1, ..., y_M\}</script><p>在已知观测数据$z$和输入数据$u$的条件下，对机器人的状态估计：</p>
-<script type="math/tex; mode=display">
-P(x | z,u)</script><p>先忽略测量运动的传感器，仅考虑测量方程，根据<strong>贝叶斯法则</strong>：</p>
-<script type="math/tex; mode=display">
-P(x|z) = \frac{P(z|x)P(x)}{P(z)} \varpropto P(z|x)P(x)</script><ul>
-<li>先验概率$P(x)$：先验的概念最好理解，就是一个事件的概率分布。</li>
-<li>似然概率$P(z|x)$：已知事件的概率分布，事件中某状态的概率。</li>
-<li>后验概率$P(x|z)$：在给定数据条件下，不确定性的条件分布。</li>
-<li>$Posterior  \varpropto Likelihood * Prior$</li>
-</ul>
-<p>求解后验分布比较困难，但是求一个状态最优估计（使得后验概率最大化）是可行的：</p>
-<script type="math/tex; mode=display">
-x^*_{MAP} = argmaxP(x|z) = argmaxP(z|x)P(x) = argmaxP(z|x)</script><p>因为先验概率不知道，所以问题直接转成为求解极大似然估计，问题中的未知数是$x$，直观意义就是：寻找一个最优的状态分布，使其最可能产生当前观测到的数据。</p>
-</li>
-<li><p>假设了噪声项$v_{kj} \thicksim N(0, Q_{k,j})$，所以极大似然概率也服从一个高斯分布：</p>
-<script type="math/tex; mode=display">
-P(z_{kj}|x_k, y_j) = N(h (y_j, x_i), Q)</script><p>求高斯分布的最值通常取负对数处理，最大化变成求最小化：</p>
-<script type="math/tex; mode=display">
-P(x) = \frac{1}{\sqrt{(2\pi)^Ndet(\Sigma)}} exp\bigg(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\bigg)\\
--ln(P(x) ) = \frac{1}{2}ln\big((2\pi)^Ndet(\Sigma)\big) + \frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)</script><p>对数第一项与$x$无关，第二项等价于噪声的平方项。因此可以得到优化问题的目标函数：</p>
-<script type="math/tex; mode=display">
-e_{k} = x_k - f(x_{k-1}, u_k)\\
-e_{kj} = z_{kj} - h(x_k, y_j)\\
-J(x) = \Sigma e_k^TR^{-1}_ke_{k} + \Sigma e_{kj}^TQ^{-1}_ke_{kj}\\
-x* = argmin_x J(x)</script><p>以上的最小二乘问题可以采用各种各样的梯度下降法求解最优解（参考<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>）。</p>
-</li>
-<li><p>Bundle Ajustment</p>
-<p>优化问题最终可以表示成$H\Delta x = g$的形式，其对角线上的两个矩阵为稀疏矩阵，且右下角的矩阵维度往往远大于左上角（因为特征点的数目远大于位姿节点）：</p>
-<script type="math/tex; mode=display">
-H = 
-\begin{bmatrix}
-B &E\\
-E^T & C
-\end{bmatrix}</script><p>一个有效的求解方式称为<strong>Schur消元</strong>，也叫<strong>边缘化Marginalization</strong>，主要思路如下：首先求解$C$矩阵的逆矩阵，然后对$H$矩阵进行消元，目标是消去其右上角的$E$矩阵，这样就能够先独立求解相机参数$\Delta x_c$，再利用求得的解来求landmarks参数$\Delta x_p$：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-I &-EC^{-1}\\
-0 & I
-\end{bmatrix}
-\begin{bmatrix}
-B &E\\
-E^T & C
-\end{bmatrix}
-\begin{bmatrix}
-\Delta x_c \\
-\Delta x_p
-\end{bmatrix} = 
-\begin{bmatrix}
-I &-EC^{-1}\\
-0 & I
-\end{bmatrix}
-\begin{bmatrix}
-v \\
-w
-\end{bmatrix} \\
-\begin{bmatrix}
-B - EC^{-1}E^T & 0\\
-E^T & C
-\end{bmatrix}\begin{bmatrix}
-\Delta x_c \\
-\Delta x_p
-\end{bmatrix} = 
-\begin{bmatrix}
-v  - EC^{-1}w\\
-w
-\end{bmatrix}</script><p>因此可以解得$\Delta x_c$：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-B - EC^{-1}E^T
-\end{bmatrix} \Delta x_c = v - EC^{-1}w</script><ul>
-<li>这个矩阵称为消元之后的$S$矩阵，它的维度与相机参数的维度一致</li>
-<li>$S$矩阵的意义是两个相机变量之间是否存在着共同观测点</li>
-<li>$S$矩阵的稀疏性由实际数据情况决定，因此只能通过普通的矩阵分解的方式来求解</li>
-</ul>
-</li>
-<li><p>核函数</p>
-<p>当误差很大时，二范数增长的很快，为了防止其过大掩盖掉其他的边，可以将其替换成增长没那么快的函数，使得整个优化结果更为稳健，因此又叫鲁棒核函数，常用的核有Huber核、Cauchy核、Tukey核等，Huber核的定义如下：</p>
-<script type="math/tex; mode=display">
-H(e) = 
-\left\{
-\begin{split}
-   & \frac{1}{2} e ^2, \ \ \ |e| \leq \delta\\
-  &  \delta(|e| -  \frac{1}{2}\delta), \ \ else
-\end{split}   
-\right.</script></li>
-</ul>
-<h4 id="3-卡尔曼滤波"><a href="#3-卡尔曼滤波" class="headerlink" title="3. 卡尔曼滤波"></a>3. 卡尔曼滤波</h4><p>滤波思路基于一个重要的<strong>假设：一阶马尔可夫性——k时刻状态只与k-1时刻状态有关</strong>，整理成两个要素如下：</p>
-<ul>
-<li>$x_{k-1}$ contains the whole history</li>
-<li>$x_k = f(x_{k-1}, u_k, z_k)$</li>
-</ul>
-<p>在这里我们只需要维护一个状态量$x_k$，并对它不断进行迭代更新，<strong>moreover，如果状态量服从高斯分布，我们只需要维护状态量的均值和方差即可（进一步简化）</strong>。</p>
-<p>首先考虑一个<strong>线性系统</strong>：</p>
-<script type="math/tex; mode=display">
-\left\{
-\begin{split}
-& x_k = A_k x_{k-1}+u_k + w_k\\
-& z_k = C_k x_k + v_k
-\end{split}
-\right.\\
-w_k \thicksim N(0, R), v_k \thicksim N(0, Q)</script><p>卡尔曼滤波器的第一步<strong>预测</strong>，通过运动方程确定$x_k$的先验分布，注意用不同的上标区分不同的概率分布：尖帽子$\hat x_k$表示后验，平帽子$\bar x_k$表示先验：</p>
-<script type="math/tex; mode=display">
-P(\bar x_k) =  N(\bar x_k, \bar P_k)\\
-\bar x_k = A_k \hat x_{k-1} + u_k\\
-\bar P_k = A_k\hat P_{k-1}A_k^T+R</script><p>第二步为<strong>观测</strong>，通过分析实际观测值，计算<strong>在某状态下应该产生怎样的分布</strong>：</p>
-<script type="math/tex; mode=display">
-P(z_k|x_k) = N(C_kx_k, Q)</script><p>第三步为<strong>更新</strong>，根据第一节中的<strong>贝叶斯法则</strong>，得到$x_k$的后验分布：</p>
-<script type="math/tex; mode=display">
-(\hat x_k, \hat P_k) = N(C_kx_k, Q)N(\bar x_k, \bar P_k)\\
-K = \bar P_k C_k^T(C_k\bar P_k C_k^T + Q_k)^{-1}\\
-\hat x_k = \bar x_k + K(z_k-C_k\bar x_k)\\
-\hat P_k = (I - KC_k)\bar P_k</script><p>整体的流程图如下：</p>
-<p><img src="/2018/06/30/状态估计/KF.jpeg" alt=""></p>
-<p>具体过程本节中不做展开，详情可以参考<a href="">卡尔曼滤波</a>。高斯分布经过线性变换仍然服从高斯分布，因此整个过程没有发生任何的近似，因此可以说卡尔曼滤波器构成了线性系统的最优无偏估计。</p>
-<p>下面考虑<strong>非线性系统</strong>：</p>
-<p>SLAM中不管是三维还是平面刚体运动，因为都引入了旋转，因此其运动方程和观测方程都是非线性函数。一个高斯分布，经过非线性变换，通常就不再服从高斯分布，因此<strong>对于非线性系统，必须采取一定的近似，将一个非高斯分布近似成高斯分布</strong>。</p>
-<p>通常的做法是，将k时刻的运动方程和观测方程在$\hat x_{k-1}$，$\hat P_{k-1}$处做一阶泰勒展开，得到两个雅可比矩阵：</p>
-<script type="math/tex; mode=display">
-F = \frac{\partial f}{\partial x_{k-1}}\bigg|_{\hat x_{k-1}}\\
-H = \frac{\partial h}{\partial x_k}\bigg|_{\hat x_k}</script><p>中间量卡尔曼增益$K_k$：</p>
-<script type="math/tex; mode=display">
-\bar P_k = F\hat P_{k-1}F^T + R_k\\
-K_k = \bar P_k H^T(H \bar P_k H^T + Q_k)^{-1}</script><p>后验概率：</p>
-<script type="math/tex; mode=display">
-\hat x_k = \bar x_k + K_k(z_k - h(\bar x_k))\\
-\hat P_k = (I - K_k H)\bar P_k</script><p> 对于SLAM这种非线性的情况，EKF给出的是单次线性近似下的最大后验估计（MAP）。</p>
-<h4 id="4-EKF-VS-Graph-Optimization"><a href="#4-EKF-VS-Graph-Optimization" class="headerlink" title="4. EKF VS Graph-Optimization"></a>4. EKF VS Graph-Optimization</h4><ol>
-<li>马尔可夫性抛弃了更久之前的状态，优化方法则运用了更多的信息。</li>
-<li>非线性误差：两种方法都使用了线性化近似，EKF只在$x_{k-1}$处做了一次线性化，图优化法则在每一次迭代更新时都对新的状态点做泰勒展开，其线性化的模型更接近原始非线性模型。</li>
-<li>存储：EKF维护的是状态的均值和方差，存储量与状态维度成平方增长，图优化存储的是每个状态点的位姿，存储线性增长。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2115,7 +2041,7 @@ K_k = \bar P_k H^T(H \bar P_k H^T + Q_k)^{-1}</script><p>后验概率：</p>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2128,7 +2054,7 @@ K_k = \bar P_k H^T(H \bar P_k H^T + Q_k)^{-1}</script><p>后验概率：</p>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

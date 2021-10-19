@@ -276,6 +276,201 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/03/IoU/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/03/IoU/" itemprop="url">IoU</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-03T15:41:03+08:00">
+                2020-08-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/08/03/IoU/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/03/IoU/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>reference: <a href="https://bbs.cvmart.net/articles/1396" target="_blank" rel="noopener">https://bbs.cvmart.net/articles/1396</a></p>
+<ol>
+<li><p>IoU</p>
+<p> IoU = Intersection / Union</p>
+<p> $Loss_{IoU} = 1 - IoU$</p>
+<ul>
+<li>[0,1]</li>
+<li>无法直接优化没有重叠的部分：如果两个框没有交集，IoU=0，没有梯度回传，无法进行学习训练</li>
+<li>尺度不敏感</li>
+<li><p>无法精确的反映两者的重合质量</p>
+<p><img src="/2020/08/03/IoU/IoU.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GIoU(Generalized Intersection over Union)</p>
+<p> $GIoU = IoU - \frac{|A_c - U|}{|A_c|}$，$A_c$是包含两个框的最小外接框</p>
+<p> $Loss_{GIoU} = 1 - GIoU$</p>
+<p> <img src="/2020/08/03/IoU/GIoU.png" width="40%;"></p>
+<ul>
+<li>GIoU倾向于先增大bbox的大小来增大与GT的交集，然后通过IoU项引导最大化bbox的重叠区域</li>
+<li>[-1,1]</li>
+<li>能够关注到非重合区域</li>
+<li>尺度不敏感</li>
+<li>两个框为包含关系时，退化为IoU</li>
+<li>如果之间用来替换mse，前期收敛会比较慢</li>
+<li><strong>一般地，GIoU loss不能很好地收敛SOTA算法，反而造成不好的结果</strong></li>
+</ul>
+</li>
+<li><p>DIoU (Distance-IoU)</p>
+<p> $DIoU = IoU - \frac{d^2}{c^2}$，d是两个中心点间的欧式距离，c是两个框的最小外接框的对角线距离</p>
+<p> $Loss_{DIoU} = 1 - DIoU$</p>
+<p> <img src="/2020/08/03/IoU/DIoU.png" width="30%;"></p>
+</li>
+</ol>
+<pre><code>* 直接最小化两个目标框的距离，收敛快得多
+
+* 能够关注到非重合区域
+
+* 对于包含关系的两个框，仍旧有距离损失，不会退化为IoU
+
+* 可以替换NMS中的IoU：原始的IoU仅考虑了重叠区域，对包含的情况没有很好的处理
+    $$
+    score = score\text{ if }IoU - dis(box_{max}, box)&gt;\epsilon \text{, else } 0
+    $$
+
+
+* 没有考虑形状（长宽比）
+</code></pre><ol>
+<li><p>CIoU (Complete-IoU)</p>
+<p> $CIoU = IoU - \frac{d^2}{c^2}-av$，在DIoU的基础上新增了惩罚项av，a是权重系数，v用来评价长宽比：</p>
+<script type="math/tex; mode=display">
+ v = \frac{4}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})^2\\
+ a = \frac{v}{1-IoU+v}</script><p> $Loss_{CIoU} = 1 - CIoU$</p>
+<ul>
+<li><p>v的梯度中有$\frac{1}{w^2+h^2}$，长宽在[0,1]之间，可能很小，会导致梯度爆炸，用的时候</p>
+<ul>
+<li>clamp一下上下限</li>
+<li><p>分母中的$w^2+h^2$替换成1</p>
+<script type="math/tex; mode=display">
+\frac{\partial v }{\partial w} = \frac{8}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})\frac{h}{w^2+h^2}\\
+\frac{\partial v }{\partial w} = \frac{8}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})\frac{w}{w^2+h^2}</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/YOLOACT/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3064,627 +3259,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/30/RetinaNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/30/RetinaNet/" itemprop="url">RetinaNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-30T11:17:04+08:00">
-                2020-05-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/30/RetinaNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/30/RetinaNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li>[det] RetinaNet: Focal Loss for Dense Object Detection</li>
-<li>[det+instance seg] RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free </li>
-<li>[det+semantic seg] Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection </li>
-</ol>
-<h2 id="Focal-Loss-for-Dense-Object-Detection"><a href="#Focal-Loss-for-Dense-Object-Detection" class="headerlink" title="Focal Loss for Dense Object Detection"></a>Focal Loss for Dense Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>dense prediction(one-stage detector)</li>
-<li>focal loss：address the class imbalance problem</li>
-<li>RetinaNet：design and train a simple dense detector </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>accuracy trailed<ul>
-<li>two-stage：classifier is applied to a sparse set of candidate</li>
-<li>one-stage：dense sampling of possible object locations</li>
-<li>the <strong>extreme foreground-background class imbalance</strong> encountered during training of dense detectors is the central cause</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>standard cross entropy loss：down-weights the loss assigned to well-classified examples</li>
-<li>proposed focal loss：focuses training on a sparse set of hard examples</li>
-</ul>
-</li>
-<li>R-CNN系列two-stage framework <ul>
-<li>proposal-driven </li>
-<li>the first stage generates a sparse set of candidate object locations</li>
-<li>the second stage classifies each candidate location as one of the foreground classes or as background</li>
-<li>class imbalance：在stage1大部分背景被filter out了，stage2训练的时候强制固定前背景样本比例，再加上困难样本挖掘OHEM </li>
-<li>faster：reducing input image resolution and the number of proposals </li>
-<li>ever faster：one-stage</li>
-</ul>
-</li>
-<li>one-stage detectors <ul>
-<li>One stage detectors are applied over a regular, dense sampling of object locations, scales, and aspect ratios</li>
-<li>dense：regularly sampling(contrast to selection)，基于grid以及anchor以及多尺度</li>
-<li>the training procedure is still dominated by easily classified background examples</li>
-<li>class imbalance：通常引入bootstrapping和hard example mining来优化</li>
-</ul>
-</li>
-<li>Object Detectors<ul>
-<li>Classic：sliding-window+classifier based on HOG，dense predict</li>
-<li>Two-stage：selective Search+classifier based on CNN，shared network RPN</li>
-<li>One-stage：‘anchors’ introduced by RPN，FPN</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>Huber loss：down-weighting the loss of outliers (hard examples)</li>
-<li>focal loss：down-weighting inliers (easy examples)  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>focal loss</p>
-<ul>
-<li>CE：$CE(p_t)=-log(p_t)$<ul>
-<li>even examples that are easily classified ($p_t&gt;0.5$) incur a loss with non-trivial magnitude</li>
-<li>summed CE loss over a large number of easy examples can overwhelm the rare class</li>
-</ul>
-</li>
-<li>WCE：$WCE(p_t)=-\alpha_t log(p_t)$<ul>
-<li>balances the importance of positive/negative examples</li>
-<li>does not differentiate between easy/hard examples </li>
-</ul>
-</li>
-<li><p>FL：$FL(p_t)=-\alpha_t(1-p_t)^\gamma log(p_t)$</p>
-<ul>
-<li>as $\gamma$ increases the modulating factor is likewise increased </li>
-<li>$\gamma=2$ works best in our experiments </li>
-</ul>
-<p><img src="/2020/05/30/RetinaNet/loss.png" width="40%;"></p>
-<p>​    </p>
-</li>
-<li><p>two-stage detectors通常不会使用WCE或FL</p>
-<ul>
-<li>cascade stage会过滤掉大部分easy negatives </li>
-<li>第二阶段训练会做biased minibatch sampling </li>
-<li>Online Hard Example Mining (OHEM)<ul>
-<li>construct minibatches using high-loss examples</li>
-<li>scored by loss + nms</li>
-<li>completely discards easy examples</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>RetinaNet</p>
-<ul>
-<li>compose：backbone network + two task-specific subnetworks</li>
-<li>backbone：convolutional feature map over the entire input image </li>
-<li>subnet1：object classification </li>
-<li><p>subnet2：bounding box regression </p>
-<p><img src="/2020/05/30/RetinaNet/retinanet.png" width="60%;"></p>
-</li>
-<li><p>ResNet-FPN backbone</p>
-<ul>
-<li>rich, multi-scale feature pyramid，二阶段的RPN也用了FPN</li>
-<li>each level can be used for detecting objects at a different scale</li>
-<li>P3 - P7：8x - 128x downsamp</li>
-<li>FPN channels：256</li>
-</ul>
-</li>
-<li><p>anchors</p>
-<ul>
-<li>anchor ratios：{1:2, 1:1, 2:1}，长宽比</li>
-<li>anchor scales：{$2^0$, $2^\frac{1}{3}$, $2^\frac{2}{3}$}，大小，同一个scale的anchor，面积相同，都是size*size，长宽通过ratio求得</li>
-<li>anchor size per level：[32, 64, 128, 256, 512]，基本的正方形anchor的边长</li>
-<li>total anchors per level：A=9</li>
-<li>KA：each anchor is assigned a length K one-hot vector of classification targets </li>
-<li>4A：and a 4-vector of box regression targets </li>
-<li>anchors are assigned to ground-truth object boxes using an intersection-over-union (IoU) threshold of 0.5 </li>
-<li>anchors are <strong>assigned background</strong> if their IoU is in [0, 0.4)</li>
-<li>anchor is unassigned between [0.4, 0.5), which is ignored during training</li>
-<li>each anchor is assigned to at most one object box </li>
-<li><p>for each anchor</p>
-<ul>
-<li><p>classification targets：one-hot vector </p>
-</li>
-<li><p>box regression targets：each anchor和其对应的gt box的offset</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>rpn offset：中心点、宽、高</p>
-<pre><code>  $$
-</code></pre><p>  t_x = (x - x_a) / w_a\\</p>
-<pre><code>    t_y = (y - y_a) / h_a\\
-</code></pre><p>  t_w = log(w/ w_a)\\</p>
-<pre><code>    t_h = log(h/ h_a)
-</code></pre><p>  $$</p>
-</li>
-<li><p>or omitted if there is no assignment</p>
-</li>
-<li><p>【QUESTION】所谓的anchor state {-1:ignore, 0:negative, 1:positive} 是针对cls loss来说的，相当于人为丢弃了一部分偏向中立的样本，这对分类效果有提升吗？？</p>
-</li>
-<li><p>classification subnet</p>
-<ul>
-<li><p>for each spatial position，for each anchor，predict one among K classes，one-hot</p>
-</li>
-<li><p>input：C channels feature map from FPN</p>
-</li>
-<li><p>structure：four 3x3 conv + ReLU，each with C filters </p>
-</li>
-<li><p>head：3x3 conv + sigmoid，with KA filters</p>
-</li>
-<li><p>share across levels</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>not share with box regression subnet </p>
-</li>
-<li><p>focal loss：</p>
-<ul>
-<li>sum over all ～100k anchors<pre><code>  * and normalized by the number of anchors assigned to a ground-truth box
-  * 因为是sum，所以要normailize，norm项用的是number of assigned anchors（这是包括了前背景？）
-  * vast majority of anchors are **easy negatives** and receive negligible loss values under the focal loss（确实包含背景框）
-  * $\alpha$：In general $alpha$ should be decreased slightly as $\gamma$ is increased 
-</code></pre></li>
-<li><p>strong effect on negatives：FL can effectively discount the effect of easy negatives, focusing all attention on the hard negative examples </p>
-<p><img src="/2020/05/30/RetinaNet/bg.png" width="80%;"></p>
-</li>
-<li><p>box regression subnet </p>
-<ul>
-<li>class-agnostic bounding box regressor  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>same structure：four 3x3 conv + ReLU，each with C filters <pre><code>  * head：4A linear outputs 
-  * L1 loss
-</code></pre></li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>inference</p>
-<ul>
-<li><p>keep top 1k predictions per FPN level </p>
-<pre><code>  * all levels are merged and non-maximum suppression with a threshold of 0.5 
-</code></pre><ul>
-<li><p>train</p>
-<ul>
-<li>initialization：<ul>
-<li>cls head bias initialization，encourage more foreground prediction at the start of training </li>
-<li>prevents the large number of background anchors from generating a large, destabilizing loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>network design</p>
-<ul>
-<li><p>anchors</p>
-<pre><code>      * one-stage detecors use fixed sampling grid to generate position
-      * use multiple ‘anchors’ at each spatial position to cover boxes of various scales and aspect ratios 
-      * beyond 6-9 anchors did not shown further gains in AP
-  * speed/accuracy trade-off  
-      * outperforms all previous methods
-      * bigger resolution bigger AP
-      * Retina-101-600与ResNet101-FRCNN的AP持平，但是比他快
-</code></pre><ul>
-<li><p>gradient：</p>
-<ul>
-<li>梯度有界</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>the derivative is small as soon as $x_t &gt; 0$</p>
-<pre><code>      &lt;img src=&quot;RetinaNet/gradient.png&quot; width=&quot;70%;&quot; /&gt;
-</code></pre></li>
-</ul>
-<pre><code>​        
-</code></pre><h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>improve single-shot detectors to the same level as current two-stage techniques</li>
-<li>improve on RetinaNet<ul>
-<li>integrating instance mask prediction</li>
-<li>adaptive loss </li>
-<li>additional hard examples</li>
-<li>Group Normalization</li>
-</ul>
-</li>
-<li><p>same computational cost as the original RetinaNet but more accurate：同样的参数量级比orgin RetinaNet准，整体的参数量级大于yolov3，acc快要接近二阶段的mask RCNN了</p>
-<p><img src="/2020/05/30/RetinaNet/acc:time.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>论点</p>
-<ul>
-<li>part of improvements of two-stage detectors is due to architectures like Mask R-CNN that involves multiple prediction heads</li>
-<li>additional segmentation task had only been added to two-stage detectors in the past</li>
-<li>two-stage detectors have the cost of resampling(ROI-Align) issue：RPN之后要特征对齐</li>
-<li>add addtional heads in training keeps the structure of the detector at test time unchanged </li>
-<li>potential improvement directions<ul>
-<li>data：OHEM</li>
-<li>context：FPN</li>
-<li>additional task：segmentation branch</li>
-</ul>
-</li>
-<li>this paper’s contribution<ul>
-<li>add a mask prediction branch</li>
-<li>propose a new self-adjusting loss function</li>
-<li>include more of positive samples—&gt;those with low overlap</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>best matching policy</p>
-<ul>
-<li>speical case：outlier gt box，跟所有的anchor iou都不大于0.5，永远不会被当作正样本</li>
-<li>use best matching anchor with any nonzero overlap to replace the threshold</li>
-</ul>
-</li>
-<li><p>self-adjusting Smooth L1 loss</p>
-<ul>
-<li><p>bbox regression</p>
-</li>
-<li><p>smooth L1：</p>
-<ul>
-<li>L1 loss is used beyond $\beta$ to <strong>avoid over-penalizing outliers</strong></li>
-<li><p>the choice of control point is heuristic and is usually done by hyper parameter search </p>
-<script type="math/tex; mode=display">
-f(x) = \begin{cases}
-0.5 \frac{x^2}{\beta} \text{,  if  } |x| < \beta \\
-|x| - 0.5\beta \text{,  otherwise  }
-\end{cases}</script></li>
-</ul>
-</li>
-<li><p>self-adjusting control point</p>
-<ul>
-<li><p>running mean &amp; variance</p>
-<script type="math/tex; mode=display">
-  \mu_B = \frac{1}{n}\sum_{i=1}^n |x_i|\\
-  \sigma_B^2 = \frac{1}{n}\sum_{i=1}^n(|x_i|-\mu_B)^2</script></li>
-<li><p>minibatch update：m=0.9</p>
-<script type="math/tex; mode=display">
-  \mu_R = \mu_R * m + \mu_B*(1-m)\\
-  \sigma_R^2 = \sigma_R^2*m+\sigma_B^2*(1-m)</script></li>
-<li><p>control point：$[0, \hat \beta]$ clip to avoid unstable </p>
-<script type="math/tex; mode=display">
-  \beta = max(0, min(\hat \beta, \mu_R-\sigma_R^2))</script></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>mask module</p>
-<ul>
-<li><p>detection predictions are treated as mask proposals </p>
-</li>
-<li><p>extract the top N scored predictions </p>
-</li>
-<li><p>distribute the mask proposals to sample features from the appropriate layers </p>
-<script type="math/tex; mode=display">
-  k = [k_0 + log_2 \sqrt{wh}/224]</script><ul>
-<li>$k_0=4$，如果size小于224*224，proposal会被分配给P3，如果大于448*448，proposal会被分配给P5</li>
-<li>using more feature layers shows no performance boost</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>architecture </p>
-<ul>
-<li>r50&amp;r101 back：freezing all of the Batch Nor- malization layers </li>
-<li>fpn feature channel：256</li>
-<li>classification branch<ul>
-<li>4 conv layers：conv3x3+relu，channel256</li>
-<li>head：conv3x3+sigmoid，channel n_anchors*n_classes</li>
-</ul>
-</li>
-<li>regression branch<ul>
-<li>4 conv layers：conv3x3+relu，channel256</li>
-<li>head：conv3x3，channel n_anchors*4</li>
-</ul>
-</li>
-<li>aggregate the boxes to the FPN layers </li>
-<li>ROI-Align yielding 14x14 resolution features </li>
-<li><p>mask head</p>
-<ul>
-<li>4 conv layers：conv3x3</li>
-<li>a single transposed convolutional layer：convtranspose2d 2x2，to 28*28 resolution</li>
-<li>prediction head：conv1x1</li>
-</ul>
-<p><img src="/2020/05/30/RetinaNet/retinaMask.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>min side &amp; max side：800&amp;1333</li>
-<li>limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly</li>
-<li>positive/ignore/negative：0.5，0.4</li>
-<li><p>focal loss for classification</p>
-<ul>
-<li><p>gaussian initialization</p>
-</li>
-<li><p>$\alpha=0.25, \lambda=2.0$</p>
-</li>
-<li><p>$FL=-\alpha_t(1-p_t)^\lambda log(p_t)$</p>
-<script type="math/tex; mode=display">
- FL = 
- \left\{
- \begin{array}{lr}
-
- -\alpha (1-p)^{\gamma}log(p),  \  \ y=1\\
- -(1-\alpha) p^{\gamma}log(1-p),  \  \ y=0\\
-
- \end{array}
- \right.</script></li>
-<li><p>gamma项控制的是简单样本的衰减速度，alpha项控制的是正负样本比例，可以默认值下正样本的权重是0.25，负样本的权重是0.75，和想象中的给正样本更多权重不一样，因为alpha和gamma是耦合起来作用的，（可能检测场景下困难的负样本相比于正样本更少？背景就是比前景好学？不确定不确定。。。）</p>
-</li>
-</ul>
-</li>
-<li>self-adjusting L1 loss for box regression<ul>
-<li>limit running params：[0, 0.11]</li>
-</ul>
-</li>
-<li>mask loss<ul>
-<li>top-100 predicted boxes + ground truth boxes</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>inference</p>
-<ul>
-<li>box confidence threshold 0.05</li>
-<li>nms threshold 0.4</li>
-<li>use top-50 boxes for mask prediction</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>localization<ul>
-<li>pixel-level predict</li>
-<li>ad-hoc heuristics when mapping back to object-level scores</li>
-</ul>
-</li>
-<li>semantic segmentation<ul>
-<li>auxiliary task</li>
-<li>overall one-stage </li>
-<li>leveraging available supervision signals</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>monitoring pixel-wise predictions are clinically required </li>
-<li>medical annotations is commonly performed in pixel- wise  </li>
-<li>full semantic supervision <ul>
-<li>fully exploiting the available semantic segmentation signal results in significant performance gains  </li>
-</ul>
-</li>
-<li>one-stage<ul>
-<li>explicit scale variance enforced by the resampling operation in two-stage detectors is not helpful in the medical domain </li>
-</ul>
-</li>
-<li>two-stage methods<ul>
-<li>predict proposal-based segmentations </li>
-<li>mask loss is only evaluated on cropped proposal：no context gradients</li>
-<li>ROI-Align：not suggested in medical image</li>
-<li>depends on the results of region proposal：serial vs parallel</li>
-<li>gradients of the mask loss do not flow through the entire model</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>model</p>
-<ul>
-<li>back：<ul>
-<li>ResNet50 </li>
-</ul>
-</li>
-<li>fpn：<ul>
-<li>shift p3-p6 to p2-p5</li>
-<li>change sigmoid to softmax</li>
-<li>3d head channels：64</li>
-<li>anchor size：$\{P_2: 4^2, P_3: 8^2,, P_4: 16^2,, P_5: 32^2\}$</li>
-<li>3d z-scale：{1，2，4，8}，考虑到z方向的low resolution</li>
-</ul>
-</li>
-<li>segmentation supervision<ul>
-<li>p0 &amp; p1</li>
-<li>with skip connections </li>
-<li>without detection heads</li>
-<li>segmentation loss calculates on p0 logits</li>
-<li>dice + ce</li>
-</ul>
-</li>
-<li><p>h</p>
-<p><img src="/2020/05/30/RetinaNet/retinaUnet.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>weighted box clustering</p>
-<ul>
-<li><p>patch crop</p>
-</li>
-<li><p>tiling strategies &amp; model ensembling causes multi predictions per location </p>
-</li>
-<li><p>nms选了一类中score最大的box，然后抑制所有与它同类的IoU大于一定阈值的box</p>
-</li>
-<li><p>weighted box作用于这一类所有的box，计算一个融合的结果</p>
-<ul>
-<li>coordinates confidence：$o_c = \frac{\sum c_i s_i w_i}{\sum s_i w_i}$</li>
-<li><p>score confidence：$o_s = \frac{\sum s_i w_i}{\sum w_i + n_{missing * \overline w}}$</p>
-</li>
-<li><p>$w_i$：$w=f a p$</p>
-<ul>
-<li>overlap factor f：与highest scoring box的overlap</li>
-<li>area factor a：higher weights to larger boxes，经验</li>
-<li>patch center factor p：相对于patch center的正态分布</li>
-</ul>
-</li>
-<li>score confidence的分母上有一个down-weight项$n_{missing}$：基于prior knowledge预期prediction的总数得到</li>
-</ul>
-</li>
-<li><p>论文给的例子让我感觉好比nms的点</p>
-<ul>
-<li>一个cluster里面一类最终就留下一个框：解决nms一类大框包小框的情况</li>
-<li>这个location上prediction明显少于prior knowledge的类别confidence会被显著拉低：解决一个位置出现大概率假阳框的情况</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3739,7 +3313,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3752,7 +3326,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

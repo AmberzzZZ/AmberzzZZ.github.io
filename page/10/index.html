@@ -276,6 +276,820 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/05/unet-vnet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/05/unet-vnet/" itemprop="url">unet & vnet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-05T09:38:21+08:00">
+                2019-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/05/unet-vnet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/05/unet-vnet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation"><a href="#U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation" class="headerlink" title="U-NET: Convolutional Networks for Biomedical Image Segmentation"></a>U-NET: Convolutional Networks for Biomedical Image Segmentation</h2><ol>
+<li><p>动机：</p>
+<ul>
+<li>train from very few images </li>
+<li>outperforms more precisely on segmentation tasks</li>
+<li>fast</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ul>
+<li>编码：a contracting path to capture context</li>
+<li>解码：a symmetric expanding path that enables precise localization</li>
+<li>实现：pooling operators &amp; upsampling operators</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li><p>when we talk about deep convolutional networks：</p>
+<ul>
+<li>larger and deeper</li>
+<li>millions of parameters </li>
+<li>millions of training samples </li>
+</ul>
+</li>
+<li><p>representative method：run a sliding-window and predict a pixel label based on its‘ patch</p>
+</li>
+<li>drawbacks：<ul>
+<li>calculating redundancy of overlapping patches</li>
+<li>big patch：more max-pooling layers that reduce the localization accuracy</li>
+<li>small patch：less involvement of context</li>
+</ul>
+</li>
+<li>metioned but not further explained：cascade structure</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>In order to localize, high resolution features from the contracting path are combined with the upsampled output. A successive convolution layer can then learn to assemble a more precise output based on this information. </p>
+<p> 理解：深层特征层感受野较大，带有全局信息，将其上采样用于提供localization information，而横向add过来特征层带有局部特征信息。两个3*3的conv block用于将两类信息整合，输出更精确的表达。</p>
+</li>
+<li><p>In the upsampling part we have also a large number of feature channels, which allow the network to propagate context information to higher resolution layers.  </p>
+<p> 理解：应该是字面意思吧，为上采样的卷积层保留更多的特征通道，就相当于保留了更多的上下文信息。</p>
+</li>
+<li><p>we use excessive data augmentation.</p>
+</li>
+</ol>
+</li>
+<li><p>细节：</p>
+<ol>
+<li><p>contracting path：</p>
+<ul>
+<li>typical CNN：blocks of [2 3*3 unpadded convs+ReLU+2*2 stride2 maxpooling]</li>
+<li>At each downsampling step we double the number of feature channels</li>
+</ul>
+</li>
+<li><p>expansive path：</p>
+<ul>
+<li>upsampling：<ul>
+<li>2*2 up-conv that half the channels</li>
+<li>concatenation the corresponding cropped feature map from the contracting path</li>
+<li>2 [3x3 conv+ReLU]</li>
+</ul>
+</li>
+<li>final layer：use a 1*1 conv to map the feature vectors to class vectors</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/unet.png" width="60%"></p>
+</li>
+<li><p>train：</p>
+<ul>
+<li>prefer larger input size to larger batch size</li>
+<li>sgd with 0.99 momentum so that the previously seen samples dominate the optimization</li>
+</ul>
+</li>
+<li><p>loss：softmax &amp; cross entropy </p>
+</li>
+<li><p>unbalanced weight：</p>
+<ul>
+<li>pre-compute the weight map base on the frequency of pixels for a certain class </li>
+<li>add the weight for a certain element to force the learning emphasis：e.g. the small separation borders </li>
+<li>initialization：Gaussian distribution </li>
+</ul>
+</li>
+<li><p>data augmentation：</p>
+<ul>
+<li>deformations </li>
+<li>“Drop-out layers at the end of the contracting path perform further implicit data augmentation”</li>
+</ul>
+</li>
+<li><p>metrics：“warping error”, the “Rand error” and the “pixel error”  for EM segmentation challenge  and average IOU for ISBI cell tracking challenge </p>
+</li>
+<li><p>prediction：</p>
+<p>按照论文的模型结构，<strong>输入和输出的维度是不一样的</strong>——在valid padding的过程中有边缘信息损失。</p>
+<p>那么如果我们想要预测黄框内的分割结果，需要输入一张更大的图（蓝框）作为输入，在图片边缘的时候，我们通过镜像的方式补全。</p>
+<p><img src="/2019/12/05/unet-vnet/predict.png" width="60%;"></p>
+<p><strong>因果关系：</strong></p>
+<ul>
+<li>首先因为内存限制，输入的不是整张图，是图片patch，</li>
+<li>为了保留上下文信息，使得预测更准确，我们给图片patch添加一圈border的上下文信息（实际感兴趣的是黄框区域）</li>
+<li>在训练时，为了避免重叠引入的计算，卷积层使用了valid padding</li>
+<li>因此在网络的输出层，输出尺寸才是我们真正关注的部分</li>
+<li>如果训练样本尺寸不那么huge，完全可以全图输入，然后使用same padding，直接预测全图mask</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>总结：</p>
+<ul>
+<li>train from very few images —-&gt; data augmentation</li>
+<li>fast —-&gt; full convolution layers</li>
+<li>precise —-&gt; global?</li>
+</ul>
+</li>
+</ol>
+<h2 id="V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation"><a href="#V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation" class="headerlink" title="V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation"></a>V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>entire 3D volume</li>
+<li>imbalance between the number of foreground and background voxels：dice coefficient</li>
+<li>limited data：apply random non-linear transformations and histogram matching</li>
+<li>fast and accurate</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>early approaches based on patches<ul>
+<li>local context</li>
+<li>challenging modailities</li>
+<li>efficiency issues</li>
+</ul>
+</li>
+<li>fully convolutional networks<ul>
+<li>2D so far</li>
+</ul>
+</li>
+<li>imbalance issue：the anatomy of interest occupies only a very small region of the scan thus predictions are strongly biased towards the background.<ul>
+<li>re-weighting</li>
+<li>dice coefficient claims to be better that above</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ul>
+<li>a compression path</li>
+<li><p>a decompression path</p>
+<p><img src="/2019/12/05/unet-vnet/vnet.png" width="55%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ul>
+<li><p>compression：</p>
+<ul>
+<li>add residual能够加速收敛</li>
+<li>resolution is reduced by [2*2*2 conv with stride 2]相比于maxpooling节省了bp所需switch map的memory消耗</li>
+<li>double the number of feature maps as we reduce their resolution</li>
+<li>PReLU</li>
+</ul>
+</li>
+<li><p>decompression：</p>
+<ul>
+<li>horizontal connections：1) gather fine grained detail that would be otherwise lost in the compression path  2) improve the convergence time </li>
+<li><p>residual conv：blocks of [5*5*5 conv with stride 1] 提取特征继续增大感受野</p>
+<p><img src="/2019/12/05/unet-vnet/receptive.png" width="50%"></p>
+</li>
+<li><p>up-conv：expands the spatial support of the lower resolution feature maps </p>
+<p><img src="/2019/12/05/unet-vnet/deconv.png" width="60%"></p>
+</li>
+<li><p>last layer：run [1*1*1conv with 2 channel+softmax] to obtain the voxelwise probabilistic segmentations of the foreground and background </p>
+</li>
+</ul>
+</li>
+<li><p>dice coefficient： [0,1] which we aim to maximise，assume $p_i$、$g_i$ belong to two <strong>binary volumes</strong></p>
+<script type="math/tex; mode=display">
+  D = \frac{2\sum_i^N p_i g_i}{\sum_i^N p_i^2 + \sum_i^N g_i^2}</script></li>
+<li><p>train：</p>
+<ul>
+<li>input fix size 128 × 128 × 64 voxels and a spatial resolution of 1 × 1 × 1.5 millimeters</li>
+<li>each mini-batch contains 2 volumes</li>
+<li>online augmentation：<ul>
+<li>randomly deformation</li>
+<li>vary the intensity distribution：随机选取样本的灰度分布作为当前训练样本的灰度分布</li>
+</ul>
+</li>
+<li>used a momentum of 0.99 and a initial learning rate of 0.0001 which decreases by one order of magnitude every 25K iterations</li>
+</ul>
+</li>
+<li><p>metrics：</p>
+<ul>
+<li>Dice coefficient</li>
+<li>Hausdorff distance of the predicted delineation to the ground truth annotation</li>
+<li>the score obtained on the challenge </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="dice-loss-amp-focal-loss"><a href="#dice-loss-amp-focal-loss" class="headerlink" title="dice loss &amp; focal loss"></a>dice loss &amp; focal loss</h2><ol>
+<li><p>CE &amp; BCE</p>
+<ul>
+<li><p>CE：categorical_crossentropy，针对所有类别计算，类别间互斥</p>
+<script type="math/tex; mode=display">
+CE(x) = -\sum_{i=1}^{n\_class}y_i log f_i(x)</script><blockquote>
+<p>$x$是输入样本，$y_i$是第$i$个类别对应的真实标签，$f_i(x)$是对应的模型输出值。</p>
+<p>对分类问题，$y_i$是one-hot，$f_i(x)$是个一维向量。最终得到一个数值。</p>
+</blockquote>
+</li>
+<li><p>BCE：binary_crossentropy，针对每个类别计算</p>
+<script type="math/tex; mode=display">
+BCE(x)_i = - [y_i log f_i(x) + (1-y_i)log(1-f_i(x))]</script><blockquote>
+<p>$i$是类别编号，最终得到一个维度为$n_class$的向量。</p>
+<p>再求类均值得到一个数值作为单个样本的loss。</p>
+</blockquote>
+<script type="math/tex; mode=display">
+BCE(x) = \frac{\sum_{i=1}^{n\_class}BCE_i(x)}{n\_class}</script></li>
+<li><p>batch loss：对batch中所有样本的loss求均值。</p>
+</li>
+<li><p>从公式上看，CE的输出通常是经过了softmax，softmax的某一个输出增大，必然导致其它类别的输出减小，因此在计算loss的时候关注正确类别的预测值是否被拉高即可。使用BCE的场景通常是使用sigmoid，类别间不会互相压制，因此既要考虑所属类别的预测概率够高，也要考虑不所属类别的预测概率足够低（这一项在softmax中被实现了故CE不需要这一项）。</p>
+</li>
+<li>场景：<ul>
+<li>二分类：只有一个输出节点，$f(x) \in (0,1)$，应该使用sigmoid+BCE作为最后的输出层配置。</li>
+<li>单标签多分类：应该使用softmax+CE的方案，BCE也同样适用。</li>
+<li>多标签多分类：multi-label每个标签的输出是相互独立的，因此常用配置是sigmoid+BCE。</li>
+</ul>
+</li>
+<li>对分割场景来说，输出的每一个channel对应一个类别的预测map，可以看成是多个channel间的单标签多分类（softmax+CE），也可以看成是每个独立通道类别map的二分类（sigmoid+BCE）。unet论文用了weighted的softmax+CE。vnet论文用了dice_loss。</li>
+</ul>
+</li>
+<li><p>re-weighting(WCE)</p>
+<p> 基于CE&amp;BCE，给了样本不同的权重。</p>
+<p> unet论文中提到了基于pixel frequency为不同的类别创建了weight map。</p>
+<p> 一种实现：基于每个类别的weight map，在实现CE的时候改成加权平均即可。</p>
+<p> 另一种实现：基于每个样本的weight map，作为网络的附加输入，在实现CE的时候乘在loss map上。</p>
+</li>
+<li><p>focal loss</p>
+<p> 提出是在目标检测领域，用于解决正负样本比例严重失调的问题。</p>
+<p> 也是一种加权，但是相比较于re-weighting，<strong>困难样本的权重由网络自行推断出</strong>，通过添加$(\alpha)$和$(-)^\lambda$这一加权项：</p>
+<script type="math/tex; mode=display">
+ focal\_loss(x)_i = -[\alpha y_i (1-p_i)^\lambda log (p_i)+(1-\alpha)(1-y_i)p_i^\lambda log(1-p_i)]</script><ul>
+<li><p>对于类别间不均衡的情况（通常负样本远远多于正样本），$(\alpha)$项用于平衡正负样本权重。</p>
+</li>
+<li><p>对于类内困难样本的挖掘，$(-)^\lambda$项用于调整简单样本和困难样本的权重，预测概率更接近真实label的样本（简单样本）的权重会衰减更快，预测概率比较不准确的样本（苦难样本）的权重则更高些。</p>
+<p>由于分割网络的输出的单通道／多通道的图片，直接使用focal loss会导致loss值很大。</p>
+<p>​    1. 通常与其他loss加权组合使用</p>
+<p>​    2. sum可以改成mean</p>
+<p>​    3.不建议在训练初期就加入，可在训练后期用于优化模型</p>
+<p>​    4. 公式中含log计算，可能导致nan，要对log中的元素clip</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    gamma = <span class="number">2.</span></span><br><span class="line">    alpha = <span class="number">0.25</span></span><br><span class="line">    <span class="comment"># score = alpha * y_true * K.pow(1 - y_pred, gamma) * K.log(y_pred) +            # this works when y_true==1</span></span><br><span class="line">    <span class="comment">#         (1 - alpha) * (1 - y_true) * K.pow(y_pred, gamma) * K.log(1 - y_pred)  # this works when y_true==0</span></span><br><span class="line">    pt_1 = tf.where(tf.equal(y_true, <span class="number">1</span>), y_pred, tf.ones_like(y_pred))</span><br><span class="line">    pt_0 = tf.where(tf.equal(y_true, <span class="number">0</span>), y_pred, tf.zeros_like(y_pred))</span><br><span class="line">    <span class="comment"># avoid nan</span></span><br><span class="line">    pt_1 = K.clip(pt_1, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    pt_0 = K.clip(pt_0, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    score = -K.sum(alpha * K.pow(<span class="number">1.</span> - pt_1, gamma) * K.log(pt_1)) -  \</span><br><span class="line">            K.sum((<span class="number">1</span> - alpha) * K.pow(pt_0, gamma) * K.log(<span class="number">1.</span> - pt_0))</span><br><span class="line">    <span class="keyword">return</span> score</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>dice loss</p>
+<p>dice定义两个mask的相似程度：</p>
+<script type="math/tex; mode=display">
+dice = \frac{2 * A \bigcap B}{|A|+|B|} = \frac{2 * TP}{2*TP + FN + FP}</script><ul>
+<li>分子是TP——只关注前景</li>
+<li><p>分母可以是$|A|$（逐个元素相加），也可以是平方形式$|A|^2$</p>
+</li>
+<li><p><strong>梯度：</strong>“使用dice loss有时会不可信，原因是对于softmax或log loss其梯度简言之是p-t ，t为目标值，p为预测值。而dice loss 为 2t2 / (p+t)2</p>
+<p> 如果p，t过小会导致梯度变化剧烈，导致训练困难。”</p>
+<p> 【详细解释下】交叉熵loss：$L=-(1-|t-p|)log(1-|t-p|)$，求导得到$\frac{\partial L}{\partial p}=-log(1-|t-p|)$，其实就可以简化看作$t-p$，很显然这个梯度是有界的，因此使用交叉熵loss的优化过程比较稳定。而dice loss的两种形式（不平方&amp;平方）：$L=\frac{2pt}{p+t}\ or\  L=\frac{2pt}{p^2+t^2}$，求导以后分别是$\frac{\partial L}{\partial p} = \frac{t^2+2pt}{(p+t)^2} \ or\ \frac{3tp^2+t^3}{(p^2+t^2)^2}$计算结果比较复杂，pt都很小的情况下，梯度值可能很大，可能导致训练不稳定，loss曲线混乱。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>  vnet论文中的定义在分母上稍有不同（see below）。smoothing的好处：</p>
+<ul>
+<li>避免分子除0</li>
+<li><p>减少过拟合</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">  	smooth = <span class="number">1.</span></span><br><span class="line">    intersection = K.sum(y_true * y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    union = K.sum(y_true, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) + K.sum(y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    <span class="keyword">return</span> K.mean( (<span class="number">2.</span> * intersection + smooth) / (union + smooth), axis=<span class="number">0</span>) </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef_loss</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">    <span class="number">1</span> - dice_coef(y_true, y_pred, smooth=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol>
+<li><p>iou loss</p>
+<p> dice loss衍生，intersection over union：</p>
+<script type="math/tex; mode=display">
+ iou = \frac{A \bigcap B}{A \bigcup B}</script><p> 分母上比dice少了一个intersection。</p>
+<ul>
+<li>“IOU loss的缺点同DICE loss，训练曲线可能并不可信，训练的过程也可能并不稳定，有时不如使用softmax loss等的曲线有直观性，通常而言softmax loss得到的loss下降曲线较为平滑。”</li>
+</ul>
+</li>
+<li><p>boundary loss</p>
+<p> dice loss和iou loss是基于<strong>区域面积匹配度</strong>去学习，我们也可以使用<strong>边界匹配度</strong>去监督网络的学习。</p>
+<p> 只对边界上的像素进行评估，和GT的边界吻合则为0，不吻合的点，根据其距离边界的距离评估它的Loss。</p>
+</li>
+<li><p>Hausdorff distance</p>
+<p> 用于度量两个点集之间的相似程度，denote 点集$A\{a_1, a_2, …, a_p\}$，点集$B\{b_1, b_2, …, b_p\}$：</p>
+<script type="math/tex; mode=display">
+ HD(A, B) = max\{hd(A,B), hd(B,A)\}\\
+ hd(A,B) = max_{a \in A} min_{b in B} ||a-b||\\
+ hd(B,A) = max_{b \in B} min_{a in A} ||b-a||</script><p> 其中HD(A,B)是Hausdorff distance的基本形式，称为双向距离</p>
+<p> hd(A,B)描述的是单向距离，首先找到点集A中每个点在点集B中距离最近的点作为匹配点，然后计算这些a-b-pair的距离的最大值。</p>
+<p> HD(A,B)取单向距离中的最大值，描述了两个点集合的最大不匹配程度。</p>
+</li>
+<li><p>mix loss</p>
+<ul>
+<li>BCE + dice loss：在数据较为平衡的情况下有改善作用，但是在数据极度不均衡的情况下，交叉熵损失会在几个训练之后远小于Dice 损失，效果会损失。</li>
+<li>focal loss + dice loss：数量级问题</li>
+</ul>
+</li>
+<li><p>MSE</p>
+<p> 关键点检测有时候也会采用分割框架，这时候ground truth是高斯map，dice是针对二值化mask的，这时候还可以用MSE。</p>
+</li>
+<li><p>ohnm</p>
+<p>online hard negative mining 困难样本挖掘</p>
+</li>
+<li><p>Tversky loss</p>
+<p>一种加权的dice loss，dice loss会平等的权衡FP（精度，假阳）和FN（召回，假阴），但是医学图像中病灶数目远少于背景数量，很可能导致训练结果偏向高精度但是低召回率，Tversky loss控制loss更偏向FN：</p>
+<script type="math/tex; mode=display">
+loss = 1-\frac{|PG|}{|PG|+\alpha|P\backslash G|+\beta|G\backslash P|}</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tversky_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    y_true_pos = K.flatten(y_true)</span><br><span class="line">    y_pred_pos = K.flatten(y_pred)</span><br><span class="line">    <span class="comment"># TP</span></span><br><span class="line">    true_pos = K.sum(y_true_pos * y_pred_pos)</span><br><span class="line">    <span class="comment"># FN</span></span><br><span class="line">    false_neg = K.sum(y_true_pos * (<span class="number">1</span>-y_pred_pos))</span><br><span class="line">    <span class="comment"># FP</span></span><br><span class="line">    false_pos = K.sum((<span class="number">1</span>-y_true_pos) * y_pred_pos)</span><br><span class="line">    alpha = <span class="number">0.7</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> - (true_pos + K.epsilon())/(true_pos + alpha * false_neg + (<span class="number">1</span>-alpha) * false_pos + K.epsilon())</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Lovasz hinge &amp; Lovasz-Softmax loss</p>
+<p>IOU loss衍生，jaccard loss只适用于离散情况，而网络预测是连续值，如果不使用某个超参将神经元输出二值化，就不可导。blabla</p>
+<p>不是很懂直接用吧：<a href="https://github.com/bermanmaxim/LovaszSoftmax" target="_blank" rel="noopener">https://github.com/bermanmaxim/LovaszSoftmax</a></p>
+</li>
+</ol>
+<h2 id="一些补充"><a href="#一些补充" class="headerlink" title="一些补充"></a>一些补充</h2><ol>
+<li><p>改进：</p>
+<ol>
+<li>dropout、batch normalization：从论文上看，unet只在最深层卷积层后面添加了dropout layer，BN未表，而common sense用每一个conv层后面接BN层能够替换掉dropout并能获得性能提升的。</li>
+<li>UpSampling2D、Conv2DTranspose：unet使用了上采样，vnet使用了deconv，但是“DeConv will produce image with checkerboard effect, which can be revised by upsample and conv”(<a href="https://distill.pub/2016/deconv-checkerboard/" target="_blank" rel="noopener">Reference</a>)。</li>
+<li>valid padding、same padding：unet论文使用图像patch作为输入，特征提取时使用valid padding，损失边缘信息。</li>
+<li>network blocks：unet用的conv block是两个一组的3*3conv，vnet稍微不同一点，可以尝试的block有ResNet／ResNext、DenseNet、DeepLab等。</li>
+<li>pretrained encoder：feature extraction path使用一些现有的backbone，可以加载预训练权重(<a href="https://arxiv.org/abs/1801.05746" target="_blank" rel="noopener">Reference</a>)，加速训练，防止过拟合。</li>
+<li>加入SE模块(<a href="https://zhuanlan.zhihu.com/p/36890585" target="_blank" rel="noopener">Reference</a>)：对每个通道的特征加权</li>
+<li>attention mechanisms：</li>
+<li>引用nn-Unet主要<strong>结构改进</strong>合集：“Just to provide some prominent examples: variations of encoder-decoder style architectures with skip connections, first introduced by the U-Net [12], include the introduction of residual connections [9], dense connections [6], at- tention mechanisms [10], additional loss layers [5], feature recalibration [13], and others [11]. </li>
+</ol>
+</li>
+<li><p>衍生：</p>
+<ol>
+<li><p>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation </p>
+</li>
+<li><p>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation"><a href="#TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation" class="headerlink" title="TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation"></a>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation</h2><ol>
+<li><p>动机：</p>
+<ul>
+<li>neural network initialized with pre-trained weights usually shows better performance than those trained from scratch on a small dataset. </li>
+<li>保留encoder-decoder的结构，同时充分利用迁移学习的优势</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>load pretrained weights</li>
+<li>用huge dataset做预训练</li>
+</ul>
+</li>
+<li><p>方法：</p>
+<ul>
+<li>用vgg11替换原始的encoder，并load pre-trained weights on ImageNet：</li>
+<li>最深层输入(maxpooling5)：use a single conv of 512 channels that <strong>serves as a bottleneck central part</strong> of the network</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/TernausNet.png" width="50%;">                      <img src="/2019/12/05/unet-vnet/vgg11.png" width="30%;"></p>
+<ul>
+<li><p>upsampling换成了convTranspose</p>
+</li>
+<li><p>loss function：IOU + BCE：</p>
+<script type="math/tex; mode=display">
+ L = BCE - log(IOU)</script></li>
+<li><p>inference：choose a <strong>threshold 0.3</strong>, all pixel values below which are set to be zero</p>
+</li>
+</ul>
+</li>
+<li><p>结论：</p>
+<ol>
+<li>converge faster</li>
+<li>better IOU</li>
+</ol>
+</li>
+</ol>
+<h2 id="nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation"><a href="#nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation" class="headerlink" title="nnU-Net: Breaking the Spell on Successful Medical Image Segmentation"></a>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>many proposed methods fail to generalize: 对于分割任务，从unet出来之后的几年里，在网络结构上已经没有多少的突破了，结构修改越多，反而越容易过拟合</li>
+<li>relies on just a simple U-Net architecture embedded in a robust training scheme</li>
+<li>automate necessary adaptations such as preprocessing, the exact patch size, batch size, and inference settings based on the properties of a given dataset: 更多的提升其实在于理解数据，针对数据采用适当的预处理和训练方法和技巧</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>the diversity and individual peculiarities of imaging datasets make it difficult to generalize </li>
+<li>prominent modifications focus on architectural modifications, merely brushing over all the other hyperparameters</li>
+<li>we propose: 使用基础版unet：nnUNet（no-new-Net）<ul>
+<li>a formalism for automatic adaptation to new datasets</li>
+<li>automatically designs and executes a network training pipeline </li>
+<li>without any manual fine-tuning</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素</p>
+<p>a segmentation task: $f_{\theta}(X) = \hat Y$,  in this paper we seek for a $g(X,Y)=\theta$.</p>
+<p>First we distinguish two type of hyperparameters:</p>
+<ul>
+<li>static params：in this case the network architecture and a robust training scheme </li>
+<li>dynamic params：those that need to be changed in dependence of $X$ and $Y$</li>
+</ul>
+<p>Second we define g——a set of heuristics rules covering the entire process of the task:</p>
+<ul>
+<li>预处理：resampling和normalization</li>
+<li>训练：loss，optimizer设置、数据增广</li>
+<li>推理：patch-based策略、test-time-augmentations集成和模型集成等</li>
+<li>后处理：增强单连通域等</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ol>
+<li><p>Preprocessing</p>
+<ul>
+<li>Image Normalization：<ul>
+<li>CT：$normed_intensity = (intensity  - fg_mean) / fg_standard_deviation$,   $fg$ for $[0.05,0.95]$ foreground intensity</li>
+<li>not CT：$normed_intensity = (intensity  - mean) / standard_deviation $</li>
+</ul>
+</li>
+<li>Voxel Spacing：<ul>
+<li>for each axis chooses the median as the target spacing</li>
+<li>image resampled with third order spline interpolation</li>
+<li>z-axis using nearest neighbor interpolation if ‘anisotropic spacing’ occurs</li>
+<li>mask resampled with third order spline interpolation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training Procedure </p>
+<ul>
+<li><p>Network Architecture：</p>
+<ul>
+<li><p>3 <strong>independent</strong> model：a 2D U-Net, a 3D U-Net and a cascade of two 3D U-Net  </p>
+<p>  <img src="/2019/12/05/unet-vnet/nnUnet.jpg" width="80%;"></p>
+</li>
+<li><p>padded convolutions：to achieve identical output and input shapes </p>
+</li>
+<li><p><strong>instance normalization</strong>：“BN适用于判别模型，比如图片分类模型。因为BN注重对每个batch进行归一化，从而保证数据分布的一致性，而判别模型的结果正是取决于数据整体分布。但是BN对batchsize的大小比较敏感，由于每次计算均值和方差是在一个batch上，所以如果batchsize太小，则计算的均值、方差不足以代表整个数据分布；IN适用于生成模型，比如图片风格迁移。因为图片生成的结果主要依赖于某个图像实例，所以对整个batch归一化不适合图像风格化，在风格迁移中使用Instance Normalization不仅可以加速模型收敛，并且可以保持每个图像实例之间的独立。”</p>
+</li>
+<li><p>Leaky ReLUs</p>
+</li>
+</ul>
+</li>
+<li><p>Network Hyperparameters：</p>
+<ul>
+<li>sets the batch size, patch size and number of pooling operations for each axis based on the memory consumption </li>
+<li>large patch sizes are favored over large batch sizes </li>
+<li>pooling along each axis is done until the voxel size=4</li>
+<li>start num of filters=30, double after each pooling</li>
+<li>If the selected patch size covers less than 25% of the voxels, train the 3D U-Net cascade on a downsampled version of the training data  to keep sufficient context </li>
+</ul>
+</li>
+<li><p>Network Training:</p>
+<ul>
+<li>five-fold cross-validation </li>
+<li>One epoch is defined as processing 250 batches </li>
+<li>loss = dice loss + cross-entropy loss </li>
+<li>Adam(lr=3e-4, decay=3e-5)</li>
+<li>lrReduce: EMA(train_loss), 30 epoch, factor=0.2</li>
+<li>earlyStop: earning rate drops below 10 6 or 1000 epochs are exceeded</li>
+<li>data augmentation: elastic deformations, random scaling and random rotations as well as <strong>gamma augmentation</strong>($g(x,y)=f(x,y)^{gamma}$)</li>
+<li>keep transformations in 2D-plane if ‘anisotropic spacing’ occurs</li>
+</ul>
+</li>
+<li><p>Inference </p>
+<ul>
+<li>sliding window with half the patch size: this increases the weight of the predictions close to the center relative to the borders</li>
+<li>ensemble:<ul>
+<li>U-Net configurations (2D, 3D and cascade)</li>
+<li>furthermore uses the five models (five-fold cross-validation)</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>Ablation studies</p>
+<p><img src="/2019/12/05/unet-vnet/nn-Unet Ablation studies.png" width="70%;"></p>
+</li>
+</ol>
+<h2 id="3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation"><a href="#3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation" class="headerlink" title="3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation"></a>3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learns from sparsely/full annotated volumetric images (user annotates some slices)</li>
+<li>provides a dense 3D segmentation </li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>要素</p>
+<ul>
+<li>3D operations </li>
+<li>avoid bottlenecks and use batch normalization for faster convergence</li>
+<li>on-the-fly elastic deformation</li>
+<li>train from scratch</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>neighboring slices show almost the same information </li>
+<li>many biomedical applications generalizes reasonably well because medical images comprises repetitive structures  </li>
+<li>thus we suggest dense-volume-segmentation-network that only requires some annotated 2D slices for training</li>
+<li><p>scenarios</p>
+<ul>
+<li>manual annotated 一部分slice，然后训练网络实现dense seg</li>
+<li>用一部分 sparsely annotated的dataset作为training set，然后训练的网络实现在新的数据集上dense seg</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/scenarios.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Network Architecture </p>
+<ul>
+<li><p>compression：2*3x3x3 convs(+BN)+relu+2x2x2 maxpooling</p>
+</li>
+<li><p>decompression：2x2x2 upconv+2*3x3x3 convs+relu</p>
+</li>
+<li><p>head：1x1x1 conv</p>
+</li>
+<li><p>concat shortcut connections</p>
+</li>
+<li><p>【QUESTION】avoid bottlenecks by doubling the number of channels already before max pooling</p>
+<p>  个人理解这个double channel是在跟原始的unet结构对比，原始unet每个stage的两个conv的filter num是一样的，然后进行max pooling会损失部分信息，但是分割任务本身是个dense prediction，所以增大channel来减少信息损失</p>
+<p>  但是不理解什么叫“avoid bottlenecks”</p>
+<p>  原文说是参考了《Rethinking the inception architecture for computer vision》大名鼎鼎的inception V3</p>
+<p>  可能对应的是“1. Avoid representational bottlenecks, especially early in the network.”，从输入到输出，要逐渐减少feature map的尺寸，同时要逐渐增加feature map的数量。</p>
+</li>
+</ul>
+<p><img src="/2019/12/05/unet-vnet/3Dunet.png" width="50%;"></p>
+<ul>
+<li>input：132x132x116 voxel tile </li>
+<li>output：44x44x28</li>
+<li>BN：before each ReLU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p><strong>weighted softmax loss function</strong>：setting the weights of unlabeled pixels to zero makes it possible to learn from only the labelled ones and, hence, to generalize to the whole volume（是不是random set the loss zeros of some samples总能让网络更好的generalize？）</p>
+<ul>
+<li><p>Data</p>
+<ul>
+<li>manually annotated some orthogonal xy, xz, and yz slices </li>
+<li>annotation slices were sampled uniformly</li>
+</ul>
+</li>
+<li><p>ran on down-sampled versions of the original resolution by factor of two </p>
+</li>
+<li><p>labels：0: “inside the tubule”; 1: “tubule”; 2: “background”, and 3: “unlabeled”.  </p>
+</li>
+<li><p>Training</p>
+<ul>
+<li>rotation, scaling and gray value augmentation</li>
+</ul>
+</li>
+<li>a smooth dense deformation：random vector, normal distribution, B-spline interpolation <ul>
+<li>weighted cross-entropy loss：increase weights  “inside the tubule”, reduce weights “background”, set zero “unlabeled”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss"><a href="#2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss" class="headerlink" title="2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss"></a>2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss</h2><ol>
+<li><p>专业术语</p>
+<ul>
+<li>Vestibular Schwannoma(VS) tumors：前庭神经鞘瘤</li>
+<li>through-plane resolution：层厚</li>
+<li>isotropic resolution：各向同性</li>
+<li>anisotropic resolutions：各向异性</li>
+</ul>
+</li>
+<li><p>动机</p>
+<ul>
+<li><p>tumor的精确自动分割</p>
+</li>
+<li><p>challenge</p>
+<ul>
+<li>low contrast：hardness-weighted Dice loss functio </li>
+<li>small target region：attention module </li>
+<li>low through-plane resolution：2.5D</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>segment small structures from large image contexts<ul>
+<li>coarse-to-fine </li>
+<li>attention map </li>
+<li>Dice loss </li>
+<li>our method<ul>
+<li>end-to-end supervision on the learning of attention map </li>
+<li>voxel-level hardness- weighted Dice loss function </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CNN<ul>
+<li>2D CNNs ignore inter-slice correlation </li>
+<li>3D CNNs most applied to images with isotropic resolution requiring upsampling</li>
+<li>to balance the physical receptive field (in terms of mm rather than voxels)：memory rise</li>
+<li>our method<ul>
+<li>high in-plane resolution &amp; low through-plane resolution </li>
+<li>2.5D CNN combining 2D and 3D convolutions </li>
+<li>use inter-slice features </li>
+<li>more efficient than 3D CNNs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>数据<ul>
+<li>T2-weighted MR images of 245 patients with VS tumor</li>
+<li>high in-plane resolution around 0.4 mm×0.4 mm，512x512</li>
+<li>slice thickness and inter-slice spacing 1.5 mm，slice number 19 to 118</li>
+<li>cropped cube size：100 mm×50 mm×50 mm </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<ul>
+<li>five levels：L1、L2 use 2D，L3、L4、L5 use 3D</li>
+<li>After the first two max-pooling layers that downsample the feature maps only in 2D, the feature maps in L3 and the followings have a near- isotropic 3D resolution.  </li>
+<li>start channels：16</li>
+<li>conv block：conv-BN-pReLU</li>
+<li><p>add a spatial attention module to each level of the decoder </p>
+<p><img src="/2019/12/05/unet-vnet/2.5D UNet.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>spatial attention module </p>
+<ul>
+<li>A spatial attention map can be seen as a single-channel image of attention coefficient </li>
+<li>input：feature map with channel $N_l$</li>
+<li>conv1+ReLU： channel $N_l/2$</li>
+<li>conv2+Sigmoid：channel 1，outputs the attention map</li>
+<li>multiplied the feature map with the attention map</li>
+<li>a residual connection</li>
+<li>explicit supervision <ul>
+<li>multi-scale attention loss </li>
+<li>$L_{attention} = \frac{1}{L} \sum_{L} l(A_l, G_l^f)$</li>
+<li>$A_l$是每一层的attention map，$G_l^f$是每一层是前景ground truth average-pool到当前resolution的mask</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Voxel-Level Hardness-Weighted Dice Loss</p>
+<ul>
+<li><p>automatic hard voxel weighting：$w_i = \lambda * abs(p_i - g_i) + (1-\lambda)$</p>
+</li>
+<li><p>$\lambda \in [0,1]$，controls the degree of hard voxel weighting</p>
+</li>
+<li><p>hardness-weighted Dice loss (HDL) ：</p>
+<script type="math/tex; mode=display">
+  l(P,G) = 1.0 - \frac{1}{C}\sum_{C} \frac{2\sum_i w_i p_i g_i + \epsilon}{\sum_i w_i (p_i + g_i) + \epsilon}</script></li>
+<li><p>total loss：</p>
+<script type="math/tex; mode=display">
+  L = \frac{1}{L} \sum_{L} l(A_l, G_l^f) + l(P,G)</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning"><a href="#Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning" class="headerlink" title="Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning"></a>Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning</h2><p>只有摘要和一幅图</p>
+<p><img src="/2019/12/05/unet-vnet/two-pathway-unet.jpg" width="80%;"></p>
+<ul>
+<li>multi-parametric MR images：T1W、T2W、T1C</li>
+<li>two-pathway U-Net model<ul>
+<li>kernel 3 × 3 × 1 and 1 × 1 × 3 respectively</li>
+<li>to extract the in-plane and through-plane features of the anisotropic MR images</li>
+</ul>
+</li>
+<li>结论<ul>
+<li>The proposed two-pathway U-Net model outperformed the single-pathway U-Net model when segmenting VS using anisotropic MR images.</li>
+<li>multi-inputs（T1、T2）outperforms single-inputs</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/28/yolo系列/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2987,171 +3801,6 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/29/ssh-visualization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/29/ssh-visualization/" itemprop="url">ssh visualization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-29T18:33:00+08:00">
-                2018-12-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/29/ssh-visualization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/29/ssh-visualization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>ssh boocax@192.168.1.100</p>
-<p>密码：robot123</p>
-</li>
-<li><p>echo $ROS_MASTER_URI</p>
-<p>查看端口号11311</p>
-</li>
-<li><p>小车端：</p>
-<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
-<p>export ROS_IP=192.168.1.100</p>
-</li>
-<li><p>虚拟机端：</p>
-<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
-<p>export ROS_IP=172.16.128.142</p>
-</li>
-</ol>
-<h4 id=""><a href="#" class="headerlink" title=" "></a> </h4><h6 id="-1"><a href="#-1" class="headerlink" title="#"></a>#</h6><h4 id="-2"><a href="#-2" class="headerlink" title=" "></a> </h4><ol>
-<li><p>nav远程开启三个终端（代码重构以前）：</p>
-<p>move_base: roslaunch teleop_twist_joy real_nav.launch </p>
-<p>mapserver: rosrun map_server map_server catkin_ws2/src/patrol/map/p1.yaml </p>
-<p>amcl: roslaunch patrol real_loc.launch </p>
-</li>
-<li><p>本地可视化：rviz／rqt_graph / rosservice call /rostopic pub</p>
-<ul>
-<li><p>全局定位：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call /global_localization "&#123;&#125;"</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>设置导航目标点：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 相对base_link坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "base_link" &#125;, pose: &#123; position: &#123; x: 0.5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br><span class="line"></span><br><span class="line">// 相对map坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "map" &#125;, pose: &#123; position: &#123; x: 5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br></pre></td></tr></table></figure>
-<p>注意<strong>-1</strong>，否则循环发布。</p>
-</li>
-</ul>
-</li>
-</ol>
-<h4 id="-3"><a href="#-3" class="headerlink" title=" "></a> </h4><h6 id="-4"><a href="#-4" class="headerlink" title="#"></a>#</h6><h4 id="-5"><a href="#-5" class="headerlink" title=" "></a> </h4><p>往回备份：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r boocax@192.168.1.100:/home/boocax/catkin_ws2019 bkp/</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3206,7 +3855,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3219,7 +3868,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

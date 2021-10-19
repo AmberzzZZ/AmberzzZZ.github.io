@@ -90,7 +90,12 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/graph-conv-layer.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/gcn.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/GCN-CNN.png">
-<meta property="og:updated_time" content="2021-07-12T10:22:54.927Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/acc1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/acc2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/conv.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/adj.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/GCN/cls.png">
+<meta property="og:updated_time" content="2021-10-18T07:35:38.438Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GCN">
 <meta name="twitter:description" content="reference：https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A  图  $G = (V,E)$：节点 &amp;amp; 边，连通图 &amp;amp; 孤立点 邻接矩阵A：NxN，有向 &amp;amp; 无向 度矩阵D：NxN对角矩阵，每个节点连接的节点 特征矩阵X：NxF，每个1-dim F是每个节点的特征向量   特征学习  可以类比CNN：对其邻域（ker">
@@ -425,8 +430,9 @@
 </ul>
 </li>
 <li><p>应用场景</p>
-<p> [半监督 GCN]：SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</p>
-<p> [skin GCN]：Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</p>
+<p> [半监督分类GCN]：SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS，提出GCN</p>
+<p> [skin GCN]：Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks，体素，一个单独的基于图的相关性分支，给feature加权</p>
+<p> [Graph Attention]：Graph Attention Networks，图注意力网络</p>
 </li>
 </ol>
 <h2 id="Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><a href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks" class="headerlink" title="Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks"></a>Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</h2><ol>
@@ -434,14 +440,12 @@
 <ul>
 <li>皮肤病：发病率高，experts少</li>
 <li>differential diagnosis：鉴别诊断，就是从众多疾病类别中跳出正确类别</li>
-<li>timely and accurate</li>
+<li>still challenging：timely and accurate</li>
 <li>propose a DLS(deep learning system)<ul>
 <li>clinical images</li>
 <li>multi-label classification</li>
-<li>80 conditions</li>
-<li>incomplete image labels</li>
-<li>GCN</li>
-<li>Co-occurrence supervision</li>
+<li>80 conditions，覆盖病种</li>
+<li>labels incompleteness：用GCN建模成Co-occurrence supervision，benefit top5</li>
 </ul>
 </li>
 </ul>
@@ -450,10 +454,10 @@
 <ul>
 <li>google的DLS<ul>
 <li>26中疾病</li>
-<li>建模成multi-class classification problem：破坏了类别间的correlation</li>
+<li>建模成multi-class classification problem：非0即1的多标签表达破坏了类别间的correlation</li>
 </ul>
 </li>
-<li>our DLS<ul>
+<li>our DLS：GCN-CNN<ul>
 <li>multi-label classification task over 80 conditions</li>
 <li>incomplete image labels：GCN that characterizes label co-occurrence supervision</li>
 <li>combine the classification network with the GCN</li>
@@ -463,18 +467,14 @@
 </li>
 <li>GCN<ul>
 <li>original application：<ul>
-<li>nodes classification，only a small subset of nodes had their labels available</li>
+<li>nodes classification，only a small subset of nodes had their labels available：半监督文本分类问题，只有一部分节点用于训练</li>
 <li>the graph structure is contructed from data</li>
 </ul>
 </li>
 <li>ML-GCN：<ul>
 <li>multi-label classification task</li>
-<li>图网络接收的输入是CNN学到的feature，而不是raw image</li>
-</ul>
-</li>
-<li>graph structure<ul>
-<li>节点代表labels</li>
-<li>边label_i —&gt; label_j表示当label_i激活的时候，label_j也激活</li>
+<li>correlation map（图结构）则是通过数据直接建立</li>
+<li>图节点是每个类别的semantic embeddings</li>
 </ul>
 </li>
 </ul>
@@ -483,10 +483,10 @@
 </li>
 <li><p>方法</p>
 <ul>
-<li><p>overview of our GCN-CNN approach</p>
+<li><p>overview</p>
 <ul>
 <li>一个trainable的CNN，将图片转化成feature vector</li>
-<li>一个GCN branch，propagates label co-occurrence and semantic embedding</li>
+<li>一个GCN branch：两层图卷积，都是order-1，图结构是基于训练集计算，无向图，encoding的是图像labels之间的dependency，用它 implicitly supervises the classification task</li>
 <li><p>然后两个feature vector相乘，给出最终结果</p>
 <p><img src="/2021/01/18/GCN/GCN-CNN.png" width="60%;"></p>
 </li>
@@ -495,15 +495,160 @@
 <li><p>GCN branch </p>
 <ul>
 <li>two graph convolutional (GC) layers</li>
-<li>use the k-th order filter of spectral graph convolution</li>
-<li>GCN-1 takes order 1，convolves on direct neighbors</li>
-<li>GCN-2 takes order 2，convolves on direct neighbors &amp; indirect neighbors</li>
-<li>avoids over smoothing labe nodes</li>
-<li>build co-occurence graph using only training data<ul>
+<li>一种estimated图结构：build co-occurence graph using only training data<ul>
 <li>node embed semantic meaning to labels</li>
 <li>边的值定义有点像类别间的相关性强度：$e_{ij} = 1(\frac{C(i,j)}{C(i)+C(j)} \geq t)$，分子是有两种标签的样本量，分母是各自样本量</li>
 </ul>
 </li>
+<li>一种designed图结构：intial value是基于有经验的专家构建</li>
+<li>node representation<ul>
+<li>graph branch的输入 label embedding</li>
+<li>用了BioSentVec，一个基于生物医学语料库训练的word bag</li>
+</ul>
+</li>
+<li>GCN<ul>
+<li>randomly initialize</li>
+<li>GCN-0：dim 700</li>
+<li>GCN-1：dim 1024</li>
+<li>GCN-2：dim 2048</li>
+<li>最终得到(cls,2048)的node features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>cls branch</p>
+<ul>
+<li>input：downsized to 448x448</li>
+<li>resnet101：执行到FC-2048，作为image features</li>
+<li>先训练300 epochs，lr 0.1，step decay</li>
+</ul>
+</li>
+<li><p>GCN-CNN</p>
+<ul>
+<li>先预训练resnet backbone，</li>
+<li>然后整体一起训练300 epochs，lr 0.0003，</li>
+<li>image feature和node features通过dot product融合，得到(cls, )的cls vec，</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>图结构不能random initialization，会使结果变差</li>
+<li><p>基于数据集估计的graph initialization有显著提升</p>
+<p><img src="/2021/01/18/GCN/acc1.png" width="60%;"></p>
+</li>
+<li><p>基于专家设计的graph initialization有进一步提升，但是不明显，考虑到标注工作繁重不太推荐</p>
+<p><img src="/2021/01/18/GCN/acc2.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS"><a href="#SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS" class="headerlink" title="SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS"></a>SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</h2><ol>
+<li><p>reference</p>
+<ul>
+<li><a href="http://tkipf.github.io/graph-convolutional-networks/，官方博客" target="_blank" rel="noopener">http://tkipf.github.io/graph-convolutional-networks/，官方博客</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/35630785，知乎笔记" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/35630785，知乎笔记</a></li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>场景<ul>
+<li>semi-supervised learning</li>
+<li>on graph-structured data </li>
+<li>比如：在一个citation network，classifying nodes (such as documents)，labels are only available for a small subset of nodes，任务的目标是对大部分未标记的节点预测类别</li>
+</ul>
+</li>
+<li>previous approach<ul>
+<li>Standard Approach<ul>
+<li>loss由两部分组成：单个节点的fitting error，和相邻节点的distance error</li>
+<li>基于一个假设：相邻节点间的label相似</li>
+<li>限制了模型的表达能力</li>
+</ul>
+</li>
+<li>Embedding-based Approach<ul>
+<li>分两步进行：先学习节点的embedding，再基于embedding训练分类器</li>
+<li>不end-to-end，两个task分别执行，不能保证学到的embedding是适合第二个任务的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>思路<ul>
+<li>train on a supervised target for nodes with labels</li>
+<li>然后通过图的连通性，trainable adjacency matrix，传递梯度给unlabeled nodes</li>
+<li>使得全图得到监督信息</li>
+</ul>
+</li>
+<li>contributions<ul>
+<li>introduce a layer-wise propagation rule，使得神经网络能够operate on graph，实现end-to-end的图结构分类器</li>
+<li>use this graph-based neural network model，训练一个semi-supervised classification of nodes的任务</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>fast approximate convolutions on graphs</p>
+<ul>
+<li><p>given：</p>
+<ul>
+<li>layer input：$H^l$</li>
+<li>layer output：$H^{l+1}$</li>
+<li>kernel pattern：$A$，在卷积里面是fixed kxk 方格，在图里面就是自由度更高的邻接矩阵</li>
+<li>kernel weights：$W$</li>
+</ul>
+</li>
+<li><p>general layer form：$H^{l+1}=f(H^l,A)$</p>
+</li>
+<li><p>inspiration：卷积其实是一种特殊的图，每个grid看作一个节点，每个节点都加上其邻居节点的信息，也就是：</p>
+<script type="math/tex; mode=display">
+  H^{l+1}=\sigma(AH^lW)</script><ul>
+<li>W是在对grids加权</li>
+<li><p>A是在对每个grids加上他的邻接节点</p>
+<p><img src="/2021/01/18/GCN/conv.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>details in practice</p>
+<ul>
+<li>自环：保留自身节点信息，$\hat A=A+I$</li>
+<li>正则化：stabilize the scale，$H^{l+1}=\sigma(\hat D^{-\frac{1}{2}}\hat A\hat D^{-\frac{1}{2}}H^lW)$</li>
+<li><p>一个实验：只利用图的邻接矩阵，就能够学得效果不错</p>
+<p><img src="/2021/01/18/GCN/adj.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>semi-supervised node classification</p>
+<p>  <img src="/2021/01/18/GCN/cls.png" width="60%;"></p>
+<ul>
+<li>思路就是在所有有标签节点上计算交叉熵loss</li>
+<li>模型结构<ul>
+<li>input：X，(b,N,D)</li>
+<li>两层图卷积<ul>
+<li>GCN1-relu：hidden F，(b,N,F)</li>
+<li>GCN2-softmax：output Z，(b,N,cls)</li>
+</ul>
+</li>
+<li>计算交叉熵</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>code</p>
+<ul>
+<li>torch/keras/tf官方都有：<ul>
+<li><a href="https://github.com/tkipf/gcn，论文里给的tf这个链接" target="_blank" rel="noopener">https://github.com/tkipf/gcn，论文里给的tf这个链接</a></li>
+<li>torch和keras的readme里面有说明，initialization scheme, dropout scheme, and dataset splits和tf版本不同，不是用来复现论文</li>
+<li>python setup.py bdist_wheel</li>
+</ul>
+</li>
+<li>数据集：Cora dataset，是一个图数据集，用于分类任务，数据集介绍<a href="https://blog.csdn.net/yeziand01/article/details/93374216" target="_blank" rel="noopener">https://blog.csdn.net/yeziand01/article/details/93374216</a><ul>
+<li>cora.content是所有论文的独自的信息，总共2708个样本，每一行都是论文编号+词向量1433-dim+论文类别</li>
+<li>cora.cites是论文之间的引用记录，A to B的reflect pair，5429行，用于创建邻接矩阵</li>
 </ul>
 </li>
 </ul>
@@ -635,7 +780,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -648,7 +793,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -691,7 +836,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><span class="nav-number">1.</span> <span class="nav-text">Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><span class="nav-number">1.</span> <span class="nav-text">Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS"><span class="nav-number">2.</span> <span class="nav-text">SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</span></a></li></ol></div>
             
 
           </div>

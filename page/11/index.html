@@ -276,6 +276,171 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/29/ssh-visualization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/12/29/ssh-visualization/" itemprop="url">ssh visualization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-29T18:33:00+08:00">
+                2018-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/12/29/ssh-visualization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/29/ssh-visualization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>ssh boocax@192.168.1.100</p>
+<p>密码：robot123</p>
+</li>
+<li><p>echo $ROS_MASTER_URI</p>
+<p>查看端口号11311</p>
+</li>
+<li><p>小车端：</p>
+<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
+<p>export ROS_IP=192.168.1.100</p>
+</li>
+<li><p>虚拟机端：</p>
+<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
+<p>export ROS_IP=172.16.128.142</p>
+</li>
+</ol>
+<h4 id=""><a href="#" class="headerlink" title=" "></a> </h4><h6 id="-1"><a href="#-1" class="headerlink" title="#"></a>#</h6><h4 id="-2"><a href="#-2" class="headerlink" title=" "></a> </h4><ol>
+<li><p>nav远程开启三个终端（代码重构以前）：</p>
+<p>move_base: roslaunch teleop_twist_joy real_nav.launch </p>
+<p>mapserver: rosrun map_server map_server catkin_ws2/src/patrol/map/p1.yaml </p>
+<p>amcl: roslaunch patrol real_loc.launch </p>
+</li>
+<li><p>本地可视化：rviz／rqt_graph / rosservice call /rostopic pub</p>
+<ul>
+<li><p>全局定位：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call /global_localization "&#123;&#125;"</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置导航目标点：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 相对base_link坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "base_link" &#125;, pose: &#123; position: &#123; x: 0.5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br><span class="line"></span><br><span class="line">// 相对map坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "map" &#125;, pose: &#123; position: &#123; x: 5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br></pre></td></tr></table></figure>
+<p>注意<strong>-1</strong>，否则循环发布。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="-3"><a href="#-3" class="headerlink" title=" "></a> </h4><h6 id="-4"><a href="#-4" class="headerlink" title="#"></a>#</h6><h4 id="-5"><a href="#-5" class="headerlink" title=" "></a> </h4><p>往回备份：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r boocax@192.168.1.100:/home/boocax/catkin_ws2019 bkp/</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/04/Occupancy-Grid-Map/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1729,211 +1894,6 @@ dis = D*\sqrt{dx*dx + dy*dy}</script><blockquote>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/13/branch-and-bound/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/13/branch-and-bound/" itemprop="url">branch and bound</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-13T18:21:19+08:00">
-                2018-11-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/13/branch-and-bound/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/13/branch-and-bound/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>一个栗子：整数规划问题欲求$max\ z = 5x_1 + 8x_2$</p>
-<script type="math/tex; mode=display">
-\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\ 
- &   5x_1 + 9x_2 \leq 45 \nonumber\\ 
- & x_1\geq0, x_2\geq0 \nonumber\\ 
- & x_1,x_2为整数 \nonumber
-\end{align}   
-\right.</script><p>根据方程组可以绘制下图：</p>
-<p><img src="/2018/11/13/branch-and-bound/规划.png" alt=""></p>
-<p>于是可以得到实数空间上的最优解：$x_1 = 2.25, x_2 = 3.75, z_0 = 41.25$。——<strong>松弛问题</strong></p>
-<p>由于存在整数限定条件：</p>
-<ol>
-<li>最优解$0 \leq z^{*} \leq 41$，且必为整数</li>
-<li>x_2的最优解不在3和4之间，因为限定为整数</li>
-</ol>
-<p>一、分支</p>
-<p>于是问题可以拆分为：$max\ z = 5x_1 + 8x_2$</p>
-<script type="math/tex; mode=display">
-p1\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
-& x_2\leq 3 \nonumber
-\end{align}   
-\right.\\</script><script type="math/tex; mode=display">
-p2\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><p>问题拆分的实质是将$x_2$在3和4之间的小数部分划掉了，将可行域拆分成$x_2 \leq 3$ 和$x_3 \geq 4$，但是没有排除任何整数可行解。——<strong>分支</strong></p>
-<p>二、定界</p>
-<p>子问题$p1$的最优解为：$x_1 = 3, x_2=3, z^{*}=39$</p>
-<p>子问题$p2$的最优解为：$x_1 = 1.8, x_2=4, z^{*}=41$</p>
-<p>也就是说，子问题$p1$的整个参数空间上，能够取得的最优解为39，子问题$p2$上则为41，显然最优解应该位于子问题$p2$所在的参数空间中，且$39\leq z^{<em>} \leq41$。——<em>*定界</em></em></p>
-<p>三、迭代</p>
-<p>对$p2$参数空间再分支，参数$x_1$可以拆分为$x_1 \leq 1$和$x_1 \geq 2$：</p>
-<script type="math/tex; mode=display">
-p3\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
- & x_1\leq 1 \nonumber\\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><script type="math/tex; mode=display">
-p4\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
- & x_1\geq 2 \nonumber \\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><p>四、总结</p>
-<p>分支定界算法的总体流程如下：</p>
-<ol>
-<li>先求解相应的松弛问题，得到最优解，检查其是否符合原问题约束，若符合则为最优解，否则进行下一步。</li>
-<li>定界，取各分支中目标函数最大的作为上界$U_z$，取其余分支中目标函数中最大的作为下界$L_z$。$L_z \leq z^{*} \leq U_z$。</li>
-<li>分支，否则选择一个不符合原问题条件的变量，构建子问题。</li>
-<li>对各分支，有序地，进行步骤1。</li>
-</ol>
-<p>在求解对应的松弛问题时，通常会有以下几种情况：</p>
-<ol>
-<li>松弛问题没有可行解，那么原问题也没有可行解。</li>
-<li>松弛问题的最优解也满足原问题约束，那么该解也是原问题的最优解，算法终止。</li>
-<li>松弛问题的最优解小于现有下界，那么应该对该子问题进行剪枝。</li>
-</ol>
-<p>五、DFS</p>
-<p>对一颗搜索树，不用计算每一层全部节点的score（BFS），我们会维护一个优先队列，其中按照score的大小存放节点，然后选择score最大的节点（the most promising child）进行分支。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1988,7 +1948,7 @@ p4\left\{
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2001,7 +1961,7 @@ p4\left\{
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

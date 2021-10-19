@@ -276,6 +276,273 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/15/optimizers优化器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/03/15/optimizers优化器/" itemprop="url">optimizers优化器</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-15T10:01:53+08:00">
+                2021-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/15/optimizers优化器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/15/optimizers优化器/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0-overview"><a href="#0-overview" class="headerlink" title="0. overview"></a>0. overview</h2><p>keywords：SGD, moment, Nesterov, adaptive, ADAM, Weight decay</p>
+<ol>
+<li>优化问题Optimization<ul>
+<li>to minimize目标函数</li>
+<li>grandient decent<ul>
+<li>gradient<ul>
+<li>numerical：数值法，approx，slow</li>
+<li>analytical：解析法，exact，fast</li>
+</ul>
+</li>
+<li>Stochastic<ul>
+<li>用minibatch的梯度来approximate全集</li>
+<li>$\theta_{k+1} = \theta_k - v_{t+1}(x_i,y_i)$</li>
+</ul>
+</li>
+<li>classic optimizers：SGD，Momentum，Nesterov‘s momentum</li>
+<li>adaptive optimizers：AdaGrad，Adadelta，RMSProp，Adam</li>
+</ul>
+</li>
+<li>Newton</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>modern optimizers for large-batch<pre><code>  * AdamW
+</code></pre><ul>
+<li>LARS</li>
+<li>LAMB</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>common updating steps</p>
+<p> for current step t：</p>
+<p> step1：计算直接梯度，$g_t = \nabla f(w_t)$</p>
+<p> step2：计算一阶动量和二阶动量，$m_t \&amp; V_t$</p>
+<p> step3：计算当前时刻的下降梯度，$\eta_t = \alpha m_t/\sqrt {V_t}$</p>
+<p> step4：参数更新，$w_{t+1} = w_t - \eta_t$</p>
+<ul>
+<li>各种优化算法的主要差别在step1和step2上</li>
+</ul>
+</li>
+<li><p>滑动平均/指数加权平均/moving average/EMA</p>
+<ul>
+<li>局部均值，与一段时间内的历史相关</li>
+<li>$v_t = \beta v_{t-1}+(1-\beta)\theta_t$，大致等于过去$1/(1-\beta)$个时刻的$\theta$的平均值，但是在起始点附近偏差较大</li>
+<li>$v_{tbiased} = \frac{v_t}{1-\beta^t}$，做了bias correction</li>
+<li>t越大，越不需要修正，两个滑动均值的结果越接近</li>
+<li><p>优缺点：不用保存历史，但是近似</p>
+<p><img src="/2021/03/15/optimizers优化器/moving average.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SGD</p>
+<ul>
+<li>SGD没有动量的概念，$m_t=g_t$，$V_t=I^2$，$w_{t+1} = w_t - \alpha g_t$</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>仅依赖当前计算的梯度<ul>
+<li>缺点：下降速度慢，可能陷在local optima上持续震荡</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>SGDW (with weight decay)</p>
+<ul>
+<li>在权重更新的同时进行权重衰减</li>
+<li>$w_{t+1} = (1-\lambda)w_t - \alpha g_t$</li>
+<li>在SGD form的优化器中weight decay等价于在loss上L2 regularization</li>
+<li>但是在adaptive form的优化器中是不等价的！！因为historical func（ERM）中regularizer和gradient一起被downscale了，因此not as much as they would get regularized in SGDW</li>
+</ul>
+</li>
+<li><p>SGD with Momentum</p>
+<ul>
+<li>引入一阶动量，$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$，使用滑动均值，抑制震荡</li>
+<li>梯度下降的主要方向是此前累积的下降方向，略微向当前时刻的方向调整</li>
+</ul>
+</li>
+<li><p>SGD with Nesterov Acceleration</p>
+<ul>
+<li>look ahead SGD-momentum</li>
+<li>在local minima的时候，四周没有下降的方向，但是如果走一步再看，可能就会找到优化方向</li>
+<li>先跟着累积动量走一步，求梯度：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
+<li>用这个点的梯度方向来计算滑动平均，并更新梯度</li>
+</ul>
+</li>
+<li><p>Adagrad</p>
+<ul>
+<li>引入二阶动量，开启“自适应学习率”，$V_t = \sum_0^t g_k^2$，度量历史更新频率</li>
+<li>对于经常更新的参数，我们已经积累了大量关于它的知识，不希望被单个样本影响太大，希望学习速率慢一些；对于偶尔更新的参数，我们了解的信息太少，希望能从每个偶然出现的样本身上多学一些，即学习速率大一些</li>
+<li>$\eta_t = \alpha m_t / \sqrt{V_t}$，本质上为每个参数，对学习率分别rescale</li>
+<li>缺点：二阶动量单调递增，导致学习率单调衰减，可能会使得训练过程提前结束</li>
+</ul>
+</li>
+<li><p>AdaDelta/RMSProp</p>
+<ul>
+<li>参考momentum，对二阶动量也计算滑动平均，$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
+<li>避免了二阶动量持续累积、导致训练过程提前结束</li>
+</ul>
+</li>
+<li><p>Adam</p>
+<ul>
+<li>集大成者：把一阶动量和二阶动量都用起来，Adaptive Momentum<ul>
+<li>SGD-M在SGD基础上增加了一阶动量</li>
+<li>AdaGrad和AdaDelta在SGD基础上增加了二阶动量</li>
+</ul>
+</li>
+<li>一阶动量滑动平均：$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$</li>
+<li>二阶动量滑动平均：$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
+</ul>
+</li>
+<li><p>Nadam</p>
+<ul>
+<li>look ahead Adam</li>
+<li>把Nesterov的one step try加上：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
+<li>再Adam更新两个动量</li>
+</ul>
+</li>
+<li><p>经验超参</p>
+<ul>
+<li>$momentum=0.9$</li>
+<li>$\beta_1=0.9$</li>
+<li>$\beta_2=0.999$</li>
+<li>$m_0 = 0$</li>
+<li>$V_0 = 0$</li>
+<li>上面的图上可以看出，初期的$m_t$和$V_t$会无限接近于0，此时可以进行误差修正：$factor=\frac{1}{1-\beta^t}$</li>
+</ul>
+</li>
+<li><p>AdamW</p>
+<ul>
+<li>在adaptive methods中，解耦weight-decay和loss-based gradient在ERM过程中的绑定downscale的关系</li>
+<li>实质就是将导数项后移</li>
+</ul>
+<p><img src="/2021/03/15/optimizers优化器/AdamW.png" width="80%;"></p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/11/regnet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3419,224 +3686,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/25/ASFF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/25/ASFF/" itemprop="url">ASFF</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-25T17:17:57+08:00">
-                2021-01-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/25/ASFF/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/25/ASFF/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Learning-Spatial-Fusion-for-Single-Shot-Object-Detection"><a href="#Learning-Spatial-Fusion-for-Single-Shot-Object-Detection" class="headerlink" title="Learning Spatial Fusion for Single-Shot Object Detection"></a>Learning Spatial Fusion for Single-Shot Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>inconsistency when fuse across different feature scales</li>
-<li>propose ASFF<ul>
-<li>suppress the inconsistency </li>
-<li>spatially filter conflictive information：想法应该跟SSE-block类似</li>
-</ul>
-</li>
-<li><p>build on yolov3</p>
-<ul>
-<li>introduce a bag of tricks</li>
-<li>anchor-free pipeline</li>
-</ul>
-<p><img src="/2021/01/25/ASFF/ASFF.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>ssd is one of the first to generate pyramidal feature representations<ul>
-<li>deeper layers reuse the formers</li>
-<li>bottom-up path</li>
-<li>small instances suffers low acc because containing insufficient semanic info</li>
-</ul>
-</li>
-<li>FPN use top-down path<ul>
-<li>shares rich semantics at all levels </li>
-<li>improvement：more strengthening feature fusion </li>
-</ul>
-</li>
-<li>在使用FPN时，通常不同scale的目标绑定到不同的level上面<ul>
-<li>inconsistency：其他level的feature map对应位置的信息则为背景</li>
-<li>some methods set ignore region in adjacent features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>introduce advanced techniques  <ul>
-<li>mixup</li>
-<li>cosine learning rate schedule </li>
-<li>sync-bn</li>
-<li>an anchor-free branch to run jointly with anchor-based ones</li>
-<li>L1 loss + IoU loss</li>
-</ul>
-</li>
-<li>fusion<ul>
-<li>全联接而非adjacent merge：三个level的fuse map都来自三个level的feature map</li>
-<li>上采样：<ul>
-<li>1x1 conv：对齐channel</li>
-<li>upsamp with interpolation</li>
-</ul>
-</li>
-<li>下采样：<ul>
-<li>s2：3x3 s2 conv</li>
-<li>s4：maxpooling + 3x3 s2 conv</li>
-</ul>
-</li>
-<li>adaptive fusion<ul>
-<li>pixel level的reweight</li>
-<li>shared across channels：hxwx1</li>
-<li>对来自三个level的feature map，resolution对齐以后，分别1x1conv，channel 1</li>
-<li>norm the weights：softmax</li>
-<li>为啥能suppress inconsistency：三个level的像素点，只激活一个另外两个是0的情况是绝对不harm的，相当于上面ignore那个方法拓展成adaptive</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>training<ul>
-<li>apply mixup on the classification pretraining of D53</li>
-<li>turn off mixup augmentation for the last 30 epochs. </li>
-</ul>
-</li>
-<li>inference<ul>
-<li>the detection header at each level first predicts the shape of anchors？？？这个不太懂</li>
-</ul>
-</li>
-<li>ASFF &amp; ASFF*<ul>
-<li>enhanced version of ASFF by integrating other lightweight modules </li>
-<li>dropblock &amp; RFB</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实现</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ASFF</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, level, activate, rfb=False, vis=False)</span>:</span></span><br><span class="line">        super(ASFF, self).__init__()</span><br><span class="line">        self.level = level</span><br><span class="line">        self.dim = [<span class="number">512</span>, <span class="number">256</span>, <span class="number">128</span>]</span><br><span class="line">        self.inter_dim = self.dim[self.level]</span><br><span class="line">        <span class="keyword">if</span> level == <span class="number">0</span>:</span><br><span class="line">            self.stride_level_1 = conv_bn(<span class="number">256</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">512</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">1</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">256</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">2</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>, stride=<span class="number">1</span>)</span><br><span class="line">            self.compress_level_1= conv_bn(<span class="number">256</span>,self.inter_dim,kernel=<span class="number">1</span>,stride=<span class="number">1</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">128</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        compress_c = <span class="number">8</span> <span class="keyword">if</span> rfb <span class="keyword">else</span> <span class="number">16</span>  </span><br><span class="line">        self.weight_level_0 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_1 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_2 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_levels = conv_bias(compress_c * <span class="number">3</span>, <span class="number">3</span>, kernel=<span class="number">1</span>, stride=<span class="number">1</span>, padding=<span class="number">0</span>)</span><br><span class="line">        self.vis = vis</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x_level_0, x_level_1, x_level_2)</span>:</span></span><br><span class="line">      	<span class="comment"># 跟论文描述一样：上采样先1x1conv对齐，再upinterp，下采样3x3 s2 conv</span></span><br><span class="line">        <span class="keyword">if</span> self.level == <span class="number">0</span>:</span><br><span class="line">            level_0_resized = x_level_0</span><br><span class="line">            level_1_resized = self.stride_level_1(x_level_1)</span><br><span class="line">            level_2_downsampled_inter = F.max_pool2d(x_level_2, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>)</span><br><span class="line">            level_2_resized = self.stride_level_2(level_2_downsampled_inter)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">1</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_resized = x_level_1</span><br><span class="line">            level_2_resized = self.stride_level_2(x_level_2)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">2</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">4</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_compressed = self.compress_level_1(x_level_1)</span><br><span class="line">            sh = torch.tensor(level_1_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_1_resized = F.interpolate(level_1_compressed, tuple(sh),<span class="string">'nearest'</span>)</span><br><span class="line">            level_2_resized = x_level_2</span><br><span class="line">        <span class="comment"># 这里得到的resized特征图不直接转换成一通道的weighting map，</span></span><br><span class="line">        <span class="comment"># 而是先1x1conv降维到8/16，然后concat，然后3x3生成3通道的weighting map</span></span><br><span class="line">        <span class="comment"># weighting map相当于一个prediction head，所以是conv_bias_softmax，无bn</span></span><br><span class="line">        level_0_weight_v = self.weight_level_0(level_0_resized)</span><br><span class="line">        level_1_weight_v = self.weight_level_1(level_1_resized)</span><br><span class="line">        level_2_weight_v = self.weight_level_2(level_2_resized)</span><br><span class="line">        levels_weight_v = torch.cat((level_0_weight_v, level_1_weight_v, level_2_weight_v), <span class="number">1</span>)</span><br><span class="line">        levels_weight = self.weight_levels(levels_weight_v)</span><br><span class="line">        levels_weight = F.softmax(levels_weight, dim=<span class="number">1</span>)</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># reweighting</span></span><br><span class="line">        fused_out_reduced = level_0_resized * levels_weight[:, <span class="number">0</span>:<span class="number">1</span>, :, :] + \</span><br><span class="line">                            level_1_resized * levels_weight[:, <span class="number">1</span>:<span class="number">2</span>, :, :] + \</span><br><span class="line">                            level_2_resized * levels_weight[:, <span class="number">2</span>:, :, :]</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># 3x3的conv，是特征图平滑</span></span><br><span class="line">        out = self.expand(fused_out_reduced)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.vis:</span><br><span class="line">            <span class="keyword">return</span> out, levels_weight, fused_out_reduced.sum(dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3691,7 +3740,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">138</span>
+                  <span class="site-state-item-count">139</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3704,7 +3753,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">76</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
