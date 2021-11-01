@@ -276,6 +276,293 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/27/guided-anchoring/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/27/guided-anchoring/" itemprop="url">guided anchoring</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-27T14:05:29+08:00">
+                2021-01-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/27/guided-anchoring/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/27/guided-anchoring/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>原作者知乎reference：<a href="https://zhuanlan.zhihu.com/p/55854246" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/55854246</a></p>
+<ul>
+<li>不完全是anchor-free，因为还是有decision grid to choose from的，应该说是adaptive anchor instead of hand-picked</li>
+<li>为了特征和adaptive anchor对齐，引入deformable conv</li>
+</ul>
+<h2 id="Region-Proposal-by-Guided-Anchoring"><a href="#Region-Proposal-by-Guided-Anchoring" class="headerlink" title="Region Proposal by Guided Anchoring"></a>Region Proposal by Guided Anchoring</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>most methods<ul>
+<li>predefined anchors</li>
+<li>do a uniformed dense prediction </li>
+</ul>
+</li>
+<li>our method<ul>
+<li>use sematic features to guide the anchoring</li>
+<li>anchor size也是网络预测参数，compute from feature map</li>
+<li>arbitrary aspect ratios </li>
+</ul>
+</li>
+<li>feature inconsistency<ul>
+<li>不同的anchor loc都是对应feature map上某一个点</li>
+<li>变化的anchor size和固定的位置向量之间存在inconsistency</li>
+<li>引入feature adaption module</li>
+</ul>
+</li>
+<li>use high-quality proposals<ul>
+<li>GA-RPN提升了proposal的质量</li>
+<li>因此我们对proposal进入stage2的条件更严格</li>
+</ul>
+</li>
+<li>adopt in Fast R-CNN, Faster R-CNN and RetinaNet均涨点<ul>
+<li>RPN提升显著：9.1</li>
+<li>MAP也有涨点：1.2-2.7</li>
+</ul>
+</li>
+<li>还可以boosting trained models<ul>
+<li>boosting a two-stage detector by a fine-tuning schedule</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>alignment &amp; consistency</p>
+<ul>
+<li><p>我们用feature map的pixels作为anchor representations，那么anchor centers必须跟feature pixels保持align</p>
+</li>
+<li><p>不同pixel的reception field必须跟对应的anchor size保持匹配</p>
+</li>
+<li>previous sliding window scheme对每个pixel都做一样的操作，用同样一组anchor，因此是align和consist的</li>
+<li>previous progressly refining scheme对anchor的位置大小做了refinement，ignore the alignment &amp; consistency issue，是不对的！！</li>
+</ul>
+</li>
+<li><p>disadvantage of predefined anchors</p>
+<ul>
+<li>hard hyperparams</li>
+<li>huge pos/neg imbalance &amp; computation </li>
+</ul>
+</li>
+<li><p>we propose GA-RPN</p>
+<ul>
+<li>learnable anchor shapes to mitigate the hand-picked issue</li>
+<li>feature adaptation to solve the consistency issue</li>
+<li>key concerns in this paper<ul>
+<li>learnable anchors</li>
+<li>joint anchor distribution </li>
+<li>alignment &amp; consistency</li>
+<li>high-quality proposals </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>formulation</p>
+<ul>
+<li>$p(x,y,w,h|I) = p(x,y|I)p(w,h|x,y,I)$</li>
+<li>将问题解耦成位置和尺寸的预测，首先anchor的loc服从full image的均匀分布，anchor的size建立在loc存在的基础上</li>
+<li>two branches for loc &amp; shape prediction<ul>
+<li>loc：binary classification，hxwx1</li>
+<li>shape：location-dependent shapes，hxwx2</li>
+<li>anchors：loc probabilities above a certain threshold &amp; correponding ‘most probable’ anchor shape</li>
+</ul>
+</li>
+<li>multi-scale<ul>
+<li>the anchor generation parameters are shared</li>
+</ul>
+</li>
+<li><p>feature adaptation module</p>
+<ul>
+<li>adapts the feature according to the anchor shape </li>
+</ul>
+<p><img src="/2021/01/27/guided-anchoring/guided anchoring.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>anchor location prediction</p>
+<ul>
+<li>indicates the probability of an object’s center  </li>
+<li>一层卷积：1x1 conv，channel1，sigmoid</li>
+<li>transform back：each grid(i,j) corresponds to coords ((i+0.5)*s, (j+0.5)*s) on the origin map</li>
+<li>filter out 90% of the regions</li>
+<li>thus replace the ensuing conv layers by masked convs</li>
+<li>groud truth<ul>
+<li>binary label map </li>
+<li>each level：center region &amp; ignore region &amp; outside region，基于object center的方框<ul>
+<li>$\sigma_1=0.2，\sigma_2=0.5$：region box的长宽系数</li>
+<li>？？？用centerNet的heatmap会不会更好？？？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>focal loss $L_{loc}$</li>
+</ul>
+</li>
+<li>anchor shape prediction<ul>
+<li>predicts the best shape for each location</li>
+<li>best shape：a shape that lead to best iou with the nearest gt box</li>
+<li>一层卷积：1x1 conv，channel2，[-1,1]</li>
+<li>transform layer：transform direct [-1,1] outputs to real box shape<ul>
+<li>$w = \sigma <em> s </em> e^{dw}$</li>
+<li>$h = \sigma <em> s </em> e^{dh}$</li>
+<li>s：stride</li>
+<li>$\sigma$：经验参数，8 in experiments</li>
+</ul>
+</li>
+<li>set 9 pairs of (w,h) as RetinaNet，calculate the IoU of these sampled anchors with gt，take the max as target value</li>
+<li>bounded iou loss：$L_{shape} = L_1(1-min(\frac{w}{w_g}, \frac{w_g}{w})) + L_1(1-min(\frac{h}{h_g}, \frac{h_g}{h}))$ </li>
+</ul>
+</li>
+<li>feature adaptation<ul>
+<li>intuition：the feature corresponding to different size of anchor shapes应该encode different content region</li>
+<li>inputs：feature map &amp; anchor shape</li>
+<li>location-dependent transformation：3x3 deformable conv</li>
+<li>deformable conv的offset是anchor shape得到的</li>
+<li>outputs：adapted features</li>
+</ul>
+</li>
+<li>with adapted features<ul>
+<li>then perform further classification and bounding-box regression </li>
+</ul>
+</li>
+<li>training<ul>
+<li>jointly optimize：$L = \lambda_1 L_{loc} + \lambda_2 L_{shape} + L_{cls} + L_{reg}$</li>
+<li>$\lambda_1=0.2，\lambda_2=0.5$</li>
+<li>each level of feature map should only target objects of a specific scale range：但是ASFF论文主张说这种arrange by scale的模式会引入前背景inconsistency？？</li>
+</ul>
+</li>
+<li>High-quality Proposals <ul>
+<li>set a higher positive/negative threshold </li>
+<li>use fewer samples  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/25/ASFF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4203,544 +4490,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/29/centerNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/12/29/centerNet/" itemprop="url">centerNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-29T10:45:15+08:00">
-                2020-12-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/12/29/centerNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/29/centerNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[papers]</p>
-<ul>
-<li><p>[centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归</p>
-</li>
-<li><p>[cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerNet，但是我觉得叫corner-centerNet更合适，它是基于cornerNet衍生的，在cornerNet的基础上再加一刀判定，基于角点pair的中心点是否是前景来决定是否保留这个框</p>
-</li>
-<li><p>[centerNet2] Probabilistic two-stage detection，utexas，</p>
-</li>
-</ul>
-<h2 id="centerNet-Objects-as-Points"><a href="#centerNet-Objects-as-Points" class="headerlink" title="centerNet: Objects as Points"></a>centerNet: Objects as Points</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>anchor-based</p>
-<ul>
-<li>exhaustive list of potential locations</li>
-<li>wasteful, inefficient, requires additional post-processing</li>
-</ul>
-</li>
-<li><p>our detector</p>
-<ul>
-<li>center：use keypoint estimation to find center points</li>
-<li>other properties：regress</li>
-</ul>
-</li>
-<li><p>tasks</p>
-<ul>
-<li>object detection</li>
-<li>3d object detection</li>
-<li><p>multi-person human pose estimation </p>
-<p><img src="/2020/12/29/centerNet/tasks.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>相比较于传统一阶段、二阶段检测<ul>
-<li>anchor：<ul>
-<li>box &amp; kp：一个是框，一个是击中格子</li>
-<li>nms：take local peaks，no need of nms</li>
-<li>larger resolution：hourglass架构，输出x4的heatmap，eliminates the need for multiple anchors </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>相比较于key point estimantion network<ul>
-<li>them：require grouping stage</li>
-<li>our：只定位一个center point，no need for group or post-processing</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>loss</p>
-<ul>
-<li><p>关键点loss</p>
-<ul>
-<li><p>center point关键点定义：每个目标的gt point只有一个，以它为中心，做object size-adaptive的高斯penalty reduction，overlap的地方取max</p>
-</li>
-<li><p>focal loss：基本与cornetNet一致</p>
-<script type="math/tex; mode=display">
-  L_k = \frac{-1}{N}\sum_{x,y,c}
-  \begin{cases}
-  (1-\hat Y)^\alpha log(\hat Y), if Y=1\\
-  (1-Y)^\beta \hat Y^\alpha log(1-\hat Y), otherwise
-  \end{cases}</script><ul>
-<li>$\alpha=2, \beta=4$</li>
-<li>background points有penalty，根据gt的高斯衰减来的</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>offset loss</p>
-<ul>
-<li>只有两个通道(x_offset &amp; y_offset)：shared among categories</li>
-<li>gt的offset是原始resolution/output stride向下取整得到</li>
-<li>L1 loss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>centerNet</p>
-<ul>
-<li><p>output</p>
-<ul>
-<li>第一个部分：中心点，[h,w,c]，binary mask for each category</li>
-<li>第二个部分：offset，[h,w,2]，shared among</li>
-<li>第三个部分：size，[h,w,2]，shared among<ul>
-<li>L1 loss，use raw pixel coordinates</li>
-</ul>
-</li>
-<li>overall<ul>
-<li>C+4 channels，跟传统检测的formulation是一致的，只不过传统检测gt是基于anchor计算的相对值，本文直接回归绝对值</li>
-<li>$L_{det} = L_k + \lambda_{size} L_{size} + \lambda_{off} L_{off}$</li>
-<li>其他task的formulation看第一张图</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>inference workflow</p>
-<ul>
-<li>local peaks：<ul>
-<li>for each category channel</li>
-<li>all responses greater or equal to its 8-connected neighbors：3x3 max pooling</li>
-<li>keep the top100</li>
-</ul>
-</li>
-<li>generate bounding boxes<ul>
-<li>组合offset &amp; size predictions</li>
-<li>？？？？没有后处理了？？？假阳？？？？</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>encoder-decoder backbone：x4</p>
-<ul>
-<li>hourglass104<ul>
-<li>stem：x4</li>
-<li>modules：两个</li>
-</ul>
-</li>
-<li>resnet18/101+deformable conv upsampling<ul>
-<li>3x3 deformable conv, 256/128/64</li>
-<li>bilinear interpolation</li>
-</ul>
-</li>
-<li><p>DLA34+deformable conv upsampling</p>
-<p><img src="/2020/12/29/centerNet/backs.jpg" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>heads</p>
-<ul>
-<li>independent heads</li>
-<li>one 3x3 conv，256</li>
-<li>1x1 conv for prediction</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>总结</p>
-<p> 个人感觉，centerNet和anchor-based的formulation其实是一样的，</p>
-<ul>
-<li>center的回归对标confidence的回归，区别在于高斯/[0,1]/[0,-1,1]</li>
-<li>size的回归变成了raw pixel，不再基于anchor</li>
-<li>hourglass结构就是fpn，级联的hourglass可以对标bi-fpn</li>
-<li>多尺度变成了单一大resolution特征图，也可以用多尺度预测，需要加NMS</li>
-</ul>
-</li>
-</ol>
-<h2 id="centerNet2-Probabilistic-two-stage-detection"><a href="#centerNet2-Probabilistic-two-stage-detection" class="headerlink" title="centerNet2: Probabilistic two-stage detection"></a>centerNet2: Probabilistic two-stage detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>two-stage</li>
-<li>probabilistic interpretation</li>
-<li>the suggested pipeline<ul>
-<li>stage1：infer proper object-backgroud likelihood，专注前背景分离</li>
-<li>stage2：inform the overall score</li>
-</ul>
-</li>
-<li>verified on COCO<ul>
-<li>faster and more accurate than both one and two stage detectors</li>
-<li>outperform yolov4</li>
-<li>extreme large model：56.4 mAP</li>
-<li>standard ResNeXt- 32x8d-101-DCN back：50.2 mAP</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>one-stage detectors<ul>
-<li>dense predict</li>
-<li>jointly predict class &amp; location</li>
-<li>anchor-based：RetinaNet用focal loss来deal with 前背景imbalance</li>
-<li>anchor-free：FCOS &amp; CenterNet不基于anchor基于grid，缓解imbalance</li>
-<li>deformable conv：AlignDet在output前面加一层deformable conv to get richer features</li>
-<li>sound probablilistic interpretation</li>
-<li>heavier separate classification and regression branches than two-stage models：如果类别特别多的情况，头会非常重，严重影响性能</li>
-<li>misaligned issue：一阶段预测是基于local feature，感受野、anchor settings都会影响与目标的对齐程度</li>
-</ul>
-</li>
-<li>two-stage detectors<ul>
-<li>first RPN generates coarse object proposals</li>
-<li>then per-region head to classify and refine</li>
-<li>ROI heads：Faster-RCNN用了两个fc层作为ROI heads</li>
-<li>cascaded：CascadeRCNN用了三个连续的Faster-RCNN，with a different positive threshold</li>
-<li>semantic branch：HTC用了额外的分割分支enhance the inter-stage feature flow</li>
-<li>decouple：TSD将cls&amp;pos两个ROI heads解耦</li>
-<li>weak RPN：因为尽可能提升召回率，proposal score也不准，丧失了一个clear的probabilistic interpretation</li>
-<li>independent probabilistic interpretation：两个阶段各训各的，最后的cls score仅用第二阶段的</li>
-<li>slow：proposals太多了所以slow down</li>
-</ul>
-</li>
-<li>other detectors<ul>
-<li>point-based：cornetNet预测&amp;组合两个角点，centerNet预测中心点并基于它回归长宽</li>
-<li>transformer：DETR直接预测a set of bounding boxes，而不是传统的结构化的dense output</li>
-</ul>
-</li>
-<li><p>网络结构</p>
-<ul>
-<li>one/two-stage detectors：image classification network + lightweight upsampling layers + heads</li>
-<li>point-based：FCN，有symmetric downsampling and upsampling layer，预测一个小stride的heatmap</li>
-<li>DETR：feature extraction + transformer decoder</li>
-</ul>
-</li>
-<li><p>our method</p>
-<p>  <img src="/2020/12/29/centerNet/centerNet2.png" width="40%;"></p>
-<ul>
-<li>第一个阶段<ul>
-<li>做二分类的one-stage detector，提前景，</li>
-<li>实现上就用region-level feature+classifier（FCN-based）</li>
-</ul>
-</li>
-<li>第二阶段<ul>
-<li>做position-based类别预测</li>
-<li>实现上既可以用一个Faster-RCNN，也可以用classifier</li>
-</ul>
-</li>
-<li>最终的loss由两个阶段合并得到，而不是分阶段训练</li>
-<li>跟former two-stage framework的主要不同是<ul>
-<li>加了joint probabilistic objective over both stages</li>
-<li>以前的二阶段RPN的用途主要是最大化recall，does not produce accurate likelihoods</li>
-</ul>
-</li>
-<li>faster and more accurate<ul>
-<li>首先是第一个阶段的proposal更少更准</li>
-<li>其次是第二个阶段makes full use of years of progress in two-stage detection，二阶段的设计站在伟人的肩膀上</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>joint class distribution：先介绍怎么将一二阶段联动<ul>
-<li>【第一阶段的前背景score】 乘上 【第二阶段的class score】</li>
-<li>$P(C_k) = \sum_o P(C_k|O_k=o)P(O_k=o)$</li>
-<li>maximum likelihood estimation<ul>
-<li>for annotated objects<ul>
-<li>退阶成independent maximum-likelihood</li>
-<li>$log P(C_k) = log P(C_k|O_k=1) + log P(O_k=1)$</li>
-</ul>
-</li>
-<li>for background class<ul>
-<li>不分解</li>
-<li>$log P(bg) = log( P(bg|O_k=1) * P(O_k=1) + P(O_k=0))$</li>
-<li>lower bounds，基于jensen不等式得到两个不等式</li>
-<li>$log P(bg) \ge P(O_k=1) * log( P(bg|O_k=1))$：如果一阶段前景率贼大，那么就</li>
-<li>$log P(bg) \ge P(O_k=0)$：</li>
-<li>optimize both bounds jointly works better</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>network design：介绍怎么在one-stage detector的基础上改造出一个two-stage probabilistic detector</p>
-<ul>
-<li>experiment with 4 different designs for first-stage RPN</li>
-<li>RetinaNet<ul>
-<li>RetinaNet其实和two-stage的RPN高度相似核心区别在于：<ul>
-<li>a heavier head design：4-conv vs 1-conv<ul>
-<li>RetinaNet是backbone+fpn+individual heads</li>
-<li>RPN是backbone+fpn+shared convs+individual heads</li>
-</ul>
-</li>
-<li>a stricter positive and negative anchor definition：都是IoU-based anchor selection，thresh不一样</li>
-<li>focal loss</li>
-</ul>
-</li>
-<li>first-stage design<ul>
-<li>以上三点都在probabilistic model里面保留</li>
-<li>然后将separated heads改成shared heads</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>centerNet<ul>
-<li>模型升级<ul>
-<li>升级成multi-scale：use ResNet-FPN back，P3-P7</li>
-<li>头是FCOS那种头：individual heads，不share conv，然后cls branch预测centerness+cls，reg branch预测regress params</li>
-<li>正样本也是按照FCOS策略：position &amp; scale-based</li>
-</ul>
-</li>
-<li>升级模型进行one-stage &amp; two-stage实验：centerNet*</li>
-</ul>
-</li>
-<li>ATSS<ul>
-<li>是一个adaptive IoU thresh的方法，centerness来表示一个格子的score</li>
-<li>我们将centerness*classification score定义为这个模型的proposal score</li>
-<li>另外就是two-stage下还是将RPN的cls &amp; reg heads合并</li>
-</ul>
-</li>
-<li>GFL：还没看过，先跳过吧</li>
-<li>second-stage designs：FasterRCNN &amp; CascadeR- CNN</li>
-<li>deformable conv：这个在centerNetv1的ResNet和DLA back里面都用了，在v2里面，主要是用ResNeXt-32x8d-101-DCN，</li>
-</ul>
-</li>
-<li><p>hyperparameters for two-stage probabilistic model</p>
-<ul>
-<li>两阶段模型通常是用P2-P6，一阶段通常用P3-P7：我们用P3-P7</li>
-<li>increase the positive IoU threshold：0.5 to [0.6,0.7,0.8]</li>
-<li>maximum of 256 proposals （对比origin的1k）</li>
-<li>increase nms threshold from 0.5 to 0.7</li>
-<li>SGD，90K iterations</li>
-<li>base learning rate：0.02 for two-stage &amp; 0.01 for one-stage，0.1 decay</li>
-<li>multi-scale training：短边[640,800]，长边不超过1333</li>
-<li>fix-scale testing：短边用800，长边不超过1333</li>
-<li>first stage loss weight：0.5，因为one-stage detector通常用0.01 lr开始训练</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>4种design的对比</p>
-<ul>
-<li>所有的probabilistic model都比one-stage model强，甚至还快（因为简化了脑袋）</li>
-<li>所有的probabilistic FasterRCNN都比原始的RPN-based FasterRCNN强，也快（因为P3-P7比P2-P6的计算量小一半，而且第二阶段fewer proposals）</li>
-<li><p>CascadeRCNN-CenterNet design performs the best：所以以后就把它叫CenterNet2</p>
-<p><img src="/2020/12/29/centerNet/designs.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>和其他real-time models对比</p>
-<ul>
-<li>大多是real-time models都是一阶段模型</li>
-<li><p>可以看到二阶段不仅能够比一阶段模型还快，精度还更高</p>
-<p><img src="/2020/12/29/centerNet/real-time.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>SOTA对比</p>
-<ul>
-<li>报了一个56.4%的sota，但是大家口碑上好像效果很差</li>
-<li>不放图了</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="corner-centerNet-Keypoint-Triplets-for-Object-Detection"><a href="#corner-centerNet-Keypoint-Triplets-for-Object-Detection" class="headerlink" title="corner-centerNet: Keypoint Triplets for Object Detection"></a>corner-centerNet: Keypoint Triplets for Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>based on cornerNet</p>
-</li>
-<li><p>triplet</p>
-<ul>
-<li>corner keypoints：weak grouping ability cause false positives</li>
-<li><p>correct predictions can be determined by checking the central parts</p>
-<p><img src="/2020/12/29/centerNet/center.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>cascade corner pooling and center poolling</p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>whats new in CenterNet<ul>
-<li>triplet inference workflow<ul>
-<li>after a proposal is generated as a pair of corner keypoints</li>
-<li>checking if there is a center keypoint of the same class </li>
-</ul>
-</li>
-<li>center pooling<ul>
-<li>for predicting center keypoints </li>
-<li>by making the center keypoints on feature map having the max sum Hori+Verti responses</li>
-</ul>
-</li>
-<li>cascade corner pooling<ul>
-<li>equips the original corner pooling module with the ability of perceiving internal information </li>
-<li>not only consider the boundary but also the internal directions </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>CornetNet痛点<ul>
-<li>fp rate高</li>
-<li>small object的fp rate尤其高</li>
-<li>一个idea：cornerNet based RPN<ul>
-<li>但是原生RPN都是复用的</li>
-<li>计算效率？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>center pooling</p>
-<ul>
-<li>geometric centers &amp; semantic centers</li>
-<li><p>center pooling能够有效地将语义信息最丰富的点（semantic centers）传达到物理中心点（geometric centers），也就是central region</p>
-<p><img src="/2020/12/29/centerNet/central.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4795,7 +4544,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">139</span>
+                  <span class="site-state-item-count">140</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4808,7 +4557,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">76</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

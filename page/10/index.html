@@ -276,6 +276,203 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/25/NiN-network-in-network/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/25/NiN-network-in-network/" itemprop="url">NiN: network in network</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T17:08:30+08:00">
+                2019-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/25/NiN-network-in-network/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/25/NiN-network-in-network/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="Network-In-Network"><a href="#Network-In-Network" class="headerlink" title="Network In Network"></a>Network In Network</h3><ol>
+<li><p>动机</p>
+<ul>
+<li>enhance model discriminability(获得更好的特征描述)：propose mlpconv</li>
+<li>less prone to overfitting：propose global average pooling</li>
+</ul>
+</li>
+<li><p>论点</p>
+<p> <strong>comparison 1:</strong></p>
+<ul>
+<li>conventional CNN uses linear filter, which implicitly makes the assumption that the latent concepts are linearly separable. </li>
+<li>traditional CNN is stacking [linear filters+nonlinear activation/linear+maxpooling+nonlinear]：这里引出了一个激活函数和池化层先后顺序的问题，对于avg_poolling，两种操作得到的结果是不一样的，先接激活函数会丢失部分信息，所以应该先池化再激活，对于MAX_pooling，两种操作结果一样，但是先池化下采样，可以减少激活函数的计算量，<strong>总结就是先池化再激活</strong>。但是好多网络实际实现上都是relu紧跟着conv，后面接pooling，这样比较interpretable——cross feature map pooling </li>
+<li><p>mlpconv layer can be regarded as a highly nonlinear function(filter-fc-activation-fc-activation-fc-activation…)</p>
+<p><img src="/2019/12/25/NiN-network-in-network/mlpconv.png" width="50%;"></p>
+<p><strong>comparison 2:</strong></p>
+</li>
+<li><p>maxout network imposes the prior that instances of a latent concept lie within a convex set in the input space【QUESTION HERE】</p>
+</li>
+<li><p>mlpconv layer is a universal function approximator instead of a convex function approximator  </p>
+<p><strong>comparison 3:</strong></p>
+</li>
+<li><p>fully connected layers are prone to overfitting and heavily depend on dropout regularization </p>
+</li>
+<li>global average pooling is more meaningful and interpretable, moreover it itself is a structural regularizer【QUESTION HERE】</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>use <strong>mlpconv layer</strong> to replace conventional GLM(linear filters)</li>
+<li>use <strong>global average pooling</strong> to replace traditional fully connected layers</li>
+<li>the overall structure is a stack of mlpconv layers, on top of which lie the global average pooling and the objective cost layer</li>
+<li>Sub-sampling layers can be added in between the mlpconv as in CNN</li>
+<li>dropout is applied on the outputs of all but the last mlpconv layers for regularization</li>
+<li>another regularizer applied is weight decay </li>
+</ul>
+<p><img src="/2019/12/25/NiN-network-in-network/NIN.png" width="70%;"></p>
+</li>
+<li><p>细节</p>
+<ul>
+<li><p>preprocessing：global contrast normalization and ZCA whitening </p>
+</li>
+<li><p>augmentation：translation and horizontal flipping</p>
+</li>
+<li><p>GAP for conventional CNN：CNN+FC+DROPOUT &lt; CNN+GAP &lt; CNN+FC</p>
+<ul>
+<li>gap is effective as a regularizer</li>
+<li>slightly worse than the dropout regularizer result for some reason</li>
+</ul>
+</li>
+<li><p>confidence maps </p>
+<ul>
+<li>explicitly enforce feature maps in the last mlpconv layer of NIN to be confidence maps of the categories by means of global average pooling：NiN将GAP的输出直接作为output layer，因此每一个类别对应的feature map可以近似认为是 confidence map。</li>
+<li>the strongest activations appear roughly at the same region of the object in the original image：特征图上高响应区域基本与原图上目标区域对应。</li>
+<li>this motivates the possibility of performing object detection via NIN</li>
+</ul>
+</li>
+<li><p>architecture：实际中多层感知器使用1x1conv来实现，增加的多层感知器相当于是一个含参的池化层，通过对多个特征图进行含参池化，再传递到下一层继续含参池化，这种级联的<strong>跨通道的含参池化</strong>让网络有了更复杂的表征能力。</p>
+<p>  <img src="/2019/12/25/NiN-network-in-network/architecture.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+<li><p>总结</p>
+<ol>
+<li>mlpconv：stronger local reception unit</li>
+<li>gap：regularizer &amp; bring confidence maps</li>
+</ol>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/05/unet-vnet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3495,6 +3692,27 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># model</span></span><br><span class="line">model = keras.Model(inputs=inputs, outputs=outputs)</span><br><span class="line">optimizer = keras.optimizers.SGD(learning_rate=<span class="number">1e-3</span>)</span><br><span class="line">loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))</span><br><span class="line">train_dataset = train_dataset.shuffle(buffer_size=<span class="number">1024</span>).batch(batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># iter epochs</span></span><br><span class="line">epochs = <span class="number">2</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):</span><br><span class="line">    print(<span class="string">"\nStart of epoch %d"</span> % (epoch,))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># iter batches</span></span><br><span class="line">    <span class="keyword">for</span> step, (x_batch_train, y_batch_train) <span class="keyword">in</span> enumerate(train_dataset):</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Open a GradientTape to record the operations run</span></span><br><span class="line">        <span class="comment"># during the forward pass, which enables auto-differentiation.</span></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Run the forward pass of the layer.</span></span><br><span class="line">            logits = model(x_batch_train, training=<span class="keyword">True</span>)  <span class="comment"># Logits for this minibatch</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># Compute the loss value for this minibatch.</span></span><br><span class="line">            loss_value = loss_fn(y_batch_train, logits)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># automatically retrieve the gradients of the trainable variables with respect to the loss</span></span><br><span class="line">        grads = tape.gradient(loss_value, model.trainable_weights)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Run one step of gradient descent by updating the value of the variables to minimize the loss.</span></span><br><span class="line">        optimizer.apply_gradients(zip(grads, model.trainable_weights))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Log every 200 batches.</span></span><br><span class="line">        <span class="keyword">if</span> step % <span class="number">200</span> == <span class="number">0</span>:</span><br><span class="line">            print(</span><br><span class="line">                <span class="string">"Training loss (for one batch) at step %d: %.4f"</span></span><br><span class="line">                % (step, float(loss_value))</span><br><span class="line">            )</span><br><span class="line">            print(<span class="string">"Seen so far: %s samples"</span> % ((step + <span class="number">1</span>) * <span class="number">64</span>))</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
+<h2 id="16-keras自定义初始化initializers"><a href="#16-keras自定义初始化initializers" class="headerlink" title="16. keras自定义初始化initializers"></a>16. keras自定义初始化initializers</h2><p>16.1 基类：keras.initializers.Initializer()，用于给层参数kernel_initializer和bias_initializer传入初始化方法</p>
+<p>内置初始化器：</p>
+<ul>
+<li>keras.initializers.Zeros()：全0</li>
+<li>keras.initializers.Ones()：全1</li>
+<li>keras.initializers.Constant(value=0)：全赋值为指定常量</li>
+<li>keras.initializers.RandomNormal(mean=0.0, stddev=0.05, seed=<strong>None</strong>)：正态分布</li>
+<li>keras.initializers.RandomUniform(minval=-0.05, maxval=0.05, seed=<strong>None</strong>)：均匀分布</li>
+<li>keras.initializers.VarianceScaling(scale=1.0, mode=’fan_in’, distribution=’normal’, seed=<strong>None</strong>)：根据层属性决定分布的参数，如果distribution=’normal’，那么正态分布的stddev=sqrt(scale/n)，如果distribution=”uniform”，那么均匀分布的limit=sqrt(3 * scale/n)，n决定于mode，可以是层输入单元数/输出单元数/两者平均</li>
+<li>keras.initializers.Orthogonal(gain=1.0, seed=<strong>None</strong>)：随机正交矩阵</li>
+<li>keras.initializers.Identity(gain=1.0)：单位矩阵</li>
+<li>keras.initializers.glorot_normal(seed=<strong>None</strong>)： Xavier 正态分布，0为中心，stddev=sqrt(2 / (fan_in + fan_out))</li>
+<li>keras.initializers.glorot_uniform(seed=<strong>None</strong>)： Xavier 均匀分布，limit=sqrt(6 / (fan_in + fan_out))</li>
+<li>keras.initializers.he_normal(seed=<strong>None</strong>)：Kaiming正态分布，0为中心，stddev=sqrt(2 / fan_in)</li>
+<li>keras.initializers.he_uniform(seed=<strong>None</strong>)：Kaiming均匀分布，limit=sqrt(6/fan_in)</li>
+</ul>
+<p>传入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用名字字符串</span></span><br><span class="line">model.add(Dense(<span class="number">64</span>,kernel_initializer=<span class="string">'random_uniform'</span>, bias_initializer=<span class="string">'zeros'</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用初始化器的实例</span></span><br><span class="line">model.add(Dense(<span class="number">64</span>,kernel_initializer=keras.initializers.Constant(value=<span class="number">3.0</span>), </span><br><span class="line">								bias_initializer=keras.initializers.RandomNormal(mean=<span class="number">0.</span>,stddev=<span class="number">.05</span>)))</span><br><span class="line"></span><br><span class="line"><span class="comment"># use config_dict，这个是在efficientDet源码里面看到的</span></span><br><span class="line">DENSE_KERNEL_INITIALIZER = &#123;</span><br><span class="line">    <span class="string">'class_name'</span>: <span class="string">'VarianceScaling'</span>,</span><br><span class="line">    <span class="string">'config'</span>: &#123;</span><br><span class="line">        <span class="string">'scale'</span>: <span class="number">1.</span> / <span class="number">3.</span>,</span><br><span class="line">        <span class="string">'mode'</span>: <span class="string">'fan_out'</span>,</span><br><span class="line">        <span class="string">'distribution'</span>: <span class="string">'uniform'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">x = Dense(n_classes, activation=<span class="string">'softmax'</span>, kernel_initializer=DENSE_KERNEL_INITIALIZER)(x)</span><br></pre></td></tr></table></figure>
+<p>16.2 自定义初始化器：</p>
+<p>必须使用参数shape和dtype</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> backend <span class="keyword">as</span> K</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_init</span><span class="params">(shape, dtype=None)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> K.random_normal(shape, dtype=dtype)</span><br><span class="line"></span><br><span class="line">model.add(Dense(<span class="number">64</span>, kernel_initializer=my_init))</span><br></pre></td></tr></table></figure>
 
           
         
@@ -3666,141 +3884,6 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/06/11/beautifulsoup-saving-file/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/11/beautifulsoup-saving-file/" itemprop="url">beautifulsoup saving file </a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-11T23:23:40+08:00">
-                2019-06-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/06/11/beautifulsoup-saving-file/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/06/11/beautifulsoup-saving-file/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近用bs4处理xml文件，遇到了一个在爬虫时候从未思考过的问题——</p>
-<p><strong>修正从xml文件中解析出的文件树，并将changes保存到原来的xml文件中。</strong></p>
-<p>我一直在beautifulsoup的手册中去寻找库函数，实际只需要简单的文件读写操作：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"></span><br><span class="line">soup = BeautifulSoup(open(<span class="string">'test.xml'</span>), <span class="string">'xml'</span>)</span><br><span class="line">add = BeautifulSoup(<span class="string">"&lt;a&gt;Foo&lt;/a&gt;"</span>, <span class="string">'xml'</span>)</span><br><span class="line">soup.orderlist.append(add)</span><br><span class="line">print(soup.prettify())</span><br><span class="line">f = open(<span class="string">'test.xml'</span>, <span class="string">'w'</span>)</span><br><span class="line">f.write(str(soup))</span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
-<p>附一个简单xml文件用来实验：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span><br><span class="line"><span class="tag">&lt;<span class="name">orderlist</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">order</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">customer</span>&gt;</span>姓名1<span class="tag">&lt;/<span class="name">customer</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">phone</span>&gt;</span>电话1<span class="tag">&lt;/<span class="name">phone</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">address</span>&gt;</span>地址1<span class="tag">&lt;/<span class="name">address</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">count</span>&gt;</span>点餐次数1<span class="tag">&lt;/<span class="name">count</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">order</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">order</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">customer</span>&gt;</span>姓名2<span class="tag">&lt;/<span class="name">customer</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">phone</span>&gt;</span>电话2<span class="tag">&lt;/<span class="name">phone</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">address</span>&gt;</span>地址2<span class="tag">&lt;/<span class="name">address</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">count</span>&gt;</span>点餐次数2<span class="tag">&lt;/<span class="name">count</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">order</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3855,7 +3938,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">139</span>
+                  <span class="site-state-item-count">140</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3868,7 +3951,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">76</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

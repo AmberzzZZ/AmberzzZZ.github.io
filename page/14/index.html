@@ -276,6 +276,142 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/" itemprop="url">Real-Time loop Loop Closure in 2D Lidar SLAM 论文笔记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-27T16:08:55+08:00">
+                2018-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>文章的核心思想在于解决loop closure问题。</p>
+<p>全局地图由一系列的submap构成，每个submap则由一系列的位姿节点及对应的scan数据构成。</p>
+<p>文章的重点在第四部分和第五部分：</p>
+<ul>
+<li>第四部分：local 2d slam，将scan与<strong>当前submap</strong>的匹配问题转化成一个最小二乘优化问题，由ceres来求解。参考文献《Many-to-Many Multi-Resolution Scan Matching 》</li>
+<li>第五部分：closing loop，采用SPA进行后端loop closure，提出一种并行的scan与<strong>finished submaps</strong>匹配的方法BBS，大幅提高精度和速度。参考文献《Efficient Sparse Pose Adjustment for 2D Mapping(SPA)》、《Real-Time Correlative Scan Matching(BBS)》</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/12/三维刚体运动-李代数/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2604,7 +2740,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">139</span>
+                  <span class="site-state-item-count">140</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2617,7 +2753,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">76</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

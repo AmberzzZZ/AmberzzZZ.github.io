@@ -276,6 +276,355 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/10/27/GPT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/10/27/GPT/" itemprop="url">GPT</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-27T14:10:20+08:00">
+                2021-10-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/10/27/GPT/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/10/27/GPT/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>GPT papers，openAI三部曲，通用预训练模型</p>
+<ul>
+<li>[2018 GPT-1] Improving Language Understanding by Generative Pre-Training：transformer-based，pre-training+task-specific finetuning，将所有的task的输入都整合成sequence-to-sequence form，结构上不需要task-specific architecture</li>
+<li>[2019 GPT-2] Language Models are Unsupervised Multitask Learners：对GPT-1结构上微调，引入huge dataset进行无监督训练</li>
+<li><p>[2020 GPT-3] Language models are few-shot learners：scaling up LMs，zero-shot</p>
+<p><img src="/2021/10/27/GPT/overview.png" width="55%;"></p>
+</li>
+<li><p>BERT有3亿参数</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="GPT-1-Improving-Language-Understanding-by-Generative-Pre-Training"><a href="#GPT-1-Improving-Language-Understanding-by-Generative-Pre-Training" class="headerlink" title="GPT-1: Improving Language Understanding by Generative Pre-Training"></a>GPT-1: Improving Language Understanding by Generative Pre-Training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>NLP tasks<ul>
+<li>textual entailment：文本蕴含</li>
+<li>question answering</li>
+<li>semantic similarity assessment</li>
+<li>document classification</li>
+</ul>
+</li>
+<li>labeled data少，unlabeled corpora充足</li>
+<li>large gains can be realized by<ul>
+<li>generative pre-training of a language model on diverse unlabeled corpus，无监督general model，learn universal representations</li>
+<li>discriminative fine-tuning on specific task，有监督task-specific model，adapt to wide range of tasks</li>
+</ul>
+</li>
+<li>general task-agnostic model能够打败discriminatively trained models</li>
+<li>use task-aware input transformations</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>learn from raw text &amp;alleviate the dependence on supervised learning still challenging：<ul>
+<li>不清楚选什么optmization objectives：language modeling/machine translation/discourse coherence</li>
+<li>effective way to transfer：加task-specific模型结构改动/auxiliary learning objectives/learning schemes</li>
+</ul>
+</li>
+<li>two-stage training procedure<ul>
+<li>pretrain + fine-tuning</li>
+<li>use Transformer：better handling long-term dependencies</li>
+<li>task-specific input adaptions将输入处理成structured词向量序列</li>
+</ul>
+</li>
+<li>evaluate on<ul>
+<li>natural language inference</li>
+<li>question answering</li>
+<li>semantic similarity</li>
+<li>text classification</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/10/27/GPT/GPT.png" width="25%;"></p>
+<ul>
+<li>architecture：transformer decoder</li>
+<li>training objectives<ul>
+<li>unsupervised：text prediction，前文预测后文</li>
+<li>supervised：task classifier，对整个序列分类</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Unsupervised pre-training</p>
+<ul>
+<li>given unsupervised corpus of tokens $U={u_1, …, u_n}$</li>
+<li>context window size $k$</li>
+<li>use standard language modeling objective：$L_1(U)=\sum log P(u_i|u_{i-k},…,u_{i-1};\Theta)$</li>
+<li>use multi-layer Transformer decoder<ul>
+<li>input：$h_0 = UW_e + W_p$</li>
+<li>attention blocks：$h_l = tranformer_block(h_{l-1}), \forall l\in[1,n]$</li>
+<li>output：$P(u)=softmax(h_l W_e^T)$</li>
+</ul>
+</li>
+<li>use SGD</li>
+</ul>
+</li>
+<li><p>Supervised fine-tuning</p>
+<ul>
+<li><p>given labeled dataset $C$ consists of $[x^1,…,x^m;y]$ instances</p>
+</li>
+<li><p>use the final transformer block’s activation $h_l^m$</p>
+</li>
+<li><p>fed into an linear+softmax output layer：$P(y|x^1,…,x^m)=softmax(h_l^mW_y)$</p>
+</li>
+<li><p>优化目标是y：$L_2(C) = \sum log(P(y|x^1,…,x^m))$</p>
+</li>
+<li><p>实验发现加上Unsupervised loss helps learning：提升泛化性，加速收敛</p>
+<script type="math/tex; mode=display">
+  L_3(C) = L_2(C) + \lambda * L_1(C)</script></li>
+</ul>
+</li>
+<li><p>Task-specific input transformations</p>
+<ul>
+<li>certain tasks has structured inputs如问答pairs/triplets</li>
+<li>we convert them into ordered sequences<ul>
+<li>Textual entailment：将前提premise和推理hypothesis concat在一起</li>
+<li>Similarity tasks：两个文本没有先后顺序关系，所以一对文本变成顺序交换的两个sequence，最后的hidden units $h^m_l$相加，然后接输出层</li>
+<li>Question Answering and Commonsense Reasoning：given document $z$, question $q$, and possible answers $\{a_k\}$，context $zq$和每个答案$a_i$都构造一组连接，然后分别independently processed with our model，最后共同接入一个softmax，生成对所有possible answers的概率分布</li>
+</ul>
+</li>
+<li>所有的连接都使用分隔符$</li>
+<li><p>所有的sequence的首尾都加上一个randomly initialized start&amp;end tokens</p>
+<p><img src="/2021/10/27/GPT/transformations.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="GPT-2-Language-Models-are-Unsupervised-Multitask-Learners"><a href="#GPT-2-Language-Models-are-Unsupervised-Multitask-Learners" class="headerlink" title="GPT-2: Language Models are Unsupervised Multitask Learners"></a>GPT-2: Language Models are Unsupervised Multitask Learners</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>more general models which can perform many tasks</li>
+<li>train language model<ul>
+<li>without explicit supervision</li>
+<li>trained on a new dataset of millions of webpages called WebText</li>
+<li>outperforms several baselines</li>
+</ul>
+</li>
+<li>GPT-2：a 1.5B parameter Transformer</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>Machine learning systems are sensitive to slight changes of<ul>
+<li>data distribution </li>
+<li>task specification</li>
+<li>‘narrow experts’</li>
+<li>lack of generalization since ingle task training on single domain datasets</li>
+</ul>
+</li>
+<li>methods<ul>
+<li>multitask training：还不成熟</li>
+<li>pretraining + finetuning：still require supervised training</li>
+</ul>
+</li>
+<li>this paper<ul>
+<li>connect the two lines above</li>
+<li>perform donw-stream tasks in a zero-shot setting</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>natural sequential characteristic makes the general formulation $p(output|input)$</p>
+<script type="math/tex; mode=display">
+  p(x) = \Pi_{i=1}^n p(s_{n-k}, ..., s_n|s_1, ..., s_{n-k-1})</script></li>
+<li><p>task specific system requires the probabilistic framework also condition on the task to be performed $p(output|input, task)$</p>
+<ul>
+<li>architectural level：task-specific encoders/decoders</li>
+<li>algorithmic level：like MAML</li>
+<li>or in a more flexible way to specify tasks：write all as sequences<ul>
+<li>translation：(translate to french, english text, french text)</li>
+<li>comprehension：(answer the question, document, question, answer)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training dataset</p>
+<ul>
+<li>海量document可以通过爬虫获得but significant data quality issues</li>
+<li>与target dataset similar的外部doc的子集能够给到提升</li>
+<li>因此本文设定了一个搜集文本的机制：Reddit的外链，去掉Wikipedia</li>
+</ul>
+</li>
+<li><p>input representation</p>
+<ul>
+<li><p>word-level language model VS byte-level language model</p>
+<ul>
+<li>word-level performs better</li>
+<li>但是受到vocabulary限制</li>
+</ul>
+</li>
+<li><p>Byte Pair Encoding (BPE)</p>
+<ul>
+<li><p>combine the empirical benefits of word-level LMs with the generality of byte-level approaches</p>
+</li>
+<li><p>具体改进还没理解</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>model</p>
+<ul>
+<li><p>Transformer-based，few modifications on GPT-1 model</p>
+<ul>
+<li>layer normalization was moved to the input of each sub-block</li>
+<li>additional layer normalization was added after the final self-attention block</li>
+<li>initialization on residual path：N个residual layers，就将residual weights rescale $\frac{1}{\sqrt{N}}$</li>
+<li>context size：1024</li>
+<li>batch size：512</li>
+</ul>
+</li>
+<li><p>residual block</p>
+<p>  <img src="/2021/10/27/GPT/GPT-2.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="GPT-3-Language-Models-are-Few-Shot-Learners"><a href="#GPT-3-Language-Models-are-Few-Shot-Learners" class="headerlink" title="GPT-3: Language Models are Few-Shot Learners"></a>GPT-3: Language Models are Few-Shot Learners</h2><ol>
+<li>动机<ul>
+<li>zero-shot：pretraining+finetuning scheme还是需要task-specific finetuning datset</li>
+<li>scale-up：scaling up language models greatly improves general few-shot performance</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/10/11/dag/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2834,296 +3183,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/20/Generalized-Focal-Loss/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/08/20/Generalized-Focal-Loss/" itemprop="url">Generalized Focal Loss</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-20T13:39:44+08:00">
-                2021-08-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/08/20/Generalized-Focal-Loss/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/20/Generalized-Focal-Loss/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Generalized-Focal-Loss-Learning-Qualified-and-Distributed-Bounding-Boxes-for-Dense-Object-Detection"><a href="#Generalized-Focal-Loss-Learning-Qualified-and-Distributed-Bounding-Boxes-for-Dense-Object-Detection" class="headerlink" title="Generalized Focal Loss: Learning Qualified and Distributed Bounding Boxes for  Dense Object Detection"></a>Generalized Focal Loss: Learning Qualified and Distributed Bounding Boxes for  Dense Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>one-stage  detectors<ul>
-<li>dense prediction</li>
-<li>three fundamental elements<ul>
-<li>class branch</li>
-<li>box localization branch</li>
-<li>an individual quality branch to estimate the quality of localization</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>current problems<ul>
-<li>the inconsistent usage of the quality estimation in train &amp; test</li>
-<li>the inflexible Dirac delta distribution：将box regression的value建模成真值附近的脉冲分布，用来描述边界不清晰/遮挡的case可能不准确</li>
-</ul>
-</li>
-<li>we design new representations for these three elements<ul>
-<li>merge quality estimation into class prediction：将objectness/centerness整合进cls prediction，直接用作NMS score</li>
-<li>continout labels</li>
-<li>propose GFL(Generalized Focal Loss) that generalizes Focal Loss from discrete form into continous version</li>
-</ul>
-</li>
-<li>test on COCO<ul>
-<li>ResNet-101-?-GFL: 45.0% AP </li>
-<li>defeat ATSS</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>inconsistent usage of localization quality estimation and classification score</p>
-<ul>
-<li>训练的时候quality和cls branch是independent branch</li>
-<li>box branch的supervision只作用在positive样本上：which is unreliable on predicting negatives</li>
-<li>测试阶段将quality和cls score乘起来有可能拉高负样本的分数，以至于在NMS阶段把低分正样本挤掉</li>
-</ul>
-</li>
-<li><p>inflexible representation of bounding boxes</p>
-<ul>
-<li>most method建模成脉冲分布：只在IoU大于一定阈值的格子上有响应，别的格子都是0</li>
-<li>some recent work建模成高斯分布</li>
-<li>in fact the real distribution can be more arbitrary and flexible，连续且不严格镜像</li>
-</ul>
-</li>
-<li><p>thus we propose</p>
-<ul>
-<li><p>merge the quality representation into the class branch：</p>
-<ul>
-<li>class vector的每个元素代表了格子的localization quality(如IoU score)</li>
-<li><p>在inference阶段也是直接用作cls score</p>
-<p><img src="/2021/08/20/Generalized-Focal-Loss/joint quality.png" width="80%"></p>
-</li>
-</ul>
-</li>
-<li><p>propose arbitrary/general distribution</p>
-<ul>
-<li>有明确边界的目标的边的分布是比较sharp的</li>
-<li><p>没有明显边界的边分布就是flatten一点</p>
-<p><img src="/2021/08/20/Generalized-Focal-Loss/distribution.png" width="80%"></p>
-</li>
-</ul>
-</li>
-<li><p>Generalized Focal Loss (GFL)</p>
-<ul>
-<li>joint class representation是continuous IoU label (0∼1) </li>
-<li>imbalance问题仍然存在，但是standart Focal Loss仅支持[0,1] sample</li>
-<li>修改成continuous形式，同时specialized into Quality Focal Loss (QFL) and Distribution Focal Loss (DFL) <ul>
-<li>QFL for cls branch：focuses on a sparse set of hard examples</li>
-<li>DFL for box branch： focus on learning the probabilities of values around the continuous target locations</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Focal Loss (FL)</p>
-<p>  <img src="/2021/08/20/Generalized-Focal-Loss/FL.png" width="70%"></p>
-<ul>
-<li>standard CE part：$-log(p_t)$</li>
-<li>scaling factor：down-weights the easy examples，focus on hard examples</li>
-</ul>
-</li>
-<li><p>Quality Focal Loss (QFL)</p>
-<ul>
-<li><p>soft one-hot label：正样本在对应类别上有个(0,1]的float score，负样本全0</p>
-</li>
-<li><p>float score定义为预测框和gt box的IoU score</p>
-</li>
-<li><p>we adopt multiple binary classification with sigmoid</p>
-</li>
-<li><p>modify FL</p>
-<ul>
-<li>CE part 改成complete form：$-ylog(\hat y)-(1-y)log(1-\hat y)$</li>
-<li>scaling part用vector distance替换减法：$|y-\hat y |^{\beta}$</li>
-<li><p>$\beta$ controls the down-weighting rate smoothly &amp; $\beta=2$ works best</p>
-<p><img src="/2021/08/20/Generalized-Focal-Loss/QFL.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Distribution Focal Loss (DFL)</p>
-<ul>
-<li><p>use relative offsets from the location to the four sides of a bounding box as the regression targets</p>
-</li>
-<li><p>回归问题formulation</p>
-<ul>
-<li>连续：$\hat y = \int_{y_0}^{y_n}P(x)xdx$</li>
-<li>离散化：$\hat y = \sum_{i=0}^n P(y_i)y_i$</li>
-<li>P(x) can be easily implemented through a softmax layer containing n+1 units：</li>
-</ul>
-</li>
-<li><p>DFL</p>
-<ul>
-<li>force predictions to focus values near label $y$：explicitly enlarge the probabilities of $y_i$和$y_{i+1}$，given $y_i \leq y \leq y_{i+1}$</li>
-<li>$log(S_i)$ force the probabilities </li>
-<li><p>gap balance the 上下限，使得$\hat y$的global mininum solution无限逼近真值$y$，如果真值接近的是$\hat y_{i+1}$，可以看到$log(S_i)$那项被downscale了</p>
-<p><img src="/2021/08/20/Generalized-Focal-Loss/DFL.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Generalized Focal Loss (GFL)</p>
-<p>  <img src="/2021/08/20/Generalized-Focal-Loss/GFL.png" width="80%"></p>
-<ul>
-<li><p>以前的cls preditions在测试阶段要结合quality predictions作为NMS score，现在直接就是</p>
-</li>
-<li><p>以前regression targets每个回归一个值，现在是n+1个值</p>
-</li>
-<li><p>overall</p>
-<p>  <img src="/2021/08/20/Generalized-Focal-Loss/GFL1.png" width="70%"></p>
-<ul>
-<li>第一项cls loss，就是QFL，dense on 所有格子，用正样本数去norm</li>
-<li>第二项box loss，GIoU loss + DFL，$\lambda_0$默认2，$\lambda_1$默认1/4，只计算有IoU的格子</li>
-<li>we also utilize the quality scores to weight $L_B$ and $L_D$ during training</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>彩蛋</p>
-<ul>
-<li><p>IoU branch always superior than centerness-branch</p>
-<ul>
-<li><p>centerness天生值较小，影响召回，IoU的值较大</p>
-<p><img src="/2021/08/20/Generalized-Focal-Loss/centerness.png" width="80%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3178,7 +3237,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">139</span>
+                  <span class="site-state-item-count">140</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3191,7 +3250,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">76</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

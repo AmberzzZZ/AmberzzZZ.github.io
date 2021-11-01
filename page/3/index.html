@@ -276,6 +276,773 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/04/30/MoCo系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/04/30/MoCo系列/" itemprop="url">MoCo系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-30T10:56:21+08:00">
+                2021-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/04/30/MoCo系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/04/30/MoCo系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers：</p>
+<p>[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming</p>
+<p>[2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Representations，Google Brain，混进来是因为它improve based on MoCo v1，而MoCo v2/v3又都是基于它改进</p>
+<p>[2020 MoCo v2] Improved Baselines with Momentum Contrastive Learning，kaiming</p>
+<p>[2021 MoCo v3] An Empirical Study of Training Self-Supervised Visual Transformers，kaiming</p>
+<h2 id="preview-自监督学习-Self-supervised-Learning"><a href="#preview-自监督学习-Self-supervised-Learning" class="headerlink" title="preview: 自监督学习 Self-supervised Learning"></a>preview: 自监督学习 Self-supervised Learning</h2><ol>
+<li><p>reference：<a href="https://ankeshanand.com/blog/2020/01/26/contrative-self-supervised-learning.html" target="_blank" rel="noopener">https://ankeshanand.com/blog/2020/01/26/contrative-self-supervised-learning.html</a></p>
+</li>
+<li><p>overview</p>
+<p><img src="/2021/04/30/MoCo系列/无监督.png" width="40%;"></p>
+<ul>
+<li>就是无监督</li>
+<li>针对的痛点（有监督训练模型）<ul>
+<li>标注成本高</li>
+<li>迁移性差</li>
+</ul>
+</li>
+<li>会基于数据特点，设置Pretext tasks（最常见的任务就是生成/重建），构造Pesdeo Labels来训练网络</li>
+<li>通常模型用来作为其他学习任务的预训练模型</li>
+<li>被认为是用来学习图像的通用视觉表示</li>
+</ul>
+</li>
+<li><p>methods</p>
+<ul>
+<li><p>从结构上区分主要就是两大类方法</p>
+<ul>
+<li>生成式：通过encoder-decoder结构还原输入，监督信号是输入输出尽可能相似<ul>
+<li>重建任务开销大</li>
+<li>没有建立直接的语义学习</li>
+<li>外加GAN的判别器使得任务更加复杂难训</li>
+</ul>
+</li>
+<li>判别式：输入两张图片，通过encoder编码，监督信号是判断两张图是否相似，判别式模型也叫Contrastive Learning</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/self-supervised.png" width="70%;"></p>
+</li>
+<li><p>从Pretext tasks上划分主要分为三类</p>
+<ul>
+<li>基于上下文（Context based） ：如bert的MLM，在句子/图片中随机扣掉一部分，然后推动模型基于上下文/语义信息预测这部分/相对位置关系</li>
+<li>基于时序（Temporal Based）：如bert的NSP，视频/语音，利用相邻帧的相似性，构建不同排序的序列，判断B是否是A的下一句/是否相邻帧</li>
+<li>基于对比（Contrastive Based）：比较正负样本，最大化相似度的loss在这里面被叫做InfoNCE</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>memory-bank</p>
+<ul>
+<li>Contrastive Based方法最常见的方式是在一个batch中构建正负样本进行对比学习<ul>
+<li>end-to-end</li>
+<li>每个mini-batch中的图像增强前后的两张图片互为正样本</li>
+<li>字典大小就是minibatch大小</li>
+</ul>
+</li>
+<li>memory bank包含数据集中所有样本编码后特征<ul>
+<li>随机采样一部分作为keys</li>
+<li>每个迭代只更新被采样的样本编码</li>
+<li>因为样本编码来自不同的training step，一致性差</li>
+</ul>
+</li>
+<li><p>MoCo</p>
+<ul>
+<li>动态编码库：out-of-date的编码出列</li>
+<li>momentum update：一致性提升</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/memory-bank.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>InfoNCE</p>
+<ul>
+<li><p>deep mind在CPC(Contrastive Predictive Coding)提出，论文以后有机会再展开</p>
+<ul>
+<li>unsupervised</li>
+<li>encoder：encode x into latent space representations z，resnet blocks</li>
+<li>autoregressive model：summarize each time-step set of {z} into a context representation c，GRUs</li>
+<li><p>probabilistic contrastive loss</p>
+<ul>
+<li>Noise-Contrastive Estimation</li>
+<li>Importance Sampling</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/CPC.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>训练目标是输入数据x和context vector c之间的mutual information</p>
+<ul>
+<li>每次从$p(x_{t+k}|c_t)$中采样一个正样本：正样本是这个序列接下来预测的东西，和c的相似性肯定要高于不想干的token</li>
+<li>从$p(x_{t+k})$中采样N-1个负样本：负样本是别的序列里面随机采样的东西</li>
+<li><p>目标是让正样本与context相关性高，负样本低</p>
+<p><img src="/2021/04/30/MoCo系列/InfoNCE.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning"><a href="#MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning" class="headerlink" title="MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning"></a>MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unsupervised visual representation learning </li>
+<li>contrastive learning </li>
+<li><p>dynamic dictionary</p>
+<ul>
+<li>large</li>
+<li>consisitent</li>
+</ul>
+</li>
+<li><p>verified on</p>
+<ul>
+<li>7 down-stream tasks</li>
+<li>ImageNet classification</li>
+<li>VOC &amp; COCO det/seg</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Unsupervised representation learning </p>
+<ul>
+<li>highly successful in NLP，in CV supervised is still the main-stream</li>
+<li>两个核心<ul>
+<li>pretext tasks</li>
+<li>loss functions</li>
+</ul>
+</li>
+<li>loss functions<ul>
+<li>生成式方法的loss是基于prediction和一个fix target来计算的</li>
+<li>contrastive-based的key target则是vary on-the-fly during training</li>
+<li>Adversarial losses没展开</li>
+</ul>
+</li>
+<li>pretext tasks<ul>
+<li>tasks involving recover：auto-encoder</li>
+<li>task involving pseudo-labels：通常有个exemplar/anchor，然后计算contrastive loss </li>
+</ul>
+</li>
+<li>contrastive learning VS pretext tasks<ul>
+<li>大量pretext tasks可以通过设计一些contrastive loss来实现</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>recent approaches using contrastive loss</p>
+<ul>
+<li>dynamic dictionaries<ul>
+<li>由keys组成：sampled from data &amp; represented by an encoder </li>
+</ul>
+</li>
+<li>train the encoder to perform dictionary look-up<ul>
+<li>given an encoded query</li>
+<li>similar to its matching key and dissimilar to others</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>desirable dictionary </p>
+<ul>
+<li>large：better sample</li>
+<li>consistent：training target consistent</li>
+</ul>
+</li>
+<li><p>MoCo：Momentum Contrast</p>
+<ul>
+<li>queue</li>
+<li>每个it step的mini-batch的编码入库</li>
+<li>the oldest are dequeued</li>
+<li><p>EMA：</p>
+<ul>
+<li>a slowly progressing key encoder</li>
+<li>momentum-based moving average of the query encoder</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/MoCo.png" width="50%;"></p>
+</li>
+<li><p>similar的定义：q &amp; k are from the same image</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>contrastive learning</p>
+<ul>
+<li>a encoded query $q$</li>
+<li>a set of encoded samples $\{k_0, k_1, …\}$</li>
+<li>assume：there is a single key $k_+$ in the dictionary that $q$ matches</li>
+<li>similarity measurement：dot product</li>
+<li>InfoNCE：<ul>
+<li>$L_q = -log \frac{exp(qk_+/\tau)}{\sum_0^K exp(qk/\tau)}$</li>
+<li>1 positive &amp; K negtive samples</li>
+<li>本质上是个softmax-based classifier，尝试将$q$分类成$k_+$</li>
+</ul>
+</li>
+<li>unsupervised workflow<ul>
+<li>with a encoder network $f_q$ &amp; $f_k$</li>
+<li>thus we have query &amp; sample representation $q=f_q(x^q)$ &amp; $k=f_k(x^k)$</li>
+<li>inputs $x$ can be images/patches/context(patches set)</li>
+<li>$f_q$ &amp; $f_k$ can be identical/partially shared/different</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>momentum contrast</p>
+<ul>
+<li><p>dictionary as a key</p>
+<ul>
+<li>the dictionary always represents a sampled subset of all data</li>
+<li>the current mini-batch入列</li>
+<li>the oldest mini-batch出列</li>
+</ul>
+</li>
+<li><p>momentum update</p>
+<ul>
+<li><p>large dictionary没法对keys进行back-propagation：因为sample太多了</p>
+</li>
+<li><p>only $f_q$ are updated by back-propagation：mini-batch</p>
+</li>
+<li><p>naive solution：copy $f_q$的参数给$f_k$，yields poor results，因为key encoder参数变化太频繁了，representation inconsistent issue</p>
+</li>
+<li><p>momentum update：$f_k = mf_k + (1-m)f_q$，$m=0.999$</p>
+</li>
+<li><p>三种更新方式对比</p>
+<p>  <img src="/2021/04/30/MoCo系列/key encoder.png" width="80%;"></p>
+<ul>
+<li>第一种end-to-end method：<ul>
+<li>use samples in current mini-batch as the dictionary</li>
+<li>keys are consistently encoded</li>
+<li>dictionary size is limited</li>
+</ul>
+</li>
+<li>第二种memory bank<ul>
+<li>A memory bank consists of the representations of all samples in the dataset</li>
+<li>the dictionary for each mini-batch is randomly sampled from the memory bank，不进行bp，thus enables large dictionary</li>
+<li>key representation is updated when it was last seen：inconsistent</li>
+<li>有些也用momentum update，但是是用在representation上，而不是encoder参数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>pretext task</p>
+<ul>
+<li>define positive pair：if the query and the key come from the same image</li>
+<li>我们从图上take two random views under random augmentation to form a positive pair</li>
+<li>然后用各自的encoder编码成q &amp; k</li>
+<li>每一对计算similarity：pos similarity</li>
+<li>然后再计算input queries和dictionary的similarity：neg similarity</li>
+<li>计算ce，update $f_q$</li>
+<li>用$f_q$ update $f_k$</li>
+<li>把k加入dictionary队列</li>
+<li><p>把最早的mini-batch出列</p>
+<p><img src="/2021/04/30/MoCo系列/MoCo code.png" width="50%;"></p>
+</li>
+<li><p>技术细节</p>
+<ul>
+<li>resnet：last fc dim=128，L2 norm</li>
+<li>temperature $\tau=0.07$</li>
+<li>augmentation<ul>
+<li>random resize + random(224,224) crop</li>
+<li>random color jittering</li>
+<li>random horizontal flip</li>
+<li>random grayscale conversion</li>
+</ul>
+</li>
+<li>shuffling BN<ul>
+<li>实验发现使用resnet里面的BN会导致不好的结果：猜测是intra-batch communication引导模型学习了一种cheating的low-loss solution</li>
+<li>具体做法是给$f_k$的输入mini-batch先shuffle the order，然后进行fp，然后再shuffle back，这样$f_q$和$f_k$的BN计算的mini-batch的statics就是不同的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations"><a href="#SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations" class="headerlink" title="SimCLR: A Simple Framework for Contrastive Learning of Visual Representations"></a>SimCLR: A Simple Framework for Contrastive Learning of Visual Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>simplify recently proposed contrastive self-supervised learning algorithms </li>
+<li>systematically study the major components <ul>
+<li>data augmentations</li>
+<li>learnable unlinear prediction head</li>
+<li>larger batch size and more training steps</li>
+</ul>
+</li>
+<li><p>outperform previous self-supervised &amp; semi-supervised learning methods on ImageNet</p>
+<p><img src="/2021/04/30/MoCo系列/acc.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>discriminative approaches based on contrastive learning</p>
+<ul>
+<li>maximizing agreement between differently augmented views of the same data sample </li>
+<li>via a contrastive loss in the latent space</li>
+</ul>
+</li>
+<li><p>major components &amp; conclusions</p>
+<ul>
+<li>数据增强很重要，unsupervised比supervised benefits more</li>
+<li>引入的learnable nonlinear transformation提升了representation quality</li>
+<li>contrastive cross entropy loss受益于normalized embedding和adjusted temperature parameter</li>
+<li>larger batch size and more training steps很重要，unsupervised比supervised benefits more</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>common framework</p>
+<p>  <img src="/2021/04/30/MoCo系列/framework.png" width="40%;"></p>
+<ul>
+<li><p>4 major components</p>
+<ul>
+<li>随机数据增强<ul>
+<li>results in two views of the same sample，构成positive pair</li>
+<li>crop + resize back + color distortions + gaussian blur</li>
+</ul>
+</li>
+<li>base encoder<ul>
+<li>用啥都行，本文用了resnet including the GAP</li>
+</ul>
+</li>
+<li>a projection head<ul>
+<li>将representation dim映射到the space where contrastive loss is applied（given 1 pos pair &amp; N neg pair，就是N+1 dim）</li>
+<li>之前有方法直接用linear projection</li>
+<li>我们用了带一个hidden layer的MLP：fc-bn-relu-fc</li>
+</ul>
+</li>
+<li>a contrastive loss</li>
+</ul>
+</li>
+<li><p>overall workflow</p>
+<ul>
+<li>random sample a minibatch of N</li>
+<li>random augmentation results in 2N data points</li>
+<li>对每个样本来讲，有1个positive pair，其余2(N-1)个data points都是negative samples</li>
+<li>set cosine similarity $sim(u,v)=u^Tv/|u||v|$</li>
+<li>given positive pair $(i,j)$ then the loss is $l_{i,j} = -log \frac{exp(s_{i,j}/\tau)}{\sum_{k\neq i}^{2N} exp(s_{i,k}/\tau)}$</li>
+<li>对每个positive pair都计算，包括$(i,j)$ 和$(j,i)$，叫那个symmetrized loss</li>
+<li><p>update encoder</p>
+<p><img src="/2021/04/30/MoCo系列/SimCLR.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training with large batch size</p>
+<ul>
+<li>batch 8192，negatives 16382</li>
+<li>大batch时，linear learning rate scaling可能不稳定，所以用了LARS optmizer</li>
+<li>global BN，aggregate BN mean &amp; variance over all devices</li>
+<li>TPU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning"><a href="#MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning" class="headerlink" title="MoCo v2: Improved Baselines with Momentum Contrastive Learning"></a>MoCo v2: Improved Baselines with Momentum Contrastive Learning</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>still working on contrastive unsupervised learning</li>
+<li>simple modifications on MoCo<ul>
+<li>introduce two effective SimCLR’s designs：</li>
+<li>an MLP head</li>
+<li>more data augmentation</li>
+<li>requires smaller batch size than SimCLR，making it possible to run on GPU</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>ImageNet classification </li>
+<li>VOC detection</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>MoCo &amp; SimCLR <ul>
+<li>contrastive unsupervised learning frameworks</li>
+<li>MoCo v1 shows promising</li>
+<li>SimCLR further reduce the gap</li>
+<li>we found two design imrpovements in SimCLR 在两个方法中都work，而且用在MoCo中shows better transfer learning results<ul>
+<li>an MLP projection head</li>
+<li>stronger data augmentation</li>
+</ul>
+</li>
+<li>同时MoCo framework相比较于SimCLR ，远不需要large training batches<ul>
+<li>SimCLR based on end-to-end mechanism，需要比较大的batch size，来提供足够多的negative pair</li>
+<li>MoCo则用了动态队列，所以不限制batch size</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>SimCLR <ul>
+<li>improves the end-to-end method</li>
+<li>larger batch：to provide more negative samples</li>
+<li>output layer：replace fc with a MLP head</li>
+<li>stronger data augmentation</li>
+</ul>
+</li>
+<li><p>MoCo</p>
+<ul>
+<li>a large number of negative samples are readily available</li>
+<li>所以就把后两项引入进来了</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/optimization.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>MLP head</p>
+<ul>
+<li>2-layer MLP(hidden dim=2048, ReLU)</li>
+<li>仅影响unsupervised training，有监督transfer learning的时候换头</li>
+<li><p>temperature param调整：从default 0.07 调整成optimal value 0.2</p>
+<p><img src="/2021/04/30/MoCo系列/temperature.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>augmentation</p>
+<ul>
+<li>add blur</li>
+<li>SimCLR还用了stronger color distortion：we found stronger color distortion in SimCLR hurts in our MoCo，所以没加</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>ablation</p>
+<ul>
+<li>MLP：在分类任务上的提升比检测大</li>
+<li><p>augmentation：在检测上的提升比分类大</p>
+<p><img src="/2021/04/30/MoCo系列/ablation.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>comparison</p>
+<p>  <img src="/2021/04/30/MoCo系列/comparison.png" width="50%;"></p>
+<ul>
+<li>large batches are not necessary for good acc：SimCLR longer training那个版本精度更高</li>
+<li>end-to-end的方法肯定more costly in memory and time：因为要bp两个encoder</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers"><a href="#MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers" class="headerlink" title="MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers"></a>MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>self-supervised frameworks that based on Siamese network, including MoCo</li>
+<li>ViT：study the fundamental components for training self-supervised ViT</li>
+<li>MoCo v3：an incremental improvement of MoCo v1/2，striking for a better balance of simplicity &amp; accuracy &amp; scalability</li>
+<li>instability is a major issue</li>
+<li>scaling up ViT models<ul>
+<li>ViT-Large</li>
+<li>ViT-Huge</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>we go back to the basics and investigate the fundamental components of training deep neural networks<ul>
+<li>batch size</li>
+<li>learning rate</li>
+<li>optmizer</li>
+</ul>
+</li>
+<li>instability <ul>
+<li>instability is a major issue that impacts self-supervised ViT training</li>
+<li>but may not result in catastrophic failure，只会导致精度损失</li>
+<li>所以称之为hidden degradation</li>
+<li>use a simple trick to improve stability：freeze the patch projection layer in ViT</li>
+<li>and observes increasement in acc</li>
+</ul>
+</li>
+<li>NLP里面基于masked auto-encoding的framework效果要比基于contrastvie的framework好，图像正好反过来</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>MoCo v3</p>
+<ul>
+<li>take two crops for each image under random augmentation</li>
+<li>encoded by two encoders $f_q$ &amp; $f_k$ into vectors $q$ &amp; $k$</li>
+<li>we use the keys that naturally co-exist in the same batch<ul>
+<li>abandon the memory queue：因为发现batch size足够大（4096）的时候，memory queue就没啥acc gain了</li>
+<li>回归到batch-based sample pair</li>
+</ul>
+</li>
+<li>但是encoder k仍旧不回传梯度，还是基于encoder q进行动量更新</li>
+<li><p>symmetrized loss：</p>
+<ul>
+<li>$ctr(q_1, k_2) + ctr(q_2,k_1)$</li>
+<li>InfoNCE</li>
+<li>temperature</li>
+<li>两个crops分别计算ctr</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/MoCo v3.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>encoder </p>
+<ul>
+<li>encoder $f_q$<ul>
+<li>a backbone</li>
+<li>a projection head</li>
+<li>an extra prediction head</li>
+</ul>
+</li>
+<li>encoder $f_k$<ul>
+<li>a backbone</li>
+<li>a projection head</li>
+</ul>
+</li>
+<li>encoder $f_k$ is updated by the moving average of $f_q$，excluding the prediction head</li>
+</ul>
+</li>
+<li><p>baseline acc</p>
+<p>  <img src="/2021/04/30/MoCo系列/v3 base.png" width="50%;"></p>
+<ul>
+<li>basic settings，主要变动就是两个：<ul>
+<li>dynamic queue换成large batch</li>
+<li>encoder $f_q$的extra prediction head</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>use ViT</p>
+<ul>
+<li><p>直接用ViT替换resnet back met instability issue</p>
+</li>
+<li><p>batch size</p>
+<ul>
+<li><p>ViT里面的一个观点就是，model本身比较heavy，所以large batch is desirable</p>
+</li>
+<li><p>实验发现</p>
+<ul>
+<li>a batch of 1k &amp; 2k produces reasonably smooth curves：In this regime, the larger batch improves accuracy thanks to more negative samples</li>
+<li>a batch of 4k 有明显的untable dips：</li>
+<li><p>a batch of 6k has worse failure patterns：我们解读为在跳水点，training is partially restarted and jumps out of the current local optimum</p>
+<p><img src="/2021/04/30/MoCo系列/batch.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>learning rate</p>
+<ul>
+<li>lr较小，training比较稳定，但是容易欠拟合</li>
+<li>lr过大，会导致unstable，也会影响acc</li>
+<li><p>总体来说精度还是决定于stability</p>
+<p><img src="/2021/04/30/MoCo系列/lr.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>optimizer</p>
+<ul>
+<li>default adamW，batch size 4096</li>
+<li>有些方法用了LARS &amp; LAMB for large-batch training</li>
+<li><p>LAMB </p>
+<ul>
+<li>sensitive to lr</li>
+<li>optmal lr achieves slightly better accuracy than AdamW</li>
+<li>但是lr一旦过大，acc极速drop</li>
+<li>但是training curves still smooth，虽然中间过程有drop：我们解读为LAMB can avoid sudden change in the gradients，但是避免不了negative compact，还是会累加</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/lamb.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>a trick for improving stability</p>
+<ul>
+<li>we found a spike in gradient causes a dip in the training curve</li>
+<li>we also observe that gradient spikes happen earlier in the first layer (patch projection)</li>
+<li><p>所以尝试freezing the patch projection layer during training，也就是一个random的patch projection layer</p>
+<ul>
+<li>This stability benefits the final accuracy</li>
+<li>The improvement is bigger for a larger lr</li>
+<li>在别的ViT-back-framework上也有效（SimCLR、BYOL）</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/random.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>we also tried BN，WN，gradient clip</p>
+<ul>
+<li>BN/WN does not improve</li>
+<li>gradient clip在threshold足够小的时候有用，推到极限就是freezing了</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>implementation details</p>
+<ul>
+<li>AdamW</li>
+<li>batch size 4096</li>
+<li>lr：warmup 40 eps then cosine decay</li>
+</ul>
+</li>
+<li><p>MLP heads</p>
+<ul>
+<li>projection head：3-layers，4096-BN-ReLU-4096-BN-ReLU-256</li>
+<li>prediction head：2-layers，4096-BN-ReLU-256</li>
+</ul>
+</li>
+<li><p>loss</p>
+<ul>
+<li>ctr里面有个scale的参数，$2\tau$</li>
+<li>makes it less sensitive to $\tau$ value</li>
+<li>$\tau=0.2$</li>
+</ul>
+</li>
+<li><p>ViT architecture</p>
+<p>  <img src="/2021/04/30/MoCo系列/ViT.png" width="45%;"></p>
+<ul>
+<li>跟原论文保持一致</li>
+<li>输入是224x244的image，划分成16x16/14x14的patch sequence，project成256d/196d的embedding</li>
+<li>加上sine-cosine-2D的PE</li>
+<li>再concat一个cls token</li>
+<li>经过一系列transformer blocks</li>
+<li>The class token after the last block (and after the final LayerNorm) is treated as the output of the backbone，and is the input to the MLP heads</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/15/optimizers优化器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3399,293 +4166,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/27/guided-anchoring/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/27/guided-anchoring/" itemprop="url">guided anchoring</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-27T14:05:29+08:00">
-                2021-01-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/27/guided-anchoring/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/27/guided-anchoring/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>原作者知乎reference：<a href="https://zhuanlan.zhihu.com/p/55854246" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/55854246</a></p>
-<ul>
-<li>不完全是anchor-free，因为还是有decision grid to choose from的，应该说是adaptive anchor instead of hand-picked</li>
-<li>为了特征和adaptive anchor对齐，引入deformable conv</li>
-</ul>
-<h2 id="Region-Proposal-by-Guided-Anchoring"><a href="#Region-Proposal-by-Guided-Anchoring" class="headerlink" title="Region Proposal by Guided Anchoring"></a>Region Proposal by Guided Anchoring</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>most methods<ul>
-<li>predefined anchors</li>
-<li>do a uniformed dense prediction </li>
-</ul>
-</li>
-<li>our method<ul>
-<li>use sematic features to guide the anchoring</li>
-<li>anchor size也是网络预测参数，compute from feature map</li>
-<li>arbitrary aspect ratios </li>
-</ul>
-</li>
-<li>feature inconsistency<ul>
-<li>不同的anchor loc都是对应feature map上某一个点</li>
-<li>变化的anchor size和固定的位置向量之间存在inconsistency</li>
-<li>引入feature adaption module</li>
-</ul>
-</li>
-<li>use high-quality proposals<ul>
-<li>GA-RPN提升了proposal的质量</li>
-<li>因此我们对proposal进入stage2的条件更严格</li>
-</ul>
-</li>
-<li>adopt in Fast R-CNN, Faster R-CNN and RetinaNet均涨点<ul>
-<li>RPN提升显著：9.1</li>
-<li>MAP也有涨点：1.2-2.7</li>
-</ul>
-</li>
-<li>还可以boosting trained models<ul>
-<li>boosting a two-stage detector by a fine-tuning schedule</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>alignment &amp; consistency</p>
-<ul>
-<li><p>我们用feature map的pixels作为anchor representations，那么anchor centers必须跟feature pixels保持align</p>
-</li>
-<li><p>不同pixel的reception field必须跟对应的anchor size保持匹配</p>
-</li>
-<li>previous sliding window scheme对每个pixel都做一样的操作，用同样一组anchor，因此是align和consist的</li>
-<li>previous progressly refining scheme对anchor的位置大小做了refinement，ignore the alignment &amp; consistency issue，是不对的！！</li>
-</ul>
-</li>
-<li><p>disadvantage of predefined anchors</p>
-<ul>
-<li>hard hyperparams</li>
-<li>huge pos/neg imbalance &amp; computation </li>
-</ul>
-</li>
-<li><p>we propose GA-RPN</p>
-<ul>
-<li>learnable anchor shapes to mitigate the hand-picked issue</li>
-<li>feature adaptation to solve the consistency issue</li>
-<li>key concerns in this paper<ul>
-<li>learnable anchors</li>
-<li>joint anchor distribution </li>
-<li>alignment &amp; consistency</li>
-<li>high-quality proposals </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>$p(x,y,w,h|I) = p(x,y|I)p(w,h|x,y,I)$</li>
-<li>将问题解耦成位置和尺寸的预测，首先anchor的loc服从full image的均匀分布，anchor的size建立在loc存在的基础上</li>
-<li>two branches for loc &amp; shape prediction<ul>
-<li>loc：binary classification，hxwx1</li>
-<li>shape：location-dependent shapes，hxwx2</li>
-<li>anchors：loc probabilities above a certain threshold &amp; correponding ‘most probable’ anchor shape</li>
-</ul>
-</li>
-<li>multi-scale<ul>
-<li>the anchor generation parameters are shared</li>
-</ul>
-</li>
-<li><p>feature adaptation module</p>
-<ul>
-<li>adapts the feature according to the anchor shape </li>
-</ul>
-<p><img src="/2021/01/27/guided-anchoring/guided anchoring.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>anchor location prediction</p>
-<ul>
-<li>indicates the probability of an object’s center  </li>
-<li>一层卷积：1x1 conv，channel1，sigmoid</li>
-<li>transform back：each grid(i,j) corresponds to coords ((i+0.5)*s, (j+0.5)*s) on the origin map</li>
-<li>filter out 90% of the regions</li>
-<li>thus replace the ensuing conv layers by masked convs</li>
-<li>groud truth<ul>
-<li>binary label map </li>
-<li>each level：center region &amp; ignore region &amp; outside region，基于object center的方框<ul>
-<li>$\sigma_1=0.2，\sigma_2=0.5$：region box的长宽系数</li>
-<li>？？？用centerNet的heatmap会不会更好？？？</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>focal loss $L_{loc}$</li>
-</ul>
-</li>
-<li>anchor shape prediction<ul>
-<li>predicts the best shape for each location</li>
-<li>best shape：a shape that lead to best iou with the nearest gt box</li>
-<li>一层卷积：1x1 conv，channel2，[-1,1]</li>
-<li>transform layer：transform direct [-1,1] outputs to real box shape<ul>
-<li>$w = \sigma <em> s </em> e^{dw}$</li>
-<li>$h = \sigma <em> s </em> e^{dh}$</li>
-<li>s：stride</li>
-<li>$\sigma$：经验参数，8 in experiments</li>
-</ul>
-</li>
-<li>set 9 pairs of (w,h) as RetinaNet，calculate the IoU of these sampled anchors with gt，take the max as target value</li>
-<li>bounded iou loss：$L_{shape} = L_1(1-min(\frac{w}{w_g}, \frac{w_g}{w})) + L_1(1-min(\frac{h}{h_g}, \frac{h_g}{h}))$ </li>
-</ul>
-</li>
-<li>feature adaptation<ul>
-<li>intuition：the feature corresponding to different size of anchor shapes应该encode different content region</li>
-<li>inputs：feature map &amp; anchor shape</li>
-<li>location-dependent transformation：3x3 deformable conv</li>
-<li>deformable conv的offset是anchor shape得到的</li>
-<li>outputs：adapted features</li>
-</ul>
-</li>
-<li>with adapted features<ul>
-<li>then perform further classification and bounding-box regression </li>
-</ul>
-</li>
-<li>training<ul>
-<li>jointly optimize：$L = \lambda_1 L_{loc} + \lambda_2 L_{shape} + L_{cls} + L_{reg}$</li>
-<li>$\lambda_1=0.2，\lambda_2=0.5$</li>
-<li>each level of feature map should only target objects of a specific scale range：但是ASFF论文主张说这种arrange by scale的模式会引入前背景inconsistency？？</li>
-</ul>
-</li>
-<li>High-quality Proposals <ul>
-<li>set a higher positive/negative threshold </li>
-<li>use fewer samples  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3740,7 +4220,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">139</span>
+                  <span class="site-state-item-count">140</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3753,7 +4233,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">76</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
