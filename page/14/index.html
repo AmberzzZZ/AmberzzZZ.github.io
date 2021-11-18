@@ -276,6 +276,205 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/01/kd-tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/01/kd-tree/" itemprop="url">kd-tree</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-01T12:22:40+08:00">
+                2018-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/01/kd-tree/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/01/kd-tree/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><em>Reference：Bentley J L. Multidimensional Binary Search Trees Used for Associative Searching[J]. Communications of the Acm, 1975, 18(9):509-517.</em></p>
+<p>前面更新<a href="https://amberzzzz.github.io/2018/05/05/ICP-Iterative-Closest-Points/">basic ICP</a>的时候留了一个坑——最近邻的求法。线性扫描？手动挥手。</p>
+<h4 id="1-先说说距离吧"><a href="#1-先说说距离吧" class="headerlink" title="1. 先说说距离吧"></a>1. 先说说距离吧</h4><p><strong>1.1 欧式距离</strong></p>
+<script type="math/tex; mode=display">
+d(x,y) = \sqrt{(x_1 - y_1)^2 + (x_2-y_2)^2 + ... + (x_n-y_n)^2} = \sqrt{\sum_{i=1}^n (x_i - y_i)^2}</script><p><strong>1.2 标准化欧式距离</strong></p>
+<p>首先将数据各维度分量都标准化到均值为0，方差为1，再求欧式距离：</p>
+<script type="math/tex; mode=display">
+X_{stand} = \frac{X - \mu}{\sigma}</script><p>简单推导后可以发现，标准化欧式距离实际上就是一种加权欧式距离：</p>
+<script type="math/tex; mode=display">
+d(x,y) = \sqrt{\sum_{i=1}^n (\frac{x_i-y_i}{s_i})^2}</script><p><strong>1.3 马氏距离（Mahalanobis Distance）</strong></p>
+<script type="math/tex; mode=display">
+D(X_i,X_j) = \sqrt{(X_i - X_j)S^{-1}(X_i-X_j)}</script><p>其中$S$为协方差矩阵$Cov$：</p>
+<script type="math/tex; mode=display">
+Cov(X,Y) = E\{[X-E(X)][Y-E(Y)]\}</script><p><strong>若协方差矩阵是单位阵（样本各维度之间独立同分布）</strong>，那公式就变成欧式距离了，若协方差矩阵是对角阵，那公式就变成标准化欧式距离了。</p>
+<p><strong>1.4 相似度</strong></p>
+<p>相似度也是距离的一种表征方式，距离越相近，相似度越高。</p>
+<ul>
+<li>欧式距离相似度：将欧式距离限定在0 1之间变化</li>
+</ul>
+<script type="math/tex; mode=display">
+相似度 = \frac{1}{1+欧式距离}</script><ul>
+<li>余弦相似度：-1到1之间变化</li>
+</ul>
+<script type="math/tex; mode=display">
+cos\theta = \frac{A\cdot B}{||A||\ ||B||}</script><ul>
+<li>皮尔逊相关系数：-1到1之间变化</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> numpy.corrcoef(A, B)</span><br></pre></td></tr></table></figure>
+<h4 id="2-KD树"><a href="#2-KD树" class="headerlink" title="2. KD树"></a>2. KD树</h4><ul>
+<li>k-NN算法</li>
+<li>推荐系统</li>
+<li>SIFT特征匹配</li>
+<li>ICP迭代最近点</li>
+<li>最近在做的M3RCM中的堆结构（这个有点牵强，因为不是二叉树）</li>
+</ul>
+<p>总之以上这些基于匹配／比较的目的而进行的数据库查找／图像检索，本质上都可以归结为通过距离函数在高维矢量之间的相似性检索问题。</p>
+<p>一维向量有二分法查找，对应地高维空间有树形结构便于快速检索。<strong>利用树形结构可以省去对大部分数据点的搜索，从而减少检索的计算量</strong>。 </p>
+<p>KD树是一种<strong>二叉树</strong>，通过不断地用垂直于某坐标轴的超平面将k维空间切分构造而成。 </p>
+<p><img src="/2018/06/01/kd-tree/2d.png" alt="2d"></p>
+<p><img src="/2018/06/01/kd-tree/3d.png" alt="3d"></p>
+<p><strong>2.1 构造树</strong></p>
+<p>递归创建节点：节点信息包含切分坐标轴和切分点，从而确定超平面，将当前空间切分为左右两个子空间，递归直到当前子空间内没有实例为止。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, point, axis)</span>:</span></span><br><span class="line">		self.value = point</span><br><span class="line">		self.axis = axis</span><br><span class="line">		self.left = <span class="keyword">None</span></span><br><span class="line">		self.right = <span class="keyword">None</span></span><br></pre></td></tr></table></figure>
+<p>为了使得构造出的KD树尽可能平衡（高效分割空间）：</p>
+<ul>
+<li>选择坐标轴：简单点的方式是循环交替选择坐标轴，复杂点的做法是选择当前方差最大的轴作为切分轴。</li>
+<li>选择切分点：取选定坐标轴上数据的中值作为切分点。</li>
+</ul>
+<p>注意：KD树的构造旨在高效分割空间，<strong>其叶子节点并非是最近邻搜索等应用场景的最优解</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kdTree</span><span class="params">(points, depth)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> len(points) == <span class="number">0</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line">	axis = depth % len(points[<span class="number">0</span>])</span><br><span class="line">	points.sort(key=<span class="keyword">lambda</span> x: x[axis])</span><br><span class="line">	cut_idx = centreValue(points)</span><br><span class="line">	node = Node(points[cut_idx], axis)</span><br><span class="line">	node.left = kdTree(points[:cut_idx], depth+<span class="number">1</span>)</span><br><span class="line">	node.right = kdTree(points[cut_idx+<span class="number">1</span>:], depth+<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">return</span> node</span><br></pre></td></tr></table></figure>
+<p>对于包含n个实例的k维数据来说，构造KD树的时间复杂度为O(k*n*log n)。</p>
+<p><strong>2.2 新增节点</strong></p>
+<p>递归实现：从根节点开始做比较，大于则插入左子树，小于则插入右子树。直到达到叶子节点，并创建新的叶子节点。</p>
+<p><strong>2.3 删除节点</strong></p>
+<p>将待删除的节点的所有子节点组成一个集合，重新构建KD子树，替换待删除节点。</p>
+<p><strong>2.4 最近邻搜索</strong></p>
+<p>搜索最近邻算法主要分为两部分：首先是深度优先遍历，直到遇到叶子节点，生成搜索路径。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">searchNearest</span><span class="params">(node, target)</span>:</span></span><br><span class="line">    <span class="comment"># input: node: root node of the tree</span></span><br><span class="line">    <span class="comment">#        target: list</span></span><br><span class="line">    <span class="comment"># output: nearest: list</span></span><br><span class="line">    <span class="comment"># 	      dist: distance between target and nearest</span></span><br><span class="line">    <span class="keyword">if</span> node == <span class="keyword">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line">    <span class="comment"># 生成搜索路径</span></span><br><span class="line">    search_path = deque()</span><br><span class="line">    nearest = node</span><br><span class="line">    print(<span class="string">"search path: "</span>)</span><br><span class="line">    <span class="keyword">while</span> node:</span><br><span class="line">        print(node.value)</span><br><span class="line">        search_path.append(node)</span><br><span class="line">        <span class="comment"># if Dist(nearest.value, target) &gt; Dist(node.value, target):</span></span><br><span class="line">        <span class="comment"># 	nearest.value = node.value</span></span><br><span class="line">        <span class="comment"># 	minDist = Dist(node.value, target)</span></span><br><span class="line"></span><br><span class="line">        axis = node.axis</span><br><span class="line">        <span class="keyword">if</span> target[axis] &gt; node.value[axis]:</span><br><span class="line">            node = node.right</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            node = node.left</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>然后是<strong>回溯查找</strong>，如果目标点和当前最近点构成的球形区域与其上溯节点相交，那么就有一种潜在的可能——上溯节点的另一个子空间的实例可能位于当前这个球形区域内，因此要进行一次判断。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">searchNearest</span><span class="params">(node, target)</span>:</span></span><br><span class="line">    <span class="comment"># input: node: root node of the tree</span></span><br><span class="line">    <span class="comment">#        target: list</span></span><br><span class="line">    <span class="comment"># output: nearest: list</span></span><br><span class="line">    <span class="comment"># 	      dist: distance between target and nearest</span></span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment"># 回溯</span></span><br><span class="line">    print(<span class="string">"\nsearch backwards: "</span>)</span><br><span class="line">    nearest = search_path.pop()</span><br><span class="line">    minDist = Dist(nearest.value, target)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> search_path:</span><br><span class="line">        node = search_path.pop()</span><br><span class="line">        print(node.value)</span><br><span class="line">        <span class="keyword">if</span> node.axis:</span><br><span class="line">            axis = node.axis</span><br><span class="line">            <span class="keyword">if</span> minDist &gt; Dist1(node.value[axis], target[axis]):</span><br><span class="line">                <span class="keyword">if</span> target[axis] &gt; node.value[axis]:</span><br><span class="line">                    search_path.append(node.left)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    search_path.append(node.right)</span><br><span class="line">        <span class="keyword">if</span> Dist(target, nearest.value) &gt; Dist(node.value, target):</span><br><span class="line">            nearest = node</span><br><span class="line">            minDist = Dist(node.value, target)</span><br><span class="line">    <span class="keyword">return</span> nearest.value, minDist</span><br></pre></td></tr></table></figure>
+<p>两个参考点：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">samples = [(<span class="number">2</span>,<span class="number">3</span>), (<span class="number">5</span>,<span class="number">4</span>), (<span class="number">9</span>,<span class="number">6</span>), (<span class="number">4</span>,<span class="number">7</span>), (<span class="number">8</span>,<span class="number">1</span>), (<span class="number">7</span>,<span class="number">2</span>)]</span><br><span class="line">target = (<span class="number">2.1</span>, <span class="number">3.1</span>)</span><br><span class="line">target = (<span class="number">2</span>, <span class="number">4.5</span>)</span><br></pre></td></tr></table></figure>
+<p>KD树搜索的核心就是：当查询点的邻域与分割超平面两侧空间交割时，需要查找另一侧子空间！！！算法平均复杂度O(N logN)。实际时间复杂度与实例分布情况有关，$t_{worst} = O(kN^{1-\frac{1}{k}})$，通常要求数据规模达到$N \geq 2^D$才能达到高效的搜索。</p>
+<p><img src="/2018/06/01/kd-tree/search1.jpg" alt="s1"></p>
+<p><img src="/2018/06/01/kd-tree/search2.jpg" alt="s2"></p>
+<h4 id="3-改进算法：BBF算法"><a href="#3-改进算法：BBF算法" class="headerlink" title="3. 改进算法：BBF算法"></a>3. 改进算法：BBF算法</h4><p>回溯是由查询路径决定的，因此一种算法改进思路就是<strong>将查询路径上的结点排序</strong>，回溯检查总是从优先级最高的树节点开始——Best-Bin-First BBF算法。该算法能确保优先检索包含最邻近点可能性较高的空间。</p>
+<ul>
+<li>优先队列：优先级取决于它们离查询点的距离，距离越近，优先级越高，回溯的时候优先遍历。</li>
+<li>对回溯可能需要路过的结点加入队列：切分的时候，把未选中的那个兄弟结点加入到队列中。</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2552,145 +2751,11 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/12/VTK编译报错no-override-found-for-vtkpolydatamapper/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/12/VTK编译报错no-override-found-for-vtkpolydatamapper/" itemprop="url">VTK编译报错no override found for vtkpolydatamapper</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T11:13:07+08:00">
-                2018-04-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/04/12/VTK编译报错no-override-found-for-vtkpolydatamapper/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/12/VTK编译报错no-override-found-for-vtkpolydatamapper/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>报错原因是通过IDE编译而不是直接通过cmake，因此要添加如下代码段：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"vtkAutoInit.h"</span>   </span></span><br><span class="line">VTK_MODULE_INIT(vtkRenderingOpenGL2); </span><br><span class="line">VTK_MODULE_INIT(vtkInteractionStyle);</span><br></pre></td></tr></table></figure>
-<p>先记录解决办法，more details 留到以后。</p>
-<p>基础测试：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"vtkAutoInit.h"</span></span></span><br><span class="line">VTK_MODULE_INIT(vtkRenderingOpenGL2); <span class="comment">// VTK was built with vtkRenderingOpenGL2</span></span><br><span class="line">VTK_MODULE_INIT(vtkInteractionStyle);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkSphereSource.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkPolyData.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkSmartPointer.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkPolyDataMapper.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkActor.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkRenderWindow.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkRenderer.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vtkRenderWindowInteractor.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">char</span> *[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">// Create a sphere</span></span><br><span class="line">  vtkSmartPointer&lt;vtkSphereSource&gt; sphereSource =</span><br><span class="line">          vtkSmartPointer&lt;vtkSphereSource&gt;::New();</span><br><span class="line">  sphereSource-&gt;SetCenter(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>);</span><br><span class="line">  sphereSource-&gt;SetRadius(<span class="number">5.0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//mapper</span></span><br><span class="line">  vtkSmartPointer&lt;vtkPolyDataMapper&gt; mapper =</span><br><span class="line">          vtkSmartPointer&lt;vtkPolyDataMapper&gt;::New();</span><br><span class="line">  mapper-&gt;SetInputConnection(sphereSource-&gt;GetOutputPort());</span><br><span class="line"></span><br><span class="line">  <span class="comment">//actor</span></span><br><span class="line">  vtkSmartPointer&lt;vtkActor&gt; actor =</span><br><span class="line">          vtkSmartPointer&lt;vtkActor&gt;::New();</span><br><span class="line">  actor-&gt;SetMapper(mapper);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//renderer ,renderWindow, renderWindowInteractor.</span></span><br><span class="line">  vtkSmartPointer&lt;vtkRenderer&gt; renderer =</span><br><span class="line">          vtkSmartPointer&lt;vtkRenderer&gt;::New();</span><br><span class="line">  vtkSmartPointer&lt;vtkRenderWindow&gt; renderWindow =</span><br><span class="line">          vtkSmartPointer&lt;vtkRenderWindow&gt;::New();</span><br><span class="line">  renderWindow-&gt;AddRenderer(renderer);</span><br><span class="line">  vtkSmartPointer&lt;vtkRenderWindowInteractor&gt; renderWindowInteractor =</span><br><span class="line">          vtkSmartPointer&lt;vtkRenderWindowInteractor&gt;::New();</span><br><span class="line">  renderWindowInteractor-&gt;SetRenderWindow(renderWindow);</span><br><span class="line"></span><br><span class="line">  renderer-&gt;AddActor(actor);</span><br><span class="line">  renderer-&gt;SetBackground(<span class="number">.3</span>, <span class="number">.6</span>, <span class="number">.3</span>); <span class="comment">// Background color green</span></span><br><span class="line">  renderWindow-&gt;Render();</span><br><span class="line">  renderWindowInteractor-&gt;Start();</span><br><span class="line">  <span class="keyword">return</span> EXIT_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/13/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span>
+    <a class="extend prev" rel="prev" href="/page/13/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/15/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2740,7 +2805,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2753,7 +2818,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

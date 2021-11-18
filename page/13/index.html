@@ -276,6 +276,169 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/08/CSM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/08/CSM/" itemprop="url">CSM, Correlative Scan Matching</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-08T15:22:43+08:00">
+                2018-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/08/CSM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/08/CSM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>SLAM前端主要解决两个问题，一是从不同时刻的传感器输入中识别出同一个地图特征，二是计算每个当前时刻机器人相对该特征的位姿。</p>
+<p>vSLAM能够轻松解决前者，LidarSLAM解决后者无压力。本文讨论激光SLAM前端问题1——特征点匹配。目前两大常用思路：scan2scan——ICP，scan2map——CSM。</p>
+<p>basic的CSM算法思路如下：从前一帧机器人位姿开始，寻找最优刚性变换，使雷达点在栅格地图中的位置尽量对应于占据度为1的栅格。</p>
+<p>为了保持定位信息原有的数位精度，使用双线性插值方法来获取雷达点的地图值(占据度)，而不是使用其所在栅格的地图值来直接对应：</p>
+<p><img src="/2018/10/08/CSM/插值.png" alt="插值"></p>
+<p>$Pm$是雷达点，$P_{00}, P_{01}, P_{10}, P_{11}$是雷达点邻近的四个<strong>栅格中心</strong>点。于是得到地图值：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
+& =\frac{y-y_0}{y_1-y_0} \left ( \frac{x-x_0}{x_1-x_0}M(P_{11}) + \frac{x_1-x}{x_1-x_0}M(P_{01})\right)\\
+& +\frac{y_1-y}{y_1-y_0}\left ( \frac{x-x_0}{x_1-x_0}M(P_{10}) + \frac{x_1-x}{x_1-x_0}M(P_{00})\right)
+\end{align}</script><p>雷达点所在位置的地图值变化梯度：</p>
+<script type="math/tex; mode=display">
+\triangledown M(P_m) = \left [\frac{\delta M(P_m)}{\delta x}, \frac{\delta M(P_m)}{\delta y} \right]\\
+\frac{\delta M(P_m)}{\delta x} =\frac{y-y_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{01}))  +\frac{y_1-y}{(y_1-y_0)(x_1-x_0)}(M(P_{10})- M(P_{00}))\\
+\frac{\delta M(P_m)}{\delta y} =\frac{x-x_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{10}))  +\frac{x_1-x}{(y_1-y_0)(x_1-x_0)}(M(P_{01})- M(P_{00}))\\</script><p>记当前时刻的已有地图$M$，当前帧共输入$n$个雷达点$S_1, …, S_n$，其对应位置的占据度为$M(S_k)$，最优变换定义为$\xi = (\Delta x, \Delta y, \psi)^T$，则最优问题的最小二乘描述为：</p>
+<script type="math/tex; mode=display">
+\xi = argmin_{\xi} \sum_{k=1}^n[1-M(S_k(\xi))]^2</script><p>scan2map的鲁棒性更强，但是实时性上打了折扣。对此主要有两个改进措施：一是局部搜索，二是分辨率金字塔。</p>
+<p>一、局部搜索</p>
+<p>实际计算中会<strong>选定一个搜索区间</strong>，通常只在上一时刻地图位置的附近，对其中包含的全部可能位姿进行评分。</p>
+<p>上式（最小二乘表达式）只包含了雷达端点，考虑到传感器的噪点影响，<strong>局部极值</strong>影响大。</p>
+<ul>
+<li>基于模版的匹配：雷达端点及射线所在栅格构成的多边形区域，以此作为局部地图，进行map2map匹配。减少局部极值的影响，提高计算代价，同时考虑到动态目标，会引入新的局部极值。</li>
+</ul>
+<p><img src="/2018/10/08/CSM/模版.png" alt="模版"></p>
+<ul>
+<li><p>LM算法：迭代的方式求解最小二乘的最优解。</p>
+</li>
+<li><p>分支界定算法：基于广度优先搜索的算法，通过对解空间搜索树的分支进行扩展和剪枝，不断调整搜索方向，加快找到全局最优解的速度。界定核心：若当前分支的下界$C_{branch}$小于解空间上界$C_{HB}$，则进行拓展，否则进行裁剪，直至到达叶子结点，即找到最小代价解。</p>
+</li>
+</ul>
+<p>二、多分辨率金字塔</p>
+<p>两帧雷达点云的相似区域并不会影响匹配的最终结果，但会参与计算，导致搜索效率降低，需要更多的迭代次数达到收敛。</p>
+<p>当地图分辨率较低时，部分地图信息会被忽略，这种高、低分辨率下的差异，有助于对地图中的相似场景进行区分。实际使用中，首先将初始位姿对应的雷达点云与最上层（粗分辨率）的地图进行匹配，计算出当前分辨率下的位姿，并作为初始值进入次一级地图进行匹配，以此类推。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/08/16/leetcode95-二叉搜索树/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1929,210 +2092,11 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/01/kd-tree/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/01/kd-tree/" itemprop="url">kd-tree</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-01T12:22:40+08:00">
-                2018-06-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/01/kd-tree/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/01/kd-tree/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><em>Reference：Bentley J L. Multidimensional Binary Search Trees Used for Associative Searching[J]. Communications of the Acm, 1975, 18(9):509-517.</em></p>
-<p>前面更新<a href="https://amberzzzz.github.io/2018/05/05/ICP-Iterative-Closest-Points/">basic ICP</a>的时候留了一个坑——最近邻的求法。线性扫描？手动挥手。</p>
-<h4 id="1-先说说距离吧"><a href="#1-先说说距离吧" class="headerlink" title="1. 先说说距离吧"></a>1. 先说说距离吧</h4><p><strong>1.1 欧式距离</strong></p>
-<script type="math/tex; mode=display">
-d(x,y) = \sqrt{(x_1 - y_1)^2 + (x_2-y_2)^2 + ... + (x_n-y_n)^2} = \sqrt{\sum_{i=1}^n (x_i - y_i)^2}</script><p><strong>1.2 标准化欧式距离</strong></p>
-<p>首先将数据各维度分量都标准化到均值为0，方差为1，再求欧式距离：</p>
-<script type="math/tex; mode=display">
-X_{stand} = \frac{X - \mu}{\sigma}</script><p>简单推导后可以发现，标准化欧式距离实际上就是一种加权欧式距离：</p>
-<script type="math/tex; mode=display">
-d(x,y) = \sqrt{\sum_{i=1}^n (\frac{x_i-y_i}{s_i})^2}</script><p><strong>1.3 马氏距离（Mahalanobis Distance）</strong></p>
-<script type="math/tex; mode=display">
-D(X_i,X_j) = \sqrt{(X_i - X_j)S^{-1}(X_i-X_j)}</script><p>其中$S$为协方差矩阵$Cov$：</p>
-<script type="math/tex; mode=display">
-Cov(X,Y) = E\{[X-E(X)][Y-E(Y)]\}</script><p><strong>若协方差矩阵是单位阵（样本各维度之间独立同分布）</strong>，那公式就变成欧式距离了，若协方差矩阵是对角阵，那公式就变成标准化欧式距离了。</p>
-<p><strong>1.4 相似度</strong></p>
-<p>相似度也是距离的一种表征方式，距离越相近，相似度越高。</p>
-<ul>
-<li>欧式距离相似度：将欧式距离限定在0 1之间变化</li>
-</ul>
-<script type="math/tex; mode=display">
-相似度 = \frac{1}{1+欧式距离}</script><ul>
-<li>余弦相似度：-1到1之间变化</li>
-</ul>
-<script type="math/tex; mode=display">
-cos\theta = \frac{A\cdot B}{||A||\ ||B||}</script><ul>
-<li>皮尔逊相关系数：-1到1之间变化</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> numpy.corrcoef(A, B)</span><br></pre></td></tr></table></figure>
-<h4 id="2-KD树"><a href="#2-KD树" class="headerlink" title="2. KD树"></a>2. KD树</h4><ul>
-<li>k-NN算法</li>
-<li>推荐系统</li>
-<li>SIFT特征匹配</li>
-<li>ICP迭代最近点</li>
-<li>最近在做的M3RCM中的堆结构（这个有点牵强，因为不是二叉树）</li>
-</ul>
-<p>总之以上这些基于匹配／比较的目的而进行的数据库查找／图像检索，本质上都可以归结为通过距离函数在高维矢量之间的相似性检索问题。</p>
-<p>一维向量有二分法查找，对应地高维空间有树形结构便于快速检索。<strong>利用树形结构可以省去对大部分数据点的搜索，从而减少检索的计算量</strong>。 </p>
-<p>KD树是一种<strong>二叉树</strong>，通过不断地用垂直于某坐标轴的超平面将k维空间切分构造而成。 </p>
-<p><img src="/2018/06/01/kd-tree/2d.png" alt="2d"></p>
-<p><img src="/2018/06/01/kd-tree/3d.png" alt="3d"></p>
-<p><strong>2.1 构造树</strong></p>
-<p>递归创建节点：节点信息包含切分坐标轴和切分点，从而确定超平面，将当前空间切分为左右两个子空间，递归直到当前子空间内没有实例为止。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, point, axis)</span>:</span></span><br><span class="line">		self.value = point</span><br><span class="line">		self.axis = axis</span><br><span class="line">		self.left = <span class="keyword">None</span></span><br><span class="line">		self.right = <span class="keyword">None</span></span><br></pre></td></tr></table></figure>
-<p>为了使得构造出的KD树尽可能平衡（高效分割空间）：</p>
-<ul>
-<li>选择坐标轴：简单点的方式是循环交替选择坐标轴，复杂点的做法是选择当前方差最大的轴作为切分轴。</li>
-<li>选择切分点：取选定坐标轴上数据的中值作为切分点。</li>
-</ul>
-<p>注意：KD树的构造旨在高效分割空间，<strong>其叶子节点并非是最近邻搜索等应用场景的最优解</strong>。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kdTree</span><span class="params">(points, depth)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> len(points) == <span class="number">0</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line">	axis = depth % len(points[<span class="number">0</span>])</span><br><span class="line">	points.sort(key=<span class="keyword">lambda</span> x: x[axis])</span><br><span class="line">	cut_idx = centreValue(points)</span><br><span class="line">	node = Node(points[cut_idx], axis)</span><br><span class="line">	node.left = kdTree(points[:cut_idx], depth+<span class="number">1</span>)</span><br><span class="line">	node.right = kdTree(points[cut_idx+<span class="number">1</span>:], depth+<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">return</span> node</span><br></pre></td></tr></table></figure>
-<p>对于包含n个实例的k维数据来说，构造KD树的时间复杂度为O(k*n*log n)。</p>
-<p><strong>2.2 新增节点</strong></p>
-<p>递归实现：从根节点开始做比较，大于则插入左子树，小于则插入右子树。直到达到叶子节点，并创建新的叶子节点。</p>
-<p><strong>2.3 删除节点</strong></p>
-<p>将待删除的节点的所有子节点组成一个集合，重新构建KD子树，替换待删除节点。</p>
-<p><strong>2.4 最近邻搜索</strong></p>
-<p>搜索最近邻算法主要分为两部分：首先是深度优先遍历，直到遇到叶子节点，生成搜索路径。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">searchNearest</span><span class="params">(node, target)</span>:</span></span><br><span class="line">    <span class="comment"># input: node: root node of the tree</span></span><br><span class="line">    <span class="comment">#        target: list</span></span><br><span class="line">    <span class="comment"># output: nearest: list</span></span><br><span class="line">    <span class="comment"># 	      dist: distance between target and nearest</span></span><br><span class="line">    <span class="keyword">if</span> node == <span class="keyword">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">None</span></span><br><span class="line">    <span class="comment"># 生成搜索路径</span></span><br><span class="line">    search_path = deque()</span><br><span class="line">    nearest = node</span><br><span class="line">    print(<span class="string">"search path: "</span>)</span><br><span class="line">    <span class="keyword">while</span> node:</span><br><span class="line">        print(node.value)</span><br><span class="line">        search_path.append(node)</span><br><span class="line">        <span class="comment"># if Dist(nearest.value, target) &gt; Dist(node.value, target):</span></span><br><span class="line">        <span class="comment"># 	nearest.value = node.value</span></span><br><span class="line">        <span class="comment"># 	minDist = Dist(node.value, target)</span></span><br><span class="line"></span><br><span class="line">        axis = node.axis</span><br><span class="line">        <span class="keyword">if</span> target[axis] &gt; node.value[axis]:</span><br><span class="line">            node = node.right</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            node = node.left</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-<p>然后是<strong>回溯查找</strong>，如果目标点和当前最近点构成的球形区域与其上溯节点相交，那么就有一种潜在的可能——上溯节点的另一个子空间的实例可能位于当前这个球形区域内，因此要进行一次判断。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">searchNearest</span><span class="params">(node, target)</span>:</span></span><br><span class="line">    <span class="comment"># input: node: root node of the tree</span></span><br><span class="line">    <span class="comment">#        target: list</span></span><br><span class="line">    <span class="comment"># output: nearest: list</span></span><br><span class="line">    <span class="comment"># 	      dist: distance between target and nearest</span></span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment"># 回溯</span></span><br><span class="line">    print(<span class="string">"\nsearch backwards: "</span>)</span><br><span class="line">    nearest = search_path.pop()</span><br><span class="line">    minDist = Dist(nearest.value, target)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> search_path:</span><br><span class="line">        node = search_path.pop()</span><br><span class="line">        print(node.value)</span><br><span class="line">        <span class="keyword">if</span> node.axis:</span><br><span class="line">            axis = node.axis</span><br><span class="line">            <span class="keyword">if</span> minDist &gt; Dist1(node.value[axis], target[axis]):</span><br><span class="line">                <span class="keyword">if</span> target[axis] &gt; node.value[axis]:</span><br><span class="line">                    search_path.append(node.left)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    search_path.append(node.right)</span><br><span class="line">        <span class="keyword">if</span> Dist(target, nearest.value) &gt; Dist(node.value, target):</span><br><span class="line">            nearest = node</span><br><span class="line">            minDist = Dist(node.value, target)</span><br><span class="line">    <span class="keyword">return</span> nearest.value, minDist</span><br></pre></td></tr></table></figure>
-<p>两个参考点：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">samples = [(<span class="number">2</span>,<span class="number">3</span>), (<span class="number">5</span>,<span class="number">4</span>), (<span class="number">9</span>,<span class="number">6</span>), (<span class="number">4</span>,<span class="number">7</span>), (<span class="number">8</span>,<span class="number">1</span>), (<span class="number">7</span>,<span class="number">2</span>)]</span><br><span class="line">target = (<span class="number">2.1</span>, <span class="number">3.1</span>)</span><br><span class="line">target = (<span class="number">2</span>, <span class="number">4.5</span>)</span><br></pre></td></tr></table></figure>
-<p>KD树搜索的核心就是：当查询点的邻域与分割超平面两侧空间交割时，需要查找另一侧子空间！！！算法平均复杂度O(N logN)。实际时间复杂度与实例分布情况有关，$t_{worst} = O(kN^{1-\frac{1}{k}})$，通常要求数据规模达到$N \geq 2^D$才能达到高效的搜索。</p>
-<p><img src="/2018/06/01/kd-tree/search1.jpg" alt="s1"></p>
-<p><img src="/2018/06/01/kd-tree/search2.jpg" alt="s2"></p>
-<h4 id="3-改进算法：BBF算法"><a href="#3-改进算法：BBF算法" class="headerlink" title="3. 改进算法：BBF算法"></a>3. 改进算法：BBF算法</h4><p>回溯是由查询路径决定的，因此一种算法改进思路就是<strong>将查询路径上的结点排序</strong>，回溯检查总是从优先级最高的树节点开始——Best-Bin-First BBF算法。该算法能确保优先检索包含最邻近点可能性较高的空间。</p>
-<ul>
-<li>优先队列：优先级取决于它们离查询点的距离，距离越近，优先级越高，回溯的时候优先遍历。</li>
-<li>对回溯可能需要路过的结点加入队列：切分的时候，把未选中的那个兄弟结点加入到队列中。</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2182,7 +2146,7 @@ cos\theta = \frac{A\cdot B}{||A||\ ||B||}</script><ul>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2195,7 +2159,7 @@ cos\theta = \frac{A\cdot B}{||A||\ ||B||}</script><ul>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

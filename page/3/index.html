@@ -276,6 +276,310 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/19/memory-bank/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/19/memory-bank/" itemprop="url">memory bank</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-19T11:10:01+08:00">
+                2021-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/19/memory-bank/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/19/memory-bank/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>2018年的paper</li>
+<li>official code：<a href="https://github.com/zhirongw/lemniscate.pytorch" target="_blank" rel="noopener">https://github.com/zhirongw/lemniscate.pytorch</a></li>
+<li>memory bank</li>
+<li>NCE</li>
+</ul>
+<h2 id="Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination"><a href="#Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination" class="headerlink" title="Unsupervised Feature Learning via Non-Parametric Instance Discrimination"></a>Unsupervised Feature Learning via Non-Parametric Instance Discrimination</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unsupervised learning<ul>
+<li>can we learn good feature representation that captures apparent similarity among instances instead of classes</li>
+<li>formulate a non-parametric classification problem at instance-level</li>
+<li>use noise contrastive estimation</li>
+</ul>
+</li>
+<li>our non-parametric model<ul>
+<li>highly compact：128-d feature per image，only 600MB storage in total</li>
+<li>enable fast nearest neighbour retrieval</li>
+</ul>
+</li>
+<li>【QUESTION】无类别标签，单靠similarity，最终的分类模型是如何建立的？</li>
+<li>verified on<ul>
+<li>ImageNet 1K classification</li>
+<li>semi-supervised learning</li>
+<li>object detection tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>observations<ul>
+<li>ImageNet top-5 err远比top-1 err小</li>
+<li>second highest responding class is more likely to be visually related</li>
+<li>说明模型隐式地学到了similarity</li>
+<li>apparent similarity is learned not from se- mantic annotations, but from the visual data themselves</li>
+</ul>
+</li>
+<li>将class-wise supervision推到一个极限<ul>
+<li>就变成了instance-level</li>
+<li>类别数变成了the whole training set：softmax to many more classes becomes infeasible<ul>
+<li>approximate the full softmax distribution with noise-contrastive estimation(NCE)</li>
+<li>use a proximal regularization to stablize the learning process</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>train &amp; test<ul>
+<li>通常的做法是learned representations加一个线性分类器</li>
+<li>e.g. SVM：但是train和test的feature space是不一致的</li>
+<li>我们用了KNN：same metric space </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>to learn a embedding function $f_{\theta}$</li>
+<li>distance metric $d_{\theta}(x,y)  = ||f_{\theta}(x)-f_{\theta}(y)||$</li>
+<li>to map visually similar images closer</li>
+<li><p>instance-level：to distinct between instances</p>
+<p><img src="/2021/05/19/memory-bank/pipeline.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Non-Parametric Softmax Classifier</p>
+<ul>
+<li><p>common parametric classifier</p>
+<ul>
+<li>given网络预测的N-dim representation $v=f_{\theta}(x)$</li>
+<li>要预测C-classes的概率，需要一个$W^{NC}$的projection：$P(i|v) = \frac{exp (W^T_iv)}{\sum exp (W^T_jv)}$</li>
+</ul>
+</li>
+<li><p>Non-Parametric version</p>
+<ul>
+<li>enforce $||v||=1$ via L2 norm</li>
+<li>replace $W^T$ with $v^T$</li>
+<li>then the probability：$P(i|v) = \frac{exp (v^T_iv/\tau)}{\sum exp (v^T_jv / \tau)}$</li>
+<li>temperature param $\tau$：controls the concentration level of the distribution </li>
+<li><p>the goal is to minimize the negative log-likelihood</p>
+</li>
+<li><p>意义：L2 norm将所有的representation映射到了一个128-d unit sphere上面，$v_i^T v_j$度量了两个projection vec的similarity，我们希望同类的vec尽可能重合，不同类的vec尽可能正交</p>
+<ul>
+<li>class weights $W$ are not generalized to new classes</li>
+<li>but feature representations $V$ does</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>memory bank</p>
+<ul>
+<li>因为是instance level，C-classes对应整个training set，也就是说${v_i}$ for all the images are needed for loss</li>
+<li>Let $V={v_i}$ 表示memory bank，初始为unit random vectors</li>
+<li>every learning iterations<ul>
+<li>$f_\theta$ is optimized by SGD</li>
+<li>输入$x_i$所对应的$f_i$更新到$v_i$上</li>
+<li>也就是只有mini-batch中包含的样本，在这一个step，更新projection vec</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Noise-Contrastive Estimation</p>
+<ul>
+<li><p>non-parametric softmax的计算量随着样本量线性增长，millions level样本量的情况下，计算太heavy了</p>
+</li>
+<li><p>we use NCE to approximate the full softmax</p>
+</li>
+<li><p>assume</p>
+<ul>
+<li>noise samples的uniform distribution：$P_n =\frac{1}{n}$</li>
+<li>noise samples are $m$ times frequent than data samples</li>
+</ul>
+</li>
+<li><p>那么sample $i$ matches vec $v$的后验概率是：$h(i,v)=\frac{P(i|v)}{P(i|v)+mP_n}$</p>
+<ul>
+<li>approximated training object is to minimize the negative log-likelihood of $h(i,v)$</li>
+<li><img src="/2021/05/19/memory-bank/NCE.png" width="40%;"></li>
+</ul>
+</li>
+<li><p>normalizing constant $Z$的近似</p>
+<ul>
+<li><p><img src="/2021/05/19/memory-bank/norm.png" width="40%;"></p>
+</li>
+<li><p>主要就是分母这个$Z_i$的计算比较heavy，我们用Monte Carlo采样来近似：</p>
+<p>  <img src="/2021/05/19/memory-bank/monte.png" width="40%;"></p>
+</li>
+<li><p>${j_k}$ is a random subset of indices：随机抽了memory bank的一个子集来approx全集的分母，实验发现取batch size大小的子集就可以，m=4096</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Proximal Regularization</p>
+<ul>
+<li><p>the learning process oscillates a lot</p>
+<ul>
+<li>we have one instance per class</li>
+<li>during each training epoch each class is only visited once</li>
+</ul>
+</li>
+<li><p>we introduce an additional term</p>
+<ul>
+<li>overall workflow：在每一个iteration t，feature representation是$v_i^t=f_{\theta}(x_i)$，而memory bank里面的representations来自上一个iteration step $V={v^{t-1}}$，我们从memory bank里面采样，并计算NCE loss，然后bp更新网络权重，然后将这一轮fp的representations update到memory bank的指定样本上，然后下一轮</li>
+<li>可以发现，在初始random阶段，梯度更新会比较快而且不稳定</li>
+<li><p>我们给positive sample的loss上额外加了一个$\lambda ||v_i^t-v_i^{t-1}||^2_2$，有点类似weight decay那种东西，开始阶段l2 loss会占主导，引导网络收敛</p>
+</li>
+<li><p><img src="/2021/05/19/memory-bank/proximal.png" width="50%;"></p>
+</li>
+<li><p>stabilize</p>
+</li>
+<li>speed up convergence</li>
+<li>improve the learned representations </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Weighted k-Nearest Neighbor Classifier</p>
+<ul>
+<li>a test time，先计算feature representation，然后跟memory bank的vectors分别计算cosine similarity $s_i=cos(v_i, f)$，选出topk neighbours $N_k$，然后进行weighted voting</li>
+<li>weighted voting：<ul>
+<li>对每个class c，计算它在topk neighbours的total weight，$w_c =\sum_{i \in N_k} \alpha_i 1(c_i=c)$</li>
+<li>$\alpha_i = exp(s_i/\tau)$</li>
+</ul>
+</li>
+<li>k = 200</li>
+<li>$\tau = 0.07$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/04/30/MoCo系列/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3905,272 +4209,11 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/28/spineNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/28/spineNet/" itemprop="url">spineNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-28T16:25:17+08:00">
-                2021-01-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/28/spineNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/28/spineNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization"><a href="#SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization" class="headerlink" title="SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization"></a>SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>object detection task<ul>
-<li>requiring simultaneous recognition and localization</li>
-<li>solely encoder performs not well</li>
-<li>while encoder-decoder architectures are ineffective</li>
-</ul>
-</li>
-<li><p>propose SpineNet</p>
-<ul>
-<li>scale-permuted intermediate features</li>
-<li>cross-scale connections</li>
-<li>searched by NAS on detection COCO</li>
-<li>can transfer to classification tasks</li>
-<li><p>在轻量和重量back的一阶段网络中都涨点领先</p>
-<p><img src="/2021/01/28/spineNet/scale-permuted.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>scale-decreasing backbone <ul>
-<li>throws away the spatial information by down-sampling</li>
-<li>challenging to recover</li>
-<li>接一个轻量的FPN：</li>
-</ul>
-</li>
-<li>scale-permuted model <ul>
-<li>scales of features can increase/decrease anytime：retain the spacial information </li>
-<li>connections go across scales：multi-scale fusion</li>
-<li>searched by NAS</li>
-<li>是一个完整的FPN，不是encoder-decoder那种可分的形式</li>
-<li>directly connect to classification and bounding box regression subnets</li>
-<li>base on ResNet50<ul>
-<li>use bottleneck feature blocks</li>
-<li>two inputs for each feature blocks</li>
-<li>roughly the same computation</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>overall architecture<ul>
-<li>stem：scale-decreased architecture </li>
-<li>scale-permuted network</li>
-<li>blocks in the stem network can be candidate inputs for the following scale-permuted network </li>
-</ul>
-</li>
-<li>scale-permuted network<ul>
-<li>building blocks：$B_k$</li>
-<li>feature level：$L_3 - L_7$</li>
-<li>output features：1x1 conv，$P_3 - P_7$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>search space</p>
-<ul>
-<li><p>scale-permuted network：</p>
-<ul>
-<li>block只能从前往后connect</li>
-<li>based on resNet blocks</li>
-<li>channel 256 for $L_5, L_6, L_7$</li>
-</ul>
-</li>
-<li><p>cross-scale connections：</p>
-<ul>
-<li><p>two input connections for each block</p>
-</li>
-<li><p>from lower ordering block / stem</p>
-</li>
-<li><p>resampling</p>
-<ul>
-<li>narrow factor  $\alpha$：1x1 conv</li>
-<li>上采样：interpolation</li>
-<li>下采样：3x3 s2 conv</li>
-<li><p>element-wise add</p>
-<p><img src="/2021/01/28/spineNet/resampling.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>block adjustment</p>
-<ul>
-<li>intermediate blocks can adjust its scale level &amp; type</li>
-<li>level from {-1, 0, 1, 2}</li>
-<li>select from bottleneck / residual block</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>family of models</p>
-<ul>
-<li>R[N] - SP[M]：N feature layers in stem &amp; M feature layers in scale-permuted layers</li>
-<li>gradually shift from stem to SP</li>
-<li><p>with size decreasing </p>
-<p><img src="/2021/01/28/spineNet/shifting.png" width="45%;"></p>
-<p><img src="/2021/01/28/spineNet/family.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>spineNet family</p>
-<ul>
-<li>basic：spineNet-49</li>
-<li>spineNet-49S：channel数scaled down by 0.65</li>
-<li>spineNet-96：double the number of blocks</li>
-<li>spineNet-143：repeat 3 times，fusion narrow factor $\alpha=1$</li>
-<li>spineNet-190：repeat 4 times，fusion narrow factor $\alpha=1$，channel数scaled up by 1.3</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>在mid/heavy量级上，比resnet-family-FPN涨出两个点</p>
-<p>  <img src="/2021/01/28/spineNet/heavy.png" width="45%;"></p>
-</li>
-<li><p>在light量级上，比mobileNet-family-FPN涨出一个点</p>
-<p>  <img src="/2021/01/28/spineNet/light.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -4220,7 +4263,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4233,7 +4276,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,410 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/30/SE-block/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/30/SE-block/" itemprop="url">SE block</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-30T14:11:38+08:00">
+                2020-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/30/SE-block/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/30/SE-block/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>图像特征的提取能力是CNN的核心能力，而SE block可以起到为CNN校准采样的作用。</p>
+<p>根据感受野理论，特征矩阵主要来自于样本的中央区域，处在边缘位置的酒瓶的图像特征很大概率会被pooling层抛弃掉。而SE block的加入就可以通过来调整特征矩阵，增强酒瓶特征的比重，提高它的识别概率。</p>
+<p><img src="/2020/04/30/SE-block/bottle.png" width="25%"></p>
+<ol>
+<li>[SE-Net] Squeeze-and-Excitation Networks</li>
+<li>[SC-SE] Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks </li>
+<li>[CMPE-SE] Competitive Inner-Imaging Squeeze and Excitation for Residual Network</li>
+</ol>
+<h2 id="SENet-Squeeze-and-Excitation-Networks"><a href="#SENet-Squeeze-and-Excitation-Networks" class="headerlink" title="SENet: Squeeze-and-Excitation Networks"></a>SENet: Squeeze-and-Excitation Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>prior research has investigated the spatial component to achieve more powerful representations </li>
+<li>we focus on the channel relationship instead</li>
+<li>SE-block：adaptively recalibrates channel-wise feature responses by explicitly modelling interdependencies between channels</li>
+<li>enhancing the representational power </li>
+<li>in a computationally efficient manner</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>stronger network：<ul>
+<li>deeper</li>
+<li>NiN-like bocks</li>
+</ul>
+</li>
+<li>cross-channel correlations in prior work<ul>
+<li>mapped as new combinations of features through 1x1 conv</li>
+<li>concentrated on the objective of reducing model and computational complexity</li>
+</ul>
+</li>
+<li>In contrast, we found this mechanism <ul>
+<li>can ease the learning process</li>
+<li>and significantly enhance the representational power of the network</li>
+</ul>
+</li>
+<li>Attention<ul>
+<li>Attention can be interpreted as a means of biasing the allocation of available computational resources towards the most informative components<ul>
+<li>Some works provide interesting studies into the combined use of spatial and channel attention </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>SE-block</p>
+<ul>
+<li><p>The channel relationships modelled by convolution are inherently implicit and local </p>
+</li>
+<li><p>we would like to provide it with access to global information</p>
+</li>
+<li><p>squeeze：using global average pooling </p>
+</li>
+<li><p>excitation：nonlinear &amp; non-mutually-exclusive using sigmoid</p>
+<ul>
+<li><p>bottleneck：a dimensionality-reduction layer $W_1$ with reduction ratio $r$ and ReLU and a dimensionality-increasing layer $W_2$</p>
+</li>
+<li><p>$s = F_{ex}(z,W) = \sigma (W_2 \delta(W_1 z))$</p>
+<p><img src="/2020/04/30/SE-block/seblock.png" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>integration</p>
+<ul>
+<li>insert after the non-linearity following each convolution</li>
+<li>inception：take the transformation $F_{tr}$ to be an entire Inception module </li>
+<li><p>residual：take the transformation $F_{tr}$ to be the non-identity branch of a residual module</p>
+<p><img src="/2020/04/30/SE-block/integrate.png" width="70%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>model and computational complexity</p>
+<ul>
+<li>ResNet50 vs. SE-ResNet50：0.26% relative increase GFLOPs approaching ResNet10’s accuracy </li>
+<li>the additional parameters result solely from the two FC layers, among which  the final stage FC claims the majority due to being performed across the greatest number of channels</li>
+<li>the costly final stage of SE blocks could be removed at only a small cost in performance </li>
+</ul>
+</li>
+<li><p>ablations</p>
+<ul>
+<li>FC<ul>
+<li>removing the biases of the FC layers  in the excitation facilitates the modelling of channel dependencies </li>
+</ul>
+</li>
+<li>reduction ratio<ul>
+<li>performance is robust to a range of reduction ratios </li>
+<li>In practice, using an identical ratio throughout a network may not be optimal due to the distinct roles performed by different layers </li>
+</ul>
+</li>
+<li>squeeze<ul>
+<li>global average pooling vs. global max pooling：average pooling slightly better </li>
+</ul>
+</li>
+<li>excitation<ul>
+<li>Sigmoid vs. ReLU vs. tanh：<ul>
+<li>tanh：slightly worse</li>
+<li>ReLU：dramatically worse   </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>stages<ul>
+<li>each stages brings benefits </li>
+<li>combination make even better</li>
+</ul>
+</li>
+<li>integration strategy<ul>
+<li>fairly robust to their location, provided that they are applied prior to branch aggregation</li>
+<li>inside the residual unit：fewer channels, fewer parameters, comparable accuracy </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>primitive understanding <ul>
+<li>squeeze<ul>
+<li>the use of <strong>global information</strong> has a significant influence on the model performance</li>
+</ul>
+</li>
+<li>excitation<ul>
+<li>the distribution across different classes is very similar at the earlier layers  (general features)</li>
+<li>the value of each channel becomes much more class-specific at greater depth</li>
+<li>SE_5_2 exhibits an interesting tendency towards a saturated state in which most of the activations are close to one</li>
+<li>SE_5_3 exhibits a similar pattern emerges over different classes, up to a modest change in scale</li>
+<li>suggesting that SE_5_2 and SE_5_3 are less important than previous blocks in providing recalibration to the network (thus can be removed)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>APPENDIX</p>
+<ul>
+<li>在ImageNet上SOTA的模型是SENet-154，top1-err是18.68，被标记在了efficientNet论文的折线图上<ul>
+<li>SE-ResNeXt-152（64x4d）<ul>
+<li>input=(224,224)：top1-err是18.68</li>
+<li>input=320/299：top1-err是17.28</li>
+</ul>
+</li>
+<li>further difference<ul>
+<li>each bottleneck building block的第一个1x1 convs的通道数减半</li>
+<li>stem的第一个7x7conv换成了3个连续的3x3 conv</li>
+<li>1x1的s2 conv换成了3x3的s2 conv</li>
+<li>fc之前添加dropout layer</li>
+<li>label smoothing</li>
+<li>最后几个training epoch将BN层的参数冻住，保证训练和测试的参数一致</li>
+<li>64 GPUs，batch size=2048（32 per GPU）</li>
+<li>initial lr=1.0</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks"><a href="#SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks" class="headerlink" title="SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks"></a>SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>image segmentation task 上面SE-Net提出来主要是针对分类</li>
+<li>three variants of SE modules <ul>
+<li>squeezing spatially and exciting channel-wise (cSE)</li>
+<li>squeezing channel-wise and exciting spatially (sSE)</li>
+<li>concurrent spatial and channel squeeze &amp; excitation (scSE) </li>
+</ul>
+</li>
+<li>integrate within three different state-of-the- art F-CNNs (DenseNet, SD-Net, U-Net) </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>F-CNNs have become the tool of choice for many image segmentation tasks </li>
+<li>core：convolutions that capturing <strong>local spatial pattern along all input channels</strong> jointly </li>
+<li>SE block <strong>factors out the spatial dependency</strong> by global average pooling to learn a channel specific descriptor (later refered to as cSE /channel-SE)</li>
+<li>while for image segmentation, we hypothesize that the pixel-wise spatial information is more informative </li>
+<li>thus we propose sSE(spatial SE) and scSE(spatial and channel SE)</li>
+<li><p>can be seamlessly integrated by placing after every encoder and decoder block</p>
+<p><img src="/2020/04/30/SE-block/scse.png" width="60%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>cSE<ul>
+<li>GAP：embeds the global spatial information into a vector </li>
+<li>FC-ReLU-FC-Sigmoid：adaptively learns the importance  </li>
+<li>recalibrate</li>
+</ul>
+</li>
+<li>sSE<ul>
+<li>1x1 conv：generating a projection tensor representing the linearly combined representation for all channels C for a spatial location (i,j)</li>
+<li>Sigmoid：rescale </li>
+<li>recalibrate </li>
+</ul>
+</li>
+<li>scSE<ul>
+<li>by element-wise addition </li>
+<li>encourages the network to learn more meaningful feature maps ———- relevant both spatially and channel-wise</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>F-CNN architectures：</p>
+<ul>
+<li>4 encoder blocks, one bottleneck layer, 4 decoder blocks and a classification layer </li>
+<li>class imbalance：median frequency balancing ce</li>
+</ul>
+</li>
+<li><p>dice cmp：scSE &gt; sSE &gt; cSE &gt; vanilla</p>
+</li>
+<li><p>小区域类别的分割，观察到使用cSE可能会差于vanilla： might have got overlooked by only exciting the channels</p>
+</li>
+<li><p>定性分析：</p>
+<ul>
+<li>一些under segmented的地方，scSE improves with the inclusion </li>
+<li><p>一些over segmented的地方，scSE rectified the result</p>
+<p><img src="/2020/04/30/SE-block/qualitive.png" width="55%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network"><a href="#Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network" class="headerlink" title="Competitive Inner-Imaging Squeeze and Excitation for Residual Network"></a>Competitive Inner-Imaging Squeeze and Excitation for Residual Network</h2><ol>
+<li>动机<ul>
+<li>for residual network</li>
+<li>the residual architecture has been proved to be diverse and redundant</li>
+<li>model the competition between residual and identity mappings</li>
+<li>make the identity flow to control the complement of the residual feature maps</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>For analysis of ResNet, with the increase in depth, the residual network exhibits a certain amount of redundancy </li>
+<li><p>with the CMPE-SE mechanism, it makes residual mappings tend to provide more efficient supplementary for identity mappings</p>
+<p><img src="/2020/04/30/SE-block/cmpese.png" width="55%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>主要提出了三种变体：</p>
+<p><img src="/2020/04/30/SE-block/cmpeses.png" width="75%"></p>
+</li>
+<li><p>第一个变体：</p>
+<ul>
+<li>两个分支id和res分别GAP出一个vector，然后fc reduct by ratio，然后concat，然后channel back</li>
+<li>Implicitly, we can believe that the winning of the identity channels in this competition results in less weights of the residual channels </li>
+</ul>
+</li>
+<li><p>第二个变体：</p>
+<ul>
+<li><p>两种方案</p>
+<ul>
+<li>2x1 convs：对上下相应位置的元素求avg</li>
+<li>1x1 convs：对全部元素求avg，然后flatten</li>
+</ul>
+<p><img src="/2020/04/30/SE-block/sec.png" width="45%"></p>
+</li>
+</ul>
+</li>
+<li><p>第三个变体：</p>
+<ul>
+<li><p>两边的channel-wise vector叠起来，然后reshape成矩阵形式，然后3x3 conv，然后flatten</p>
+<p><img src="/2020/04/30/SE-block/trd.png" width="45%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>比较扯，不浪费时间分析了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/19/cv2-numpy-tobeadded/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4676,348 +5080,11 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/01/03/CNN-Visualization系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/03/CNN-Visualization系列/" itemprop="url">CNN Visualization系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-03T17:03:05+08:00">
-                2020-01-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/01/03/CNN-Visualization系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/01/03/CNN-Visualization系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-Visualizing-and-Understanding-Convolutional-Networks"><a href="#1-Visualizing-and-Understanding-Convolutional-Networks" class="headerlink" title="1. Visualizing and Understanding Convolutional Networks"></a>1. Visualizing and Understanding Convolutional Networks</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>give insight into the internal operation and behavior of the complex models</li>
-<li>then one can design better models</li>
-<li>reveal which parts of the scene in image are important for classification</li>
-<li>explore the generalization ability of the model to other datasets </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>most visualizing methods limited to the 1st layer where projections to pixel space are possible </p>
-</li>
-<li><p>Our approach propose a method that could projects high level feature maps to the pixel space</p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>* some methods give some insight into invariances basing on a simple quadratic approximation 
-* Our approach, by contrast, provides a non-parametric view of invariance 
-
-
-
-* some methods associate patches that responsible for strong activations at higher layers
-* In our approach they are not just crops of input images, but rather top-down projections that reveal structures  
-</code></pre><ol>
-<li><p>方法</p>
-<p> 3.1 Deconvnet: use deconvnet to project the feature activations back to the input pixel space </p>
-<ul>
-<li>To examine a given convnet activation, we <strong>set all other activations in the layer to zero</strong> and pass the feature maps as input to the attached deconvnet layer</li>
-<li>Then successively (i) unpool, (ii) rectify and (iii) filter to reconstruct the activity of the layer beneath until the input pixel space is reached</li>
-<li>【Unpooling】using switches</li>
-<li>【Rectification】the convnet uses relu to ensure always positive, same for back projection</li>
-<li>【Filtering】transposed conv</li>
-<li><p>Due to unpooling, the reconstruction obtained from a single activation resembles a small piece of the original input image</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/deconv.png" width="55%;"></p>
-<p>3.2 CNN model</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/CNN.png" width="70%;"></p>
-<p>3.3 visualization among layers</p>
-</li>
-<li><p>for each layer, we take the top9 strongest activation across the validation data</p>
-</li>
-<li>calculate the back projection separately</li>
-<li><p>alongside we provide the corresponding image patches</p>
-<p>3.4 visualization during training</p>
-</li>
-<li><p>randomly choose several strongest activation of a given feature map</p>
-</li>
-<li><p>lower layers converge fast, higher layers conversely</p>
-<p>3.5 visualizing the Feature Invariance</p>
-</li>
-<li><p>5 sample images being translated, rotated and scaled by varying degrees</p>
-</li>
-<li>Small transformations have a dramatic effect in the first layer of the model(c2 &amp; c3对比)</li>
-<li><p>the network is stable to translations and scalings, but not invariant to rotation </p>
-<p>3.6 architecture selection</p>
-</li>
-<li><p>old architecture(stride4, filterSize11)：The first layer filters are a mix of extremely high and low frequency information, with little coverage of the mid frequencies.  The 2nd layer visualization shows aliasing artifacts caused by the large stride 4 used in the 1st layer convolutions. (这点可以参考之前vnet中提到的，deconv导致的棋盘格伪影，大stride会更明显)</p>
-</li>
-<li><p>smaller stride &amp; smaller filter(stride2, filterSize7)：more coverage of mid frequencies, no aliasing, no dead feature</p>
-<p>3.7</p>
-</li>
-<li><p>对于物体的关键部分遮挡之后会极大的影响分类结果</p>
-</li>
-<li>第二个和第三个例子中分别是文字和人脸的响应更高，但是却不是关键部分。</li>
-</ul>
-</li>
-<li><p>理解</p>
-<p> 4.1 总的来说，网络学习到的特征，是具有辨别性的特征，通过可视化就可以看到我们提取到的特征忽视了背景，而是把关键的信息给提取出来了。从layer 1、layer 2学习到的特征基本上是颜色、边缘等低层特征；layer 3则开始稍微变得复杂，学习到的是纹理特征，比如上面的一些网格纹理；layer 4学习到的则是较多的类别信息，比如狗头；layer 5对应着更强的不变性，可以包含物体的整体信息。。</p>
-<p> 4.2 在网络迭代的过程中，特征图出现了sudden jumps。低层在训练的过程中基本没啥变化，比较容易收敛，高层的特征学习则变化很大。这解释了低层网络的从训练开始，基本上没有太大的变化，因为梯度弥散。高层网络刚开始几次的迭代，变化不是很大，但是到了40~50的迭代的时候，变化很大，因此我们以后在训练网络的时候，不要着急看结果，看结果需要保证网络收敛。</p>
-<p> 4.3 图像的平移、缩放、旋转，可以看出第一层中对于图像变化非常敏感，第7层就接近于线性变化。</p>
-</li>
-</ol>
-<h3 id="2-Striving-for-Simplicity-The-All-Convolutional-Net"><a href="#2-Striving-for-Simplicity-The-All-Convolutional-Net" class="headerlink" title="2. Striving for Simplicity: The All Convolutional Net"></a>2. Striving for Simplicity: The All Convolutional Net</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>traditional pipeline: alternating <strong>convolution</strong> and <strong>max-pooling</strong> layers followed by a small number of <strong>fully connected layers</strong></li>
-<li>questioning the necessity of different components in the pipeline, <strong>max-pooling</strong> layer to be specified</li>
-<li>to analyze the network we introduce a new variant of the “deconvolution approach” for visualizing features</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>two major improving directions based on traditional pipeline<ul>
-<li>using more complex activation functions</li>
-<li>building multiple conv modules</li>
-</ul>
-</li>
-<li>we study the most simple architecture we could conceive<ul>
-<li>a homogeneous network solely consisting of convolutional layers </li>
-<li>without the need for complicated activation functions, any response normalization or max-pooling</li>
-<li>reaches state of the art performance </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>replace the pooling layers with standard convolutional layers with stride two</p>
-<ul>
-<li>the spatial dimensionality reduction performed by pooling makes covering larger parts of the input in higher layers possible </li>
-<li>which is crucial for achieving good performance with CNNs </li>
-</ul>
-</li>
-<li><p>make use of small convolutional layers </p>
-<ul>
-<li>greatly reduce the number of parameters in a network and thus serve as a form of regularization</li>
-<li>if the topmost convolutional layer covers a portion of the image large enough to recognize its content then fully connected layers can also be replaced by simple 1-by-1 convolutions</li>
-</ul>
-</li>
-<li><p>the overall architecture consists only of convolutional layers with rectified linear non-linearities and an averaging + softmax layer to produce predictions  </p>
-<p>  <img src="/2020/01/03/CNN-Visualization系列/basemodel.png" width="60%;"></p>
-<p>  <img src="/2020/01/03/CNN-Visualization系列/modifiedmodel.png" width="60%;"></p>
-<ul>
-<li>Strided-CNN-C: pooling is removed and the preceded conv stride is increase</li>
-<li>ConvPool-CNN-C: a dense conv is placed, to show the effect of increasing parameters</li>
-<li>All-CNN-C: max-pooling is replaced by conv</li>
-<li>when pooling is replaced by an additional convolution layer with stride 2, performance stabilizes and even improves  </li>
-<li>small 3 × 3 convolutions stacked after each other seem to be enough to achieve the best performance </li>
-</ul>
-</li>
-<li><p>guided backpropagation</p>
-<ul>
-<li>the paper above proposed ‘deconvnet’, which we observe that it does not always work well without max-pooling layers </li>
-<li><strong>For higher layers</strong> of our network the method of Zeiler and Fergus fails to produce <strong>sharp, recognizable image structure</strong></li>
-<li>Our architecture does not include max-pooling, thus we can ’deconvolve’ <strong>without switches</strong>, i.e. not conditioning on an input image</li>
-<li><p>In order to obtain a reconstruction conditioned on an input image from our network without pooling layers we to combine the simple backward pass and the deconvnet</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/backwardpass.png" width="70%;"></p>
-</li>
-<li><p>Interestingly, the very first layer of the network does not learn the usual Gabor filters, but higher layers do</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/gabor.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h3 id="3-Cam-Learning-Deep-Features-for-Discriminative-Localization"><a href="#3-Cam-Learning-Deep-Features-for-Discriminative-Localization" class="headerlink" title="3. Cam: Learning Deep Features for Discriminative Localization"></a>3. Cam: Learning Deep Features for Discriminative Localization</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>we found that CNNs actually behave as object detectors despite no supervision on the location </li>
-<li>this ability is lost when fully-connected layers are used for classification </li>
-<li>we found that the advantages of global average pooling layers are beyond simply acting as a regularizer</li>
-<li>it makes it easily to localize the discriminative image regions despite not being trained for them</li>
-</ul>
-</li>
-<li><p>论点</p>
-<p> 2.1 Weakly-supervised object localization</p>
-<ul>
-<li>previous methods are not trained end-to-end and require multiple forward passes</li>
-<li><p>Our approach is trained end-to-end and can localize objects in a single forward pass</p>
-<p>2.2 Visualizing CNNs </p>
-</li>
-<li><p>previous methods only analyze the convolutional layers, ignoring the fully connected thereby painting an incomplete picture of the full story</p>
-</li>
-<li>we are able to understand our network from the beginning to the end</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> 3.1 Class Activation Mapping</p>
-<ul>
-<li>A class activation map for a particular category indicates the discriminative image regions used by the network to identify that category  </li>
-<li>the network architecture: convs—-gap—-fc+softmax</li>
-<li>we can identify the importance of the image regions by projecting back the weights of the output layer on to the convolutional feature maps </li>
-<li><p>by simply upsampling the class activation map to the size of the input image we can identify the image regions most relevant to the particular category</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/cam.png" width="55%;"></p>
-<p>3.2 Weakly-supervised Object Localization </p>
-</li>
-<li><p>our technique does not adversely impact the classification performance when learning to localize  </p>
-</li>
-<li>we found that the localization ability of the networks improved when the last convolutional layer before GAP had a higher spatial resolution, thus we removed several convolutional layers from the origin networks</li>
-<li>overall we find that the classification performance is largely preserved for our GAP networks compared with the origin fc structure</li>
-<li>our CAM approach significantly outperforms the backpropagation approach on generating bounding box </li>
-<li><p>low mapping resolution prevents the network from obtaining accurate localizations</p>
-<p>3.3 Visualizing Class-Specific Units </p>
-</li>
-<li><p>the convolutional units of various layers of CNNs act as visual concept detec- tors, identifying low-level concepts like textures or mate- rials, to high-level concepts like objects or scenes </p>
-</li>
-<li>Deeper into the network, the units become increasingly discriminative</li>
-<li>given the fully-connected layers in many networks, it can be difficult to identify the importance of different units for identifying different categories </li>
-</ul>
-</li>
-</ol>
-<h3 id="4-Grad-CAM-Visual-Explanations-from-Deep-Networks-via-Gradient-based-Localization"><a href="#4-Grad-CAM-Visual-Explanations-from-Deep-Networks-via-Gradient-based-Localization" class="headerlink" title="4. Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization"></a>4. Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization</h3><h3 id="5-Grad-CAM-Improved-Visual-Explanations-for-Deep-Convolutional-Networks"><a href="#5-Grad-CAM-Improved-Visual-Explanations-for-Deep-Convolutional-Networks" class="headerlink" title="5. Grad-CAM++: Improved Visual Explanations for Deep Convolutional Networks"></a>5. Grad-CAM++: Improved Visual Explanations for Deep Convolutional Networks</h3><h2 id="6-综述"><a href="#6-综述" class="headerlink" title="6. 综述"></a>6. 综述</h2><ol>
-<li><p>GAP</p>
-<p> 首先回顾一下GAP，NiN中提出了GAP，主要为了解决全连接层参数过多，不易训练且容易过拟合等问题。</p>
-<p> 对大多数分类任务来说不会因为做了gap让特征变少而让模型性能下降。因为GAP层是一个非线性操作层，这C个特征相当于是从kxkxC经过非线性变化选择出来的强特征。</p>
-</li>
-<li><p>heatmap</p>
-<p> step1. 图像经过卷积网络后最后得到的特征图，在全连接层分类的权重（$w_{k,n}$）肯定不同，</p>
-<p> step2. 利用反向传播求出每张特征图的权重，</p>
-<p> step3. 用每张特征图乘以权重得到带权重的特征图，在第三维求均值，<strong>relu激活</strong>，归一化处理</p>
-<ul>
-<li>relu只保留wx大于0的值——我们正响应是对当前类别有用的特征，负响应会拉低$\sum wx$，即会降低当前类别的置信度</li>
-<li><p>如果没有relu，定位图谱显示的不仅仅是某一类的特征。而是所有类别的特征。</p>
-<p>step4. 将特征图resize到原图尺寸，便于叠加显示</p>
-</li>
-</ul>
-</li>
-<li><p>CAM</p>
-<p> CAM要求必须使用GAP层，</p>
-<p> CAM选择softmax层值最大的节点反向传播，<strong>求GAP层的梯度</strong>作为特征图的权重，每个GAP的节点对应一张特征图。</p>
-</li>
-<li><p>Grad-CAM</p>
-<p> Grad-CAM不需要限制模型结构，</p>
-<p> Grad-CAM选择softmax层值最大的节点反向传播，对<strong>最后一层卷积层</strong>求梯度，用每张特征图的梯度的均值作为该特征图的权重。</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -5067,7 +5134,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -5080,7 +5147,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

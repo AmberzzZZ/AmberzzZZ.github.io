@@ -276,6 +276,426 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/23/Meta-Pseudo-Labels/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/23/Meta-Pseudo-Labels/" itemprop="url">Meta Pseudo Labels</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-23T10:33:20+08:00">
+                2021-08-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/23/Meta-Pseudo-Labels/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/23/Meta-Pseudo-Labels/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<ul>
+<li><p>[MPL 2021] Meta Pseudo Labels</p>
+</li>
+<li><p>[UDA 2009] Unsupervised Data Augmentation for Consistency Training</p>
+</li>
+<li><p>[Entropy Minimization 2004] Semi-supervised Learning by Entropy Minimization</p>
+</li>
+</ul>
+<h2 id="Meta-Pseudo-Labels"><a href="#Meta-Pseudo-Labels" class="headerlink" title="Meta Pseudo Labels"></a>Meta Pseudo Labels</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>semi-supervised learning<ul>
+<li>Pseudo Labels：fixed teacher</li>
+<li>Meta Pseudo Labels：constantly adapted teacher by the feedback of the student</li>
+</ul>
+</li>
+<li>SOTA on ImageNet：top-1 acc 90.2%</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Pseudo Labels methods</p>
+<ul>
+<li>teacher generates pseudo labels on unlabeled images</li>
+<li>pseudo labeled images are then combined with labeled images to train the student</li>
+<li>confirmation bias problem：student的精度取决于伪标签的质量</li>
+</ul>
+</li>
+<li><p>we propose Meta Pseudo Labels</p>
+<ul>
+<li>teacher observes how its pseudo labels affect the student</li>
+<li>then correct the bias</li>
+<li>the feedback signal is the performance of the student on the labeled dataset</li>
+<li>总的来说，teacher和student是train in parallel的<ul>
+<li>student learns from pseudo labels from the teacher</li>
+<li>teacher learns from reward signal from how well student perform on labeled set</li>
+</ul>
+</li>
+<li>dataset<ul>
+<li>ImageNet as labeled set</li>
+<li>JFT-300M as unlabeled set</li>
+</ul>
+</li>
+<li>model<ul>
+<li>teacher：EfficientNet-L2</li>
+<li>student：EfficientNet-L2</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>main difference</p>
+<ul>
+<li>Pseudo Labels方法中，teacher在单向的影响student</li>
+<li><p>Meta Pseudo Labels方法中，teacher和student是交互作用的</p>
+<p><img src="/2021/08/23/Meta-Pseudo-Labels/diff.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>notations</p>
+<ul>
+<li>models<ul>
+<li>teacher model T &amp; $\theta_T$</li>
+<li>student model S &amp; $\theta_S$</li>
+</ul>
+</li>
+<li>data<ul>
+<li>labeled set $(x_l, y_l)$</li>
+<li>unlabeled set $(x_u)$</li>
+</ul>
+</li>
+<li>predictions<ul>
+<li>soft predictions by teacher $T(x_u, \theta_T)$</li>
+<li>student  $S(x_u, \theta_S)$ &amp;  $S(x_l, \theta_S)$</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>$CE(q,p)$，其中$q$是one-hot label，e.g. $CE(y_l, S(x_l, \theta_S))$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pseudo Labels</p>
+<ul>
+<li>given a fixed teacher $\theta_T$</li>
+<li><p>train the student model to minimize the cross-entropy loss on unlabeled data</p>
+<script type="math/tex; mode=display">
+\theta_S^{PL} = argmin_{\theta_S}CE(T(x_u,\theta_T), S(x_u, \theta_S))</script></li>
+<li><p>$\theta_S^{PL}$ also achieve a low loss on labeled data</p>
+</li>
+<li>$\theta_S^{PL}$ explicitly depends on $\theta_T$：$\theta_S^{PL}(\theta_T)$</li>
+<li>student loss on labeled data is also a function of $\theta_T$：$L_l(\theta_S^{PL}(\theta_T))$</li>
+</ul>
+</li>
+<li><p>Meta Pseudo Labels</p>
+<ul>
+<li><p>intuition：minimize $L_l$ with respect to $\theta_T$</p>
+</li>
+<li><p>但是实际上dependency of $\theta_S^{PL}(\theta_T)$ on $\theta_T$ 非常复杂</p>
+</li>
+<li><p>因为我们用了teacher prediction的hard labels去训练student</p>
+</li>
+<li><p>an alternating optimization procedure</p>
+<p>  <img src="/2021/08/23/Meta-Pseudo-Labels/alternating.png" width="45%;"></p>
+</li>
+<li><p>teacher’s auxiliary losses</p>
+<ul>
+<li>augment the teacher’s training with a supervised learning objective and a semi-supervise learning objective</li>
+<li>supervised objective<ul>
+<li>train on labeled data</li>
+<li>CE</li>
+</ul>
+</li>
+<li>semi-supervised objective<ul>
+<li>train on unlabeled data</li>
+<li>UDA(Unsupervised Data Augmentation)：将样本进行简单增强，通过衡量一致性损失，模型的泛化效果得到提升</li>
+<li>consistency training loss：KL散度</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>finetuning student</p>
+<ul>
+<li>在meta pseudo labels训练过程中，student only learns from the unlabeled data</li>
+<li>所以在训练过程结束后，可以finetune it on labeled data to improve accuracy </li>
+</ul>
+</li>
+<li><p>overall algorithm</p>
+<p>  <img src="/2021/08/23/Meta-Pseudo-Labels/algorithm.png" width="90%;"></p>
+<pre><code>  * 这里面有一处下标写错了，就是teacher的UDA gradient，是在unlabeled data上面算的，那两个$x_l$得改成$x_u$
+  * UDA loss论文里使用两个predicted logits的散度，这里是CE
+</code></pre></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Unsupervised-Data-Augmentation-for-Consistency-Training"><a href="#Unsupervised-Data-Augmentation-for-Consistency-Training" class="headerlink" title="Unsupervised Data Augmentation for Consistency Training"></a>Unsupervised Data Augmentation for Consistency Training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>data augmentation in previous works<ul>
+<li>能在一定程度上缓解需要大量标注数据的问题</li>
+<li>多用在supervised model上</li>
+<li>achieved limited gains</li>
+</ul>
+</li>
+<li>we propose UDA<ul>
+<li>apply data augmentation in semi-supervised learning setting</li>
+<li>use harder and more realistic noise to generate the augmented samples</li>
+<li>encourage the prediction to be consistent between unlabeled &amp; augmented unlabeled sample</li>
+<li>在越小的数据集上提升越大</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>six language tasks</li>
+<li>three vision tasks<ul>
+<li>ImageNet-10%：：top1/top5 68.7/88.5%</li>
+<li>ImageNet-extra unlabeled：top1/top5 79.0/94.5%</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>semi-supervised learning<ul>
+<li>three categories<ul>
+<li>graph-based label propagation via graph convolution and graph embeddings</li>
+<li>modeling prediction target as latent variables</li>
+<li>consistency / smoothness enforcing</li>
+</ul>
+</li>
+<li>最后这一类方法shown to work well，<ul>
+<li>enforce the model predictions on the two examples to be similar</li>
+<li>主要区别在于perturbation function的设计</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>we propose UDA<ul>
+<li>use state-of-the-art data augmentation methods</li>
+<li>we show that better augmentation methods(AutoAugment) lead to greater improvements</li>
+<li>minimizes the KL divergence</li>
+<li>can be applied even the class distributions of labeled and unlabeled data mismatch</li>
+</ul>
+</li>
+<li>we propose TSA<ul>
+<li>a training technique</li>
+<li>prevent overfitting when much more unlabeled data is avaiable than labeled data</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>formulation</p>
+<ul>
+<li><p>given an input $x\in U$ and a small noise $\epsilon$</p>
+</li>
+<li><p>compute the output distribution $p_{\theta}(y|x)$ and $p_{\theta}(y|x,\epsilon)$</p>
+</li>
+<li><p>minimize the divergence between two predicted distributions $D(p_{\theta}(y|x)||p_{\theta}(y|x,\epsilon))$</p>
+<p>  <img src="/2021/08/23/Meta-Pseudo-Labels/UDA.png" width="70%;"></p>
+</li>
+<li><p>add a CE loss on labeled data</p>
+<p>  <img src="/2021/08/23/Meta-Pseudo-Labels/CE.png" width="70%;"></p>
+</li>
+<li><p>UDA的优化目标</p>
+<ul>
+<li>enforce the model to be insensitive to perturbation</li>
+<li>thus smoother to the changes in the input space</li>
+</ul>
+</li>
+<li><p>$\lambda=1$ for most experiments</p>
+</li>
+<li><p>use different batchsize for labeled &amp; unlabeled</p>
+</li>
+</ul>
+</li>
+<li><p>Augmentation Strategies for Different Tasks</p>
+<ul>
+<li>AutoAugment for Image Classification<ul>
+<li>通过RL搜出来的一组optimal combination of aug operations</li>
+</ul>
+</li>
+<li>Back translation for Text Classification</li>
+<li>TF-IDF based word replacing for Text Classification</li>
+</ul>
+</li>
+<li><p>Trade-off Between Diversity and Validity for Data Augmentation</p>
+<ul>
+<li>对原始sample做变换的时候，有一定概率导致gt label变化</li>
+<li>AutoAugment已经是optmial trade-off了，所以不用管</li>
+<li>text tasks需要调节temperature</li>
+</ul>
+</li>
+<li><p>Additional Training Techniques</p>
+<ul>
+<li><p>TSA(Training Signal Annealing)</p>
+<ul>
+<li><p>situation：unlabeled data远比labeled data多的情况，我们需要large enough model去充分利用大数据，但又容易对小trainset过拟合</p>
+</li>
+<li><p>for each training step</p>
+<ul>
+<li>set a threshold $\frac{1}{K}\leq \eta_t\leq 1$，K is the number of categories</li>
+<li>如果样本在gt cls上的预测概率大于这个threshold，就把这个样本的loss去掉</li>
+</ul>
+</li>
+<li><p>$\eta_t$ serves as a ceiling to prevent the model from over-training on examples that the model is already confident about</p>
+</li>
+<li><p>gradually release the training signals of the labeled examples，缓解overfitting</p>
+</li>
+<li><p>schedules of $\eta_t$</p>
+<ul>
+<li>log-schedule：$\lambda_t = 1-exp(-\frac{t}{T}*5)$</li>
+<li>linear-schedule：$\lambda_t = \frac{t}{T}$</li>
+<li><p>exp-schedule：$\lambda_t = exp((\frac{t}{T}-1)*5)$</p>
+</li>
+<li><p>如果模型非常容易过拟合，用exp-schedule，反过来（abundant labeled data/effective regularizations），用log-schedule</p>
+<p><img src="/2021/08/23/Meta-Pseudo-Labels/TSA.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Sharpening Predictions</p>
+<ul>
+<li>situation：the predicted distributions on unlabeled examples tend to be over-flat across categories，task比较困难，训练数据比较少时，在unlabeled data上每类的预测概率都差不多低，没有倾向性</li>
+<li>这时候KL divergence的监督信息就很弱</li>
+<li>thus we need to sharpen the predicted distribution on unlabeled examples</li>
+<li>Confidence-based masking：将current model not confident enough to predict的样本过滤掉，只保留最大预测概率大于0.6的样本计算consistency loss</li>
+<li>Entropy minimization：add an entropy term to the overall objective</li>
+<li>softmax temperature：在计算softmax时先对logits进行rescale，$Softmax(logits/\tau)$，a lower temperature corresponds to a sharper distribution</li>
+<li>in practice发现Confidence-based masking和softmax temperature更适用于小labeled set，Entropy minimization适用于相对大一点的labeled set</li>
+</ul>
+</li>
+<li><p>Domain-relevance Data Filtering</p>
+<ul>
+<li>其实也是Confidence-based masking，先用labeled data训练一个base model，然后inference the out-of-domain dataset，挑出预测概率较大的样本</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Semi-supervised-Learning-by-Entropy-Minimization"><a href="#Semi-supervised-Learning-by-Entropy-Minimization" class="headerlink" title="Semi-supervised Learning by Entropy Minimization"></a>Semi-supervised Learning by Entropy Minimization</h2>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/20/Generalized-Focal-Loss/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3097,315 +3517,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/19/memory-bank/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/19/memory-bank/" itemprop="url">memory bank</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-19T11:10:01+08:00">
-                2021-05-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/19/memory-bank/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/19/memory-bank/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li>2018年的paper</li>
-<li>official code：<a href="https://github.com/zhirongw/lemniscate.pytorch" target="_blank" rel="noopener">https://github.com/zhirongw/lemniscate.pytorch</a></li>
-<li>memory bank</li>
-<li>NCE</li>
-</ul>
-<h2 id="Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination"><a href="#Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination" class="headerlink" title="Unsupervised Feature Learning via Non-Parametric Instance Discrimination"></a>Unsupervised Feature Learning via Non-Parametric Instance Discrimination</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>unsupervised learning<ul>
-<li>can we learn good feature representation that captures apparent similarity among instances instead of classes</li>
-<li>formulate a non-parametric classification problem at instance-level</li>
-<li>use noise contrastive estimation</li>
-</ul>
-</li>
-<li>our non-parametric model<ul>
-<li>highly compact：128-d feature per image，only 600MB storage in total</li>
-<li>enable fast nearest neighbour retrieval</li>
-</ul>
-</li>
-<li>【QUESTION】无类别标签，单靠similarity，最终的分类模型是如何建立的？</li>
-<li>verified on<ul>
-<li>ImageNet 1K classification</li>
-<li>semi-supervised learning</li>
-<li>object detection tasks</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>observations<ul>
-<li>ImageNet top-5 err远比top-1 err小</li>
-<li>second highest responding class is more likely to be visually related</li>
-<li>说明模型隐式地学到了similarity</li>
-<li>apparent similarity is learned not from se- mantic annotations, but from the visual data themselves</li>
-</ul>
-</li>
-<li>将class-wise supervision推到一个极限<ul>
-<li>就变成了instance-level</li>
-<li>类别数变成了the whole training set：softmax to many more classes becomes infeasible<ul>
-<li>approximate the full softmax distribution with noise-contrastive estimation(NCE)</li>
-<li>use a proximal regularization to stablize the learning process</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>train &amp; test<ul>
-<li>通常的做法是learned representations加一个线性分类器</li>
-<li>e.g. SVM：但是train和test的feature space是不一致的</li>
-<li>我们用了KNN：same metric space </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>to learn a embedding function $f_{\theta}$</li>
-<li>distance metric $d_{\theta}(x,y)  = ||f_{\theta}(x)-f_{\theta}(y)||$</li>
-<li>to map visually similar images closer</li>
-<li><p>instance-level：to distinct between instances</p>
-<p><img src="/2021/05/19/memory-bank/pipeline.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Non-Parametric Softmax Classifier</p>
-<ul>
-<li><p>common parametric classifier</p>
-<ul>
-<li>given网络预测的N-dim representation $v=f_{\theta}(x)$</li>
-<li>要预测C-classes的概率，需要一个$W^{NC}$的projection：$P(i|v) = \frac{exp (W^T_iv)}{\sum exp (W^T_jv)}$</li>
-</ul>
-</li>
-<li><p>Non-Parametric version</p>
-<ul>
-<li>enforce $||v||=1$ via L2 norm</li>
-<li>replace $W^T$ with $v^T$</li>
-<li>then the probability：$P(i|v) = \frac{exp (v^T_iv/\tau)}{\sum exp (v^T_jv / \tau)}$</li>
-<li>temperature param $\tau$：controls the concentration level of the distribution </li>
-<li><p>the goal is to minimize the negative log-likelihood</p>
-</li>
-<li><p>意义：L2 norm将所有的representation映射到了一个128-d unit sphere上面，$v_i^T v_j$度量了两个projection vec的similarity，我们希望同类的vec尽可能重合，不同类的vec尽可能正交</p>
-<ul>
-<li>class weights $W$ are not generalized to new classes</li>
-<li>but feature representations $V$ does</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>memory bank</p>
-<ul>
-<li>因为是instance level，C-classes对应整个training set，也就是说${v_i}$ for all the images are needed for loss</li>
-<li>Let $V={v_i}$ 表示memory bank，初始为unit random vectors</li>
-<li>every learning iterations<ul>
-<li>$f_\theta$ is optimized by SGD</li>
-<li>输入$x_i$所对应的$f_i$更新到$v_i$上</li>
-<li>也就是只有mini-batch中包含的样本，在这一个step，更新projection vec</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Noise-Contrastive Estimation</p>
-<ul>
-<li><p>non-parametric softmax的计算量随着样本量线性增长，millions level样本量的情况下，计算太heavy了</p>
-</li>
-<li><p>we use NCE to approximate the full softmax</p>
-</li>
-<li><p>assume</p>
-<ul>
-<li>noise samples的uniform distribution：$P_n =\frac{1}{n}$</li>
-<li>noise samples are $m$ times frequent than data samples</li>
-</ul>
-</li>
-<li><p>那么sample $i$ matches vec $v$的后验概率是：$h(i,v)=\frac{P(i|v)}{P(i|v)+mP_n}$</p>
-<ul>
-<li>approximated training object is to minimize the negative log-likelihood of $h(i,v)$</li>
-<li><img src="/2021/05/19/memory-bank/NCE.png" width="40%;"></li>
-</ul>
-</li>
-<li><p>normalizing constant $Z$的近似</p>
-<ul>
-<li><p><img src="/2021/05/19/memory-bank/norm.png" width="40%;"></p>
-</li>
-<li><p>主要就是分母这个$Z_i$的计算比较heavy，我们用Monte Carlo采样来近似：</p>
-<p>  <img src="/2021/05/19/memory-bank/monte.png" width="40%;"></p>
-</li>
-<li><p>${j_k}$ is a random subset of indices：随机抽了memory bank的一个子集来approx全集的分母，实验发现取batch size大小的子集就可以，m=4096</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Proximal Regularization</p>
-<ul>
-<li><p>the learning process oscillates a lot</p>
-<ul>
-<li>we have one instance per class</li>
-<li>during each training epoch each class is only visited once</li>
-</ul>
-</li>
-<li><p>we introduce an additional term</p>
-<ul>
-<li>overall workflow：在每一个iteration t，feature representation是$v_i^t=f_{\theta}(x_i)$，而memory bank里面的representations来自上一个iteration step $V={v^{t-1}}$，我们从memory bank里面采样，并计算NCE loss，然后bp更新网络权重，然后将这一轮fp的representations update到memory bank的指定样本上，然后下一轮</li>
-<li>可以发现，在初始random阶段，梯度更新会比较快而且不稳定</li>
-<li><p>我们给positive sample的loss上额外加了一个$\lambda ||v_i^t-v_i^{t-1}||^2_2$，有点类似weight decay那种东西，开始阶段l2 loss会占主导，引导网络收敛</p>
-</li>
-<li><p><img src="/2021/05/19/memory-bank/proximal.png" width="50%;"></p>
-</li>
-<li><p>stabilize</p>
-</li>
-<li>speed up convergence</li>
-<li>improve the learned representations </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Weighted k-Nearest Neighbor Classifier</p>
-<ul>
-<li>a test time，先计算feature representation，然后跟memory bank的vectors分别计算cosine similarity $s_i=cos(v_i, f)$，选出topk neighbours $N_k$，然后进行weighted voting</li>
-<li>weighted voting：<ul>
-<li>对每个class c，计算它在topk neighbours的total weight，$w_c =\sum_{i \in N_k} \alpha_i 1(c_i=c)$</li>
-<li>$\alpha_i = exp(s_i/\tau)$</li>
-</ul>
-</li>
-<li>k = 200</li>
-<li>$\tau = 0.07$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3455,7 +3571,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3468,7 +3584,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

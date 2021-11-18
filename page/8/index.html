@@ -276,6 +276,268 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/08/group-normalization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/08/group-normalization/" itemprop="url">group normalization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-08T17:49:45+08:00">
+                2020-06-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/08/group-normalization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/08/group-normalization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Group-Normalization"><a href="#Group-Normalization" class="headerlink" title="Group Normalization"></a>Group Normalization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>for small batch size</li>
+<li>do normalization in channel groups</li>
+<li>batch-independent</li>
+<li>behaves stably over different batch sizes</li>
+<li>approach BN’s accuracy </li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/error.png" width="40%;"></p>
+</li>
+<li><p>论点</p>
+<ul>
+<li>BN<ul>
+<li>requires sufficiently large batch size (e.g. 32)</li>
+<li>Mask R-CNN frameworks use a batch size of 1 or 2 images because of higher resolution, where BN is “frozen” by transforming to a linear layer </li>
+<li>synchronized BN 、BR</li>
+</ul>
+</li>
+<li>LN &amp; IN<ul>
+<li>effective for training sequential models or generative models </li>
+<li>but have limited success in visual recognition </li>
+<li>GN能转换成LN／IN</li>
+</ul>
+</li>
+<li>WN<ul>
+<li>normalize the filter weights, instead of operating on features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>group</p>
+<ul>
+<li>it is not necessary to think of deep neural network features as unstructured vectors <ul>
+<li>第一层卷积核通常存在一组对称的filter，这样就能捕获到相似特征</li>
+<li>这些特征对应的channel can be normalized together</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>normalization</p>
+<ul>
+<li><p>transform the feature x：$\hat x_i = \frac{1}{\sigma}(x_i-\mu_i)$</p>
+</li>
+<li><p>the mean and the standard deviation：</p>
+<script type="math/tex; mode=display">
+  \mu_i=\frac{1}{m}\sum_{k\in S_i}x_k\\
+  \sigma_i=\sqrt {\frac{1}{m}\sum_{k\in S_i}(x_k-\mu_i)^2+\epsilon}</script></li>
+<li><p>the set $S_i$</p>
+<ul>
+<li>BN：<ul>
+<li>$S_i=\{k|k_C = i_C\}$</li>
+<li>pixels sharing the same channel index are normalized together </li>
+<li>for each channel, BN computes μ and σ along the (N, H, W) axes </li>
+</ul>
+</li>
+<li>LN<ul>
+<li>$S_i=\{k|k_N = i_N\}$</li>
+<li>pixels sharing the same batch index (per sample) are normalized together </li>
+<li>LN computes μ and σ along the (C,H,W) axes for each sample </li>
+</ul>
+</li>
+<li>IN<ul>
+<li>$S_i=\{k|k_N = i_N, k_C=i_C\}$</li>
+<li>pixels sharing the same batch index and the same channel index are normalized together </li>
+<li>LN computes μ and σ along the (H,W) axes for each sample </li>
+</ul>
+</li>
+<li>GN<ul>
+<li>$S_i=\{k|k_N = i_N, [\frac{k_C}{C/G}]=[\frac{i_C}{C/G}]\}$</li>
+<li>computes μ and σ along the (H, W ) axes and along a group of C/G channels </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>linear transform  </p>
+<ul>
+<li>to keep representational ability </li>
+<li><strong>per channel</strong></li>
+<li>scale and shift：$y_i = \gamma \hat x_i + \beta$</li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/gn.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>relation</p>
+<ul>
+<li>to LN<ul>
+<li>LN assumes <em>all</em> channels in a layer make “similar contributions” </li>
+<li>which is less valid with the presence of convolutions </li>
+<li>GN improved representational power over LN</li>
+</ul>
+</li>
+<li>to IN<ul>
+<li>IN can only rely on the spatial dimension for computing the mean and variance </li>
+<li>it misses the opportunity of exploiting the channel dependence</li>
+<li>【QUESTION】BN也没考虑通道间的联系啊，但是计算mean和variance时跨了sample</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>implementation</p>
+<ul>
+<li>reshape</li>
+<li>learnable $\gamma \&amp; \beta$</li>
+<li>computable mean &amp; var</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/06/08/group-normalization/code.png" width="50%;"></p>
+</li>
+<li><p>实验</p>
+<ul>
+<li>GN相比于BN，training error更低，但是val error略高于BN<ul>
+<li>GN is effective for easing optimization</li>
+<li>loses some regularization ability </li>
+<li>it is possible that GN combined with a suitable regularizer will improve results </li>
+</ul>
+</li>
+<li>选取不同的group数，所有的group&gt;1均好于group=1（LN）</li>
+<li>选取不同的channel数（C／G），所有的channel&gt;1均好于channel=1（IN）</li>
+<li>Object Detection  <ul>
+<li>frozen：因为higher resolution，batch size通常设置为2/GPU，这时的BN frozen成一个线性层$y=\gamma(x-\mu)/\sigma+beta$，其中的$\mu$和$sigma$是load了pre-trained model中保存的值，并且frozen掉，不再更新</li>
+<li>denote as BN*</li>
+<li>replace BN* with GN during fine-tuning </li>
+<li>use a weight decay of 0 for the γ and β parameters </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/02/regularization/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3169,415 +3431,11 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/30/SE-block/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/04/30/SE-block/" itemprop="url">SE block</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-30T14:11:38+08:00">
-                2020-04-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/04/30/SE-block/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/30/SE-block/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>图像特征的提取能力是CNN的核心能力，而SE block可以起到为CNN校准采样的作用。</p>
-<p>根据感受野理论，特征矩阵主要来自于样本的中央区域，处在边缘位置的酒瓶的图像特征很大概率会被pooling层抛弃掉。而SE block的加入就可以通过来调整特征矩阵，增强酒瓶特征的比重，提高它的识别概率。</p>
-<p><img src="/2020/04/30/SE-block/bottle.png" width="25%"></p>
-<ol>
-<li>[SE-Net] Squeeze-and-Excitation Networks</li>
-<li>[SC-SE] Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks </li>
-<li>[CMPE-SE] Competitive Inner-Imaging Squeeze and Excitation for Residual Network</li>
-</ol>
-<h2 id="SENet-Squeeze-and-Excitation-Networks"><a href="#SENet-Squeeze-and-Excitation-Networks" class="headerlink" title="SENet: Squeeze-and-Excitation Networks"></a>SENet: Squeeze-and-Excitation Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>prior research has investigated the spatial component to achieve more powerful representations </li>
-<li>we focus on the channel relationship instead</li>
-<li>SE-block：adaptively recalibrates channel-wise feature responses by explicitly modelling interdependencies between channels</li>
-<li>enhancing the representational power </li>
-<li>in a computationally efficient manner</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>stronger network：<ul>
-<li>deeper</li>
-<li>NiN-like bocks</li>
-</ul>
-</li>
-<li>cross-channel correlations in prior work<ul>
-<li>mapped as new combinations of features through 1x1 conv</li>
-<li>concentrated on the objective of reducing model and computational complexity</li>
-</ul>
-</li>
-<li>In contrast, we found this mechanism <ul>
-<li>can ease the learning process</li>
-<li>and significantly enhance the representational power of the network</li>
-</ul>
-</li>
-<li>Attention<ul>
-<li>Attention can be interpreted as a means of biasing the allocation of available computational resources towards the most informative components<ul>
-<li>Some works provide interesting studies into the combined use of spatial and channel attention </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>SE-block</p>
-<ul>
-<li><p>The channel relationships modelled by convolution are inherently implicit and local </p>
-</li>
-<li><p>we would like to provide it with access to global information</p>
-</li>
-<li><p>squeeze：using global average pooling </p>
-</li>
-<li><p>excitation：nonlinear &amp; non-mutually-exclusive using sigmoid</p>
-<ul>
-<li><p>bottleneck：a dimensionality-reduction layer $W_1$ with reduction ratio $r$ and ReLU and a dimensionality-increasing layer $W_2$</p>
-</li>
-<li><p>$s = F_{ex}(z,W) = \sigma (W_2 \delta(W_1 z))$</p>
-<p><img src="/2020/04/30/SE-block/seblock.png" width="70%"></p>
-</li>
-</ul>
-</li>
-<li><p>integration</p>
-<ul>
-<li>insert after the non-linearity following each convolution</li>
-<li>inception：take the transformation $F_{tr}$ to be an entire Inception module </li>
-<li><p>residual：take the transformation $F_{tr}$ to be the non-identity branch of a residual module</p>
-<p><img src="/2020/04/30/SE-block/integrate.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>model and computational complexity</p>
-<ul>
-<li>ResNet50 vs. SE-ResNet50：0.26% relative increase GFLOPs approaching ResNet10’s accuracy </li>
-<li>the additional parameters result solely from the two FC layers, among which  the final stage FC claims the majority due to being performed across the greatest number of channels</li>
-<li>the costly final stage of SE blocks could be removed at only a small cost in performance </li>
-</ul>
-</li>
-<li><p>ablations</p>
-<ul>
-<li>FC<ul>
-<li>removing the biases of the FC layers  in the excitation facilitates the modelling of channel dependencies </li>
-</ul>
-</li>
-<li>reduction ratio<ul>
-<li>performance is robust to a range of reduction ratios </li>
-<li>In practice, using an identical ratio throughout a network may not be optimal due to the distinct roles performed by different layers </li>
-</ul>
-</li>
-<li>squeeze<ul>
-<li>global average pooling vs. global max pooling：average pooling slightly better </li>
-</ul>
-</li>
-<li>excitation<ul>
-<li>Sigmoid vs. ReLU vs. tanh：<ul>
-<li>tanh：slightly worse</li>
-<li>ReLU：dramatically worse   </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>stages<ul>
-<li>each stages brings benefits </li>
-<li>combination make even better</li>
-</ul>
-</li>
-<li>integration strategy<ul>
-<li>fairly robust to their location, provided that they are applied prior to branch aggregation</li>
-<li>inside the residual unit：fewer channels, fewer parameters, comparable accuracy </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>primitive understanding <ul>
-<li>squeeze<ul>
-<li>the use of <strong>global information</strong> has a significant influence on the model performance</li>
-</ul>
-</li>
-<li>excitation<ul>
-<li>the distribution across different classes is very similar at the earlier layers  (general features)</li>
-<li>the value of each channel becomes much more class-specific at greater depth</li>
-<li>SE_5_2 exhibits an interesting tendency towards a saturated state in which most of the activations are close to one</li>
-<li>SE_5_3 exhibits a similar pattern emerges over different classes, up to a modest change in scale</li>
-<li>suggesting that SE_5_2 and SE_5_3 are less important than previous blocks in providing recalibration to the network (thus can be removed)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>APPENDIX</p>
-<ul>
-<li>在ImageNet上SOTA的模型是SENet-154，top1-err是18.68，被标记在了efficientNet论文的折线图上<ul>
-<li>SE-ResNeXt-152（64x4d）<ul>
-<li>input=(224,224)：top1-err是18.68</li>
-<li>input=320/299：top1-err是17.28</li>
-</ul>
-</li>
-<li>further difference<ul>
-<li>each bottleneck building block的第一个1x1 convs的通道数减半</li>
-<li>stem的第一个7x7conv换成了3个连续的3x3 conv</li>
-<li>1x1的s2 conv换成了3x3的s2 conv</li>
-<li>fc之前添加dropout layer</li>
-<li>label smoothing</li>
-<li>最后几个training epoch将BN层的参数冻住，保证训练和测试的参数一致</li>
-<li>64 GPUs，batch size=2048（32 per GPU）</li>
-<li>initial lr=1.0</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks"><a href="#SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks" class="headerlink" title="SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks"></a>SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>image segmentation task 上面SE-Net提出来主要是针对分类</li>
-<li>three variants of SE modules <ul>
-<li>squeezing spatially and exciting channel-wise (cSE)</li>
-<li>squeezing channel-wise and exciting spatially (sSE)</li>
-<li>concurrent spatial and channel squeeze &amp; excitation (scSE) </li>
-</ul>
-</li>
-<li>integrate within three different state-of-the- art F-CNNs (DenseNet, SD-Net, U-Net) </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>F-CNNs have become the tool of choice for many image segmentation tasks </li>
-<li>core：convolutions that capturing <strong>local spatial pattern along all input channels</strong> jointly </li>
-<li>SE block <strong>factors out the spatial dependency</strong> by global average pooling to learn a channel specific descriptor (later refered to as cSE /channel-SE)</li>
-<li>while for image segmentation, we hypothesize that the pixel-wise spatial information is more informative </li>
-<li>thus we propose sSE(spatial SE) and scSE(spatial and channel SE)</li>
-<li><p>can be seamlessly integrated by placing after every encoder and decoder block</p>
-<p><img src="/2020/04/30/SE-block/scse.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>cSE<ul>
-<li>GAP：embeds the global spatial information into a vector </li>
-<li>FC-ReLU-FC-Sigmoid：adaptively learns the importance  </li>
-<li>recalibrate</li>
-</ul>
-</li>
-<li>sSE<ul>
-<li>1x1 conv：generating a projection tensor representing the linearly combined representation for all channels C for a spatial location (i,j)</li>
-<li>Sigmoid：rescale </li>
-<li>recalibrate </li>
-</ul>
-</li>
-<li>scSE<ul>
-<li>by element-wise addition </li>
-<li>encourages the network to learn more meaningful feature maps ———- relevant both spatially and channel-wise</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>F-CNN architectures：</p>
-<ul>
-<li>4 encoder blocks, one bottleneck layer, 4 decoder blocks and a classification layer </li>
-<li>class imbalance：median frequency balancing ce</li>
-</ul>
-</li>
-<li><p>dice cmp：scSE &gt; sSE &gt; cSE &gt; vanilla</p>
-</li>
-<li><p>小区域类别的分割，观察到使用cSE可能会差于vanilla： might have got overlooked by only exciting the channels</p>
-</li>
-<li><p>定性分析：</p>
-<ul>
-<li>一些under segmented的地方，scSE improves with the inclusion </li>
-<li><p>一些over segmented的地方，scSE rectified the result</p>
-<p><img src="/2020/04/30/SE-block/qualitive.png" width="55%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network"><a href="#Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network" class="headerlink" title="Competitive Inner-Imaging Squeeze and Excitation for Residual Network"></a>Competitive Inner-Imaging Squeeze and Excitation for Residual Network</h2><ol>
-<li>动机<ul>
-<li>for residual network</li>
-<li>the residual architecture has been proved to be diverse and redundant</li>
-<li>model the competition between residual and identity mappings</li>
-<li>make the identity flow to control the complement of the residual feature maps</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>For analysis of ResNet, with the increase in depth, the residual network exhibits a certain amount of redundancy </li>
-<li><p>with the CMPE-SE mechanism, it makes residual mappings tend to provide more efficient supplementary for identity mappings</p>
-<p><img src="/2020/04/30/SE-block/cmpese.png" width="55%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>主要提出了三种变体：</p>
-<p><img src="/2020/04/30/SE-block/cmpeses.png" width="75%"></p>
-</li>
-<li><p>第一个变体：</p>
-<ul>
-<li>两个分支id和res分别GAP出一个vector，然后fc reduct by ratio，然后concat，然后channel back</li>
-<li>Implicitly, we can believe that the winning of the identity channels in this competition results in less weights of the residual channels </li>
-</ul>
-</li>
-<li><p>第二个变体：</p>
-<ul>
-<li><p>两种方案</p>
-<ul>
-<li>2x1 convs：对上下相应位置的元素求avg</li>
-<li>1x1 convs：对全部元素求avg，然后flatten</li>
-</ul>
-<p><img src="/2020/04/30/SE-block/sec.png" width="45%"></p>
-</li>
-</ul>
-</li>
-<li><p>第三个变体：</p>
-<ul>
-<li><p>两边的channel-wise vector叠起来，然后reshape成矩阵形式，然后3x3 conv，然后flatten</p>
-<p><img src="/2020/04/30/SE-block/trd.png" width="45%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>比较扯，不浪费时间分析了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3627,7 +3485,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">140</span>
+                  <span class="site-state-item-count">141</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3640,7 +3498,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">78</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
