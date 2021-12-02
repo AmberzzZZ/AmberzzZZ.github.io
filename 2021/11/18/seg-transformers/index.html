@@ -95,7 +95,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/decoder.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/swinUnet.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/swin%20block.png">
-<meta property="og:updated_time" content="2021-11-25T10:01:49.183Z">
+<meta property="og:updated_time" content="2021-11-30T02:05:19.092Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="seg-transformers">
 <meta name="twitter:description" content="之前那篇《transformers》太长了，新开一个分割方向的专题，papers： ——————————previous—————————-  [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transforme">
@@ -380,6 +380,17 @@
 <li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
 <li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
 </ul>
+<h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
+<ul>
+<li>dataset：<ul>
+<li>ADE20K：semantic segmentation</li>
+<li>150 categories</li>
+<li>25K/20K/2K/3K for total/train/val/test</li>
+<li>UperNet as base framework</li>
+</ul>
+</li>
+<li>benchmark：<a href="https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision" target="_blank" rel="noopener">https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision</a></li>
+</ul>
 <h2 id="nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><a href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation" class="headerlink" title="nnFormer: Interleaved Transformer for Volumetric Segmentation"></a>nnFormer: Interleaved Transformer for Volumetric Segmentation</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -660,6 +671,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2021/11/30/swin/" rel="prev" title="swin">
+                swin <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -742,7 +757,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -755,7 +770,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -798,7 +813,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">1.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-for-Semantic-Segmentaion"><span class="nav-number">1.</span> <span class="nav-text">Swin Transformer for Semantic Segmentaion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li></ol></div>
             
 
           </div>

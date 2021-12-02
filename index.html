@@ -276,6 +276,338 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/11/30/swin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/11/30/swin/" itemprop="url">swin</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-30T11:55:12+08:00">
+                2021-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/11/30/swin/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/11/30/swin/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>papers</li>
+</ul>
+<p>[swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：</p>
+<p>[swin V2] Swin Transformer V2: Scaling Up Capacity and Resolution：卷死了卷死了，同年就上V2，</p>
+<h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ul>
+<li><p>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：</p>
+<ul>
+<li>input embedding：absolute PE 替换成 relative PE</li>
+<li>basic stage<ul>
+<li>basic swin block：W-MSA &amp; SW-MSA</li>
+<li>patch merging</li>
+</ul>
+</li>
+<li>classification head</li>
+</ul>
+</li>
+<li><p>a quick look back on MSA layer：</p>
+<ul>
+<li>scaled dot-Product attention<ul>
+<li>dot：计算每个query和所有keys的similarity，$QK^T$</li>
+<li>scaled：归一化dot-product的结果，用$\sqrt {d_k}$做分母，$\frac{QK^T}{\sqrt {d_k}}$</li>
+</ul>
+</li>
+<li>weighted sum<ul>
+<li>softmax：计算query和所有keys的weights，$softmax(\frac{QK^T}{\sqrt {d_k}})$</li>
+<li>sum：计算query在所有values上的加权和，作为其全局representation，$softmax(\frac{QK^T}{\sqrt {d_k}})V$</li>
+</ul>
+</li>
+<li>multi-head attention<ul>
+<li>linear project：将输入QKV投影成h个D/h-dim的sub-QKV-pairs</li>
+<li>attention in parallel：并行对每组sub-QKV计算sub-Q的global attention</li>
+<li>concat：concat这些heads的输出，也就是所有query的global attention</li>
+<li>linear project：增加表征复杂度</li>
+</ul>
+</li>
+<li><p>masking</p>
+<ul>
+<li>used in decoder inputs</li>
+<li>decoder inputs query只计算它之前出现的keys的attention：将其之后的similarity value置为-inf，这样weights就无限接近0了</li>
+</ul>
+</li>
+<li><p>3类regularization：</p>
+<ul>
+<li>Residual dropout：在每个residual path上面都增加了residual dropout</li>
+<li>PE dropout：在输入的PE embedding之后添加dropout</li>
+<li>adds dropout：在每个residual block的sums之后添加dropout</li>
+<li>$P_{drop}=0.1$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Swin-Transformer-V2-Scaling-Up-Capacity-and-Resolution"><a href="#Swin-Transformer-V2-Scaling-Up-Capacity-and-Resolution" class="headerlink" title="Swin Transformer V2: Scaling Up Capacity and Resolution"></a>Swin Transformer V2: Scaling Up Capacity and Resolution</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>scaling up：<ul>
+<li>capacity and resolution</li>
+<li>generally applicable for vision models </li>
+</ul>
+</li>
+<li>facing issues<ul>
+<li>instability </li>
+<li>low resolution pre-trained models到high-resolution downstream task的有效transfer</li>
+<li>GPU memory consumption</li>
+</ul>
+</li>
+<li>we present techniques<ul>
+<li>a post normalization technique：instability</li>
+<li>a scaled cosine attention approach：instability</li>
+<li>a log-spaced continuous position bias：transfer</li>
+<li>implementation details that lead to significant GPU savings</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>大模型有用这个事在NLP领域已经被充分证实了：Bert/GPT都是pretrained huge model + downsteam few-shot finetuning、</p>
+</li>
+<li><p>CV领域的scaling up稍微lagging behind一点：而且existing model只是用于image classification tasks</p>
+</li>
+<li><p>instability</p>
+<ul>
+<li>大模型不稳定的主要原因是residual path上面的value直接add to the main branch，the amplitudes accumulate</li>
+<li>提出post-norm，将LN移动到residual unit后面，限幅</li>
+<li>提出scaled cosine attention，替换原来的dot product attention，好处是cosine product是与amplitude无关的</li>
+<li><p>看图：三角是norm后置，圆形是norm前置</p>
+<p><img src="/2021/11/30/swin/instability.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>transfer</p>
+<ul>
+<li>提出log-spaced continous position bias (Log-CPB)</li>
+<li>之前是bi-cubic interpolation of the position bias maps</li>
+<li><p>看图：第一行是swin V1的差值，transfer到别的window size会显著drop，下面两个CPB一个维持，一个enhance</p>
+<p><img src="/2021/11/30/swin/transfer.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GPU usage</p>
+<ul>
+<li>zero optimizer</li>
+<li>activation check pointing</li>
+<li>a novel implementation of sequential self-attention computation</li>
+</ul>
+</li>
+<li><p>our model</p>
+<ul>
+<li>3 billion params</li>
+<li>1536x1536 resolution</li>
+<li>Nvidia A100-40G GPUs</li>
+<li>用更少的数据finetuning就能在downstream task上获得更好的表现</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/11/30/swin/cmp.png" width="40%;"></p>
+</li>
+<li><p>normalization configuration</p>
+<ul>
+<li>common language Transformers和vanilla ViT都是前置norm layer</li>
+<li>所以swin V1就inherit这个设置了</li>
+<li>但是swin V2重新安排了</li>
+</ul>
+</li>
+<li><p>relative position bias</p>
+<ul>
+<li>key component in V1</li>
+<li>没有用PE，而是在MSA里面引入了bias term：$Attention(Q,K,V)=Softmax(QK^T/\sqrt d + B)V$</li>
+<li>记一个window里面patches的个数是$M^2$，那么$B \in R^{M^2}$，两个轴上的相对位置范围都是[-M+1,M-1)，有bias matrix $\hat B \in R^{(2M-1)\times(2M-1)}$，然后从中得到$B$，源代码实现的时候用了一个truncated_normal来随机生成$\hat B$，然后在$\hat B$里面取$B$</li>
+<li>windows size发生变化的时候，bias matrix就进行bi-cubic插值变换</li>
+</ul>
+</li>
+<li><p>Scaling Up Model Capacity</p>
+<ul>
+<li><p>在 pre-normalization的设置下</p>
+<ul>
+<li>the output activation values of each residual block are directly merged back to the main branch</li>
+<li>main branch在deeper layer的amplitude就越来越大</li>
+<li>导致训练不稳定</li>
+</ul>
+</li>
+<li><p>Post normalization</p>
+<ul>
+<li>就是MSA、MLP和layerNorm的顺序调换</li>
+<li>在largest model training的时候，在main branch也引入了layerNorm，每6个Transformer block就引入一个norm unit</li>
+</ul>
+</li>
+<li><p>Scaled cosine attention</p>
+<ul>
+<li>原始的similarity term是Q.dot(K)</li>
+<li>但是在post-norm下，发现the learnt attention map容易被个别几对pixel pairs主导</li>
+<li>所以改成cosine：$Sim(q_i,k_i)=cos(q_i,k_i)/\tau + B_{ij}$<ul>
+<li>$\tau$ 是learnable scalar</li>
+<li>larger than 0.01</li>
+<li>non-shared across heads &amp; layers</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Scaling Up Window Resolution</p>
+<ul>
+<li><p>Continuous relative position bias</p>
+<ul>
+<li>用一个小网络来生成relative bias，输入是relative coordinates</li>
+<li><p>2-layer MLP + ReLU in between</p>
+<p><img src="/2021/11/30/swin/linear.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Log-spaced coordinates</p>
+<ul>
+<li><p>将坐标值压缩到log空间之后，插值的时候，插值空间要小得多</p>
+<p><img src="/2021/11/30/swin/log.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Implementation to save GPU memory</p>
+<ul>
+<li>Zero-Redundancy Optimizer (ZeRO)：通常并行情况下，优化器的states是复制多份在每个GPU上的，对大模型极其不友好，解决方案是divided and distributed to multiple GPUs</li>
+<li>Activation check-pointing：没展开说，就说high resolution下，feature map的存储也占了很大memory，用这个可以提高train speed 30%</li>
+<li>Sequential self-attention computation：串行计算self-attention，不是batch computation，这个底层矩阵效率优化不理解</li>
+</ul>
+</li>
+<li><p>Joining with a self-supervised approach</p>
+<ul>
+<li>大模型需要海量数据驱动</li>
+<li>一个是扩充imageNet数据集到五倍大，using noisy labels</li>
+<li>还进行了自监督学习：additionally employ a self-supervised learning approach to better exploit this data：《Simmim: A simple framework for masked image modeling》，这个还没看过</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/11/18/seg-transformers/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -373,6 +705,17 @@
 <ul>
 <li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
 <li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
+</ul>
+<h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
+<ul>
+<li>dataset：<ul>
+<li>ADE20K：semantic segmentation</li>
+<li>150 categories</li>
+<li>25K/20K/2K/3K for total/train/val/test</li>
+<li>UperNet as base framework</li>
+</ul>
+</li>
+<li>benchmark：<a href="https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision" target="_blank" rel="noopener">https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision</a></li>
 </ul>
 <h2 id="nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><a href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation" class="headerlink" title="nnFormer: Interleaved Transformer for Volumetric Segmentation"></a>nnFormer: Interleaved Transformer for Volumetric Segmentation</h2><ol>
 <li><p>动机</p>
@@ -2810,332 +3153,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/GHM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/08/31/GHM/" itemprop="url">GHM</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-31T15:48:50+08:00">
-                2021-08-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/08/31/GHM/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/31/GHM/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>families:</p>
-<ul>
-<li>[class-imbalanced CE]</li>
-<li>[focal loss]</li>
-<li>[generalized focal loss] focal loss(CE)的连续版本</li>
-<li>[ohem]</li>
-</ul>
-<p>keras implementation:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">weightedCE_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.8</span></span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    wce = tf.where(y_true&gt;<span class="number">0.5</span>, alpha* , (<span class="number">1</span>-alpha)* )</span><br><span class="line">    <span class="keyword">return</span> wce</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.25</span></span><br><span class="line">		gamma = <span class="number">2</span></span><br><span class="line">		</span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># easy/hard reweight</span></span><br><span class="line">		fl = -K.pow(pt, gamma) * K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    fl = tf.where(y_true&gt;<span class="number">0.5</span>, alpha*fl, (<span class="number">1</span>-alpha)*fl)</span><br><span class="line">    <span class="keyword">return</span> fl</span><br><span class="line">  </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">generalized_focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		<span class="comment"># CE = -ytlog(yp)-(1-yt)log(1-yp)</span></span><br><span class="line">  	<span class="comment"># GFL = |yt-yp|^beta * CE</span></span><br><span class="line">    beta = <span class="number">2</span></span><br><span class="line">    <span class="comment"># clip y_pred</span></span><br><span class="line">    y_pred = K.clip(y_pred, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -y_true*K.log(y_pred) - (<span class="number">1</span>-y_true)*K.log(<span class="number">1</span>-y_pred)   <span class="comment"># [N,C]</span></span><br><span class="line">    <span class="comment"># easy/hard reweight</span></span><br><span class="line">    gfl = K.pow(K.abs(y_true-y_pred), beta) * ce</span><br><span class="line">    <span class="keyword">return</span> gfl</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ce_ohem</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">  	pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># sort loss</span></span><br><span class="line">    k = <span class="number">50</span></span><br><span class="line">    ohem_loss, indices = tf.nn.top_k(ce, k=k)   <span class="comment"># topk loss: [k,], topk indices: [k,], idx among 0-b</span></span><br><span class="line">    mask = tf.where(ce&gt;=ohem_loss[k<span class="number">-1</span>], tf.ones_like(ce), tf.zeros_like(ce))</span><br><span class="line">    <span class="keyword">return</span> mask*ce</span><br></pre></td></tr></table></figure>
-<h2 id="Gradient-Harmonized-Single-stage-Detector"><a href="#Gradient-Harmonized-Single-stage-Detector" class="headerlink" title="Gradient Harmonized Single-stage Detector"></a>Gradient Harmonized Single-stage Detector</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>one-stage detector<ul>
-<li>核心challenge就是imbalance issue</li>
-<li>imbalance between positives and negatives</li>
-<li>imbalance between easy and hard examples</li>
-<li>这两项都能归结为对梯度的作用：a term of the gradient</li>
-</ul>
-</li>
-<li>we propose a novel gradient harmonizing mechanism (GHM) <ul>
-<li>balance the gradient flow</li>
-<li>easy to embed in cls/reg losses like CE/smoothL1</li>
-<li>GHM-C for anchor classification</li>
-<li>GHM-R for bounding box refinement</li>
-</ul>
-</li>
-<li>proved substantial improvement on COCO<ul>
-<li>41.6 mAP</li>
-<li>surpass FL by 0.8</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>imbalance issue</p>
-<ul>
-<li><p>easy and hard：</p>
-<ul>
-<li>OHEM</li>
-<li>directly abandon examples</li>
-<li>导致训练不充分</li>
-</ul>
-</li>
-<li><p>positive and negative</p>
-<ul>
-<li>focal loss</li>
-<li>有两个超参，跟data distribution绑定</li>
-<li>not adaptive</li>
-</ul>
-</li>
-<li><p>通常正样本既是少量样本又是困难样本，而且可以通通归结为梯度分布不均匀的问题</p>
-<p>  <img src="/2021/08/31/GHM/gradients.png" width="50%;"></p>
-<ul>
-<li>大量样本只贡献很小的梯度，通常对应着大量负样本，总量多了也可能会引导梯度（左图）</li>
-<li>hard样本要比medium样本数量大，我们通常将其看作离群点，因为模型稳定以后这些hard examples仍旧存在，他们会影响模型稳定性（左图）</li>
-<li>GHM的目标就是希望不同样本的gradient contribution保持harmony，相比较于CE和FL，简单样本和outlier的total contribution都被downweight，比较harmony（右图）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>we propose gradient harmonizing mechanism (GHM)</p>
-<ul>
-<li>希望不同样本的gradient contribution保持harmony</li>
-<li>首先研究gradient density，按照梯度聚类样本，并相应reweight</li>
-<li>针对分类和回归设计GHM-C loss和GHM-R loss</li>
-<li>verified on COCO<ul>
-<li>GHM-C比CE好得多，sligtly better than FL</li>
-<li>GHM-R也比smoothL1好</li>
-<li>attains SOTA</li>
-</ul>
-</li>
-<li>dynamic loss：adapt to each batch</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Problem Description</p>
-<ul>
-<li><p>define gradient norm $g = |p - p^*|$</p>
-<p>  <img src="/2021/08/31/GHM/norm.png" width="40%;"></p>
-</li>
-<li><p>the distribution g from a converged model</p>
-<p>  <img src="/2021/08/31/GHM/distribution.png" width="40%;"></p>
-<ul>
-<li>easy样本非常多，不在一个数量级，会主导global gradient</li>
-<li>即使收敛模型也无法handle一些极难样本，这些样本梯度与其他样本差异较大，数量还不少，也会误导模型</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Gradient Density</p>
-<ul>
-<li>define gradient density $GD(g) = \frac{1}{l_{\epsilon}(g)} \sum_{k=1} \delta_{\epsilon}(g_k,g)$<ul>
-<li><img src="/2021/08/31/GHM/hyper.png" width="40%;"></li>
-<li>given a gradient value g</li>
-<li>统计落在中心value为$g$，带宽为$\epsilon$的范围内的梯度的样本量</li>
-<li>再用带宽去norm</li>
-</ul>
-</li>
-<li>define the gradient density harmony parameter $\beta_i = \frac{N}{GD(g_i)}$<ul>
-<li>N是总样本量</li>
-<li>其实就是与density成反比</li>
-<li>large density对应样本会被downweight</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>GHM-C Loss</p>
-<ul>
-<li><p>将harmony param作为loss weight，加入现有loss</p>
-<p>  <img src="/2021/08/31/GHM/harmony.png" width="40%;"></p>
-</li>
-<li><p><img src="/2021/08/31/GHM/norm1.png" width="50%;"></p>
-<ul>
-<li>可以看到FL主要压简单样本（基于sample loss），GHM两头压（基于sample density）</li>
-<li>最终harmonize the total gradient contribution of different density group</li>
-<li>dynamic wrt mini-batch：使得训练更加efficient和robust</li>
-</ul>
-</li>
-<li><p>Unit Region Approximation</p>
-<ul>
-<li>将gradient norm [0,1]分解成M个unit region</li>
-<li>每个region的宽度$\epsilon = \frac{1}{M}$</li>
-<li>落在每个region内的样本数计作$R_{ind(g)}$，$ind(g)$是g所在region的start idx</li>
-<li>the approximate gradient density：$\hat {GD}(g) = \frac{R_{ind(g)}}{\epsilon} =R_{ind(g)}M $</li>
-<li><p>approximate harmony parameter &amp; loss：</p>
-<ul>
-<li>we can attain good performance with quite small M</li>
-<li>一个密度区间内的样本可以并行计算，计算复杂度O(MN)</li>
-</ul>
-<p><img src="/2021/08/31/GHM/approx.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>EMA</p>
-<ul>
-<li>一个mini-batch可能是不稳定的</li>
-<li>所以通过历史累积来更新维稳：SGDM和BN都用了EMA</li>
-<li>现在每个region里面的样本使用同一组梯度，我们对每个region的样本量应用了EMA<ul>
-<li>t-th iteraion</li>
-<li>j-th region</li>
-<li>we have $R_j^t$</li>
-<li>apply EMA：$S_j^t = \alpha S_j^(t-1) + (1-\alpha )R_j^t$</li>
-<li>$\hat GD(g) = S_{ind(g)} M$</li>
-</ul>
-</li>
-<li>这样gradient density会更smooth and insensitive to extreme data</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>GHM-R loss</p>
-<ul>
-<li><p>smooth L1：</p>
-<p>  <img src="/2021/08/31/GHM/SL1.png" width="40%;"></p>
-<ul>
-<li>通常分界点设置成$\frac{1}{9}$</li>
-<li>SL1在线性部分的导数永远是常数，没法去distinguishing of examples</li>
-<li>用$|d|$作为gradient norm则存在inf</li>
-</ul>
-</li>
-<li><p>所以先改造smooth L1：Authentic Smooth L1</p>
-<p>  <img src="/2021/08/31/GHM/ASL.png" width="40%;"></p>
-<p>  <img src="/2021/08/31/GHM/ASL1.png" width="40%;"></p>
-<ul>
-<li>$\mu=0.02$</li>
-<li>梯度范围正好在[0,1)</li>
-</ul>
-</li>
-<li><p>define gradient norm as $gr = |\frac{d}{\sqrt{d^2+\mu^2}}|$</p>
-<ul>
-<li><p>观察converged model‘s gradient norm for ASL1，发现大量是outliers</p>
-<p>  <img src="/2021/08/31/GHM/gr.png" width="40%;"></p>
-</li>
-<li><p>同样用gradient density进行reweighting</p>
-<p>  <img src="/2021/08/31/GHM/GHMR.png" width="40%;"></p>
-</li>
-<li><p>收敛状态下，不同类型的样本对模型的gradient contribution</p>
-<p>  <img src="/2021/08/31/GHM/rcontrib.png" width="40%;"></p>
-<ul>
-<li>regression是对所有正样本进行计算，主要是针对离群点进行downweighting</li>
-<li>这里面的一个观点是：在regression task里面，并非所有easy样本都是不重要的，在分类task里面，easy样本大部分都是简单的背景类，但是regression分支里面的easy sample是前景box，而且still deviated from ground truth，仍旧具有充分的优化价值</li>
-<li>所以GHM-R主要是upweight the important part of easy samples and downweight the outliers</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3190,7 +3207,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3203,7 +3220,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

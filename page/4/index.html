@@ -276,6 +276,298 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/09/repVGG/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/02/09/repVGG/" itemprop="url">repVGG</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-09T15:56:23+08:00">
+                2021-02-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/02/09/repVGG/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/09/repVGG/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="RepVGG-Making-VGG-style-ConvNets-Great-Again"><a href="#RepVGG-Making-VGG-style-ConvNets-Great-Again" class="headerlink" title="RepVGG: Making VGG-style ConvNets Great Again"></a>RepVGG: Making VGG-style ConvNets Great Again</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>plain ConvNets <ul>
+<li>simply efficient but poor performance</li>
+</ul>
+</li>
+<li>propose a CNN architecture RepVGG<ul>
+<li>能够decouple为training-time和inference-time两个结构</li>
+<li>通过structure re-paramterization technique</li>
+<li>inference-time architecture has a VGG-like plain body</li>
+</ul>
+</li>
+<li>faster<ul>
+<li>83% faster than ResNet-50 or 101% faster than ResNet-101</li>
+</ul>
+</li>
+<li>accuracy-speed trade-off<ul>
+<li>reaches over 80% top-1 accuracy</li>
+<li>outperforms ResNets by a large margin</li>
+</ul>
+</li>
+<li>verify on classification &amp; semantic segmentation tasks</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>well-designed CNN architectures </p>
+<ul>
+<li>Inception，ResNet，DenseNet，NAS models</li>
+<li>deliver higher accuracy</li>
+<li>drawbacks <ul>
+<li>multi-branch designs：slow down inference and reduce memory utilization，对高并行化的设备不友好</li>
+<li>some components：depthwise &amp; channel shuffle，increase memory access cost </li>
+</ul>
+</li>
+<li>MAC(memory access cost) constitutes a large time usage in groupwise convolution：我的groupconv实现里cardinality维度上计算不并行</li>
+<li>FLOPs并不能precisely reflect actual speed，一些结构看似比old fashioned VGG/resnet的FLOPs少，但实际并没有快</li>
+</ul>
+</li>
+<li><p>multi-branch</p>
+<ul>
+<li>通常multi-branch model要比plain model表现好</li>
+<li>因为makes the model an implicit ensemble of numerous shallower models</li>
+<li>so that avoids gradient vanishing</li>
+<li>benefits are all for training</li>
+<li>drawbacks are undesired for inference</li>
+</ul>
+</li>
+<li><p>the proposed RepVGG</p>
+<ul>
+<li>advantages<ul>
+<li>plain architecture：no branches</li>
+<li>3x3 conv &amp; ReLU组成</li>
+<li>没有过重的人工设计痕迹</li>
+</ul>
+</li>
+<li>training time use identity &amp; 1x1 conv branches</li>
+<li><p>at inference time</p>
+<ul>
+<li>identity 可以看做degraded 1x1 conv</li>
+<li>1x1 conv 可以看做degraded 3x3 conv</li>
+<li>最终整个conv-bn branches能够整合成一个3x3 conv</li>
+<li>inference-time model只包含conv和ReLU：没有max pooling！！</li>
+<li>fewer memory units：分支会占内存，直到分支计算结束，plain结构的memory则是immediately released</li>
+</ul>
+<p><img src="/2021/02/09/repVGG/memory.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<p> <img src="/2021/02/09/repVGG/repvgg.png" width="45%;"></p>
+<ul>
+<li><p>training-time</p>
+<ul>
+<li>ResNet-like block<ul>
+<li>id + 1x1 conv + 3x3 conv multi-branches</li>
+<li>use BN in each branch</li>
+<li>with n blocks, the model can be interpreted as an ensemble of $3^n$ models</li>
+<li>stride2的block应该没有id path吧？？</li>
+</ul>
+</li>
+<li>simply stack serveral blocks to construct the training model</li>
+</ul>
+</li>
+<li><p>inference-time</p>
+<ul>
+<li><p>re-param</p>
+<ul>
+<li>inference-time BN也是一个线性计算</li>
+<li>两个1x1 conv都可以转换成中通的3x3 kernel，有权/无权</li>
+<li><p>要求各branch has the same strides &amp; padding pixel要对齐</p>
+<p><img src="/2021/02/09/repVGG/reparam.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>architectural specification </p>
+<ul>
+<li>variety：depth and width</li>
+<li>does not use maxpooling：只有一种operator：3x3 conv+relu</li>
+<li>head：GAP + fc / task specific</li>
+<li>5 stages<ul>
+<li>第一个stage处理high resolution，stride2</li>
+<li>第五个stage shall have more channels，所以只用一层，save parameters</li>
+<li>给倒数第二个stage最多层，考虑params和computation的balance</li>
+</ul>
+</li>
+<li>RepVGG-A：[1,2,4,14,1]，用来compete against轻量和中量级model</li>
+<li><p>RepVGG-B：deeper in s2,3,4，[1,4,6,16,1]，用来compete against high-performance ones</p>
+<p><img src="/2021/02/09/repVGG/architecture.png" width="45%;"></p>
+</li>
+<li><p>basic width：[64, 128, 256, 512]  </p>
+<ul>
+<li>width multiplier a &amp; b</li>
+<li>a控制前4个stage宽度，b控制最后一个stage</li>
+<li>[64a, 128a, 256a, 512b]  </li>
+<li><p>第一个stage的宽度只接受变小不接受变大，因为大resolution影响计算量，min(64,64a)</p>
+<p><img src="/2021/02/09/repVGG/variety.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>further reduce params &amp; computation</p>
+<ul>
+<li>groupwise 3x3 conv</li>
+<li>跳着层换：从第三开始，第三、第五、</li>
+<li>number of groups：1，2，4 globally </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>分支的作用</p>
+<p>  <img src="/2021/02/09/repVGG/branch.png" width="45%;"></p>
+</li>
+<li><p>结构上的微调</p>
+<ul>
+<li>id path去掉BN</li>
+<li>把所有的BN移动到add的后面</li>
+<li><p>每个path加上relu</p>
+<p><img src="/2021/02/09/repVGG/variants.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>ImageNet分类任务上对标其他模型</p>
+<ul>
+<li><p>simple augmentation </p>
+<p>  <img src="/2021/02/09/repVGG/simple.png" width="45%;"></p>
+</li>
+<li><p>strong：Autoaugment, label smoothing and mixup </p>
+<p>  <img src="/2021/02/09/repVGG/strong.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3310,6 +3602,7 @@
 <li>classification：ImageNet top1 acc 86.4</li>
 <li>detection：COCO box-MAP 58.7</li>
 <li>segmentation：ADE20K</li>
+<li>this paper主要介绍分类，检测是以swin作为backbone，用MaskRCNN等二阶段架构来训练的，分割是以swin作为backbone，用UperNet去训练的，具体模型配置official repo的readme里面有详细列表</li>
 </ul>
 </li>
 </ul>
@@ -3472,11 +3765,35 @@
 <li><p>channel number C：第一个stage的embdding dim，（后续逐渐x2）</p>
 </li>
 <li><p>hypers：</p>
-<p>  <img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
+<ul>
+<li>drop_rate：0.0</li>
+<li>drop_path_rate：0.1</li>
+</ul>
+<p><img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
 </li>
 <li><p>acc</p>
 <p>  <img src="/2021/01/18/transformers/swinsacc.png" width="45%;"></p>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>official repo: <a href="https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md" target="_blank" rel="noopener">https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md</a></p>
+<ul>
+<li><p>keras官方也出了一版：<a href="https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py" target="_blank" rel="noopener">https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py</a></p>
+</li>
+<li><p>model zoo</p>
+<p>model   |    resolution   |    C     |   num_layers   |   num_heads   |   window_size</p>
+<p>Swin-T  |         224         |    96    |      {2,2,6,2}       |    {3,6,12,24}     |           7</p>
+<p>Swin-S  |         224         |    96    |      {2,2,18,2}     |    {3,6,12,24}     |           7</p>
+<p>Swin-B  |     224/384    |    128  |      {2,2,18,2}     |    {4,8,16,32}     |         7/12</p>
+<p>Swin-L  |     224/384    |    192  |      {2,2,18,2}     |    {6,12,24,48}   |         7/12</p>
+<p><img src="/2021/01/18/transformers/swin zoo.png" width="75%;"></p>
+</li>
+<li><p>models/build.py</p>
+<ul>
+<li>SwinTransformer &amp; SwinMLP：前者就是论文里的，basic block是transformer的MSA加上MLP layers，后者是没用MSA，就用MLP来建模相邻windows之间的global relationship的，用的conv1d。</li>
+<li></li>
 </ul>
 </li>
 </ul>
@@ -4663,253 +4980,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/08/refineDet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/08/refineDet/" itemprop="url">refineDet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-08T16:03:40+08:00">
-                2021-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/08/refineDet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/08/refineDet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>和refineNet没有任何关系</p>
-<h2 id="RefineDet-Single-Shot-Refinement-Neural-Network-for-Object-Detectio"><a href="#RefineDet-Single-Shot-Refinement-Neural-Network-for-Object-Detectio" class="headerlink" title="RefineDet: Single-Shot Refinement Neural Network for Object Detectio"></a>RefineDet: Single-Shot Refinement Neural Network for Object Detectio</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>inherit the merits of both two-stage and one-stage：accuracy and efficiency</li>
-<li>single-shot</li>
-<li>multi-task</li>
-<li>refineDet<ul>
-<li>anchor refinement module (ARM)  </li>
-<li>object detection module (ODM)</li>
-<li>transfer connection block (TCB) </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>three advantages that two-stage superior than one-stage<ul>
-<li>RPN：handle class imbalance</li>
-<li>two step regress：coarse to refine</li>
-<li>two stage feature：RPN任务和regression任务有各自的feature</li>
-</ul>
-</li>
-<li>模拟二阶段检测的RPN，把classifier任务中的大量阴性框先排掉，但不是以两个阶段的形式，而是multi-task并行</li>
-<li>将一阶段检测的objectness和box regression任务解耦，两个任务通过transfer block连接</li>
-<li>ARM<ul>
-<li>remove negative anchors to reduce search space for the classifier </li>
-<li>coarsely adjust the locations and sizes of anchors to provide better initialization for regression</li>
-</ul>
-</li>
-<li>ODM <ul>
-<li>further improve the regression </li>
-<li>predict multi labels</li>
-</ul>
-</li>
-<li><p>TCB </p>
-<ul>
-<li>transfer the features in the ARM to handle the more challenging tasks in the ODM </li>
-</ul>
-<p><img src="/2021/01/08/refineDet/refineDet.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Transfer Connection Block</p>
-<ul>
-<li><p>没什么新的东西，上采样用了deconv，conv-relu，element-wise add</p>
-<p><img src="/2021/01/08/refineDet/TCB.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Two-Step Cascaded Regression </p>
-<ul>
-<li>fisrt step ARM prediction <ul>
-<li>for each cell，for each predefined anchor boxes，predict 4 offsets and 2 scores</li>
-<li>obtain refined anchor boxes </li>
-</ul>
-</li>
-<li>second step ODM prediction<ul>
-<li>with justified feature map，with refined anchor boxes </li>
-<li>generate accurate boxes offset to refined boxes and multi-class scores，c+4</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Negative Anchor Filtering </p>
-<ul>
-<li>reject well-classified negative anchors </li>
-<li>if the negative confidence is larger than 0.99，discard it in training the ODM </li>
-<li>ODM接收所有pred positive和hard negative</li>
-</ul>
-</li>
-<li><p>Training and Inference details</p>
-<ul>
-<li>back：VGG16 &amp; resnet101<ul>
-<li>fc6 &amp; fc7变成两个conv</li>
-<li>different feature scales </li>
-<li>L2 norm</li>
-<li>two extra convolution layers and one extra residual block </li>
-</ul>
-</li>
-<li>4 feature strides<ul>
-<li>each level：1 scale &amp; 3 ratios</li>
-<li>ensures that different scales of anchors have the same tiling density on the image</li>
-</ul>
-</li>
-<li>matching<ul>
-<li>每个GT box match一个score最高的anchor box</li>
-<li>为每个anchor box找到最匹配的iou大于0.5的gt box</li>
-<li>相当于把ignore那部分也作为正样本了</li>
-</ul>
-</li>
-<li>Hard Negative Mining<ul>
-<li>select negative anchor boxes with top loss values </li>
-<li>n &amp; p ratio：3:1</li>
-</ul>
-</li>
-<li>Loss Function<ul>
-<li>ARM loss<ul>
-<li>binary class：只计算正样本？？？</li>
-<li>box：只计算正样本</li>
-</ul>
-</li>
-<li>ODM loss<ul>
-<li>pass the refined anchors with the negative confidence less than the threshold </li>
-<li>multi-class：计算均衡的正负样本</li>
-<li>box：只计算正样本</li>
-</ul>
-</li>
-<li>正样本数为0的时候，loss均为0：纯阴性样本无效？？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4964,7 +5034,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4977,7 +5047,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

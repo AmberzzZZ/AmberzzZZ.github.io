@@ -111,11 +111,12 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/efficient-SW.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/swins.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/swinsacc.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/swin%20zoo.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETR%20pipeline.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETRseg.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/UNETR.png">
-<meta property="og:updated_time" content="2021-06-02T07:56:18.943Z">
+<meta property="og:updated_time" content="2021-11-30T06:10:58.095Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="transformers">
 <meta name="twitter:description" content="startupreference1：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA reference2：https://zhuanlan.zhihu.com/p/308301901  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维">
@@ -1326,6 +1327,7 @@
 <li>classification：ImageNet top1 acc 86.4</li>
 <li>detection：COCO box-MAP 58.7</li>
 <li>segmentation：ADE20K</li>
+<li>this paper主要介绍分类，检测是以swin作为backbone，用MaskRCNN等二阶段架构来训练的，分割是以swin作为backbone，用UperNet去训练的，具体模型配置official repo的readme里面有详细列表</li>
 </ul>
 </li>
 </ul>
@@ -1488,11 +1490,35 @@
 <li><p>channel number C：第一个stage的embdding dim，（后续逐渐x2）</p>
 </li>
 <li><p>hypers：</p>
-<p>  <img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
+<ul>
+<li>drop_rate：0.0</li>
+<li>drop_path_rate：0.1</li>
+</ul>
+<p><img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
 </li>
 <li><p>acc</p>
 <p>  <img src="/2021/01/18/transformers/swinsacc.png" width="45%;"></p>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>official repo: <a href="https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md" target="_blank" rel="noopener">https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md</a></p>
+<ul>
+<li><p>keras官方也出了一版：<a href="https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py" target="_blank" rel="noopener">https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py</a></p>
+</li>
+<li><p>model zoo</p>
+<p>model   |    resolution   |    C     |   num_layers   |   num_heads   |   window_size</p>
+<p>Swin-T  |         224         |    96    |      {2,2,6,2}       |    {3,6,12,24}     |           7</p>
+<p>Swin-S  |         224         |    96    |      {2,2,18,2}     |    {3,6,12,24}     |           7</p>
+<p>Swin-B  |     224/384    |    128  |      {2,2,18,2}     |    {4,8,16,32}     |         7/12</p>
+<p>Swin-L  |     224/384    |    192  |      {2,2,18,2}     |    {6,12,24,48}   |         7/12</p>
+<p><img src="/2021/01/18/transformers/swin zoo.png" width="75%;"></p>
+</li>
+<li><p>models/build.py</p>
+<ul>
+<li>SwinTransformer &amp; SwinMLP：前者就是论文里的，basic block是transformer的MSA加上MLP layers，后者是没用MSA，就用MLP来建模相邻windows之间的global relationship的，用的conv1d。</li>
+<li></li>
 </ul>
 </li>
 </ul>
@@ -1906,7 +1932,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1919,7 +1945,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

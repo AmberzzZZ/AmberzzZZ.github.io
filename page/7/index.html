@@ -276,6 +276,193 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/07/regression-loss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/07/regression-loss/" itemprop="url">regression loss</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-07T15:04:32+08:00">
+                2020-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/07/regression-loss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/07/regression-loss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>损失函数用来评价模型预测值和真实值的不一样程度</p>
+<p> 两系损失函数：</p>
+<p> <img src="/2020/09/07/regression-loss/loss.png" width="30%;"></p>
+</li>
+</ol>
+<ol>
+<li><p>绝对值loss</p>
+<ul>
+<li>$L(Y,f(x))=|Y-f(x)|$</li>
+<li><img src="/2020/09/07/regression-loss/L1.png" width="30%;"></li>
+<li>平均绝对值损失，MAE，L1</li>
+<li>对异常点有更好的鲁棒性</li>
+<li>更新的梯度始终相同，对于很小的损失值，梯度也很大，不利于模型学习——手动衰减学习率</li>
+</ul>
+</li>
+<li><p>平方差loss</p>
+<ul>
+<li>$L(Y, f(x)) = (Y-f(x))^2$</li>
+<li><img src="/2020/09/07/regression-loss/L2.png" width="30%;"></li>
+<li>均方误差损失，MSE，L2</li>
+<li>因为取了平方，会赋予异常点更大的权重，会以牺牲其他样本的误差为代价，朝着减小异常点误差的方向更新，降低模型的整体性能</li>
+</ul>
+</li>
+<li><p>Huber loss</p>
+<ul>
+<li>$L = \begin{cases} \frac{1}{2}(y-f(x))^2,\text{   for }|y-f(x)|&lt;\delta,\\ \delta |y-f(x)|-\frac{1}{2}\delta^2,  \text{  otherwise} \end{cases} $</li>
+<li><img src="/2020/09/07/regression-loss/huber.png" width="30%;"></li>
+<li>超参决定了对与异常点的定义，只对较小的异常值敏感</li>
+</ul>
+</li>
+<li><p>对数loss</p>
+<script type="math/tex; mode=display">
+ L(Y, P(Y|X)) = -log(P(Y|X))</script></li>
+<li><p>cross-entropy loss</p>
+<p> 二分类双边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna</script></li>
+</ol>
+<ol>
+<li><p>指数loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = exp[-yf(x)]</script></li>
+<li><p>Hinge loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = max(0, 1-yf(x))</script></li>
+<li><p>perceptron loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = max(0, -yf(x))</script></li>
+<li><p>cross-entropy loss</p>
+<p> 二分类双边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna</script></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3069,319 +3256,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/22/FCIS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/22/FCIS/" itemprop="url">FCIS</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-22T15:19:55+08:00">
-                2020-06-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/22/FCIS/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/22/FCIS/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Fully-Convolutional-Instance-aware-Semantic-Segmentation"><a href="#Fully-Convolutional-Instance-aware-Semantic-Segmentation" class="headerlink" title="Fully Convolutional Instance-aware Semantic Segmentation"></a>Fully Convolutional Instance-aware Semantic Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>instance segmentation：<ul>
-<li>实例分割比起检测，需要得到目标更精确的边界信息</li>
-<li>比起语义分割，需要区分不同的物体</li>
-</ul>
-</li>
-<li>detects and segments simultanously</li>
-<li>FCN + instance mask proposal</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>FCNs do not work for the instance-aware semantic segmentation task <ul>
-<li>convolution is translation invariant：权值共享，一个像素值对应一个响应值，与位置无关</li>
-</ul>
-</li>
-<li>instance segmentation operates on region level <ul>
-<li>the same pixel can have different semantics in different regions </li>
-<li>Certain translation-variant property is required </li>
-</ul>
-</li>
-<li>prevalent method<ul>
-<li>step1: an FCN is applied on the whole image to generate shared feature maps </li>
-<li>step2: a pooling layer warps each region of interest into fixed-size per-ROI feature maps </li>
-<li>step3: use fc layers to convert the per-ROI feature maps to per-ROI masks </li>
-<li><strong>the translation-variant property is introduced in the fc layer(s) in the last step</strong></li>
-<li>drawbacks <ul>
-<li>the ROI pooling step losses spatial details </li>
-<li>the fc layers over-parametrize the task </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>InstanceFCN<ul>
-<li>position-sensitive score maps</li>
-<li>sliding windows </li>
-<li>sub-tasks are separated and the solution is not end-to-end </li>
-<li>blind to the object categories：前背景分割</li>
-</ul>
-</li>
-<li><p>In this work</p>
-<ul>
-<li>extends InstanceFCN</li>
-<li>end-to-end </li>
-<li>fully convolutional </li>
-<li>operates on box proposals instead of sliding windows</li>
-<li>per-ROI computation does not involve any warping or resizing operations</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/FCIS.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>position-sensitive score map</p>
-<ul>
-<li>FCN<ul>
-<li>predict a single score map</li>
-<li>predict each pixel’s likelihood score of belonging to each category</li>
-</ul>
-</li>
-<li>at instance level<ul>
-<li>the same pixel can be foreground on one object but background on another </li>
-<li>a single score map per-category is insufficient to distinguish these two cases</li>
-</ul>
-</li>
-<li>a fully convolutional solution for instance mask proposal <ul>
-<li>k x k evenly partitioned cells of object </li>
-<li>thus obtain k x k position-sensitive score maps </li>
-<li>Each score represents 当前像素在<strong>当前位置（score map在cells中的位置）</strong>上属于某个物体实例的似然得分</li>
-<li>assembling (copy-paste) </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>jointly and simultaneously</p>
-<ul>
-<li>The same set of score maps are shared for the two sub-tasks </li>
-<li>For each pixel in a ROI, there are two tasks:  <ul>
-<li>detection：whether it belongs to an object bounding box </li>
-<li>segmentation：whether it is inside an object instance’s boundary </li>
-<li>separate：two 1x1 conv heads</li>
-<li>fuse：inside and outside <ul>
-<li>high inside score and low outside score：detection+, segmentation+</li>
-<li>low inside score and high outside score：detection+, segmentation-</li>
-<li>low inside score and low outside score：detection-, segmentation-</li>
-<li>detection score<ul>
-<li>average pooling over all pixels‘ likelihoods for each class</li>
-<li>max(detection score) represent the object</li>
-</ul>
-</li>
-<li>segmentation <ul>
-<li>softmax(inside, outside) for each pixel to distinguish fg／bg</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>All the per-ROI components are implemented through convs</p>
-<ul>
-<li>local weight sharing property：a regularization mechanism </li>
-<li>without involving any feature warping, resizing or fc layers </li>
-<li>the per-ROI computation cost is negligible</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/fuse.png" width="70%"></p>
-</li>
-</ul>
-</li>
-<li><p>architecture </p>
-<ul>
-<li>ResNet back produce features with 2048 channels</li>
-<li>a 1x1 conv reduces the dimension to 1024</li>
-<li>x16 output stride：conv5 stride is decreased from 2 to 1, the dilation is increased from 1 to 2</li>
-<li>head1：joint det conf &amp; segmentation<ul>
-<li>1x1 conv，generates $2k^2(C+1)$ score maps</li>
-<li>2 for inside／outside</li>
-<li>$k^2$ for $k^2$个position</li>
-<li>$(C+1)$ for fg／bg</li>
-</ul>
-</li>
-<li>head2：bbox regression <ul>
-<li>1x1 conv，$4k^2$ channels</li>
-</ul>
-</li>
-<li>RPN to generate ROIs</li>
-<li>inference<ul>
-<li>300 ROIs </li>
-<li>pass through the bbox regression obtaining another 300 ROIs </li>
-<li>pass through joint head to obtain detection score&amp;fg mask for all categories </li>
-<li>mask voting：每个ROI (with max det score) 只包含当前类别的前景，还要补上框内其他类别背景<ul>
-<li>for current ROI, find all the ROIs (from the 600) with IoU scores higher than 0.5 </li>
-<li>their fg masks are averaged per-pixel and weighted by the classification score </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>ROI positive／negative：IoU&gt;0.5</li>
-<li>loss<ul>
-<li>softmax detection loss over C+1 categories</li>
-<li>softmax segmentation loss over the gt fg mask, on positive ROIs</li>
-<li>bbox regression loss, , on positive ROIs</li>
-</ul>
-</li>
-<li>OHEM：among the 300 proposed ROIs on one image, 128 ROIs with the highest losses are selected to back-propagate their error gradients</li>
-<li>RPN：<ul>
-<li>9 anchors  </li>
-<li>sharing feature between FCIS and RPN </li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/architecture.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>metric：mAP</p>
-</li>
-<li><p>FCIS (translation invariant)：</p>
-<ul>
-<li>set k=1，achieve the worst mAP</li>
-<li>indicating the position sensitive score map is vital for this method</li>
-</ul>
-</li>
-<li><p>back</p>
-<ul>
-<li>50-101：increase</li>
-<li>101-152：saturate</li>
-</ul>
-</li>
-<li><p>tricks</p>
-<p>  <img src="/2020/06/22/FCIS/tricks.png" width="40%"></p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>* r
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3436,7 +3310,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3449,7 +3323,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

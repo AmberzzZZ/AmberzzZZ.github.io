@@ -276,6 +276,337 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/14/MimicDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/10/14/MimicDet/" itemprop="url">MimicDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-14T14:43:49+08:00">
+                2020-10-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/10/14/MimicDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/MimicDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[MimicDet] ResNeXt-101 backbone on the COCO: 46.1 mAP </p>
+<h2 id="MimicDet-Bridging-the-Gap-Between-One-Stage-and-Two-Stage-Object-Detection"><a href="#MimicDet-Bridging-the-Gap-Between-One-Stage-and-Two-Stage-Object-Detection" class="headerlink" title="MimicDet: Bridging the Gap Between One-Stage and Two-Stage Object Detection"></a>MimicDet: Bridging the Gap Between One-Stage and Two-Stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>mimic task：knowledge distillation </li>
+<li>mimic the two-stage features <ul>
+<li>a shared backbone </li>
+<li>two heads for mimicking </li>
+</ul>
+</li>
+<li>end-to-end training</li>
+<li>specialized designs to facilitate mimicking <ul>
+<li>dual-path mimicking</li>
+<li>staggered feature pyramid </li>
+</ul>
+</li>
+<li>reach two-stage accuracy </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>one-stage detectors adopt a straightforward fully convolutional architecture </li>
+<li>two-stage detectors use RPN + R-CNN</li>
+<li>advantages of two-stage detectors <ul>
+<li>avoid class imbalance </li>
+<li>less proposals enables larger cls net and richer features </li>
+<li>RoIAlign extracts location consistent feature -&gt; better represenation</li>
+<li>regress the object location twice -&gt; better refined</li>
+</ul>
+</li>
+<li>one-stage detectors’ imitation<ul>
+<li>RefineDet：cascade detection flow  </li>
+<li>AlignDet：RoIConv layer </li>
+<li>still leaves a big gap </li>
+</ul>
+</li>
+<li>network mimicking<ul>
+<li>knowledge distillation </li>
+<li>use a well-trained large teacher model to supervise </li>
+<li>difference<ul>
+<li>mimic in heads instead of backbones </li>
+<li>teacher branch instead of model</li>
+<li>trained jointly </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>this method<ul>
+<li>not only mimic the structure design, but also imitate in the feature level</li>
+<li>contains both one-stage detection head and two-stage detection head during training <ul>
+<li>share the same backbone </li>
+<li>two-stage detection head, called T-head </li>
+<li>one-stage detection head, called S-head </li>
+<li>similarity loss for matching feature：guided deformable conv layer </li>
+<li>together with detection losses </li>
+</ul>
+</li>
+<li>specialized designs <ul>
+<li>decomposed detection heads</li>
+<li>conduct mimicking in classification and regression branches individually</li>
+<li>staggered feature pyramid  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2020/10/14/MimicDet/mimicdet.png" width="70%;"></p>
+</li>
+<li><p>back &amp; fpn</p>
+<ul>
+<li>RetinaNet fpn：with P6 &amp; P7</li>
+<li>crucial modification：P2 ～ P7</li>
+<li>staggered feature pyramid <ul>
+<li>high-res set {P2 to P6}：for T-head &amp; accuray</li>
+<li>low-res set {P3 to P7}：for S-head &amp; computation speed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>refinement module</p>
+<ul>
+<li>filter out easy negatives：mitigate the class imbalance issue </li>
+<li>adjust the location and size of pre-defined anchor boxes：anchor initialization  </li>
+<li>module<ul>
+<li>on top of the feature pyramid </li>
+<li>one 3x3 conv</li>
+<li>two sibling 1x1 convs<ul>
+<li>binary classification：bce loss</li>
+<li>bounding box regression：the same as Faster R-CNN，L1 loss</li>
+</ul>
+</li>
+<li>top-ranked boxes transferred to T-head and S-head </li>
+</ul>
+</li>
+<li>one anchor on each position：avoid feature sharing among proposals</li>
+<li>assign the objects to feature pyramid according to their scale </li>
+<li>positive area：0.3 times shrinking of gt boxes from center</li>
+<li>positive sample：<ul>
+<li>valid scale range：gt target belongs to this level</li>
+<li>central point of anchor lies in the positive area</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>detection heads</p>
+<ul>
+<li>T-head<ul>
+<li>heavy head </li>
+<li>run on a sparse set of anchor boxes </li>
+<li>use the staggered feature pyramid </li>
+<li>generate 7x7 location-sensitive features for each anchor box </li>
+<li>cls branch<ul>
+<li>two 1024-d fc layers</li>
+<li><strong>one 81-d fc layer</strong> + softmax：ce loss</li>
+</ul>
+</li>
+<li>reg branch<ul>
+<li>four 3x3 convs，ch256</li>
+<li>flatten</li>
+<li><strong>1024-d fc</strong></li>
+<li>4-d fc：L1 loss</li>
+</ul>
+</li>
+<li>mimicking target <ul>
+<li>81-d classification logits </li>
+<li>1024-d regression feature </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>S-head<ul>
+<li>light-weight  </li>
+<li>directly dense detection on fpn</li>
+<li>【不太理解】introducing the refinement module will break the location consistency between the anchor box and its corresponding features：我的理解是refine以后的anchor和原始anchor对应的特征图misalign了，T-head用的是refined anchor，S-head用的是original grid，所以misalign</li>
+<li>use deformable convolution to capture the misaligned feature <ul>
+<li>deformation offset is computed by a micro-network </li>
+<li>takes the regression output of the refinement module as input </li>
+<li>three 1x1 convs，ch64/128／18(50)</li>
+<li>3x3 Dconv for P3 and 5x5 for others，ch256</li>
+</ul>
+</li>
+<li>two sibling 1x1 convs，ch1024<ul>
+<li>cls branch：1x1 conv，ch80</li>
+<li>reg branch：1x1 conv，ch4</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><img src="/2020/10/14/MimicDet/heads.png" width="70%;"></li>
+</ul>
+</li>
+<li><p>head mimicking</p>
+<ul>
+<li>cosine similarity </li>
+<li>cls logits &amp; refine params</li>
+<li>To get the S-head feature of an adjusted anchor box <ul>
+<li>trace back to its initial position </li>
+<li>extract the pixel at that position in the feature map </li>
+</ul>
+</li>
+<li>loss：$L_{mimic} = 1 - cosine(F_i^T, F_i^S)$</li>
+</ul>
+</li>
+<li>multi-task training loss  <ul>
+<li>$L = L_R + L_S + L_T + L_{mimic}$</li>
+<li>$L_R$：refine module loss，bce+L1</li>
+<li>$L_S$：S-head loss，ce+L1</li>
+<li>$L_T$：T-head loss，ce+L1</li>
+<li>$L_{mimic}$：mimic loss </li>
+</ul>
+</li>
+<li>training details<ul>
+<li>network：resnet50/101，resize image with shorter side 800</li>
+<li>refinement module<ul>
+<li>run NMS with 0.8 IoU threshold on anchor boxes </li>
+<li>select top 2000 boxes </li>
+</ul>
+</li>
+<li>T-head<ul>
+<li>sample 128 boxes from proposal</li>
+<li>p／n：1/3</li>
+</ul>
+</li>
+<li>S-head<ul>
+<li>hard mining：select 128 boxes with top loss value </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>inference<ul>
+<li>take top 1000 boxes from refine module</li>
+<li>NMS with 0.6 IoU threshold and 0.005 score threshold </li>
+<li>【？？】finally top 100 scoring boxes：这块不太理解，最后应该不是结构化输出了啊，应该是一阶段检测头的re-refine输出啊</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/09/metrics/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3370,193 +3701,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/07/regression-loss/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/07/regression-loss/" itemprop="url">regression loss</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-07T15:04:32+08:00">
-                2020-09-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/07/regression-loss/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/07/regression-loss/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>损失函数用来评价模型预测值和真实值的不一样程度</p>
-<p> 两系损失函数：</p>
-<p> <img src="/2020/09/07/regression-loss/loss.png" width="30%;"></p>
-</li>
-</ol>
-<ol>
-<li><p>绝对值loss</p>
-<ul>
-<li>$L(Y,f(x))=|Y-f(x)|$</li>
-<li><img src="/2020/09/07/regression-loss/L1.png" width="30%;"></li>
-<li>平均绝对值损失，MAE，L1</li>
-<li>对异常点有更好的鲁棒性</li>
-<li>更新的梯度始终相同，对于很小的损失值，梯度也很大，不利于模型学习——手动衰减学习率</li>
-</ul>
-</li>
-<li><p>平方差loss</p>
-<ul>
-<li>$L(Y, f(x)) = (Y-f(x))^2$</li>
-<li><img src="/2020/09/07/regression-loss/L2.png" width="30%;"></li>
-<li>均方误差损失，MSE，L2</li>
-<li>因为取了平方，会赋予异常点更大的权重，会以牺牲其他样本的误差为代价，朝着减小异常点误差的方向更新，降低模型的整体性能</li>
-</ul>
-</li>
-<li><p>Huber loss</p>
-<ul>
-<li>$L = \begin{cases} \frac{1}{2}(y-f(x))^2,\text{   for }|y-f(x)|&lt;\delta,\\ \delta |y-f(x)|-\frac{1}{2}\delta^2,  \text{  otherwise} \end{cases} $</li>
-<li><img src="/2020/09/07/regression-loss/huber.png" width="30%;"></li>
-<li>超参决定了对与异常点的定义，只对较小的异常值敏感</li>
-</ul>
-</li>
-<li><p>对数loss</p>
-<script type="math/tex; mode=display">
- L(Y, P(Y|X)) = -log(P(Y|X))</script></li>
-<li><p>cross-entropy loss</p>
-<p> 二分类双边计算：</p>
-<script type="math/tex; mode=display">
- L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
-<script type="math/tex; mode=display">
- L = ylna</script></li>
-</ol>
-<ol>
-<li><p>指数loss</p>
-<script type="math/tex; mode=display">
- L(Y, f(x)) = exp[-yf(x)]</script></li>
-<li><p>Hinge loss</p>
-<script type="math/tex; mode=display">
- L(Y, f(x)) = max(0, 1-yf(x))</script></li>
-<li><p>perceptron loss</p>
-<script type="math/tex; mode=display">
- L(Y, f(x)) = max(0, -yf(x))</script></li>
-<li><p>cross-entropy loss</p>
-<p> 二分类双边计算：</p>
-<script type="math/tex; mode=display">
- L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
-<script type="math/tex; mode=display">
- L = ylna</script></li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3611,7 +3755,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-count">143</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3624,7 +3768,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-count">80</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
