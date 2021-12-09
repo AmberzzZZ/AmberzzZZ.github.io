@@ -276,6 +276,373 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/12/08/det-transformers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/08/det-transformers/" itemprop="url">det-transformers</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-08T18:17:19+08:00">
+                2021-12-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/08/det-transformers/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/12/08/det-transformers/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>leaderboard: <a href="https://paperswithcode.com/sota/object-detection-on-coco" target="_blank" rel="noopener">https://paperswithcode.com/sota/object-detection-on-coco</a><ul>
+<li>boxAP</li>
+<li>swin开启了霸榜时代：家族第一名63.1</li>
+<li>接着是YOLO家族：家族第一名57.3，YOLOv4是55.8</li>
+<li>DETR：论文里是44.9(没在榜单上)，只有一个deformable DETR是52.3</li>
+<li>时代的眼泪Cascade Mask R-CNN：42.8</li>
+<li>anchor-free系列：FCOS是44.7，centerNet是43.5</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>papers    </p>
+<p>  [DETR] End-to-End Object Detection with Transformers：Facebook，</p>
+<p>  [Swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软</p>
+<p>  [deformable DETR] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤</p>
+</li>
+</ul>
+<h2 id="Swin-details-for-object-detection"><a href="#Swin-details-for-object-detection" class="headerlink" title="Swin details for object detection"></a>Swin details for object detection</h2><ol>
+<li><p>integrate Swin backbone into 4 frameworks in mmdetection</p>
+<ul>
+<li>Cascade Mask R-CNN</li>
+<li>ATSS</li>
+<li>RepPoints v2</li>
+<li>Sparse RCNN</li>
+</ul>
+</li>
+<li><p>basic setttings</p>
+<ul>
+<li>multi-scale training：resize输入使得shorter side is between 480 and 800</li>
+<li>AdamW：lr=0.0001，weight decay=0.05</li>
+<li>batch size=16</li>
+<li>stochastic depth=0.2</li>
+<li>3x schedule (36 epochs with the learn- ing rate decayed by 10× at epochs 27 and 33)</li>
+<li>pretrained：use a ImageNet-22K pre-trained model as initialization</li>
+</ul>
+</li>
+<li><p>compare to ResNe(X)t</p>
+<ul>
+<li><p>R50 vs. Swin-T：Swin-T普遍优于R50，4个框架Cascade Mask R-CNN &gt; RepPoints V2 &gt; Sparse R-CNN &gt; ATSS</p>
+<p>  <img src="/2021/12/08/det-transformers/swin-a.png" width="40%;"></p>
+</li>
+<li><p>X101 vs. Swin-S &amp; X101-64 vs. Swin-B：Swin普遍优于RX</p>
+<p>  <img src="/2021/12/08/det-transformers/swin-b.png" width="40%;"></p>
+</li>
+<li><p>System-level Comparison：进一步加强Swin-L</p>
+<ul>
+<li>HTC++</li>
+<li>stonger multi-scale input(400-1400)</li>
+<li>6x schedule (72 epochs)</li>
+<li>soft- NMS</li>
+<li><p>ImageNet-22K pre-trained</p>
+<p><img src="/2021/12/08/det-transformers/swin-c.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="DETR-End-to-End-Object-Detection-with-Transformers"><a href="#DETR-End-to-End-Object-Detection-with-Transformers" class="headerlink" title="DETR: End-to-End Object Detection with Transformers"></a>DETR: End-to-End Object Detection with Transformers</h2><h2 id="DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION"><a href="#DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION" class="headerlink" title="DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION"></a>DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>DETR的痛点<ul>
+<li>slow convergence</li>
+<li>limited feature spatial resolution：小目标往往需要放大输入resolution才能检出，但是transformer负担不起high-resolution计算</li>
+</ul>
+</li>
+<li>处理attention module的计算限制<ul>
+<li>only attend to a small set of key sampling points</li>
+<li>那应该类似两阶段？先选格子，再fine-regress</li>
+</ul>
+</li>
+<li>performace<ul>
+<li>better than DETR</li>
+<li>10x less training epochs</li>
+<li>两阶段架构上，用作RPN，performance有进一步提升</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Modern object detectors：not fully end-to-end</p>
+<ul>
+<li>anchor</li>
+<li>training target assignment</li>
+<li><p>NMS</p>
+</li>
+<li><p>都是hand-crafted components，引入了超参的</p>
+</li>
+</ul>
+</li>
+<li><p>DETR：fully end-to-end</p>
+<ul>
+<li>直接回归box，结构极简</li>
+<li>但是有痛点<ul>
+<li>high-resolution</li>
+<li>slow convergence：attention weights需要很久才能focus到sparse object上</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>deformable convolution</p>
+<ul>
+<li>a powerful and efficient mech- anism to attend to sparse spatial locations</li>
+<li>while lacks the element relation modeling mechanism</li>
+</ul>
+</li>
+<li><p>we propose Deformable DETR</p>
+<ul>
+<li><p>combines the best of deformable conv and Transformers</p>
+<ul>
+<li>deformable conv：sparse spatial sampling</li>
+<li>Transformers：relation modeling capability</li>
+</ul>
+</li>
+<li><p>deformable attention module</p>
+<ul>
+<li>替换原始的Transformer attention modules</li>
+<li>不是在all featuremap pixels上做计算，而是先pre-filter一部分locations</li>
+<li>可以extended to multi-scale：naturally aggregate，无需特征金字塔</li>
+</ul>
+<p><img src="/2021/12/08/det-transformers/deformable DETR.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>核心技术回顾</p>
+<ul>
+<li><p>Multi-Head Attention in Transformers</p>
+<ul>
+<li>given Q,K,V</li>
+<li>attention values：$Softmax(\frac{QK^T}{\sqrt d}) V$</li>
+<li>multi-head：concat + dense</li>
+<li>计算量随着feature map的size的二次方增长</li>
+</ul>
+</li>
+<li><p>DETR</p>
+<ul>
+<li>given CNN feature maps</li>
+<li>用一个encoer-decoder的结构，将feature maps转化成a set of object queries</li>
+<li>encoder是self-attention：Q和K都是feature map pixels</li>
+<li><p>decoder是cross-attention + self-attention：</p>
+<ul>
+<li>cross的query来自decoder的额外输入——N object queries represented by learnable positional embeddings，key来自encoder</li>
+<li>self的query和key都是decoder的额外输入——object queries</li>
+</ul>
+<p><img src="/2021/12/08/det-transformers/DETR.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Deformable Attention Module</p>
+<ul>
+<li><p>Transformer的attention layer的计算量和feature map的size正相关</p>
+</li>
+<li><p>Deformable attention的一个点，只和周围一个固定pattern上的点计算relation ship，控制了计算量</p>
+</li>
+<li><p>assign only a small fixed number of keys for each query</p>
+</li>
+<li><p>公式</p>
+<script type="math/tex; mode=display">
+  DeformAttn(z_q,p_q,x)=\sum_{m=1}^M W_m[\sum_{k=1}^KA_{mqk}W_m^{'}x(p_q + \Delta p_{mqk})]</script><ul>
+<li>given：input $x\in R^{C\times H\times W}$，2d point $p_q$，query feature $z_q$</li>
+<li>$m$ indexes the attention head</li>
+<li>$k$ indexes the sampled keys</li>
+<li>$K$ is the total sampled key number：远小于HW</li>
+<li>$A_{mqk}$和$\Delta p_{mqk}$是每个head的attention weights &amp; sampling offsets，是从输入feature经过一个线性层得到的<ul>
+<li>前者还加了一个softmax，normed into [0,1]</li>
+<li>后者是feature level的绝对距离，范围无界</li>
+</ul>
+</li>
+<li>$W_m^{‘}x_q$是query values</li>
+<li>$x(p_q + \Delta_p{mqk})$用了bilinear interpolation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Multi-scale Deformable Attention Module</p>
+<ul>
+<li><p>将坐标$p_q$转换成normalized形式$\hat p_q$，输入一组不同scale的inputs feature map，将不同scale上这个点的weighted query加在一起就好了</p>
+</li>
+<li><p>公式</p>
+<script type="math/tex; mode=display">
+  MSDeformAttn(z_q,\hat p_q,\{x_l\}_{l=1}^L)=\sum_{m=1}^M W_m[\sum_{l=1}^L\sum_{k=1}^KA_{mlqk}W_m^{'}x_l(\phi_l(\hat p_q) + \Delta p_{mlqk})]</script><ul>
+<li>$A_{mlqk}$ is normalized by $\sum_{l=1}^L \sum_{k=1}^K A_{mlqk}=1$：attention weights的softmax是在所有level feature的sampled points上的，也就是LK个points</li>
+<li>$\phi(\hat p_q)$将normed coords转换到对应feature level</li>
+</ul>
+<p><img src="/2021/12/08/det-transformers/Deformable Attention Module.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Deformable Transformer Encoder</p>
+<ul>
+<li><p>C3-C6，L=4，channel=256</p>
+<ul>
+<li>用Resnet stage3到stage5的featuremap接一个1x1conv，作为multi-scale feature maps</li>
+<li><p>C5的output再接一下3x3 s2 conv得到C6</p>
+<p><img src="/2021/12/08/det-transformers/multi.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>堆叠Multi-scale Deformable Attention Module</p>
+<ul>
+<li>module的输入和输出都是same resolution的feature maps</li>
+<li>add a scale-level embedding $e_l$：用来指示输入的query pixel来自哪个scale level，但是它是随机初始化的，然后随着网络训练【？？？】</li>
+<li>query是pixels，reference points就是它自身</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Deformable Transformer Decoder</p>
+<ul>
+<li>cross-attention<ul>
+<li>query是object queries</li>
+<li>key是encoder的输出</li>
+<li>object queries are extracting features from the feature maps</li>
+</ul>
+</li>
+<li>self-attention<ul>
+<li>query和key都是object queries</li>
+<li>object queries interact with each other</li>
+</ul>
+</li>
+<li>这里仅给cross-attention module用了Multi-scale Deformable Attention Module，因为decoder的self-att的key不是feature maps了</li>
+</ul>
+</li>
+<li><p>query的reference points is predicted from its object query embedding：fc + sigmoid，也作为box center的initial guess</p>
+</li>
+<li><p>detection head预测的是reference point的偏移量</p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/11/30/swin/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2855,304 +3222,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/01/MuST/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/01/MuST/" itemprop="url">MuST谷歌多任务自训练</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-01T15:35:24+08:00">
-                2021-09-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/01/MuST/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/01/MuST/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li><p>recollect</p>
-<p>  [SimCLR]</p>
-<p>  [MoCo]</p>
-</li>
-</ul>
-<h2 id="Multi-Task-Self-Training-for-Learning-General-Representations"><a href="#Multi-Task-Self-Training-for-Learning-General-Representations" class="headerlink" title="Multi-Task Self-Training for Learning General Representations"></a>Multi-Task Self-Training for Learning General Representations</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>learning general feature representations</li>
-<li>expect a single general model<ul>
-<li>相比较于training specialized models for various tasks</li>
-<li>harness from independent specialized teacher models</li>
-<li>with a multi-task pseudo dataset</li>
-<li>trained with multi-task learning</li>
-</ul>
-</li>
-<li>evalutate on 6 vision tasks<ul>
-<li>image recognition (classification, detection, segmentation)</li>
-<li>3D geometry estimation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>pretraining &amp; transfer learning</p>
-<ul>
-<li>transformer一般都是这个套路，BiT&amp;ViT</li>
-<li>pretraining<ul>
-<li>supervised / unsupervised</li>
-<li>learn feature representations</li>
-</ul>
-</li>
-<li>transfer learning<ul>
-<li>on downstream tasks</li>
-<li>the features may not necessarily be useful</li>
-<li>最典型的就是ImageNet pre-training并不能improve COCO segmentation，但是Objects365能够大幅提升</li>
-</ul>
-</li>
-<li>pretraining tasks必须要和downstream task align，learn specialized features，不然白费</li>
-</ul>
-</li>
-<li><p>learning general features</p>
-<ul>
-<li>a model simultaneously do well on multiple tasks</li>
-<li>NLP的bert是一个典型用多任务提升general ability的</li>
-<li>CV比较难这样做是因为标签variety，没有这样的大型multi-task dataset</li>
-</ul>
-</li>
-<li><p>multi-task learning</p>
-<ul>
-<li>shared backbone (如ResNet-FPN)</li>
-<li>small task-specific heads</li>
-</ul>
-</li>
-<li><p>self-training</p>
-<ul>
-<li>use a supervised model to generate pseudo labels on unlabeled data</li>
-<li>then a student model is trained on the pseudo labeled data</li>
-<li>在各类任务上都proved涨点</li>
-<li>但是迄今为止都是focused on a single task</li>
-</ul>
-</li>
-<li><p>in this work</p>
-<ul>
-<li><p>lack of large scale multi-task dataset的issue，通过self-training to fix，用pseudo label</p>
-</li>
-<li><p>specialized/general issue，通过多任务，训练目标就是六边形战士，absorb the knowledge of different tasks in the shared backbone</p>
-</li>
-<li><p>three steps</p>
-<ul>
-<li>trains specialized teachers independently on labeled datasets （分类、分割、检测、深度估计）</li>
-<li>the specialized teachers are then used to label a larger unlabeled dataset（ImageNet） to create a multi- task pseudo labeled dataset</li>
-<li><p>train a student model with multi-task learning</p>
-<p><img src="/2021/09/01/MuST/MuST.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>MuST的特质</p>
-<ul>
-<li>improve with more unlabeled data，数据越多general feature越好</li>
-<li>can improve upon already strong checkpoints，在海量监督高精度模型基础上fine-tune，仍旧能在downstream tasks涨点</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Specialized Teacher Models</p>
-<ul>
-<li>4 teacher models<ul>
-<li>classification：train from scratch，ImageNet</li>
-<li>detection：train from scratch，Object365</li>
-<li>segmentation：train from scratch，COCO</li>
-<li>depth estimation：fine-tuning from pre-trained checkpoint</li>
-</ul>
-</li>
-<li>pseudo labeling<ul>
-<li>unlabeled / partially labeled datasets</li>
-<li>for detection：hard score threshold of 0.5</li>
-<li>for segmentation：hard score threshold of 0.5</li>
-<li>for classification：soft labels——probs distribution</li>
-<li>for depth：直接用</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Multi-Task Student Model</p>
-<ul>
-<li><p>模型结构</p>
-<p>  <img src="/2021/09/01/MuST/student.png" width="50%;"></p>
-<ul>
-<li>shared back<ul>
-<li>C5：for classification</li>
-<li>feature pyramids {P3,P4,P5,P6,P7}：for detection</li>
-<li>fused P2：for pixel-wise prediction，把feature pyramids rescale到level2然后sum</li>
-</ul>
-</li>
-<li>heads<ul>
-<li>classification head：ResNet design，GAP C5 + 线性层</li>
-<li>object detection task：Mask R-CNN design，RPN是2 hidden convs，Fast R-CNN是4 hidden convs + 1 fc</li>
-<li>pixel-wise prediction heads：3 hiddent convs + 1 linear conv head，分割和深度估计任务independent，不share heads</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Teacher-student training</p>
-<ul>
-<li>using the same architecture </li>
-<li>same data augmentation</li>
-<li>teacher和student的main difference就是dataset和labels</li>
-</ul>
-</li>
-<li><p>Learning From Multiple Teachers</p>
-<ul>
-<li>every image has supervision for all tasks</li>
-<li>labels may come from supervised or pseudo labels</li>
-<li>如果使用ImageNet数据集，classification就是真标签，det/seg/depth supervision则是伪标签</li>
-<li>balance the loss contribution<ul>
-<li>加权和，task-specific weights</li>
-<li>for ImageNet，use $w_i = \frac{b_slr_{it}}{b_{it}lr_{s}}$</li>
-<li>follow the scaling rule：lr和batch size成正比</li>
-<li>except for depth loss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Cross Dataset Training</p>
-<ul>
-<li>training across ImageNet, object365 and COCO</li>
-<li>有标签的就用原标签，没有的用伪标签，supervised labels and pseudo labels are treated equally，而不是分别采样和训练</li>
-<li>balance the datasets：合在一起然后均匀采样</li>
-</ul>
-</li>
-<li><p>Transfer Learning</p>
-<ul>
-<li>得到general student model以后，fine-tune on 一系列downstream tasks</li>
-<li>这些downstream datasets与MuST model的训练数据都是not align的</li>
-<li>这个实验要证明的是supervised model（如teacher model）和self-supervised model（如用pseudo label训练出来的student model），在downstream tasks上迁移学习能performance是差不多的，【注意⚠️：如果迁移datasets前后align就不是这样了，pretrain显然会更好！！！】</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3207,7 +3276,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">143</span>
+                  <span class="site-state-item-count">144</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3220,7 +3289,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">80</span>
+                  <span class="site-state-item-count">81</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,204 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/15/autolabor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/15/autolabor/" itemprop="url">Autolabor</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-15T13:02:25+08:00">
+                2018-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/15/autolabor/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/15/autolabor/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今天发现了一个支持二次开发的开源方案，说白了就是把karto、acml、navigation stack等几个ROS开源包整合的比较漂亮，代码结构值得借鉴。</p>
+<ol>
+<li><p>执行keyboard_control之前要先执行脚本，添加键盘。</p>
+<blockquote>
+<p>老AS包里面没有keyboard control，可以执行teleop_twist_keyboard包。autolabor_fake是虚拟小车的driver，建模了电机、odom相关信息，订阅cmd_vel信息。控制真实小车时这个节点要替换。</p>
+</blockquote>
+</li>
+<li><p>base是对机器人底盘的仿真，launch文件的默认Fixed Frame是base_link，想要控制小车运动可以将Frame切成real_map或odom。</p>
+<blockquote>
+<p>todolist:</p>
+<p>命令行里面控制量的显示不太好看，可以尝试在源文件里面优化，添加交互提示。</p>
+</blockquote>
+<p><img src="/2018/10/15/autolabor/keyboard.png" alt=""></p>
+</li>
+<li><p>stage是对场景的仿真，场景由map_server读取，launch以后就能查看当前场景地图。</p>
+<blockquote>
+<p>rostopic里面有一个initialpose信息，由rviz发布。rostopic list里面好多topic都是rviz发布的，在displays栏目里面取消勾选就不会发布了。</p>
+</blockquote>
+<p><img src="/2018/10/15/autolabor/initial.png" alt=""></p>
+</li>
+<li><p>object是对障碍物的仿真，调用stage，添加interactivemarker，<strong>然后选择Interact工具</strong>，理论上地图上应该出现障碍物，但是我没找到。。。状态显示waiting for tf info。</p>
+<p><img src="/2018/10/15/autolabor/marker.png" alt=""></p>
+<p><img src="/2018/10/15/autolabor/param.png" alt=""></p>
+<p><strong>修正</strong>：添加的marker要在topic里面选择，不要在type栏下。然后地图上放好障碍物以后<strong>要右键apply</strong>。</p>
+<p><img src="/2018/10/15/autolabor/obstacle.png" alt=""></p>
+</li>
+<li><p>lidar是对雷达点云的仿真，launch中给了一个lidar和map的静态tf，实际使用中应该给lidar和base_link的。</p>
+<blockquote>
+<p>todolist:</p>
+<p>map和real_map给的有点混乱，明天会统一一下。</p>
+</blockquote>
+</li>
+<li><p>老AS包create_map仿真过程中，由于场景提供mapserver和slam算法同时publish了/map这个topic，要进行区分，在launch文件里面对其中一个进行remap：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">"map_server"</span> <span class="attr">type</span>=<span class="string">"map_server"</span> <span class="attr">name</span>=<span class="string">"map_server"</span> <span class="attr">args</span>=<span class="string">"$(find simulation_launch)/map/MG_map.yaml"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">remap</span> <span class="attr">from</span>=<span class="string">"/map"</span> <span class="attr">to</span>=<span class="string">"real_map"</span>  /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">node</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2018/10/15/autolabor/remap.png" alt=""></p>
+<p>这时rostopic里面就会出现real_map这个话题，两个地图能够同时显示。</p>
+<p><img src="/2018/10/15/autolabor/real_map.png" alt="real_map"></p>
+</li>
+</ol>
+<h4 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h4><p><strong>首先是simulation包：</strong></p>
+<ol>
+<li><p>autolabor_description没啥好说的，urdf文件里面定义了一个robot，整个机器人被渲染成了一个base_link，没有子节点，懒。</p>
+</li>
+<li><p>autolabor_fake包是底盘驱动，提供了一个<code>autolabor_fake_node</code>节点，其订阅类型为<code>geometry_msgs/Twist</code>的话题<code>cmd_vel</code>，信息来源可以是joystick／keyboard（tele_op_xxx）／cmd line（rostopic pub xxx）。其发布类型为<code>nav_msgs/Odometry</code>的话题<code>odom</code>。同时该节点还会将odom frame到base_link frame的transform信息提供给tf node，用来tf_broadcast。</p>
+<p><img src="/2018/10/15/autolabor/rosgraph.png" alt="rosgraph"></p>
+</li>
+<li><p>lidar_simulation包自身提供了两个节点<code>lidar_simulation</code>和<code>obstacle_simulation</code>。</p>
+<p>3.1 <code>LidarSimulation::getPose</code>这个函数中有一段代码开始比较困惑：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ROS_INFO("roll and pitch and yaw and esp :%lf %lf %lf %lf", roll, pitch, yaw, esp);  //esp=0.000001,r&amp;p=0.000000</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">pow</span>(roll,<span class="number">2</span>) + <span class="built_in">pow</span>(pitch,<span class="number">2</span>) &gt; esp)&#123;</span><br><span class="line">	start_angle = yaw + max_angle_;</span><br><span class="line">	reverse = <span class="number">-1.0</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;  <span class="comment">// default situation: </span></span><br><span class="line">	start_angle = yaw + min_angle_;</span><br><span class="line">	reverse = <span class="number">1.0</span>;</span><br></pre></td></tr></table></figure>
+<p>通常情况下，我们都使用右手坐标系，二维平面下，global_frame_到lidar_frame_的坐标变换transform欧拉角形式下的r和p角应该始终是$0.0$，yaw代表了激光雷达$x$轴的变换，加上<code>min_angle_</code>就切换成了激光光束的初始发射角度<code>start_angle</code>。如果坐标系定义反了，r&amp;p就应该有值，这时因为坐标轴定义反过来了，激光光束的初始发射角度就变成了从正方向上的<code>max_angle_</code>开始的。</p>
+<p>3.2 <code>LidarSimulation::updateMap</code>这个函数值得注意，这是一个service client，用来调用地图更新，在当前功能包的默认launch文件中，只加载了一次地图，没有体现出它的作用。当执行建图任务时，因为map frame和odom frame会不断进行矫正，建图包就会call这个request来实时更新地图。</p>
+<p><img src="/2018/10/15/autolabor/mapupdate.png" alt="mapupdate"></p>
+<p>3.3 该功能包下还自定义了一个obstacle service，提供<code>obstacle_simulation</code>节点来更新障碍物信息。这里的障碍物是指手动添加的障碍物（interactiveMarker），launch文件中可以定义其形状顶点。</p>
+<p>​    其中的<code>ObstacleSimulation::pnpoly</code>函数用来判断某点是否落在多边形内，之前<strong>刷算法</strong>时有考虑过这个问题，这里给出的解法不知道是不是最优的，just for record：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> ObstacleSimulation::pnpoly(geometry_msgs::Polygon&amp; footprint, <span class="keyword">float</span>&amp; x, <span class="keyword">float</span>&amp; y)&#123;</span><br><span class="line">  <span class="keyword">int</span> i,j;</span><br><span class="line">  <span class="keyword">bool</span> c = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">0</span>, j=footprint.points.size()<span class="number">-1</span>; i&lt;footprint.points.size(); j = i++)&#123;</span><br><span class="line">    <span class="keyword">if</span> ( ( (footprint.points.at(i).y &gt; y) != (footprint.points.at(j).y &gt; y) ) &amp;&amp;</span><br><span class="line">         (x &lt; (footprint.points.at(j).x-footprint.points.at(i).x) * (y-footprint.points.at(i).y) / (footprint.points.at(j).y - footprint.points.at(i).y) + footprint.points.at(i).x) )&#123;</span><br><span class="line">      c = !c;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> c;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里面的for，循环条件遍历的是多边形的每一条边，如$(3,0), (0,1), (1,2), (2, 3)$这样。判定的是给定点是否落在给定边的<strong>内侧</strong>，这里所谓的内侧是以给定边的起始节点为原点，给定线段的顺时针方向。</p>
+<p>3.4 obstacle的具体操作定义在static_map中，这里面出现了世界坐标系World，值得注意的是，栅格地图的原点在地图的一角，栅格的位置用整型来表示，而世界坐标系中栅格的位置由其中心来表示，两者相差$0.5$个resolution。lidar_simulation里面创建了一个static_map对象<code>map_</code>，以及回调函数<code>LidarSimulation::obstacleHandleServer</code>。</p>
+<p>3.5 lidar_simulation功能包中的这两个节点：<code>lidar_simulation</code>是map级的，<code>obstacle_simulation</code>是obstacle级的。</p>
+</li>
+</ol>
+<p><strong>接下来看simulation_launch包：</strong></p>
+<p>这个包里面没有源代码，只提供了几个launch文件，用来仿真几种不同的情况：</p>
+<ul>
+<li><code>sim_move_simulation.launch</code>就是简单的底盘控制，控制小车在给定地图上运动，同时可视化雷达点云信息。</li>
+<li><code>create_map_simulation.launch</code>用来建图，在底盘控制的基础上，启动了<strong>建图功能包</strong>。发布默认名字为/map的topic，命令行执行map_saver保存。</li>
+<li><code>move_base_simulation.launch</code>用来导航，在底盘控制的基础上，启动了<strong>导航套件acml&amp;move_base</strong>，这时小车的底盘控制节点<code>autolabor_fake_node</code>订阅的<code>cmd_vel</code>信息不再来自teleop_keyboard，而是来自move_base的规划结果。</li>
+</ul>
+<p><strong>最后是move_base_sim这个功能包：</strong></p>
+<p>是用作<strong>真实底盘</strong>控制的（目测就是对ROS开源的move_base包的二次封装，貌似删了一些不用的插件），先skip，接下来我会直接解析ROS导航套件。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/12/sublime无法安装插件/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1774,218 +1972,6 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/07/PnP-Perspective-n-Point/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/07/PnP-Perspective-n-Point/" itemprop="url">PnP, Perspective-n-Point</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T10:21:11+08:00">
-                2018-06-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/07/PnP-Perspective-n-Point/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/07/PnP-Perspective-n-Point/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
-<p>PnP是求解3D到2D点对运动的方法，它描述了当知道n个3D空间点及其投影位置时，如何估计相机的位姿变换。最少只需要3个点对就可以估计相机的运动。</p>
-</blockquote>
-<p>该方法使用的条件是，参考点为世界坐标系下的特征点，其空间位置已知，并且知道query帧中对应参考点的像素坐标。</p>
-<p>PnP问题的求解方法有很多种：</p>
-<ul>
-<li>直接线性变换</li>
-<li>P3P</li>
-<li>非线性优化方法——Bundle Ajustment</li>
-</ul>
-<p>本节着眼于BA求解方法，其他方法暂时不做展开。</p>
-<h3 id="2-Bundle-Ajustment"><a href="#2-Bundle-Ajustment" class="headerlink" title="2. Bundle Ajustment"></a>2. Bundle Ajustment</h3><p>利用优化求解的思路是：<strong>最小化重投影误差</strong>——期望计算query帧的相机位姿$R, t$，它的李代数为$\xi$，空间特征点的坐标为$P_i = [X_i, Y_i, Z_i]^T$，其在query帧上的像素坐标为$u_i = [u_i, v_i]^T$，那么理论上：</p>
-<script type="math/tex; mode=display">
-s_i u_i = K exp(\xi^{\wedge})P_i</script><p>构建成最小二乘问题就是：寻找最优的相机位姿$\xi$，使得误差最小化：</p>
-<script type="math/tex; mode=display">
-\xi^* = argmin_{\xi} \frac{1}{2}\sum_{i=1}^{n}||u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i||^2_2</script><p>在使用优化库来求解之前，还有一个问题——每个误差项$e_i = u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i$的导数$J_i$。</p>
-<blockquote>
-<p>回忆<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>中讲过的，优化问题最终转化成为矩阵的线性求解$H\Delta x = g$，其中矩阵$H$是由单个误差项一阶展开$e(x+\Delta x) = e(x) + J\Delta x$中的雅可比矩阵$J_i$ 构成的稀疏对称阵。</p>
-</blockquote>
-<p>误差项是一个二维向量（像素坐标差），优化变量是一个六维向量（空间位姿李代数），因此$J$是一个2*6的矩阵。</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial \delta \xi} = \lim_{\delta \xi \rightarrow0} \frac{\partial e}{\partial P^{'}}\frac{\partial P^{'}}{\partial \delta \xi}</script><p>其中$P^{‘}$是特征点转换到相机坐标系下的空间坐标：</p>
-<script type="math/tex; mode=display">
-su = KP^{'}\\
-u = f_x \frac{X^{'}}{Z^{'}} + c_x\\
-v = f_y \frac{X^{'}}{Z^{'}} + c_y</script><p>因此误差项导数的第一项为：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P^{'}} = -
-\begin{bmatrix}
-\frac{\partial u}{\partial X^{'}} & \frac{\partial u}{\partial Y^{'}} & \frac{\partial u}{\partial Z^{'}}\\
-\frac{\partial v}{\partial X^{'}} & \frac{\partial v}{\partial Y^{'}} & \frac{\partial v}{\partial Z^{'}}
-\end{bmatrix}
-=-
-\begin{bmatrix}
-\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}}\\
-0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}\\
-\end{bmatrix}</script><p>误差项的第二项为变换后的点关于李代数的导数，参考<a href="https://amberzzzz.github.io/2018/05/12/%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8-%E6%9D%8E%E4%BB%A3%E6%95%B0/">李代数</a>节：</p>
-<script type="math/tex; mode=display">
-\frac{\partial TP}{\partial \delta \xi} = 
-\begin{bmatrix}
-I & -P^{'\wedge}\\
-0^T & 0^T
-\end{bmatrix}</script><p>其中$P^{‘\wedge}$是$P^{‘}$的反对称阵：</p>
-<script type="math/tex; mode=display">
-P^{'\wedge} = 
-\begin{bmatrix}
-0 & -Z^{'} & Y^{'}\\
-Z^{'} & 0 & -X^{'}\\
--Y^{'} & X^{'} & 0
-\end{bmatrix}</script><p>因此得到完整的雅可比矩阵：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial \delta \xi} =\frac{\partial e}{\partial P^{'}}
-\begin{bmatrix}
-I & P^{'\wedge}
-\end{bmatrix}=-
-\begin{bmatrix}
-\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}} & |& -\frac{f_xX^{'}Y^{'}}{Z^{'2}} & f_x + \frac{f_xX^{'2}}{Z^{'2}} & -\frac{f_xY^{'}}{Z^{'}}\\
-0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}& | & - f_y - \frac{f_xY^{'2}}{Z^{'2}}  & \frac{f_yX^{'}Y^{'}}{Z^{'2}} &  \frac{f_yX^{'}}{Z^{'}}\\
-\end{bmatrix}</script><p>除了优化相机位姿以外，还可以同时优化特征点的空间位置$P$：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P} = \frac{\partial e}{\partial P^{'}} \frac{\partial P^{'}}{\partial P}</script><p>其中的第二项为：</p>
-<script type="math/tex; mode=display">
-P^{'} = exp(\xi^{\wedge})P = RP +t\\
-\therefore \frac{\partial P^{'}}{\partial P} = R^T</script><h3 id="3-优化库使用"><a href="#3-优化库使用" class="headerlink" title="3. 优化库使用"></a>3. 优化库使用</h3><p>构建图模型：</p>
-<ul>
-<li>优化变量1：节点1：query相机位姿（六维向量李代数）</li>
-<li>优化变量2：节点2：特征点空间位置（三维向量坐标描述）</li>
-<li>预测值：边n：根据当前estimate的优化量，投影到投影平面的像素坐标$z_i = h(\xi, P_i)$</li>
-<li>观测值：能够直接读出的，query帧上对应特征点的实际投影坐标$u_i$</li>
-</ul>
-<p>g2o中已经提供了相近的基类（在g2o/types/sba/types_six_dof_expmap.h中）：李代数位姿节点VertexSE3Expmap、空间点位置节点VertexSBAPointXYZ、投影方程边EdgeProjectXYZ2UV。</p>
-<p>边类里面要关注linearizeOplus函数，这个函数描述的是非线性函数进行线性化的过程中，求导的解析解（当然也可以使用数值解），最后函数给出的是每个节点的导数矩阵（$\frac{\partial e}{\partial \delta \xi} $和$\frac{\partial e}{\partial P_i}$） 。<strong>这点是Ceres库和g2o库的一点主要差别：Ceres都是使用自动的数值导数，g2o要自己求导</strong>。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> EdgeProjectXYZ2UV::linearizeOplus()</span><br><span class="line">&#123;</span><br><span class="line">    VertexSE3Expmap * vj = <span class="keyword">static_cast</span>&lt;VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">    VertexSBAPointXYZ* vi = <span class="keyword">static_cast</span>&lt;VertexSBAPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    _jacobianOplusXi = <span class="number">-1.</span>/z * tmp * T.rotation().toRotationMatrix();</span><br><span class="line"> </span><br><span class="line">    _jacobianOplusXj(<span class="number">0</span>,<span class="number">0</span>) = x*y/z^<span class="number">2</span> * cam-&gt;focal_length;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="4-OpenCV内置函数"><a href="#4-OpenCV内置函数" class="headerlink" title="4. OpenCV内置函数"></a>4. OpenCV内置函数</h3><p><strong>basic：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line"></span><br><span class="line">Mat r, t, R;</span><br><span class="line">cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line">cv::Rodrigues ( r, R );     <span class="comment">// 旋转向量和旋转矩阵的转换</span></span><br></pre></td></tr></table></figure>
-<p><strong>advanced：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> cv::solvePnPRansac( </span><br><span class="line">    InputArray objectPoints,      <span class="comment">// 3D空间坐标 vector&lt;cv::Point3f&gt; pts3d</span></span><br><span class="line">    InputArray imagePoints,       <span class="comment">// 2D像素坐标 vector&lt;cv::Point2f&gt; pts2d</span></span><br><span class="line">    InputArray cameraMatrix,      <span class="comment">// 相机内部参数矩阵 K</span></span><br><span class="line">    InputArray distCoeffs,        <span class="comment">// 畸变系数向量 cv::Mat()</span></span><br><span class="line">    OutputArray rvec,             <span class="comment">// 旋转向量</span></span><br><span class="line">    OutputArray tvec,             <span class="comment">// 平移向量</span></span><br><span class="line">    <span class="keyword">bool</span> useExtrinsicGuess = <span class="literal">false</span>, <span class="comment">// If true, the function uses the provided rvec and tvec values as initial</span></span><br><span class="line">    <span class="keyword">int</span> iterationsCount = <span class="number">100</span>,    <span class="comment">// Number of iterations</span></span><br><span class="line">    <span class="keyword">float</span> reprojectionError = <span class="number">8.0</span>,<span class="comment">// 重投影误差最大值</span></span><br><span class="line">    <span class="keyword">double</span> confidence = <span class="number">0.99</span>,</span><br><span class="line">    OutputArray inliers = noArray(), <span class="comment">// Output vector that contains indices of inliers in objectPoints and imagePoints .</span></span><br><span class="line">    <span class="keyword">int</span> flags = SOLVEPNP_ITERATIVE   <span class="comment">// method for solving PnP</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>Ransac：考虑到我们提供的匹配里面存在误匹配的情况，OpenCV采用“随机采样一致性算法”（Random Sample Consensus），从现有匹配中随机取一部分用来估计运动（PnP的解析解法最少只需要三个点就能计算相对位姿），正确的匹配结果都是近似的，从而剔除误匹配。</li>
-<li>inlier：内点，函数最终给出的匹配可信的点。</li>
-<li>RANSAC只采用少数几个随机点来计算PnP，容易受到噪声影响。工程上通常使用RANSAC的解作为初值，再使用非线性优化方法求解最优值。</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Ransac粗匹配</span></span><br><span class="line">cv::solvePnPRansac( pts3d, pts2d, K, Mat(), rvec, tvec, <span class="literal">false</span>, <span class="number">100</span>, <span class="number">4.0</span>, <span class="number">0.99</span>, inliers );</span><br><span class="line">cv::Rodrigues ( rvec, R ); </span><br><span class="line">Eigen::Matrix3d rotation_matrix = R.at&lt;<span class="keyword">double</span>&gt;;</span><br><span class="line">T_c_r_estimated_ = SE3d(</span><br><span class="line">        SO3d(rotation_matrix),</span><br><span class="line">        Vector3d( tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"><span class="comment">// BA局部优化</span></span><br><span class="line">g2o::VertexSE3Expmap* pose <span class="keyword">new</span> g2o::VertexSE3Expmap();</span><br><span class="line">...</span><br><span class="line">pose-&gt;setEstimate(g2o::SE3Quat( T_c_r_estimated_.rotationMatrix(), T_c_r_estimated_.translation()));</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2040,7 +2026,7 @@ P^{'} = exp(\xi^{\wedge})P = RP +t\\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">143</span>
+                  <span class="site-state-item-count">144</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2053,7 +2039,7 @@ P^{'} = exp(\xi^{\wedge})P = RP +t\\
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">80</span>
+                  <span class="site-state-item-count">81</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
