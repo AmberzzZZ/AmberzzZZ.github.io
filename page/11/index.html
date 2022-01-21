@@ -276,6 +276,295 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/11/dicomReader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/11/dicomReader/" itemprop="url">dicomReader</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-11T10:28:21+08:00">
+                2019-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/11/dicomReader/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/11/dicomReader/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>read a dcm file</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SimpleITK <span class="keyword">as</span> sitk</span><br><span class="line"></span><br><span class="line">image = sitk.ReadImage(dcm_file)</span><br><span class="line">image_arr = sitk.GetArrayFromImage(image)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>read a dcm series</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">series_IDs = sitk.ImageSeriesReader.GetGDCMSeriesIDs(series_path)</span><br><span class="line"></span><br><span class="line">nb_series = len(series_IDs)</span><br><span class="line">print(nb_series)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认获取第一个序列的所有切片路径</span></span><br><span class="line">dicom_names = sitk.ImageSeriesReader.GetGDCMSeriesFileNames(file_path)</span><br><span class="line">series_reader = sitk.ImageSeriesReader()</span><br><span class="line">series_reader.SetFileNames(dicom_names)</span><br><span class="line">image3D = series_reader.Execute()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>read a dcm case</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">series_IDs = sitk.ImageSeriesReader.GetGDCMSeriesIDs(case_path)</span><br><span class="line"><span class="keyword">for</span> series_id <span class="keyword">in</span> series_IDs:</span><br><span class="line">    dicom_names = sitk.ImageSeriesReader.GetGDCMSeriesFileNames(case_path, series_id)</span><br><span class="line">    series_reader = sitk.ImageSeriesReader()</span><br><span class="line">    series_reader.SetFileNames(dicom_names)</span><br><span class="line">    image3D = series_reader.Execute()</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>read tag</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先得到image对象</span></span><br><span class="line">Image_type = image.GetMetaData(<span class="string">"0008|0008"</span>) <span class="keyword">if</span> image.HasMetaData(<span class="string">"0008|0008"</span>) <span class="keyword">else</span> <span class="string">'Nan'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>发现一种序列，每张图的尺寸不同，这样执行series_reader的时候会报错，因为series_reader会依照第一层的图像尺寸申请空间，所以要么异常要么逐张读。</p>
+<p> reference: <a href="http://itk-users.7.n7.nabble.com/ITK-users-Reader-InvalidRequestedRegionError-td38608.html" target="_blank" rel="noopener">http://itk-users.7.n7.nabble.com/ITK-users-Reader-InvalidRequestedRegionError-td38608.html</a></p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/06/c-tricks-in-engineering/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/06/c-tricks-in-engineering/" itemprop="url">c++ tricks in engineering</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-06T14:14:52+08:00">
+                2019-11-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/06/c-tricks-in-engineering/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/06/c-tricks-in-engineering/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>数组传参</p>
+<p> 工程化被坑了好多回！</p>
+<p> C/C++ 传递数组，虽然传递的是首地址地址，但是<strong>参数到了函数内就成了普通指针</strong>。</p>
+<p> 所以试图在调用函数中求取所传递数组的长度是行不通的。</p>
+</li>
+<li><p>vector传参</p>
+<p> 传值—&gt;拷贝构造，传引用／指针—&gt;不发生拷贝构造。</p>
+<p> 实际工程化中遇到的问题是，构建了一个vector\<cv::mat\> imgs对象，传入函数以后，在函数内部创建空间cv::Mat img，然后将img push进vector。在函数外读取该vector的时候发现其内部没值。</cv::mat\></p>
+<p> <strong>要点：1. 要传引用，2. push clone：imgs.push_back(img)</strong></p>
+<p> 另外，vector可以作为函数返回值。</p>
+</li>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/10/31/图像算法综述/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -829,7 +1118,16 @@
 <li>除此之外还有两个reserved keyword arguments：training&amp;mask，一个用于bn/dropout这种train/test计算有区别的flag，一个用于RNNlayers约束时序相关关系</li>
 <li><em>args和*</em>kwargs是预留为了以后扩展更多输入参数的</li>
 </ul>
-<h3 id="5-keras-Generator"><a href="#5-keras-Generator" class="headerlink" title="5. keras Generator"></a>5. keras Generator</h3><p>本质上就是python的生成器，每次返回<strong>一个batch</strong>的样本及标签<br>自定义generator的时候要写成死循环（while true），因为model.fit_generator()在使用在个函数的时候，并不会在每一个epoch之后重新调用，那么如果这时候generator自己结束了就会有问题。<br>栗子是我为mixup写的generator：<br>没有显示的while True是因为创建keras自带的generator的时候已经是死循环了（for永不跳出）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Datagen_mixup</span><span class="params">(data_path, img_size, batch_size, is_train=True, mix_prop=<span class="number">0.8</span>, alpha=<span class="number">1.0</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> is_train:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># using keras库函数</span></span><br><span class="line">    generator = datagen.flow_from_directory(data_path, target_size=(img_size, img_size),</span><br><span class="line">                                            batch_size=batch_size,</span><br><span class="line">                                            color_mode=<span class="string">"grayscale"</span>,</span><br><span class="line">                                            shuffle=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> x,y <span class="keyword">in</span> generator:     <span class="comment"># a batch of &lt;img, label&gt;</span></span><br><span class="line">        <span class="keyword">if</span> alpha &gt; <span class="number">0</span>:</span><br><span class="line">            lam = np.random.beta(alpha, alpha)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lam = <span class="number">1</span></span><br><span class="line">        idx = [i <span class="keyword">for</span> i <span class="keyword">in</span> range(x.shape[<span class="number">0</span>])]</span><br><span class="line">        random.shuffle(idx)</span><br><span class="line">        mixed_x = lam*x + (<span class="number">1</span>-lam)*x[idx]</span><br><span class="line">        mixed_y = lam*y + (<span class="number">1</span>-lam)*y[idx]</span><br><span class="line"></span><br><span class="line">        n_origin = int(batch_size * mix_prop)</span><br><span class="line">        gen_x = np.vstack(x[:n_origin], mixed_x[:(batch_size-n_origin)])</span><br><span class="line">        gen_y = np.vstack(y[:n_origin], mixed_y[:(batch_size-n_origin)])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">yield</span> gen_x, gen_y</span><br></pre></td></tr></table></figure></p>
+<p>4.4 更加flexible的自定义层：<a href="https://keras.io/guides/making_new_layers_and_models_via_subclassing/" target="_blank" rel="noopener">https://keras.io/guides/making_new_layers_and_models_via_subclassing/</a></p>
+<p>我们可以将trainable variable直接定义在__init__()里面，省略build，直接call：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># use tf.Variable</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Linear</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, units=<span class="number">32</span>, input_dim=<span class="number">32</span>)</span>:</span></span><br><span class="line">        super(Linear, self).__init__()</span><br><span class="line">        w_init = tf.random_normal_initializer()</span><br><span class="line">        self.w = tf.Variable(</span><br><span class="line">            initial_value=w_init(shape=(input_dim, units), dtype=<span class="string">"float32"</span>),</span><br><span class="line">            trainable=<span class="keyword">True</span>,</span><br><span class="line">        )</span><br><span class="line">        b_init = tf.zeros_initializer()</span><br><span class="line">        self.b = tf.Variable(</span><br><span class="line">            initial_value=b_init(shape=(units,), dtype=<span class="string">"float32"</span>), trainable=<span class="keyword">True</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> tf.matmul(inputs, self.w) + self.b</span><br><span class="line">    </span><br><span class="line"><span class="comment"># use self.add_weight方法</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Linear</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, units=<span class="number">32</span>, input_dim=<span class="number">32</span>)</span>:</span></span><br><span class="line">        super(Linear, self).__init__()</span><br><span class="line">        self.w = self.add_weight(</span><br><span class="line">            shape=(input_dim, units), initializer=<span class="string">"random_normal"</span>, trainable=<span class="keyword">True</span></span><br><span class="line">        )</span><br><span class="line">        self.b = self.add_weight(shape=(units,), initializer=<span class="string">"zeros"</span>, trainable=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> tf.matmul(inputs, self.w) + self.b</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">！！！我实验下来发现对tf1，第一种写法没法创建权重，第二种才能，可能要到tf2才行</span><br></pre></td></tr></table></figure>
+<p>build中add_weight实际上也是调用tf.Variable创建一个varaible</p>
+<p>4.5 Layer内部也可以创建a Layer instance作为其attribute——torch style</p>
+<p>也是放在__init__()里面，如learnable positional embedding</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MLPBlock</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        super(MLPBlock, self).__init__()</span><br><span class="line">        self.linear_1 = Linear(<span class="number">32</span>)</span><br><span class="line">        self.linear_2 = Linear(<span class="number">32</span>)</span><br><span class="line">        self.linear_3 = Linear(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        x = self.linear_1(inputs)</span><br><span class="line">        x = tf.nn.relu(x)</span><br><span class="line">        x = self.linear_2(x)</span><br><span class="line">        x = tf.nn.relu(x)</span><br><span class="line">        <span class="keyword">return</span> self.linear_3(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mlp = MLPBlock()</span><br><span class="line">y = mlp(tf.ones(shape=(<span class="number">3</span>, <span class="number">64</span>)))  <span class="comment"># The first call to the `mlp` will create the weights</span></span><br><span class="line">print(<span class="string">"weights:"</span>, len(mlp.weights))</span><br><span class="line">print(<span class="string">"trainable weights:"</span>, len(mlp.trainable_weights))</span><br><span class="line"></span><br><span class="line">！！！tf2才支持，别瞎搞</span><br></pre></td></tr></table></figure>
+<p><strong>！！！</strong>需要注意的是：用躲避build的方法创建的层，在层被fisrt call的时候才会创建权重，而不是在模型创建阶段</p>
+<h3 id="5-keras-Generator"><a href="#5-keras-Generator" class="headerlink" title="5. keras Generator"></a>5. keras Generator</h3><p>本质上就是python的生成器，每次返回<strong>一个batch</strong>的样本及标签<br>自定义generator的时候要写成死循环（while true），因为model.fit_generator()在使用在个函数的时候，并不会在每一个epoch之后重新调用，那么如果这时候generator自己结束了就会有问题。<br>栗子是我为mixup写的generator：<br>没有显示的while True是因为创建keras自带的generator的时候已经是死循环了（for永不跳出）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Datagen_mixup</span><span class="params">(data_path, img_size, batch_size, is_train=True, mix_prop=<span class="number">0.8</span>, alpha=<span class="number">1.0</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> is_train:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># using keras库函数</span></span><br><span class="line">    generator = datagen.flow_from_directory(data_path, target_size=(img_size, img_size),</span><br><span class="line">                                            batch_size=batch_size,</span><br><span class="line">                                            color_mode=<span class="string">"grayscale"</span>,</span><br><span class="line">                                            shuffle=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> x,y <span class="keyword">in</span> generator:     <span class="comment"># a batch of &lt;img, label&gt;</span></span><br><span class="line">        <span class="keyword">if</span> alpha &gt; <span class="number">0</span>:</span><br><span class="line">            lam = np.random.beta(alpha, alpha)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lam = <span class="number">1</span></span><br><span class="line">        idx = [i <span class="keyword">for</span> i <span class="keyword">in</span> range(x.shape[<span class="number">0</span>])]</span><br><span class="line">        random.shuffle(idx)</span><br><span class="line">        mixed_x = lam*x + (<span class="number">1</span>-lam)*x[idx]</span><br><span class="line">        mixed_y = lam*y + (<span class="number">1</span>-lam)*y[idx]</span><br><span class="line"></span><br><span class="line">        n_origin = int(batch_size * mix_prop)</span><br><span class="line">        gen_x = np.vstack(x[:n_origin], mixed_x[:(batch_size-n_origin)])</span><br><span class="line">        gen_y = np.vstack(y[:n_origin], mixed_y[:(batch_size-n_origin)])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">yield</span> gen_x, gen_y</span><br></pre></td></tr></table></figure>
 <p>【多进程】fit_generator中有一个参数use_multiprocessing，默认设置为false，因为‘using a generator with use_multiprocessing=True and multiple workers may duplicate your data. Please consider using the`keras.utils.Sequence’ class’</p>
 <p>如果设置多进程use_multiprocessing，代码会把你的数据复制几份，分给不同的workers进行输入，这显然不是我们希望的，我们希望一份数据直接平均分给多个workers帮忙输入，这样才是最快的。而Sequence数据类能完美解决这个问题。</p>
 <p><strong>keras.utils.Sequence()</strong>：</p>
@@ -1022,6 +1320,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 <ul>
 <li>tf.gather(params,indices,axis=0.name=None)：tf.gather只能接受1-D的索引，axis用来指定轴，一个索引取回对应维度的一个向量</li>
 <li>tf.gather_nd(params,indices)：tf.gather_nd可以接受多维的索引，如果索引的dim小于params的dim，则从axis=0开始索引，后面的取全部。</li>
+<li>tf.batch_gather(params,indices,name=None)：对张量的批量索引</li>
 </ul>
 </li>
 </ul>
@@ -1354,6 +1653,36 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 <p>16.2 自定义初始化器：</p>
 <p>必须使用参数shape和dtype</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> backend <span class="keyword">as</span> K</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_init</span><span class="params">(shape, dtype=None)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> K.random_normal(shape, dtype=dtype)</span><br><span class="line"></span><br><span class="line">model.add(Dense(<span class="number">64</span>, kernel_initializer=my_init))</span><br></pre></td></tr></table></figure>
+<h2 id="17-keras的model-save-amp-model-save-weights"><a href="#17-keras的model-save-amp-model-save-weights" class="headerlink" title="17. keras的model.save() &amp; model.save_weights()"></a>17. keras的model.save() &amp; model.save_weights()</h2><p>17.1 首先明确包含内容</p>
+<ul>
+<li>model.save()<ul>
+<li>模型结构，能够基于这个信息rebuild模型</li>
+<li>模型权重</li>
+<li>训练设置（loss，metric，optmizer），也就是compile的信息</li>
+<li>优化器状态，to exactly resume the training state</li>
+</ul>
+</li>
+<li>model.save_weights()<ul>
+<li>只有模型权重</li>
+</ul>
+</li>
+</ul>
+<p>17.2 一些特殊情况</p>
+<ul>
+<li>使用类继承模型时，因为没有model.get_config方法，所以没法调用model.save()，只能save_weights，如果同时也想保存优化器状态，需要手动保存：<ul>
+<li>Optimizer类的get_weights()方法：Returns the current weights of the optimizer as a list of Numpy arrays</li>
+<li>Optimizer类的set_weights()方法：Pass a list of Numpy arrays to set the new state of the optimizer</li>
+</ul>
+</li>
+</ul>
+<h2 id="18-keras-logger"><a href="#18-keras-logger" class="headerlink" title="18. keras logger"></a>18. keras logger</h2><p>18.1 主要有如下方式</p>
+<pre><code>* 原生：fit /fit_generator 都会返回一个history(Callback)对象，这里面记录了loss &amp; metrics (train &amp; val)
+* nohup log：保存打印日志，print什么就记录什么
+* Logger：同上
+</code></pre><p>18.2 查看</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">history = model.fit_generator(train_gen,</span><br><span class="line">							  steps_per_epoch=<span class="number">32</span>,</span><br><span class="line">							  epochs=<span class="number">3</span>,</span><br><span class="line">							  validation_data=val_gen,</span><br><span class="line">							  validation_steps=<span class="number">8</span>,</span><br><span class="line">)</span><br><span class="line">print(history.history)</span><br><span class="line">print(history.epoch)</span><br><span class="line">print(history.history[<span class="string">'val_loss'</span>])</span><br></pre></td></tr></table></figure>
+<p>18.3 保存：就是保存字典</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	pickle.dump(history.history, f)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'rb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	history = pickle.load(f)</span><br></pre></td></tr></table></figure>
 
           
         
@@ -2107,278 +2436,6 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/29/matplotlib的colormap/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/29/matplotlib的colormap/" itemprop="url">matplotlib的colormap</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-29T11:07:55+08:00">
-                2018-11-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/29/matplotlib的colormap/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/29/matplotlib的colormap/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>用plt的imshow画图，总是找不到心仪的colorbar，可以自定义：</p>
-<ol>
-<li><p>在原有cmap基础上自定义：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">colorbar = plt.get_cmap(<span class="string">'Greys'</span>)(range(<span class="number">180</span>))</span><br><span class="line">cm = LinearSegmentedColormap.from_list(name=<span class="string">"grey_cm"</span>, colors=colorbar)</span><br><span class="line">plt.register_cmap(cmap=cm)</span><br><span class="line"></span><br><span class="line">plt.imshow(map2d.data, cmap=<span class="string">'grey_cm'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>define一个新的cmap：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">colormap</span><span class="params">()</span>:</span></span><br><span class="line">    colors = [<span class="string">'#FFFFFF'</span>, <span class="string">'#9ff113'</span>, <span class="string">'#5fbb44'</span>, <span class="string">'#f5f329'</span>, <span class="string">'#e50b32'</span>]</span><br><span class="line">    <span class="keyword">return</span> colors.ListedColormap(colors, <span class="string">'my_cmap'</span>)</span><br><span class="line"></span><br><span class="line">my_cmap = colormap()</span><br><span class="line">plt.imshow(map2d.data, cmap=my_cmap)</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/26/mpv-video-cutter/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/26/mpv-video-cutter/" itemprop="url">mpv-video-cutter</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-26T13:50:12+08:00">
-                2018-11-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/26/mpv-video-cutter/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/26/mpv-video-cutter/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>mpv的小插件，能够一键（三键）剪辑。</p>
-<p>工程地址：<a href="https://github.com/rushmj/mpv-video-cutter" target="_blank" rel="noopener">https://github.com/rushmj/mpv-video-cutter</a></p>
-<p>step1：把c_concat.sh和cutter.lua两个文件复制到~/.config/mpv/scripts/目录下。</p>
-<p>step2：<strong>给c_concat.sh脚本添加执行权限</strong>。</p>
-<p>step3：用命令行打开文件，c-c-o在原目录下生成剪辑文件。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2433,7 +2490,7 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">144</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2446,7 +2503,7 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -2493,7 +2550,7 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

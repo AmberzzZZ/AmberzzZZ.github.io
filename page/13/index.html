@@ -276,6 +276,347 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/26/scan-matcher/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/26/scan-matcher/" itemprop="url">scan matcher</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-26T14:53:12+08:00">
+                2018-10-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/26/scan-matcher/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/26/scan-matcher/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>目前开源算法中采取的scanMatching方法主要是以下四种：</p>
+<ol>
+<li>Gmapping：ICP（simple Gradient Descent）</li>
+<li>Hector：Guass-Newton（multi-resolution map）</li>
+<li>karto：Real-time CSM（multi-resolution + 三维窗口遍历寻优）</li>
+<li>cartographer：Fast CSM（multi-resolution + branch and bound）</li>
+</ol>
+<p>scanMatcher主要涉及两个评价函数，一个score用于优化调整粒子pose作为参考，一个likelihoodAndScore用于更新粒子权重：</p>
+<script type="math/tex; mode=display">
+s(x, z, m) = \sum_i s(x, z^i, m)\\
+s(x, z^i, m) = e^{d^2/ \sigma}</script><p>粒子权重根据地图的匹配度更新：</p>
+<script type="math/tex; mode=display">
+laser\ frame \to map\ frame: \hat{z}^i = x \oplus z^i\\
+map\ cell: (x,\ y)^T\\
+d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/23/navigation-stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/23/navigation-stack/" itemprop="url">navigation stack</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T11:05:08+08:00">
+                2018-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/23/navigation-stack/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/23/navigation-stack/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="part0"><a href="#part0" class="headerlink" title="part0"></a>part0</h4><p>现实中想要移动平台移动到指定地点，机器人运动控制系统架构包括了如下几个层次：</p>
+<p><img src="/2018/10/23/navigation-stack/navi.png" alt=""></p>
+<p>最底层是机器人的底盘控制部分，驱动器接收的是机器人的期望速度（Twist），将速度解算为左右轮的期望速度，并根据期望速度对左右轮分别进行PID驱控速，输出电机的转速。</p>
+<blockquote>
+<p>这部分ROS社区已经有针对Arduino封装好的Package——rosserial_arduino。</p>
+</blockquote>
+<p>中间层是通信层，电脑端发布速度指令给平台，同时接收平台发布的当前速度，然后发布/odom topic，让其他节点订阅。</p>
+<p>最上层是决策层，也就是导航规划层，goal、localization（matching&amp;里程计）、path planner以及最终输出速度指令，这一部分都在navigation stack里面。</p>
+<h4 id="part1-packages"><a href="#part1-packages" class="headerlink" title="part1 packages"></a>part1 packages</h4><p>navigation stack是ROS提供的导航方案，内部集成了很多个package，模块之间完全解耦，可以个性化选择提供的方法。</p>
+<p><img src="/2018/10/23/navigation-stack/navigation%20stack.png" alt=""></p>
+<p>官网上给出了导航栈宏观的结构描述：</p>
+<p><img src="/2018/10/23/navigation-stack/module.png" alt=""></p>
+<p>move_base中主要包含三个部分，global_plan、local_plan以及recovery behavior。对应的插件有：</p>
+<ul>
+<li>global_plan：global_planner（实现了dijkstra和A*算法），carrot_planner，navfn</li>
+<li>local_plan：base_local_planner（实现了Trajectory Rollout和DWA算法），dwa_local_planner</li>
+<li>recovery：clear_costmap_recovery，move_slow_and_clear，rotate_recovery</li>
+</ul>
+<p>nav_core是一个接口插件，包含了以上插件基类的头文件，move_base中的方法都是在其规则上扩展的。</p>
+<p>两个灰色的插件map_server和amcl表示可选可不选：</p>
+<ul>
+<li>可以使用meta package提供的map_server节点来进行<strong>代价地图</strong>管理，也可以使用其他节点（例如直接使用gmapping的输出）。</li>
+<li>可以使用meta package提供的amcl节点来进行自定位，也可以使用其他算法包（例如ROS里面还有一个robot_pose_ekf节点）。</li>
+</ul>
+<p>costmap_2d将不同传感器的输入处理成统一的栅格地图格式。以层的概念来组织图层，用户可以根据需要自己配置（通过Social Costmap Layer、Range Sensor Layer等开源插件），默认的层有：</p>
+<ul>
+<li>static_layer：静态地图层，（通过订阅map_server的/map主题）来生成。</li>
+<li>obstacle_layer：障碍地图层，根据动态的传感器信息来生成。</li>
+<li>inflation_layer：膨胀层，将前两个图层的信息综合进行缓冲区扩展。</li>
+</ul>
+<p>voxel_grid是三维代价地图。</p>
+<p>fake_localization用来做定位仿真，内含/base_pose_ground_truth话题。</p>
+<h4 id="part2-params"><a href="#part2-params" class="headerlink" title="part2 params"></a>part2 params</h4><ol>
+<li>move_base_params.yaml：<ul>
+<li>planner_frequency：<strong>全局规划</strong>的执行频率，如果设置为0.0则全局规划器仅在接受到新目标点或者局部规划器报告路径堵塞时才会重新执行。</li>
+</ul>
+</li>
+<li>global_planner_params.yaml：<ul>
+<li>default_tolerance：当设置的目的地被占据时，以该参数为半径的范围内选取最近的点作为新目标点。</li>
+</ul>
+</li>
+<li>dwa_local_planner_params.yaml：<ul>
+<li>latch_xy_goal_tolerance：如果设置为true，达到xy_goal_tolerance以内机器人就会原地旋转，即使会转出容错圈外。</li>
+<li>sim_granularity：间隔尺寸，轨迹上采样点步长。</li>
+<li>scaling_speed：启动机器人底盘的速度。</li>
+</ul>
+</li>
+<li><p>global_costmap_params.yaml：</p>
+<ul>
+<li>raytrace_range：实时清除代价地图上障碍物的最大范围，清除的是obstacle_layer的数据。</li>
+</ul>
+</li>
+</ol>
+<h4 id="part3-topics"><a href="#part3-topics" class="headerlink" title="part3 topics"></a>part3 topics</h4><ol>
+<li><p>move_base &amp; move_base_simple：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ros::<span class="function">NodeHandle <span class="title">action_nh</span><span class="params">(<span class="string">"move_base"</span>)</span></span>;</span><br><span class="line">action_goal_pub_ = action_nh.advertise&lt;move_base_msgs::MoveBaseActionGoal&gt;(<span class="string">"goal"</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//we'll provide a mechanism for some people to send goals as PoseStamped messages over a topic</span></span><br><span class="line"><span class="comment">//they won't get any useful information back about its status, but this is useful for tools</span></span><br><span class="line"><span class="comment">//like nav_view and rviz</span></span><br><span class="line">ros::<span class="function">NodeHandle <span class="title">simple_nh</span><span class="params">(<span class="string">"move_base_simple"</span>)</span></span>;</span><br><span class="line">goal_sub_ = simple_nh.subscribe&lt;geometry_msgs::PoseStamped&gt;(<span class="string">"goal"</span>, <span class="number">1</span>, boost::bind(&amp;MoveBase::goalCB, <span class="keyword">this</span>, _1));</span><br></pre></td></tr></table></figure>
+<p>之前查看节点图的时候发现这两个节点都提供goal，一直没想通两者的关系，发现代码注释里面有，move_base继承了actionlib，有状态反馈（<a href="http://wiki.ros.org/move_base" target="_blank" rel="noopener">详见wiki 1.1.2 ActionAPI</a>），move_base_simple就是一个publisher（topic可以来自rviz／cmd line）。</p>
+<p><img src="/2018/10/23/navigation-stack/rostopic.png" alt=""></p>
+<p>/result 记录了Goal reached</p>
+<p>/feedback 记录了每个时刻机器人的位姿</p>
+<p>/status 记录了任务进程（goal accepted、failed、aborting）</p>
+<p>/cancel 没echo出信息，应该与上层对接</p>
+<p>【定点巡航】另外，定点巡航的时候将global_path的buffer设置为n就可以显示多条路径了。</p>
+</li>
+<li><p>DWAPlanner的global_plan &amp; local_plan：</p>
+<p>local_plan就是DWA算法每个时刻计算的最优预期路径。global_plan是整个局部代价地图上的路径，它是全局路径的crop，因为局部动态环境不会影响全局路径，我们只研究落在localmap以内这一段路径是否需要矫正。</p>
+<p><img src="/2018/10/23/navigation-stack/path.png" alt=""></p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/15/autolabor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1692,286 +2033,6 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/12/OpenCV定制源码编译/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/12/OpenCV定制源码编译/" itemprop="url">OpenCV定制源码编译</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-12T11:44:19+08:00">
-                2018-06-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/12/OpenCV定制源码编译/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/12/OpenCV定制源码编译/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-cmake选项"><a href="#1-cmake选项" class="headerlink" title="1. cmake选项"></a>1. cmake选项</h3><ul>
-<li>测试单元可以关掉：BUILD_DOCS，BUILD_EXAMPLES，BUILD_XXX_TESTS，BUILD_opencv_ts(一些单元测试代码)，BUILD_PACKAGE (CPACK_BINARY_XXX，CPACK_SOURCE_XXX)，INSTALL_XXX</li>
-<li>减少引入体积：打开世界模块开关BUILD_opencv_world(暂时没开，因为编译之后发现找不到要引用的头文件了)，打开BUILD_SHARED_LIBS</li>
-<li>关掉音视频处理相关模块：BUILD_opencv_video，BUILD_opencv_videoio，BUILD_opencv_videostab，WITH_1394，WITH_GSTREAMER_XXX</li>
-<li>关闭GPU相关模块：WITH_OPENCL，WITH_CUDA</li>
-<li>打开TBB模块：隐式的并行计算程序，底层依赖于操作系统的多线程库，BUILD_TBB</li>
-<li>打开viz模块：WITH_VTK，BUILD_opencv_viz</li>
-<li>暂时没开启Java相关模块：ant，就没brew过这个包</li>
-</ul>
-<p>以上reference from <a href="https://blog.csdn.net/rrrfff/article/details/76796261" target="_blank" rel="noopener">博客1</a>，<a href="http://tianchunbinghe.blog.163.com/blog/static/7001201151592834161/" target="_blank" rel="noopener">博客2</a></p>
-<h3 id="2-extra-modules"><a href="#2-extra-modules" class="headerlink" title="2. extra modules"></a>2. extra modules</h3><blockquote>
-<p>with opencv3.0, SURF/SIFT and some other things have been moved to a seperate <a href="https://github.com/itseez/opencv_contrib/" target="_blank" rel="noopener">opencv_contrib repo</a>.</p>
-</blockquote>
-<p>一部分模块被独立到了opencv_contrib这个包，首先clone到本地，然后在cmake选项里面找到OPENCV_EXTRA_MODULES_PATH，填好。</p>
-<h3 id="2-其他说明"><a href="#2-其他说明" class="headerlink" title="2. 其他说明"></a>2. 其他说明</h3><p>另外之前brew install的opencv包一定要卸载掉，不要乱link，否则INCLUDE和LIBS的路径都会出问题，手动修改cmake文件不要太酸爽。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/10/leetcode-81-搜索旋转数组2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/10/leetcode-81-搜索旋转数组2/" itemprop="url">leetcode 81 搜索旋转数组2</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-10T14:55:26+08:00">
-                2018-06-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/10/leetcode-81-搜索旋转数组2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/10/leetcode-81-搜索旋转数组2/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>实名diss这道题，一看是旋转排序数组直接做了，然后才发现测试样例里面出现了左右边界重合的情况，然后仔细再审题才发现这行小字：</p>
-<p><img src="/2018/06/10/leetcode-81-搜索旋转数组2/屏幕快照 2018-06-10 14.59.19.png" alt=""></p>
-<p>不包含重复元素的情况下代码实现如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt;= nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
-<p>因为数组中现在存在重复的元素，因此有一个特殊的情况：左右边界值相同，并且nums[mid]值与边界值也相同，这时nums[mid]可能位于两段数组的任意一边。因此要独立讨论一下这个情况：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">            	<span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt; nums[end]:</span><br><span class="line">            <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                end = mid - <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">elif</span> nums[mid] &gt; nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># nums[mid] = nums[end]的情况</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">            	end -= <span class="number">1</span></span><br><span class="line">		</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
-<p>测试用时50ms，因为边界重复的循环没有有效地二分数组，但是思路贼简单啊。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2026,7 +2087,7 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">144</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2039,7 +2100,7 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -2086,7 +2147,7 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

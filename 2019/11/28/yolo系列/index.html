@@ -112,7 +112,8 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/CSPpan.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/tiny.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/large.png">
-<meta property="og:updated_time" content="2021-09-10T03:07:43.748Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/offset_v5.png">
+<meta property="og:updated_time" content="2021-12-29T07:05:29.633Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="yolo系列">
 <meta name="twitter:description" content="综述 [yolov1] Yolov1: You Only Look Once: Unified, Real-Time Object Detection [yolov2] Yolov2: YOLO9000: Better, Faster, Stronger [yolov3] Yolov3: An Incremental Improvement  [yolov4] YOLOv4: Optimal Sp">
@@ -395,8 +396,51 @@
 <ul>
 <li>回传梯度</li>
 <li><p>不回传梯度</p>
-<p>iou是通过xywh计算的，scaled_yolov4中把这个梯度截断，只作为一个值，对confidence进行梯度回传，</p>
+<p>iou是通过xywh计算的，也就是说基于iou的loss做梯度回传的时候要流经box head，scaled_yolov4中把这个梯度截断，只作为一个值，对confidence进行梯度回传，</p>
 <p>梯度不截断也没有问题，相当于对xywh再回传一个iou的loss</p>
+</li>
+</ul>
+</li>
+<li><p>review1215：main features梳理</p>
+<ul>
+<li>yolov1</li>
+<li>yolov2</li>
+<li><p>yolov3</p>
+<ul>
+<li>giou</li>
+<li>anchor机制<ul>
+<li>匹配机制：用max_iou做1v1匹配，1 in 9 (all-level)，</li>
+<li>回归机制：用sigmoid和exp包裹logits，作为xy和wh的偏移量</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>yolov4：bag-of-tricks，CSPDarknet53+PAN-SPP+yolohead，mosaic，ciou，syncBN，diou_nms</p>
+<ul>
+<li>anchor机制<ul>
+<li>匹配机制：不再是唯一匹配，可以跨level，只要满足iou thresh就作为positive anchor</li>
+<li>回归机制</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>scaled-yolov4：fully CSP-ized，双向FPN，scaling up出一系列模型</p>
+<ul>
+<li>CSP-block是为了scaling-up服务的，yolov3的结构一张卡batch size只能开到8，在OOM边缘试探，这篇文章将整个结构都CSP化</li>
+<li>面向GPU的YOLOv4-large包含YOLOv4-P5, YOLOv4-P6, and YOLOv4-P7</li>
+<li>anchor机制<ul>
+<li>匹配机制：相比较于yolov4进一步拓展，跨level且跨网格，只要长宽比满足阈值，都作为positive anchor，同时找到gt center最近的两个邻域网格，都作为正样本</li>
+<li>回归机制：重新定义了回归机制，因为跨网格，偏移量的激活区间变成[-0.5,1.5]</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>loss_box：giou</li>
+<li>loss_obj：bce</li>
+<li>loss_cls：bce</li>
+</ul>
+</li>
+<li></li>
+</ul>
 </li>
 </ul>
 </li>
@@ -850,15 +894,32 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 </ul>
 </li>
 <li><p>use YOLOv3 (anchor based) head </p>
+<ul>
+<li><p>encoding/decoding method变了！！！</p>
+</li>
+<li><p>代码和issue里面有说明：<a href="https://github.com/WongKinYiu/ScaledYOLOv4/issues/90#，但是论文里没显式的说明" target="_blank" rel="noopener">https://github.com/WongKinYiu/ScaledYOLOv4/issues/90#，但是论文里没显式的说明</a></p>
+<ul>
+<li><p>given pred offsets $t_x,t_y,t_w,t_h$</p>
+</li>
+<li><p>xy_offsets：for each grid centers</p>
+<script type="math/tex; mode=display">
+  b_x = sigmoid(t_x)*2 - 0.5 \\
+  b_y = sigmoid(t_y)*2 - 0.5</script></li>
+<li><p>wh_ratios：for each grid anchors</p>
+<script type="math/tex; mode=display">
+  b_w = (sigmoid(t_w)*2)^2 - 0.5 \\
+  b_h = (sigmoid(t_h)*2)^2 - 0.5</script></li>
+</ul>
+</li>
+</ul>
 </li>
 <li><p>Mosaic data augmentation</p>
 <ul>
 <li>mixes 4 training images </li>
 <li>allows detection of objects outside their normal context</li>
-<li><p>reduces the need for a large mini-batch size </p>
-<p><img src="/2019/11/28/yolo系列/mosaic.png" width="40%;"></p>
-</li>
+<li>reduces the need for a large mini-batch size </li>
 </ul>
+<p><img src="/2019/11/28/yolo系列/mosaic.png" width="40%;"></p>
 </li>
 <li><p>Self-Adversarial Training (SAT) data augmentation</p>
 <ul>
@@ -867,15 +928,14 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 </ul>
 </li>
 <li><p>CmBN：a CBN modified version </p>
-<p> <img src="/2019/11/28/yolo系列/cmbn.png" width="40%;"></p>
+<p><img src="/2019/11/28/yolo系列/cmbn.png" width="40%;"></p>
 </li>
 <li><p>modified SAM：from spatial-wise attention to point- wise attention</p>
 <ul>
 <li>这里的SAM for 《An Empirical Study of Spatial <em>Attention</em> Mechanisms in Deep Networks》 ，空间注意力机制</li>
-<li><p>还有一篇SAM是《Sharpness-Aware Minimization for Efficiently Improving Generalization》，google的锐度感知最小化，用来提升模型泛化性能，注意区分</p>
-<p><img src="/2019/11/28/yolo系列/sam.png" width="35%;"></p>
-</li>
+<li>还有一篇SAM是《Sharpness-Aware Minimization for Efficiently Improving Generalization》，google的锐度感知最小化，用来提升模型泛化性能，注意区分</li>
 </ul>
+<p><img src="/2019/11/28/yolo系列/sam.png" width="35%;"></p>
 </li>
 </ul>
 </li>
@@ -1096,6 +1156,13 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 </li>
 </ul>
 </li>
+<li><p>补充细节</p>
+<ul>
+<li><p>box regression</p>
+<p>  <img src="/2019/11/28/yolo系列/offset_v5.png" width="25%;"></p>
+</li>
+</ul>
+</li>
 </ol>
 
       
@@ -1223,7 +1290,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">144</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1236,7 +1303,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1299,7 +1366,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

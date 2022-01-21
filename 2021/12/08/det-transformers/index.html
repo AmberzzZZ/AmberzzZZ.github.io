@@ -90,11 +90,12 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/swin-a.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/swin-b.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/swin-c.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/DETR%20details.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/deformable%20DETR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/DETR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/Deformable%20Attention%20Module.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/multi.png">
-<meta property="og:updated_time" content="2021-12-09T10:15:00.136Z">
+<meta property="og:updated_time" content="2021-12-13T09:11:10.035Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="det-transformers">
 <meta name="twitter:description" content="leaderboard: https://paperswithcode.com/sota/object-detection-on-coco boxAP swin开启了霸榜时代：家族第一名63.1 接着是YOLO家族：家族第一名57.3，YOLOv4是55.8 DETR：论文里是44.9(没在榜单上)，只有一个deformable DETR是52.3 时代的眼泪Cascade Mask R-CNN">
@@ -421,7 +422,60 @@
 </ul>
 </li>
 </ol>
-<h2 id="DETR-End-to-End-Object-Detection-with-Transformers"><a href="#DETR-End-to-End-Object-Detection-with-Transformers" class="headerlink" title="DETR: End-to-End Object Detection with Transformers"></a>DETR: End-to-End Object Detection with Transformers</h2><h2 id="DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION"><a href="#DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION" class="headerlink" title="DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION"></a>DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</h2><ol>
+<h2 id="DETR-End-to-End-Object-Detection-with-Transformers"><a href="#DETR-End-to-End-Object-Detection-with-Transformers" class="headerlink" title="DETR: End-to-End Object Detection with Transformers"></a>DETR: End-to-End Object Detection with Transformers</h2><p>第一次看时有些技术细节不太理解，重新梳理一下：</p>
+<p><img src="/2021/12/08/det-transformers/DETR details.png" width="60%;"></p>
+<ol>
+<li><p>encoder</p>
+<ul>
+<li>feature inputs：<ul>
+<li>用了resnet最后一个阶段的输出，(H0/32,W0/32,C)，C=2048</li>
+<li>然后用1x1 conv降维，(H,W,d)，作为attention layer的输入</li>
+</ul>
+</li>
+<li>没有batch dim，one image per GPU，外加DDP</li>
+<li>DC：distillation conv</li>
+<li>fixed PE：<ul>
+<li>给每一层attention layer的输入query和key都加了fixed PE</li>
+<li>注意是QK不是QKV</li>
+<li>论文的示例代码为了简洁用了learnt PE，而且只加在input层</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>decoder</p>
+<ul>
+<li>object queries：全0初始化，100是建议长度，补充材料里面有个实验，图像包含40以下目标时候基本不会漏检，再往上就开始漏检了</li>
+<li>learnt PE</li>
+</ul>
+</li>
+<li><p>prediction heads</p>
+<ul>
+<li><p>首先做bipartite matching</p>
+<ul>
+<li><p>将pred box和gt box一一对应，没配上的pred box与no object对齐</p>
+</li>
+<li><p>matching loss：寻找到最优的pred box排列，使得matching cost最小，优化算法是Hungarian algorithm，matching cost也可以理解为匹配质量</p>
+<ul>
+<li><script type="math/tex; mode=display">
+  L_{match_i}=-1_{\{c_i \neq \Phi\}} \hat {clsProb}(\hat c_i) + 1_{\{c_i \neq \Phi\}} L_{box}(b_i,\hat b_i)</script></li>
+<li><p>第一项是匹配上的某个box，它的预测概率，越大说明越confident，匹配质量越好</p>
+</li>
+<li><p>第二项是匹配上的某个box，它与gtbox的box loss，越大匹配质量越不好</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>然后计算detection loss</p>
+<ul>
+<li>cls loss：CE</li>
+<li>box loss：L1 + GIoU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION"><a href="#DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION" class="headerlink" title="DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION"></a>DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>DETR的痛点<ul>
@@ -640,6 +694,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2022/01/13/MAE/" rel="prev" title="MAE">
+                MAE <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -722,7 +780,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">144</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -735,7 +793,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -798,7 +856,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
