@@ -276,6 +276,219 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/13/triplet-center-loss论文/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/13/triplet-center-loss论文/" itemprop="url">triplet-center-loss论文</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-13T18:45:59+08:00">
+                2019-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/13/triplet-center-loss论文/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/13/triplet-center-loss论文/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0-before-reading"><a href="#0-before-reading" class="headerlink" title="0. before reading"></a>0. before reading</h2><p>结合：</p>
+<ul>
+<li><p>triplet loss：考虑类间关系，但计算复杂度高，困难样本难挖掘</p>
+</li>
+<li><p>center loss：考虑类内关系</p>
+</li>
+<li><p>TCL：同时增加类内数据的紧实度（compactness）和类间的分离度（separability）</p>
+<p>  三元组只考虑样本、所属类中心、最近邻类的中心。避免了建立triplets的复杂度和mining hard samples的难度。</p>
+</li>
+</ul>
+<h2 id="title：Triplet-Center-Loss-for-Multi-View-3D-Object-Retrieval"><a href="#title：Triplet-Center-Loss-for-Multi-View-3D-Object-Retrieval" class="headerlink" title="title：Triplet-Center Loss for Multi-View 3D Object Retrieval"></a>title：Triplet-Center Loss for Multi-View 3D Object Retrieval</h2><ol>
+<li><p>动机：<em>deep metric learning</em> </p>
+<ul>
+<li><p>the learned features using softmax loss are not discriminative enough in nature </p>
+</li>
+<li><p>although samples of the two classes are separated by the decision boundary elaborately, there exists significant intra-class variations</p>
+</li>
+<li><p><strong>QUESTION1</strong>：so what? how does this affect the current task? 动机描述不充分。</p>
+</li>
+<li><p><strong>QUESTION2</strong>：在二维平面上overlap不代表在高维空间中overlap，这种illustration究竟是否有意义。</p>
+</li>
+<li><p><strong>ANSWER for above</strong>：高维空间可分，投影到二维平面不一定可分，但是反过来，二维平面上高度可分，映射会高维空间数据仍旧是高度可分的。只能说，后者能够确保不同类别数据离散性更好，不能说明前者数据离散性不好（如果定义了高维距离，也可以说明）。</p>
+<p> <img src="/2019/11/13/triplet-center-loss论文/distance.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>应用场景：<em>3D object retrieval</em> </p>
+</li>
+<li><p>要素：</p>
+<ul>
+<li>learns a center for each class </li>
+<li>requires that the distances between samples and centers from the same class are smaller than those from different classes, in this way the samples are pulled closer to the corresponding center and meanwhile pushed away from the  different centers</li>
+<li>both the inter-class separability  and the intra-class variations are considered</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li><p>Compared with triplet loss, TCL avoids the complex construction of triplets and hard sample mining mechanism. </p>
+</li>
+<li><p>Compared with center loss, TCL not only considers to reduce the intra-class variations.</p>
+</li>
+<li><p><strong>QUESTION</strong>：what about the comparison with [softmax loss + center loss]?</p>
+</li>
+<li><p><strong>ANSWER for above</strong>：center-loss is actually representing for the joint loss [softmax loss + center loss]. </p>
+<p>  ‘’Since the class centers are updated at each iteration based on a mini-batch instead of the whole dataset, which can be very unstable, it has to be under the joint supervision of softmax loss during training. ‘’</p>
+</li>
+</ul>
+</li>
+<li><p>本文做法：</p>
+<ul>
+<li>the proposed TCL is used as the supervision loss</li>
+<li>the softmax loss could be also combined in as an addition</li>
+</ul>
+</li>
+<li><p>细节：</p>
+<ul>
+<li><p>TCL：</p>
+<script type="math/tex; mode=display">
+  L_{tc} = \sum_{i=1}^Mmax(D(f_i, c_{y^i}) + m - min_{j\neq y^i}D(f_i, c_j), 0)</script><p>  前半部分是center-loss，类内欧几里得距离，后半部分是每个样本和与其最近的negative center之间的距离。</p>
+</li>
+<li><p>‘Unlike center loss, TCL can be used independently from softmax loss. <strong>However</strong>… ‘</p>
+<p>  作者解释说，因为center layer是随机初始化出来的，而且是batch updating，因此开始阶段会比较tricky，’while softmax loss could serve as a good guider for seeking better class centers ‘</p>
+</li>
+<li><p>调参中提到’m is fixed to 5’，说明本文对feature vector没有做normalization（相比之下facenet做了归一化，限定所有embedding分布在高维球面上）。</p>
+</li>
+<li><p>衡量指标：AUC和MAP，这是一个retrieval任务，最终需要的是embedding，给定Query，召回top matches。</p>
+</li>
+</ul>
+</li>
+<li><p>reviews：</p>
+<ul>
+<li>个人理解：<ol>
+<li>softmax分类器旨在数据可分，对于分类边界、feature vector的空间意义不存在一个具象的描述。deep metric learning能够引入这种具象的、图像学的意义，在此基础上，探讨distance、center才有意义。</li>
+<li>就封闭类数据（类别有限且已知）分类来讲，分类边界有无图像学描述其实意义不大。已知的数据分布尽可能discriminative的主要意义是针对未知类别，我们希望给到模型一个<strong>未知数据</strong>时，它能够检测出来，而不是划入某个已知类（softmax）。</li>
+<li>TCL的最大贡献应该是想到用center替代样本来进行metric judgement，改善triplet-loss复杂计算量这一问题，后者实际训起来太难了，没有感情的GPU吞噬机器。</li>
+</ol>
+</li>
+<li>XXX：</li>
+<li></li>
+</ul>
+</li>
+</ol>
+<p>能够引入这种具象的、图像学的意义，在此基础上，我们探讨distance、center才有意义。</p>
+<p>​        </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/11/dicomReader/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2288,154 +2501,6 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/03/object-tracking/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/03/object-tracking/" itemprop="url">object tracking</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-03T14:12:42+08:00">
-                2018-12-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/03/object-tracking/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/03/object-tracking/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>范围限定：过滤掉较远范围的点云数据</p>
-</li>
-<li><p>聚类：K-Means／欧式聚类，因为前者需要设定K，故使用后者。</p>
-<script type="math/tex; mode=display">
-D(p_i, p_{i+1}) = \sqrt{r_i^2 + r_{i+1}^2 - 2r_ir_{i+1}cos(\varphi_{i+1} - \varphi_i)}</script><p>如果连续扫描点之间的距离小于一个阈值$D_t$，那么这两个点被认为属于同一个对象。这个阈值是根据当前参考点的距离动态调整的。</p>
-<script type="math/tex; mode=display">
-D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
-<li><p>运动目标特征提取：（中心坐标，长／宽／半径，反射强度）</p>
-</li>
-<li><p>由上一时刻的位置速度设置ROI：</p>
-<ul>
-<li>基于局部匹配：通过相似度计算选取响应值最高的目标</li>
-<li>基于分类器：动态目标已知（人腿），采集正负样本，构造分类器，</li>
-</ul>
-</li>
-<li><p>卡尔曼滤波：</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2490,7 +2555,7 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-count">147</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

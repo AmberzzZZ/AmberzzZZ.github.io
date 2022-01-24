@@ -276,6 +276,233 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/16/RFB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/16/RFB/" itemprop="url">RFB</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-16T20:07:00+08:00">
+                2020-12-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/16/RFB/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/16/RFB/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection"><a href="#RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection" class="headerlink" title="RFB: Receptive Field Block Net for Accurate and Fast Object Detection"></a>RFB: Receptive Field Block Net for Accurate and Fast Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>RF block：Receptive Fields </li>
+<li>strengthen the lightweight features using a hand-crafted mechanism：轻量，特征表达能力强</li>
+<li>assemble RFB to the top of SSD </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>lightweight </p>
+<ul>
+<li>enhance feature representation </li>
+</ul>
+</li>
+<li><p>人类</p>
+<ul>
+<li>群智感受野（pRF）的大小是其视网膜图中偏心率的函数</li>
+<li>感受野随着偏心率而增加</li>
+<li>更靠近中心的区域在识别物体时拥有更高的比重或作用</li>
+<li><p>大脑在对于小的空间变化不敏感</p>
+<p><img src="/2020/12/16/RFB/human.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>fixed sampling grid (conv)</p>
+<ul>
+<li>probably induces some loss in the feature discriminability as well as robustness </li>
+</ul>
+</li>
+<li><p>inception</p>
+<ul>
+<li>RFs of multiple sizes </li>
+<li>but at the same center</li>
+</ul>
+</li>
+<li><p>ASPP</p>
+<ul>
+<li>with different atrous rates </li>
+<li>the resulting feature tends to be less distinctive </li>
+</ul>
+</li>
+<li><p>Deformable CNN </p>
+<ul>
+<li>sampling grid is flexible</li>
+<li><p>but all pixels in an RF contribute equally </p>
+<p><img src="/2020/12/16/RFB/RF.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>RFB</p>
+<ul>
+<li>varying kernel sizes</li>
+<li>applies dilated convolution layers to control their eccentricities </li>
+<li>组合来模拟human visual system </li>
+<li>concat</li>
+<li><p>1x1 conv for fusion</p>
+<p><img src="/2020/12/16/RFB/rfb.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>main contributions </p>
+<ul>
+<li>RFB module: enhance deep features of lightweight CNN networks</li>
+<li>RFB Net: gain on SSD</li>
+<li>assemble on MobileNet </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Receptive Field Block </p>
+<ul>
+<li>类似inception的multi-branch</li>
+<li><p>dilated pooling or convolution layer</p>
+<p><img src="/2020/12/16/RFB/RFBlock.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>RFB Net </p>
+<ul>
+<li><p>SSD-base</p>
+<p>  <img src="/2020/12/16/RFB/ssd.png" width="80%;"></p>
+</li>
+<li><p>头上有较大分辨率的特征图的conv层are replaced by the RFB module</p>
+</li>
+<li><p>特别头上的conv层就保留了，因为their feature maps are too small to apply filters with large kernels like 5 × 5</p>
+<p><img src="/2020/12/16/RFB/rfbnet.png" width="70%;"></p>
+</li>
+<li><p>stride2 module：每个conv stride2，那id path得变成1x1 conv？</p>
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/02/PANet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3428,282 +3655,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/bilinear-CNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/bilinear-CNN/" itemprop="url">bilinear CNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T10:01:49+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/bilinear-CNN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/bilinear-CNN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>17年的paper，引用量15，提出了网路结构，但是没分析为啥有效，垃圾</p>
-<h2 id="Bilinear-CNNs-for-Fine-grained-Visual-Recognition"><a href="#Bilinear-CNNs-for-Fine-grained-Visual-Recognition" class="headerlink" title="Bilinear CNNs for Fine-grained Visual Recognition"></a>Bilinear CNNs for Fine-grained Visual Recognition</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>fine-grained classification </li>
-<li>propose a pooled outer product of features derived from two CNNs <ul>
-<li>2 CNNs</li>
-<li>a bilinear layer</li>
-<li>a pooling layer</li>
-</ul>
-</li>
-<li>outperform existing models and fairly efficient </li>
-<li>effective at other image classification tasks such as material, texture, and scene recognition </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>fine-grained classification tasks require<ul>
-<li>recognition of highly localized attributes of objects </li>
-<li>while being invariant to their pose and location in the image </li>
-</ul>
-</li>
-<li>previous techniques <ul>
-<li>part-based models<ul>
-<li>construct representations by localizing parts </li>
-<li>more accurate but requires part annotations </li>
-</ul>
-</li>
-<li>holistic models<ul>
-<li>construct a representation of the entire image </li>
-<li>texture descriptors：FV，SIFT </li>
-</ul>
-</li>
-<li>STN：augment CNNs with parameterized image transformations </li>
-<li>attention：use segmentation as a weakly-supervised manner  </li>
-</ul>
-</li>
-<li>Our key insight is that several widely-used texture representations can be written as a pooled outer product of two suitably designed features <ul>
-<li>several widely-used texture representations</li>
-<li>two suitably designed features </li>
-</ul>
-</li>
-<li>the bilinear features are highly redundant <ul>
-<li>dimensionality reduction </li>
-<li>trade-off between accuracy </li>
-</ul>
-</li>
-<li><p>We also found that feature normalization and domain-specific fine-tuning offers additional benefits</p>
-</li>
-<li><p>combination</p>
-<ul>
-<li>concatenate：additional parameters to fuse</li>
-<li>an outer product：no parameters </li>
-<li>sum product：can achieve similar approximations  </li>
-</ul>
-</li>
-<li>“two-stream” architectures <ul>
-<li>one used to model two- factor variations such as “style” and “content” for images </li>
-<li>in our case is to model two factor variations in location and appearance of parts：但并不是explicit modeling因为最终是个分类头</li>
-<li>one used to analyze videos modeling the temporal aspect and the spatial aspect </li>
-</ul>
-</li>
-<li>dimension reduction <ul>
-<li>two 512-dim feature results in 512x512-dim</li>
-<li>earlier work projects one feature to a lower-dimensional space, e.g. 64-dim—&gt;512x64-dim</li>
-<li>we use compact bilinear pooling to generate low-dimensional embeddings (8-32x)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architecture</p>
-<p>  <img src="/2020/09/18/bilinear-CNN/BCNN.png" width="50%;"></p>
-<ul>
-<li>input $(l,I)$：takes an image and a location，location generally contains position and scale </li>
-<li>quadruple $B=(f_A, f_B, P, C)$</li>
-<li>A、B两个CNN：conv+pooling layers，</li>
-<li>P：pooling function<ul>
-<li>combined A&amp;B outputs using the matrix outer product</li>
-<li>average pooling</li>
-</ul>
-</li>
-<li>C：logistic regression or linear SVM <ul>
-<li>we found that linear models are effective on top of bilinear features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>CNN</p>
-<ul>
-<li><p>independent／partial shared／fully shared</p>
-<p><img src="/2020/09/18/bilinear-CNN/CNN.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>bilinear combination </p>
-<ul>
-<li><p>for each location</p>
-</li>
-<li><p>$bilinear(l,I,f_A,f_B)=f_A(l,I)^T f_B(l,I)$</p>
-</li>
-<li><p>pooling function combines bilinear features across all locations</p>
-</li>
-<li><p>$\Phi (I) = \sum_{l\in L} bilinear(l,I,f_A,f_B)$</p>
-</li>
-<li><p>same feature dimension K for A &amp; B，e.g. KxM &amp; KxN respectively，$\Phi(I)$ is size MxN</p>
-</li>
-<li><p>Normalization</p>
-<ul>
-<li>a signed square root：$y=sign(x)\sqrt {|x|}$</li>
-<li><p>follow a l2 norm：$z = \frac{y}{||y||_2}$</p>
-</li>
-<li><p>improves performance in practice  </p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>classification </p>
-<ul>
-<li>logistic regression or linear SVM  </li>
-<li>we found that linear models are effective on top of bilinear features</li>
-</ul>
-</li>
-<li><p>back propagation</p>
-<ul>
-<li><p>$\frac{dl}{dA}=B(\frac{dl}{dx})^T$，$\frac{dl}{dB}=A(\frac{dl}{dx})^T$</p>
-</li>
-<li><p><img src="/2020/09/18/bilinear-CNN/flow.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Relation to classical texture representations：放在这一节撑篇幅？？</p>
-<ul>
-<li>texture representations can be defined by the choice of the local features, the encoding function, the pooling function, and the normalization function <ul>
-<li>choice of local features：orderless aggregation with sum／max operation</li>
-<li>encoding function：A non-linear encoding is typically applied to the local feature before aggregation</li>
-<li>normalization：normalization of the aggregated feature is done to increase invariance </li>
-</ul>
-</li>
-<li>end-to-end trainable</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3758,7 +3709,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-count">147</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

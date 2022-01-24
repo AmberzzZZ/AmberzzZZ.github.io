@@ -276,6 +276,277 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/21/ConvNext/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/01/21/ConvNext/" itemprop="url">ConvNext</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-21T16:34:46+08:00">
+                2022-01-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/21/ConvNext/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/21/ConvNext/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>facebook，2022，<a href="https://github.com/facebookresearch/ConvNeXt" target="_blank" rel="noopener">https://github.com/facebookresearch/ConvNeXt</a></p>
+<p>inductive biases（归纳偏置）</p>
+<ul>
+<li>卷积具有较强的归纳偏置：即strong man-made settings，如local kernel和shared weights，只有spatial neighbor之间有关联，且在不同位置提取特征的卷积核共享——视觉边角特征与空间位置无关</li>
+<li>相比之下，transformer结构就没有这种很人为的先验的设定，就是global的优化目标，所以收敛也慢</li>
+</ul>
+<h2 id="A-ConvNet-for-the-2020s"><a href="#A-ConvNet-for-the-2020s" class="headerlink" title="A ConvNet for the 2020s"></a>A ConvNet for the 2020s</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>reexamine the design spaces and test the limits of what a pure ConvNet can achieve</li>
+<li>精度<ul>
+<li>achieving 87.8% ImageNet top-1 acc</li>
+<li>outperforming Swin Transformers on COCO detection and ADE20K segmentation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>conv<ul>
+<li>a sliding window strategy is intrinsic</li>
+<li>built-in inductive biases：卷积的归纳偏置是locality和spatial invariance<ul>
+<li>即空间相近的grid elements有联系而远的没有：translation equivariance is a desirable property</li>
+<li>空间不变性：shared weights，inherently efficient</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ViT<ul>
+<li>除了第一层的patchify layer引入卷积，其余结构introduces no image-specific inductive bias</li>
+<li>global attention这个设定的主要问题是平方型增长的计算量</li>
+<li>使得这个结构在classification任务上比较work，但是在其他任务场景里面（需要high resolution，需要hierarchical features）使用受限</li>
+</ul>
+</li>
+<li>Hierarchical Transformers<ul>
+<li>hybrid approach：重新引入local attention这个理念</li>
+<li>能够用于各类任务</li>
+<li>揭露了卷积/locality的重要性</li>
+</ul>
+</li>
+<li>this paper brings back convolutions<ul>
+<li>propose a family of pure ConvNets called ConvNeXt</li>
+<li>a Roadmap：from ResNet to ConvNet</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>from ResNet to ConvNet</p>
+<ul>
+<li>ResNet-50 / Swin-T：FLOPs around 4.5e9</li>
+<li>ResNet-200 / Swin-B around 15e9</li>
+<li><p>首先用transformer的训练技巧训练初始的resnet，作为baseline，然后逐步改进结构</p>
+<ul>
+<li>macro design</li>
+<li>ResNeXt</li>
+<li>inverted bottleneck</li>
+<li>large kernel size</li>
+<li>various layer-wise micro designs</li>
+</ul>
+<p><img src="/2022/01/21/ConvNext/design.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Training Techniques</p>
+<ul>
+<li>300 epochs</li>
+<li>AdamW</li>
+<li>aug：Mixup，CutMix，RandAugment，Random Erasing</li>
+<li>reg：Stochastic Depth，Label Smoothing</li>
+<li><p>这就使得resnet的精度从76.1%提升到78.8%</p>
+<p><img src="/2022/01/21/ConvNext/pretraining.png" width="40%;">  <img src="/2022/01/21/ConvNext/finetuning.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Macro Design</p>
+<ul>
+<li>宏观结构就是multi-stage，每个stage的resolution不同，涉及的结构设计有<ul>
+<li>stage compute ratio</li>
+<li>stem cell</li>
+</ul>
+</li>
+<li>swin的stage比是1:1:3:1，larger model是1:1:9:1，因此将resnet50的3:4:6:3调整成3:3:9:3，acc从 78.8% 提升至 79.4%</li>
+<li>将stem替换成更加aggressive的patchify，4x4conv，s4，non-overlapping，acc从 79.4% 提升至 79.5%</li>
+</ul>
+</li>
+<li><p>ResNeXt-ify</p>
+<ul>
+<li>用分组卷积来实现更好的FLOPs/acc的trade-off</li>
+<li>分组卷积带来的model capacity loss用增加网络宽度来实现</li>
+<li>使用depthwise convolution，同时width从64提升到96<ul>
+<li>groups=channels</li>
+<li>similar to the weighted sum of self-attention：在spatial-dim上mix information</li>
+</ul>
+</li>
+<li>acc提升至80.5%，FLOPs增加5.3G</li>
+</ul>
+</li>
+<li><p>Inverted Bottleneck</p>
+<ul>
+<li><p>transformer block的ffn中，hidden layer的宽度是输入宽度的4倍</p>
+</li>
+<li><p>MobileNet &amp; EfficientNet里面也有类似的结构：中间大，头尾小</p>
+<p><img src="/2022/01/21/ConvNext/mobileblock.png" width="40%;">   <img src="/2022/01/21/ConvNext/effblock.png" width="40%;"></p>
+</li>
+<li><p>而原始的resne(X)t是bottleneck结构：中间小，两头大，为了节约计算量</p>
+</li>
+</ul>
+<p><img src="/2022/01/21/ConvNext/inversed bottleneck.png" width="50%;"></p>
+<ul>
+<li>reduce FLOPs：因为shortcut上面的1x1计算量小了</li>
+<li>精度稍有提升：80.5% to 80.6%，R200/Swin-B上则更显著一点，81.9% to 82.6%</li>
+</ul>
+</li>
+<li><p>Large Kernel Sizes</p>
+<ul>
+<li>首先将conv layer提前，类比transformer的MSA+FFN</li>
+<li>reduce FLOPs，同时精度下降至79.9%</li>
+<li>然后增大kernel size，尝试[3,5,7,9,11]，发现在7的时候精度饱和</li>
+<li>acc：from 79.9% (3×3) to 80.6% (7×7)</li>
+</ul>
+</li>
+<li><p>Micro Design：layer-level的一些尝试</p>
+<ul>
+<li>Replacing ReLU with GELU：原始的transformer paper里面也是用的ReLU，但是后面的先进transformer里面大量用了GeLU，实验发现可以替换，但是精度不变</li>
+<li>Fewer activation functions：transformer block里面有QKV dense，有proj dense，还有FFN里的两个fc层，其中只有FFN的hidden layer接了个GeLU，而原始的resnet每个conv后面都加了relu，我们将resnet也改成只有类似线性层的两个1x1 conv之间有激活函数，acc提升至81.3%，nearly match Swin</li>
+<li><p>Fewer normalization layers：我们比transformer还少用一个norm（因为实验发现加上入口那个LN没提升），acc提升至81.4%，already surpass Swin</p>
+</li>
+<li><p>Substituting BN with LN：BN对于convNet，能够加快收敛抑制过拟合，直接给resnet替换LN会导致精度下降，但是在逐步改进的block上面替换则会slightly提升，81.5%</p>
+</li>
+<li>Separate downsampling layers：学Swin，不再将stride2嵌入resnet conv，而是使用独立的2x2 s2conv，同时发现在resolution改变的时候加入norm layer能够stabilize training——每个downsamp layer/stem/final GAP之后都加一个LN，acc提升至82%，significantly exceeding Swin</li>
+</ul>
+<p><img src="/2022/01/21/ConvNext/block.png" width="40%;"></p>
+</li>
+<li><p>overall structural params</p>
+<p><img src="/2022/01/21/ConvNext/architecture.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -357,7 +628,7 @@
       
         
           
-            <p>看了如同没看，这些个点原论文都做过网格实验了。</p>
+            <p>Google，rwightman，这些个点其实原论文都提到过了</p>
 <h2 id="How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><a href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers" class="headerlink" title="How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers"></a>How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -3047,245 +3318,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/17/Self-Knowledge-Distillation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/17/Self-Knowledge-Distillation/" itemprop="url">Self-Knowledge Distillation</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-17T11:49:50+08:00">
-                2021-09-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/17/Self-Knowledge-Distillation/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/17/Self-Knowledge-Distillation/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Refine-Myself-by-Teaching-Myself-Feature-Refinement-via-Self-Knowledge-Distillation"><a href="#Refine-Myself-by-Teaching-Myself-Feature-Refinement-via-Self-Knowledge-Distillation" class="headerlink" title="Refine Myself by Teaching Myself : Feature Refinement via Self-Knowledge Distillation"></a>Refine Myself by Teaching Myself : Feature Refinement via Self-Knowledge Distillation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>传统的知识蒸馏<ul>
-<li>by stage：先训练庞大的teacher</li>
-</ul>
-</li>
-<li>self knowledge distillation<ul>
-<li>without the pretrained network</li>
-<li>分为data augmentation based approach 和 auxiliary network based approach</li>
-<li>data augmentation approach如UDA，通过监督原始图像和增强图像的一致性，但是会loose local information，对pixel-level tasks不友好，而且监督信息是从logits层，没有直接去refine feature maps</li>
-</ul>
-</li>
-<li>our approach FRSKD<ul>
-<li>auxiliary network based approach</li>
-<li>utilize both soft label and featuremap distillation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>various distillation methods</p>
-<p>  <img src="/2021/09/17/Self-Knowledge-Distillation/methods.png" width="75%;"></p>
-<ul>
-<li>a是传统知识蒸馏，深绿色是pretrained teacher，浅绿色是student，橙色箭头是feature蒸馏，绿色箭头是soft label蒸馏</li>
-<li>b是data augmentation based 自蒸馏，shared 网络，原图和增强后的图，用soft logits来蒸馏</li>
-<li>c是auxiliary classifier based 自蒸馏，cascaded分类头，每个分类器都接前一个的</li>
-<li>d是本文自蒸馏，和c最大的不同是bifpn结构使得两个分类器每个level的特征图之间都有连结，监督方式一样的</li>
-</ul>
-</li>
-<li><p>FPN</p>
-<ul>
-<li>PANet：上行+下行</li>
-<li>biFPN：上行+下行+同层级联</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li><p><img src="/2021/09/17/Self-Knowledge-Distillation/overview.png" width="80%;"></p>
-</li>
-<li><p>notations</p>
-<ul>
-<li>dataset $D=\{(x_1,y_1), (x_2,y_2),…, (x_N,y_N)\}$</li>
-<li>feature map $F_{i,j}$，i-th sample，j-th block</li>
-<li>channel dimension $c_j$，j-th block</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>self-teacher network</p>
-<ul>
-<li>self-teacher network的目的是提供refined feature map和soft labels作为监督信息</li>
-<li>inputs：feature maps $F_1, F_2, …, F_n$，也就是说teacher在进行梯度回传的时候到F就停止了，不会更新student model的参数</li>
-<li>modified biFPN<ul>
-<li>第一个不同：别的FPN都是在fuse之前先用一个fixed-dim 1x1 conv将所有level的feature map转换成相同通道数（如256），we design $d_i$ according to $c_i$，引入一个宽度系数width，$d_i=width*c_i$，</li>
-<li>第二个不同：使用depth-wise convolution</li>
-<li>notations<ul>
-<li>BiFPN：每层dim固定的版本</li>
-<li>BiFPNc：每层dim随输入变化的版本</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>self-feature distillation</p>
-<ul>
-<li>feature distillation<ul>
-<li>adapt attention transfer</li>
-<li>对feature map先进行channel-wise的pooling，然后L2 norm，提取spatial information</li>
-<li><img src="/2021/09/17/Self-Knowledge-Distillation/feature.png" width="40%;"></li>
-</ul>
-</li>
-<li>soft label distillation<ul>
-<li>两个分类头的KL divergence</li>
-<li><img src="/2021/09/17/Self-Knowledge-Distillation/label.png" width="40%;"></li>
-</ul>
-</li>
-<li>CE with gt<ul>
-<li>两个分类头分别还有正常的CE loss</li>
-</ul>
-</li>
-<li>overall<ul>
-<li>总的loss是4个loss相加：$L_{FRSKD}(x,y,\theta_c, \theta_t, K)=L_{CE}(x,y,\theta_c)+L_{CE}(x,y,\theta_t)+\alpha L_{KD}(x,\theta_c,\theta_t, K) + \beta L_{F}(T,F,\theta_c,\theta_T)$</li>
-<li>$\alpha \in [1,2,3]$</li>
-<li>$\beta \in [100,200]$</li>
-<li>【QUESTION】FRSKD updates the parameters by the distillation loss，$L_{KD}$ and $L_F$，which is only applied to the student network，这个啥意思暂时没理解</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>experiment settings<ul>
-<li>FRSKD\F：只做soft label的监督，不做feature map的监督</li>
-<li>FRSKD：标准的本文方法</li>
-<li>FRSKD+SLA：本文方法的基础上attach data augmentation based distillation</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3340,7 +3372,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-count">147</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -276,6 +276,282 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/bilinear-CNN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/18/bilinear-CNN/" itemprop="url">bilinear CNN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T10:01:49+08:00">
+                2020-09-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/18/bilinear-CNN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/bilinear-CNN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>17年的paper，引用量15，提出了网路结构，但是没分析为啥有效，垃圾</p>
+<h2 id="Bilinear-CNNs-for-Fine-grained-Visual-Recognition"><a href="#Bilinear-CNNs-for-Fine-grained-Visual-Recognition" class="headerlink" title="Bilinear CNNs for Fine-grained Visual Recognition"></a>Bilinear CNNs for Fine-grained Visual Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>fine-grained classification </li>
+<li>propose a pooled outer product of features derived from two CNNs <ul>
+<li>2 CNNs</li>
+<li>a bilinear layer</li>
+<li>a pooling layer</li>
+</ul>
+</li>
+<li>outperform existing models and fairly efficient </li>
+<li>effective at other image classification tasks such as material, texture, and scene recognition </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>fine-grained classification tasks require<ul>
+<li>recognition of highly localized attributes of objects </li>
+<li>while being invariant to their pose and location in the image </li>
+</ul>
+</li>
+<li>previous techniques <ul>
+<li>part-based models<ul>
+<li>construct representations by localizing parts </li>
+<li>more accurate but requires part annotations </li>
+</ul>
+</li>
+<li>holistic models<ul>
+<li>construct a representation of the entire image </li>
+<li>texture descriptors：FV，SIFT </li>
+</ul>
+</li>
+<li>STN：augment CNNs with parameterized image transformations </li>
+<li>attention：use segmentation as a weakly-supervised manner  </li>
+</ul>
+</li>
+<li>Our key insight is that several widely-used texture representations can be written as a pooled outer product of two suitably designed features <ul>
+<li>several widely-used texture representations</li>
+<li>two suitably designed features </li>
+</ul>
+</li>
+<li>the bilinear features are highly redundant <ul>
+<li>dimensionality reduction </li>
+<li>trade-off between accuracy </li>
+</ul>
+</li>
+<li><p>We also found that feature normalization and domain-specific fine-tuning offers additional benefits</p>
+</li>
+<li><p>combination</p>
+<ul>
+<li>concatenate：additional parameters to fuse</li>
+<li>an outer product：no parameters </li>
+<li>sum product：can achieve similar approximations  </li>
+</ul>
+</li>
+<li>“two-stream” architectures <ul>
+<li>one used to model two- factor variations such as “style” and “content” for images </li>
+<li>in our case is to model two factor variations in location and appearance of parts：但并不是explicit modeling因为最终是个分类头</li>
+<li>one used to analyze videos modeling the temporal aspect and the spatial aspect </li>
+</ul>
+</li>
+<li>dimension reduction <ul>
+<li>two 512-dim feature results in 512x512-dim</li>
+<li>earlier work projects one feature to a lower-dimensional space, e.g. 64-dim—&gt;512x64-dim</li>
+<li>we use compact bilinear pooling to generate low-dimensional embeddings (8-32x)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<p>  <img src="/2020/09/18/bilinear-CNN/BCNN.png" width="50%;"></p>
+<ul>
+<li>input $(l,I)$：takes an image and a location，location generally contains position and scale </li>
+<li>quadruple $B=(f_A, f_B, P, C)$</li>
+<li>A、B两个CNN：conv+pooling layers，</li>
+<li>P：pooling function<ul>
+<li>combined A&amp;B outputs using the matrix outer product</li>
+<li>average pooling</li>
+</ul>
+</li>
+<li>C：logistic regression or linear SVM <ul>
+<li>we found that linear models are effective on top of bilinear features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CNN</p>
+<ul>
+<li><p>independent／partial shared／fully shared</p>
+<p><img src="/2020/09/18/bilinear-CNN/CNN.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>bilinear combination </p>
+<ul>
+<li><p>for each location</p>
+</li>
+<li><p>$bilinear(l,I,f_A,f_B)=f_A(l,I)^T f_B(l,I)$</p>
+</li>
+<li><p>pooling function combines bilinear features across all locations</p>
+</li>
+<li><p>$\Phi (I) = \sum_{l\in L} bilinear(l,I,f_A,f_B)$</p>
+</li>
+<li><p>same feature dimension K for A &amp; B，e.g. KxM &amp; KxN respectively，$\Phi(I)$ is size MxN</p>
+</li>
+<li><p>Normalization</p>
+<ul>
+<li>a signed square root：$y=sign(x)\sqrt {|x|}$</li>
+<li><p>follow a l2 norm：$z = \frac{y}{||y||_2}$</p>
+</li>
+<li><p>improves performance in practice  </p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>classification </p>
+<ul>
+<li>logistic regression or linear SVM  </li>
+<li>we found that linear models are effective on top of bilinear features</li>
+</ul>
+</li>
+<li><p>back propagation</p>
+<ul>
+<li><p>$\frac{dl}{dA}=B(\frac{dl}{dx})^T$，$\frac{dl}{dB}=A(\frac{dl}{dx})^T$</p>
+</li>
+<li><p><img src="/2020/09/18/bilinear-CNN/flow.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Relation to classical texture representations：放在这一节撑篇幅？？</p>
+<ul>
+<li>texture representations can be defined by the choice of the local features, the encoding function, the pooling function, and the normalization function <ul>
+<li>choice of local features：orderless aggregation with sum／max operation</li>
+<li>encoding function：A non-linear encoding is typically applied to the local feature before aggregation</li>
+<li>normalization：normalization of the aggregated feature is done to increase invariance </li>
+</ul>
+</li>
+<li>end-to-end trainable</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/14/label-smoothing/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2591,484 +2867,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/cornerNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/07/17/cornerNet/" itemprop="url">cornerNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-17T11:32:07+08:00">
-                2020-07-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/07/17/cornerNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/17/cornerNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="CornerNet-Detecting-Objects-as-Paired-Keypoints"><a href="#CornerNet-Detecting-Objects-as-Paired-Keypoints" class="headerlink" title="CornerNet: Detecting Objects as Paired Keypoints"></a>CornerNet: Detecting Objects as Paired Keypoints</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>corner formulation <ul>
-<li>top-left corner  </li>
-<li>bottom-right corner </li>
-</ul>
-</li>
-<li>anchor-free</li>
-<li>corner pooling</li>
-<li>no multi-scale</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>anchor box drawbacks    </p>
-<ul>
-<li>huge set of anchors boxes to ensure sufficient overlap，cause huge imbalance</li>
-<li>hyperparameters and design choices</li>
-</ul>
-</li>
-<li><p>cornerNet</p>
-<ul>
-<li><p>detect and group</p>
-<ul>
-<li>heatmap to predict corners<ul>
-<li>从数学表达上看，全图wh个tl corner，wh个bt corner，可以表达wwhh个框</li>
-</ul>
-</li>
-<li>anchor-based，全图wh个中心点，9个anchor size，只能表达有限的框，且可能match不上</li>
-<li>embeddings to group pairs of corners</li>
-</ul>
-<p><img src="/2020/07/17/cornerNet/cornerNet.png" width="80%;"></p>
-</li>
-<li><p>corner pooling</p>
-<ul>
-<li><p>better localize corners  which are usually out of the foreground</p>
-<p><img src="/2020/07/17/cornerNet/cornerPooling.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>modifid hourglass architecture </p>
-</li>
-<li><p>add our novel variant of focal loss </p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> <img src="/2020/07/17/cornerNet/overview.png" width="75%;"></p>
-<ul>
-<li><p>two prediction modules</p>
-<ul>
-<li><p>heatmaps </p>
-<ul>
-<li><p>C channels, C for number of categories </p>
-</li>
-<li><p>binary mask</p>
-</li>
-<li><p>each corner has only one ground-truth positive</p>
-</li>
-<li><p>penalty the neighbored negatives within a radius that still hold high iou (0.3 iou)</p>
-<ul>
-<li>determine the radius </li>
-<li>penalty reduction $=e^{-\frac{x^2+y^2}{2\sigma^2}}$</li>
-</ul>
-</li>
-<li><p>variant focal loss</p>
-<ul>
-<li><script type="math/tex; mode=display">
-  L_{det} = \frac{-1}{N} \sum^C \sum^H \sum^W 
-  \begin{cases}
-  (1-p_{i,j})^\alpha log(p_{i,j}), \ \ if y_{ij}=1\\
-  (1-y_{ij})^\beta (p_{i,j})^\alpha log(1-p_{i,j}), \ \ otherwise
-  \end{cases}</script></li>
-<li><p>$\alpha=2, \beta=4$</p>
-</li>
-<li><p>N is the number of gts</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>embeddings</p>
-<ul>
-<li>associative embedding </li>
-<li>use 1-dimension embedding</li>
-<li>pull and push loss on gt positives <ul>
-<li>$L_{pull} = \frac{1}{N} \sum^N [(e_{tk}-e_k)^2 + (e_{bk}-e_k)^2]$</li>
-<li>$L_{push} = \frac{1}{N(N-1)} \sum_j^N\sum_{k\neq j}^N max(0, \Delta -|e_k-e_j|)$</li>
-<li>$e_k$ is the average of $e_{tk}$ and $e{bk}$</li>
-<li>$\Delta$ = 1</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>offsets</p>
-<ul>
-<li>从heatmap resolution remapping到origin resolution存在精度损失<script type="math/tex; mode=display">
-  o_k = （\frac{x_k}{n} - \lfloor \frac{x_k}{n} \rfloor， \frac{y_k}{n} - \lfloor \frac{y_k}{n} \rfloor）</script></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>greatly affect the IoU of small bounding boxes  </p>
-</li>
-<li><p>shared among all categories</p>
-</li>
-<li><p>smooth L1 loss on gt positives </p>
-<pre><code>      $$
-      L_{off} = \frac{1}{N} \sum^N SmoothL1(o_k, \hat o_k)
-</code></pre><p>  $$</p>
-</li>
-<li><p>corner pooling</p>
-<ul>
-<li>top-left pooling layer：<pre><code>  * 从当前点(i,j)开始，
-  * 向下elementwise max所有feature vecor，得到$t_{i,j}$
-  * 向右elementwise max所有feature vecor，得到$l_{i,j}$
-  * 最后两个vector相加
-</code></pre><ul>
-<li>bottom-right corner：向左向上</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/07/17/cornerNet/prediction.png" width="80%;"></p>
-</li>
-<li><p>Hourglass Network </p>
-<ul>
-<li>hourglass modules<ul>
-<li>series of convolution and max pooling layers </li>
-<li>series of upsampling and convolution layers </li>
-<li>skip layers </li>
-</ul>
-</li>
-<li><p>multiple hourglass modules stacked：reprocess the features to capture higher-level information</p>
-<p><img src="/2020/07/17/cornerNet/hourglass.png" width="40%;"></p>
-</li>
-<li><p>intermediate supervision</p>
-<ul>
-<li><p>常规的中继监督：</p>
-<p>  <img src="/2020/07/17/cornerNet/intermediate.png" width="70%;"></p>
-<p>  下一级hourglass module的输入包括三个部分</p>
-<ul>
-<li>前一级输入</li>
-<li>前一级输出</li>
-<li>中继监督的输出</li>
-</ul>
-</li>
-<li><p>本文使用了中继监督，但是没把这个结果加回去</p>
-<ul>
-<li>hourglass2 input：1x1 conv-BN to both input and output of hourglass1 + add + relu</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Our backbone</p>
-<ul>
-<li>2 hourglasses</li>
-<li>5 times downsamp with channels [256,384,384,384,512]</li>
-<li>use stride2 conv instead of max-pooling</li>
-<li>upsamp：2 residual modules + nearest neighbor upsampling</li>
-<li>skip connection: 2 residual modules，add</li>
-<li>mid connection: 4 residual modules</li>
-<li>stem: 7x7 stride2, ch128 + residual stride2, ch256</li>
-<li>hourglass2 input：1x1 conv-BN to both input and output of hourglass1 + add + relu</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>training details<ul>
-<li>randomly initialized, no pretrained</li>
-<li>bias：set the biases in the convolution layers that predict the corner heatmaps</li>
-<li>input：511x511</li>
-<li>output：128x128</li>
-<li>apply PCA to the input image</li>
-<li>full loss：$L = L_{det} + \alpha L_{pull} + \beta L_{push} + \gamma L_{off}$<ul>
-<li>配对loss：$\alpha=\beta=0.1$</li>
-<li>offset loss：$\gamma=1$</li>
-</ul>
-</li>
-<li>batch size = 49 = 4+5x9</li>
-</ul>
-</li>
-<li>test details<ul>
-<li>NMS：3x3 max pooling on heatmaps</li>
-<li>pick：top100 top-left corners &amp; top100 bottom-right corners</li>
-<li>filter pairs：<ul>
-<li>L1 distance greater than 0.5</li>
-<li>from different categories </li>
-</ul>
-</li>
-<li>fusion：combine the detections from the original and flipped images  + soft nms</li>
-</ul>
-</li>
-<li>Ablation Study <ul>
-<li>corner pooling is especially helpful for medium and large objects</li>
-<li>penalty reduction especially benefits medium and large objects</li>
-<li>CornerNet achieves a much higher AP at 0.9 IoU than other detectors：更有能力生成高质量框</li>
-<li>error analysis：the main bottleneck is detecting corners</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="CornerNet-Lite-Efficient-Keypoint-Based-Object-Detection"><a href="#CornerNet-Lite-Efficient-Keypoint-Based-Object-Detection" class="headerlink" title="CornerNet-Lite: Efficient Keypoint-Based Object Detection"></a>CornerNet-Lite: Efficient Keypoint-Based Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>keypoint-based methods</p>
-<ul>
-<li>detecting and grouping</li>
-<li>accuary but with processing cost</li>
-</ul>
-</li>
-<li><p>propose CornerNet-Lite </p>
-<ul>
-<li>CornerNet-Saccade：attention mechanism </li>
-<li>CornerNet-Squeeze：a new compact backbone </li>
-</ul>
-</li>
-<li><p>performance</p>
-<p>  <img src="/2020/07/17/cornerNet/performance.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>main drawback of cornerNet<ul>
-<li>inference speed</li>
-<li>reducing the number of scales or the image resolution cause a large accuracy drop </li>
-</ul>
-</li>
-<li>two orthogonal directions <ul>
-<li>reduce the number of pixels to process：CornerNet-Saccade </li>
-<li>reduce the amount of processing per pixel：</li>
-</ul>
-</li>
-<li>CornerNet-Saccade <ul>
-<li>downsized attention map </li>
-<li>select a subset of crops to examine in high resolution </li>
-<li>for off-line：AP of 43.2% at 190ms per image </li>
-</ul>
-</li>
-<li>CornerNet-Squeeze  <ul>
-<li>inspired by squeezeNet and mobileNet</li>
-<li>1x1 convs</li>
-<li>bottleneck layers</li>
-<li>depth-wise separable convolution</li>
-<li>for real-time：AP of 34.4% at 30ms </li>
-</ul>
-</li>
-<li>combined??<ul>
-<li>CornerNet-Squeeze-Saccade turns out slower and less accurate than CornerNet- Squeeze </li>
-</ul>
-</li>
-<li>Saccades：扫视<ul>
-<li>to generate interesting crops</li>
-<li>RCNN系列：single-type &amp; single object</li>
-<li>AutoFocus：add a branch调用faster-RCNN，thus multi-type &amp; mixed-objects，有single branch有multi branch</li>
-<li>CornerNet-Saccade：<ul>
-<li>single-type &amp; multi object</li>
-<li>crops can be much smaller than number of objects</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>CornerNet-Saccade </p>
-<p>  <img src="/2020/07/17/cornerNet/Saccade.png" width="60%;"></p>
-<ul>
-<li><p>step1：obtain possible locations  </p>
-<ul>
-<li>downsize：two scales，255 &amp; 192，zero-padding</li>
-<li>predicts 3 attention maps<ul>
-<li>small object：longer side&lt;32 pixels</li>
-<li>medium object：32-96</li>
-<li>large object：&gt;96</li>
-<li>so that we can control the zoom-in factor：zoom-in more for smaller objects</li>
-<li>feature map：different scales from the upsampling layers</li>
-<li>attention map：3x3 conv-relu + 1x1 conv-sigmoid</li>
-<li>process locations where scores &gt; 0.3</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>step2：finer detection</p>
-<ul>
-<li>zoom-in scales：4，2，1 for small、medium、large objects</li>
-<li>apply CornerNet-Saccade on the ROI<ul>
-<li>255x255 window</li>
-<li>centered at the location</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>step3：NMS</p>
-<ul>
-<li>soft-nms</li>
-<li>remove the bounding boxes which touch the crop boundary</li>
-</ul>
-</li>
-<li><p>CornerNet-Saccade uses the same network for attention maps and bounding boxes</p>
-<ul>
-<li>在第一步的时候，对一些大目标已经有了检测框</li>
-<li>也要zoom-in，矫正一下</li>
-</ul>
-</li>
-<li><p>efficiency</p>
-<ul>
-<li>regions/croped images都是processed in batch/parallel</li>
-<li>resize/crop操作在GPU中实现</li>
-<li><p>suppress redundant regions using a NMS-similar policy before prediction</p>
-<p><img src="/2020/07/17/cornerNet/efficiency.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>new hourglass backbone</p>
-<ul>
-<li>3 hourglass module，depth 54</li>
-<li>downsize twice before hourglass modules</li>
-<li>downsize 3 times in each module，with channels [384,384,512]</li>
-<li>one residual in both encoding path &amp; skip connection</li>
-<li>mid connection：one residual，with channels 512</li>
-</ul>
-</li>
-<li><p>CornerNet-Squeeze </p>
-<ul>
-<li>to replace the heavy hourglass104</li>
-<li>use fire module to replace residuals</li>
-<li>downsizes 3 times before hourglass modules</li>
-<li>downsize 4 times in each module</li>
-<li>replace the 3x3 conv in prediction head with 1x1 conv</li>
-<li><p>replace the nearest neighboor upsampling with 4x4 transpose conv</p>
-<p><img src="/2020/07/17/cornerNet/fire.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3123,7 +2921,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-count">147</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
