@@ -276,6 +276,244 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/27/DCGAN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/05/27/DCGAN/" itemprop="url">DCGAN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-27T15:28:53+08:00">
+                2020-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/27/DCGAN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/27/DCGAN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="UNSUPERVISED-REPRESENTATION-LEARNING-WITH-DEEP-CONVOLUTIONAL-GENERATIVE-ADVERSARIAL-NETWORKS"><a href="#UNSUPERVISED-REPRESENTATION-LEARNING-WITH-DEEP-CONVOLUTIONAL-GENERATIVE-ADVERSARIAL-NETWORKS" class="headerlink" title="UNSUPERVISED REPRESENTATION LEARNING WITH DEEP CONVOLUTIONAL GENERATIVE ADVERSARIAL NETWORKS"></a>UNSUPERVISED REPRESENTATION LEARNING WITH DEEP CONVOLUTIONAL GENERATIVE ADVERSARIAL NETWORKS</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unsupervised learning</li>
+<li>learns a hierarchy of representations from object parts to scenes </li>
+<li>used for novel tasks </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>GAN<ul>
+<li>Learning reusable feature representations from large unlabeled datasets </li>
+<li>generator and discriminator networks can be later used as feature extractors for supervised tasks </li>
+<li>unstable to train </li>
+</ul>
+</li>
+<li>we<ul>
+<li>propose a set of constraints on the architectural topology making it stable to train</li>
+<li>use the trained discriminators for image classification tasks </li>
+<li>visualize the filters </li>
+<li>show that the generators have interesting vector arithmetic properties  </li>
+</ul>
+</li>
+<li>unsupervised representation learning <ul>
+<li>clustering, hierarchical clustering </li>
+<li>auto-encoders learn good feature representations </li>
+</ul>
+</li>
+<li>generative image models <ul>
+<li>samples often suffer from being blurry, being noisy and incomprehensible </li>
+<li>further use for supervised tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture </p>
+<ul>
+<li>all convolutional net：没有池化，用stride conv</li>
+<li>eliminating fully connected layers：<ul>
+<li>generator：输入是一个向量，reshape以后接的全是卷积层</li>
+<li>discriminator：最后一层卷积出来直接flatten</li>
+</ul>
+</li>
+<li>Batch Normalization <ul>
+<li>generator输出层 &amp; discriminator输入层不加</li>
+<li>resulted in sample oscillation and model instability </li>
+</ul>
+</li>
+<li><p>ReLU</p>
+<ul>
+<li>generator输出层用Tanh </li>
+<li>discriminator用leakyReLU</li>
+</ul>
+<p><img src="/2020/05/27/DCGAN/gen.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>train</p>
+<ul>
+<li>image preprocess：rescale to [-1,1]</li>
+<li>LeakyReLU(0.2)</li>
+<li>lr：2e-4</li>
+<li>momentum term $\beta 1$：0.5, default 0.9</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>evaluate<ul>
+<li>apply them as a feature extractor on supervised datasets</li>
+<li>evaluate the performance of linear models on top of these features </li>
+</ul>
+</li>
+<li>model<ul>
+<li>use the discriminator’s convolutional features from all layers</li>
+<li>maxpooling to 4x4 grids</li>
+<li>flattened and concatenated to form a 28672 dimensional vector  </li>
+<li>regularized linear L2-SVM </li>
+<li>相比之下：the discriminator has many less feature maps, but larger total feature vector size </li>
+</ul>
+</li>
+<li>visualizing<ul>
+<li>walking in the latent space <ul>
+<li>在vector Z上差值，生成图像可以观察到smooth transitions </li>
+</ul>
+</li>
+<li>visualize the discriminator feature<ul>
+<li>特征图可视化，能观察到床结构</li>
+</ul>
+</li>
+<li>manipulate the generator representation<ul>
+<li>generator learns <strong>specific object representations</strong> for major scene components  </li>
+<li>use logistic regression to find feature maps related with window, drop the spatial locations on feature-maps</li>
+<li>most result forgets to draw windows in the bedrooms, replacing them with other objects</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>vector arithmetic <ul>
+<li>averaging the Z vector for three examplars </li>
+<li>semantically obeyed the arithmetic </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/27/densenet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3066,275 +3304,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/15/verseg/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/04/15/verseg/" itemprop="url">verseg</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-15T17:01:39+08:00">
-                2020-04-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/04/15/verseg/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/15/verseg/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>challenge</p>
-<p> Large Scale Vertebrae Segmentation Challenge</p>
-<ul>
-<li>task1:Vertebra Labelling，关键点检测</li>
-<li>task2:Vertebra Segmentation，多类别分割</li>
-</ul>
-</li>
-<li><p>data</p>
-<p><img src="/2020/04/15/verseg/data.png" width="80%"></p>
-<ol>
-<li>variation：数据affine轴不统一，尺寸不统一，扫描范围不统一，FOV区域不统一</li>
-<li>nii的两大解析工具：nibabel库load data的xyz顺序与axcode的顺序一致，e.g.[‘R’,’A’,’S’]的orientation会得到xyz的array，而sitk的读取刚好反过来，sitk的arr会是zyx。我们之前在将dicom写入nii时，会指定一个不为np.eye(4)的affine，就是为了transpose这三个轴。</li>
-</ol>
-</li>
-<li><p>model</p>
-<ol>
-<li><p>team paper \<vertebrae localization="" and="" segmentation="" with="" spatialconfiguration-net="" u-net\=""></vertebrae></p>
-<ul>
-<li><p>三阶段：第一阶段，due to large variation FOV of the dataset，粗分割定位脊柱位置，第二阶段，higher resolution多类别关键点定位center，获得each located vertebra，第三阶段，二类分割for each located vertebra。</p>
-</li>
-<li><p>keywords：1. uniform voxel spacing：不要随意resize，todo: trilinear interp；2. on-the-fly data augmentation：using SimpleITK</p>
-</li>
-<li><p>第一阶段：Spine Localization</p>
-<ul>
-<li>Unet</li>
-<li><strong>regress</strong> the Gaussian <strong>heatmap</strong> of spinal centerline</li>
-<li>L2-loss</li>
-<li>uniform voxel spacing of 8mm</li>
-<li><p>input shape：[64,64,128]，pad？</p>
-<p><img src="/2020/04/15/verseg/stage1.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>第二阶段：Vertebrae Localization</p>
-<ul>
-<li>SpatialConfiguration-Net</li>
-<li>regress each located vertebra‘s heatmap in individual channel</li>
-<li>resampling：bi/tricubic interpolation</li>
-<li>norm：maxmin on the whole dataset</li>
-<li>uniform voxel spacing of 2mm</li>
-<li><p>input shape：[96,96,128]，z-axis random crop，xy-plane use ROI from stage1</p>
-<p><img src="/2020/04/15/verseg/stage2.png" width="50%"></p>
-<p><img src="/2020/04/15/verseg/SCN.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>第三阶段：Vertebrae Segmentation</p>
-<ul>
-<li>Unet</li>
-<li>binary segment the mask of each vertebrae</li>
-<li>sigmoid ce-loss</li>
-<li>uniform voxel spacing of 1mm</li>
-<li><p>input shape：[128,128,96]，crop origin image &amp; heatmap image based on centroids</p>
-<p><img src="/2020/04/15/verseg/stage3.png" width="50%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>reference paper\<btrfly net:="" vertebrae="" labelling="" with="" energy-="" based="" adversarial="" learning="" of="" local="" spine="" prior="" \=""></btrfly></p>
-<ul>
-<li>核心贡献：1.MIP：combines the information across reformations，3D to 2D，2. 基于判别器的训练机制：encodes local spine structure as an anatomical prior，加固椎块间类别&amp;位置的spacial information</li>
-</ul>
-<p><img src="/2020/04/15/verseg/btr overview.png" width="60%"></p>
-<ul>
-<li>MIP：<ul>
-<li>localisation and identification rely on a large context </li>
-<li>large receptive field</li>
-<li>in full-body scans where spine is not spatially centred or is obstructed by the ribcage, such cases are handled with a pre-processing stage detecting the occluded spine  </li>
-</ul>
-</li>
-<li><p>adversarial learning：</p>
-<ul>
-<li>FCN用于分割</li>
-<li>AE用于评估分割的好坏</li>
-<li>do not ‘pre-train’ it (the AE)</li>
-<li>loss：an anatomically-inspired supervision instead of the usual binary adversarial supervision (vanilla GAN)</li>
-</ul>
-</li>
-<li><p>先说FCN——Btrfly Network</p>
-<ul>
-<li><p>建模成回归问题，每个关键点对应一个通道的高斯heatmap，背景channel为$1-max_i (y_i)$</p>
-</li>
-<li><p>双输入双输出（sagittal &amp; coronal）</p>
-</li>
-<li><p>两个视角的feature map在网络深层做了融合，to learn their inter-dependency</p>
-</li>
-<li><p>Batch- normalisation is used after every convolution layer, along with 20% dropout in the fused layers of Btrfly</p>
-</li>
-<li><p>loss：l2 distance + weighted ce</p>
-<script type="math/tex; mode=display">
-  L_{sag} = ||Y_{sag} - \hat{Y}_{sag}||^2 + \omega CE(softmax(Y_{sag}, softmax(\hat{Y}_{sag}))</script><p>  $\omega$ is the median frequency weighing map, boosting the learning of less frequent classes(ECB)</p>
-<p><img src="/2020/04/15/verseg/btrfly.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>再说判别器——Energy-based adversary for encoding prior</p>
-<ul>
-<li><p>fully-convolutional：its predictions across voxels are independent of each other owing to the spatial invariance of convolutions</p>
-</li>
-<li><p>to impose the anatomical prior of the spine’s shape onto the Btrfly net</p>
-</li>
-<li><p>look at $\hat{Y}_{sag}$ and $\hat{Y}_{cor}$ as a 3D volume and employ a 3D AE with a receptive field covering a part of the spine </p>
-</li>
-<li><p>$\hat{Y}_{sag}$ consists of Gaussians：less informative than an image, avoid using max-pooling by resorting to average pooling </p>
-</li>
-<li><p>employ spatially dilated convolution kernels</p>
-</li>
-<li><p>mission of AE：predict the l2 distance of input and its reconstruction, it learns to discriminate by predicting a low E for real annotations, while G learns to generate annotations that would trick D </p>
-<script type="math/tex; mode=display">
-  L = D(Y_x) + max(0, m-D(Y_g))\\
-  L_G = D(Y_g) + L_{fcn}</script><p><img src="/2020/04/15/verseg/btr gan.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>inference：</p>
-<ul>
-<li>The values below a threshold (T) are ignored in order to remove noisy predictions </li>
-<li>用外积，$\hat{Y}=\hat{Y}_{sag}\otimes\hat{Y}_{cor}$</li>
-<li>每个channel的最大值作为centroids</li>
-</ul>
-</li>
-<li><p>experiments</p>
-<ul>
-<li>【IMPORTANT】10 MIPs are obtained from one 3D scan per view, each time randomly choosing half the slices of interest</li>
-<li>对于每个视角，每次随机抽取一半数目的slice用于计算MIP</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-</li>
-</ol>
-<ul>
-<li><p>similar local appearance：</p>
-</li>
-<li><p>strong spatial configuration：凡是涉及到椎块-wise的信息，从全局信息入手</p>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3389,7 +3358,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">147</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

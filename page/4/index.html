@@ -276,6 +276,180 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/11/regnet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/03/11/regnet/" itemprop="url">regnet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-11T21:10:42+08:00">
+                2021-03-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/11/regnet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/11/regnet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="RegNet-Designing-Network-Design-Spaces"><a href="#RegNet-Designing-Network-Design-Spaces" class="headerlink" title="RegNet: Designing Network Design Spaces"></a>RegNet: Designing Network Design Spaces</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>study the network design principles</li>
+<li>design RegNet </li>
+<li>outperforms efficientNet and 5x faster<ul>
+<li>top1 error：20.1 （eff-b5：21.5）</li>
+<li>larger batch size</li>
+<li>1/4 的 train/test latency</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>manual network design<ul>
+<li>AlexNet, ResNet family, DenseNet, MobileNet</li>
+<li>focus on discovering new design choices that improve acc </li>
+</ul>
+</li>
+<li>the recent popular approach NAS<ul>
+<li>search the best in a fixed search space of possible networks</li>
+<li>limitations：generalize to new settings，lack of interpretability  </li>
+</ul>
+</li>
+<li>network scaling<ul>
+<li>上面两个focus on 找出一个basenet for a specific regime</li>
+<li>scaling rules aims at tuning the optimal network in any target regime </li>
+</ul>
+</li>
+<li>comparing networks<ul>
+<li>the reliable comparison metric to guide the design process</li>
+</ul>
+</li>
+<li>our method<ul>
+<li>combines the disadvantages of manual design and NAS</li>
+<li>first AnyNet</li>
+<li>then RegNet</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/09/mongodb/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3463,251 +3637,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/22/VoVNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/22/VoVNet/" itemprop="url">VoVNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-22T15:12:30+08:00">
-                2021-01-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/22/VoVNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/22/VoVNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="An-Energy-and-GPU-Computation-Efficient-Backbone-Network-for-Real-Time-Object-Detection"><a href="#An-Energy-and-GPU-Computation-Efficient-Backbone-Network-for-Real-Time-Object-Detection" class="headerlink" title="An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection"></a>An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>denseNet<ul>
-<li>dense path：diverse receptive fields</li>
-<li>heavy memory cost &amp; low efficiency </li>
-</ul>
-</li>
-<li>we propose a backbone<ul>
-<li>preserve the benefit of concatenation</li>
-<li>improve denseNet efficiency</li>
-<li>VoVNet comprised of One-Shot Aggregation (OSA)</li>
-</ul>
-</li>
-<li>apply to one/two stage object detection tasks<ul>
-<li>outperforms denseNet &amp; resNet based ones</li>
-<li>better small object detection performance</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>main difference between resNet &amp; denseNet<ul>
-<li>aggregation：summation &amp; concatenation <ul>
-<li>summation would washed out the early features</li>
-<li>concatenation last as it preserves</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>GPU parallel computation <ul>
-<li>computing utilization is maximized when operand tensor is larger </li>
-<li>many 1x1 convs for reducing dimension</li>
-<li>dense connections in intermediate layers are inducing the inefficiencies </li>
-</ul>
-</li>
-<li><p>VoVNet </p>
-<ul>
-<li>hypothesize that the dense connections are redundant</li>
-<li>OSA：aggregates intermediate features at once</li>
-<li>test as object detection backbone：outperforms DenseNet &amp; ResNet with better energy efficiency and speed</li>
-</ul>
-</li>
-<li><p>factors for efficiency</p>
-<ul>
-<li>FLOPS and model sizes are indirect metrics</li>
-<li>energy per image and frame per second are more practical</li>
-<li>MAC：<ul>
-<li>memory accesses cost，$hw(c_i+c_o) + k^2 c_ic_o$</li>
-<li>memory usage不止跟参数量有关，还跟特征图尺寸相关</li>
-<li>MAC can be minimized when input channel size equals the output</li>
-</ul>
-</li>
-<li>FLOPs/s<ul>
-<li>splitting a large convolution operation into several fragmented smaller operations makes GPU computation inefficient as fewer computations are processed in parallel</li>
-<li>所以depthwise/bottleneck理论上降低了计算量FLOP，但是从GPU并行的角度efficiency降低，并没有显著提速：cause more sequential computations</li>
-<li>以时间为单位的FLOPs才是fair的</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>hypothesize </p>
-<ul>
-<li>dense connection makes similar between neighbor layers</li>
-<li>redundant</li>
-</ul>
-</li>
-<li><p>OSA</p>
-<ul>
-<li>dense connection：former features concats in every following features</li>
-<li><p>one-shot connection：former features concats once in the last feature</p>
-<p><img src="/2021/01/22/VoVNet/OSA.png" width="40%;"></p>
-</li>
-<li><p>最开始跟dense block保持参数一致：一个block里面12个layers，channel20，发现深层特征contributes less，所以换成浅层，5个layers，channel43，发现有涨点：implies that building deep intermediate feature via dense connection is less effective than expected </p>
-<p><img src="/2021/01/22/VoVNet/weight_mat.png" width="40%;"></p>
-</li>
-<li><p>in/out channel数相同</p>
-<ul>
-<li>much less MAC：<ul>
-<li>denseNet40：3.7M</li>
-<li>OSA：5layers，channel43，2.5M</li>
-<li>对于higher resolution的detection任务impies more fast and energy efficient </li>
-</ul>
-</li>
-<li>GPU efficiency <ul>
-<li>不需要那好几十个1x1</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>architecture</p>
-<ul>
-<li>stem：3个3x3conv</li>
-<li>downsamp：s2的maxpooling</li>
-<li>stages：increasing channels enables more rich semantic high-level information，better feature representation</li>
-<li><p>deeper：makes more modules in stage3/4</p>
-<p><img src="/2021/01/22/VoVNet/VoVNet.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>one-stage：refineDet</li>
-<li>two-stage：Mask-RCNN</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3762,7 +3691,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">147</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -276,6 +276,918 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/28/yolo系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/28/yolo系列/" itemprop="url">yolo系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-28T18:34:51+08:00">
+                2019-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/28/yolo系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/28/yolo系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li>[yolov1] Yolov1: You Only Look Once: Unified, Real-Time Object Detection</li>
+<li>[yolov2] Yolov2: YOLO9000: Better, Faster, Stronger</li>
+<li>[yolov3] Yolov3: An Incremental Improvement </li>
+<li>[yolov4] YOLOv4: Optimal Speed and Accuracy of Object Detection </li>
+<li>[poly-yolo] POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3 </li>
+<li>[scaled-yolov4] Scaled-YOLOv4: Scaling Cross Stage Partial Network </li>
+</ol>
+<h2 id="0-review"><a href="#0-review" class="headerlink" title="0. review"></a>0. review</h2><ol>
+<li><p>review0121：关于yolo loss</p>
+<p> 之前看keras版的yolo loss，包含分类的bce，回归的l2/mse，以及confidence的回归loss，其中conf loss被建模成单纯的0-1分类问题，用bce来实现。</p>
+<p> 事实上原版的yolo loss中，objectness是iou（pred和gt的iou），从意义上，不仅指示当前格子有无目标，还对当前的box prediction做了评估</p>
+<ul>
+<li>回传梯度</li>
+<li><p>不回传梯度</p>
+<p>iou是通过xywh计算的，也就是说基于iou的loss做梯度回传的时候要流经box head，scaled_yolov4中把这个梯度截断，只作为一个值，对confidence进行梯度回传，</p>
+<p>梯度不截断也没有问题，相当于对xywh再回传一个iou的loss</p>
+</li>
+</ul>
+</li>
+<li><p>review1215：main features梳理</p>
+<ul>
+<li>yolov1</li>
+<li>yolov2</li>
+<li><p>yolov3</p>
+<ul>
+<li>giou</li>
+<li>anchor机制<ul>
+<li>匹配机制：用max_iou做1v1匹配，1 in 9 (all-level)，</li>
+<li>回归机制：用sigmoid和exp包裹logits，作为xy和wh的偏移量</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>yolov4：bag-of-tricks，CSPDarknet53+PAN-SPP+yolohead，mosaic，ciou，syncBN，diou_nms</p>
+<ul>
+<li>anchor机制<ul>
+<li>匹配机制：不再是唯一匹配，可以跨level，只要满足iou thresh就作为positive anchor</li>
+<li>回归机制</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>scaled-yolov4：fully CSP-ized，双向FPN，scaling up出一系列模型</p>
+<ul>
+<li>CSP-block是为了scaling-up服务的，yolov3的结构一张卡batch size只能开到8，在OOM边缘试探，这篇文章将整个结构都CSP化</li>
+<li>面向GPU的YOLOv4-large包含YOLOv4-P5, YOLOv4-P6, and YOLOv4-P7</li>
+<li>anchor机制<ul>
+<li>匹配机制：相比较于yolov4进一步拓展，跨level且跨网格，只要长宽比满足阈值，都作为positive anchor，同时找到gt center最近的两个邻域网格，都作为正样本</li>
+<li>回归机制：重新定义了回归机制，因为跨网格，偏移量的激活区间变成[-0.5,1.5]</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>loss_box：giou</li>
+<li>loss_obj：bce</li>
+<li>loss_cls：bce</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection"><a href="#1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection" class="headerlink" title="1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection"></a>1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection</h2><ol>
+<li>动机:<ul>
+<li>end-to-end: 2 stages —-&gt; 1 stage</li>
+<li>real-time</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>past methods:  complex pipelines, hard to optimize(trained separately) <ul>
+<li>DPM use a sliding window and a classifier to evaluate an object at various locations </li>
+<li>R-CNN use region proposal and run classifier on the proposed boxes,  then post-processing </li>
+</ul>
+</li>
+<li>in this paper:  you only look once at an image <ul>
+<li>rebuild the framework as a <strong>single</strong> regression problem:  single stands for <strong>you don’t have to run classifiers on each patch</strong></li>
+<li><strong>straight</strong> from image pixels to bounding box coordinates and class probabilities:  straight stands for <strong>you obtain the bounding box and the classification results side by side, comparing to the previous serial pipeline </strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>advantages：</p>
+<ul>
+<li>fast &amp; twice the <strong>mean average precision</strong> of other real-time systems</li>
+<li>CNN sees the entire image thus encodes contextual information </li>
+<li>generalize better</li>
+</ul>
+</li>
+<li><p>disadvantage:</p>
+<ul>
+<li>accuracy: “ it struggles to precisely localize some objects, especially small ones”</li>
+</ul>
+</li>
+<li><p>细节：</p>
+<ul>
+<li><p>grid：</p>
+<p>Our system divides the input image into an S × S grid. </p>
+<p>If the center of an object falls into a grid cell, that grid cell is responsible for detecting that object. </p>
+<p><img src="/2019/11/28/yolo系列/grid.png" width="60%;"></p>
+</li>
+<li><p>prediction：</p>
+<p> Each grid cell predicts B bounding boxes,  confidence scores <strong>for these boxes</strong> , and C conditional class probabilities <strong>for each grid</strong></p>
+<p> that is an <script type="math/tex">S*S*(B*5+C)</script> tensor</p>
+<ul>
+<li>We normalize the bounding box width and height by the image width and height so that they fall between 0 and 1.</li>
+<li>We parametrize the bounding box x and y coordinates to be offsets of a particular grid cell so they are also bounded between 0 and 1. </li>
+</ul>
+</li>
+<li><p>at test time：</p>
+<p> We obtain the <strong>class-specific confidence</strong> for individual box by multiply the class probability and box confidence：</p>
+<script type="math/tex; mode=display">
+ Pr(Class_i | Object) * Pr(Object)* IOU^{truth}_{pred} = Pr(Class_i)* IOU^{truth}_{pred}</script></li>
+<li><p>network：</p>
+<p>the convolutional layers extract features from the image </p>
+<p>while the fully connected layers predict the probabilities and coordinates</p>
+<p><img src="/2019/11/28/yolo系列/network.png" width="60%"></p>
+</li>
+<li><p>training：</p>
+<p> activation：use a linear activation function for the final layer and leaky rectified linear activation all the other layers</p>
+<p> optimization：use sum-squared error, however it does not perfectly align with the goal of maximizing average precision</p>
+<p> ​    * weights equally the localization error and classification error：$\lambda_{coord}$</p>
+<p> ​    * weights equally the grid cells containing and not-containing objects：$\lambda_{noobj}$</p>
+<p> ​    * weights equally the large boxes and small boxes：square roots the h&amp;w insteand of the straight h&amp;w</p>
+<p> loss：pick the box predictor has the highest current IOU with the ground truth per grid cell</p>
+<p> avoid overfitting：dropout &amp; data augmentation</p>
+<p> ​    * use dropout after the first connected layer,</p>
+<p> ​    * introduce random scaling and translations of up to 20% of the original image size for data augmentation</p>
+<p> ​    * randomly adjust the exposure and saturation of the image by up to a factor of 1.5 in the HSV color space for data augmentation</p>
+</li>
+<li><p>inference：</p>
+<p> multiple detections：some objects locates near the border of multiple cells and <strong>can be well localized by multiple cells</strong>. <strong>Non-maximal suppression</strong> is proved critical, adding 2- 3% in mAP. </p>
+</li>
+</ul>
+</li>
+<li><p>Limitations：</p>
+<ul>
+<li>strong spatial constraints：decided by the settings of bounding boxes</li>
+<li><p>softmax classification：can only have one class for each grid </p>
+<blockquote>
+<p>“This spatial constraint lim- its the number of nearby objects that our model can pre- dict. Our model struggles with small objects that appear in groups, such as flocks of birds. “</p>
+<p>“ It struggles to generalize to objects in new or unusual aspect ratios or configurations. “</p>
+</blockquote>
+</li>
+<li><p>coarse bounding box prediction：the architecture has multiple downsampling layers</p>
+</li>
+<li><p>the loss function treats errors the same in small bounding boxes versus large bounding boxes：</p>
+<blockquote>
+<p>The same error has much greater effect on a small box’s IOU than a big box.</p>
+<p>“Our main source of error is incorrect localizations. “</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>Comparison：</p>
+<ul>
+<li>mAP among <strong>real-time detectors</strong> and <strong>Less Than Real-Time detectors</strong>：less mAP than fast-rcnn but much faster</li>
+<li>error analysis between yolo and fast-rcnn：greater localization error and less background false-positive</li>
+<li>combination analysis：[fast-rcnn+yolo] defeats [fast-rcnn+fast-rcnn] since YOLO makes different kinds of mistakes  with fast-rcnn</li>
+<li>generalizability：RCNN degrades more because the Selective Search is tuned for natural images, change of dataset makes the proposals get worse. YOLO degrades less because it models the size and shape of objects, change of dataset varies less at object level but more at pixel level.</li>
+</ul>
+</li>
+</ol>
+<h2 id="2-Yolov2-YOLO9000-Better-Faster-Stronger"><a href="#2-Yolov2-YOLO9000-Better-Faster-Stronger" class="headerlink" title="2. Yolov2: YOLO9000: Better, Faster, Stronger"></a>2. Yolov2: YOLO9000: Better, Faster, Stronger</h2><ol>
+<li>动机：<ul>
+<li>run at varying sizes：offering an easy tradeoff between speed and accuracy</li>
+<li>recognize a wide variety of objects ：jointly train on object detection and classification, so that the model can predict objects that aren’t labelled in detection data</li>
+<li>better performance but still fast</li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>Current object detection datasets are limited compared to classification datasets  <ul>
+<li>leverage the classification data to expand the scope of current detection system</li>
+<li>joint training algorithm making the object detectors working on both detection and classification data</li>
+</ul>
+</li>
+<li><strong>Better performance</strong> often hinges on larger networks or ensembling multiple models. However we want a more accurate detector that is <strong>still fast</strong></li>
+<li>YOLOv1’s shortcomings<ul>
+<li>more localization errors</li>
+<li>low recall</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>要素：</p>
+<ol>
+<li><p>better</p>
+<p> <img src="/2019/11/28/yolo系列/better.png" width="70%;"></p>
+</li>
+<li><p>faster</p>
+<ul>
+<li>backbone</li>
+</ul>
+</li>
+<li><p>stronger</p>
+<ul>
+<li><p>uses labeled detection images to learn to precisely localize objects </p>
+</li>
+<li><p>uses classification images to increase its vocabulary and robustness</p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>better：</p>
+<ol>
+<li><p>batch normalization：convergence &amp; regularization</p>
+<blockquote>
+<p>add batch normalization on all of the convolutional layers </p>
+<p>remove dropout from the model </p>
+</blockquote>
+</li>
+<li><p>high resolution classifier：pretrain a hi-res classifier </p>
+<blockquote>
+<p>first fine tune the classification network at the full 448 × 448 resolution for 10 epochs on ImageNet</p>
+<p>then fine tune the resulting network on detection </p>
+</blockquote>
+</li>
+<li><p>convolutional with anchor boxes：</p>
+<p>YOLOv1通过网络最后的<strong>全连接层</strong>，直接预测每个grid上bounding box的坐标</p>
+<p>而RPN基于先验框，使用最后一层<strong>卷积层</strong>，在特征图的各位置预测bounding box的offset和confidence</p>
+<blockquote>
+<p> “Predicting offsets instead of coordinates simplifies the problem and makes it easier for the network to learn”</p>
+</blockquote>
+<p>YOLOv2去掉了全连接层，也使用anchor box来回归bounding box</p>
+<blockquote>
+<p>eliminate one pooling layer to make the network output have higher resolution</p>
+<p>shrink the network input to 416<em>416 to obtain an odd number so that there is a <em>*single center cell</em></em> in the feature map</p>
+<p>predict class and objectness for every anchor box(offset prediction) instead of nothing(direct location&amp;scale prediction)</p>
+</blockquote>
+</li>
+<li><p>dimension clustering：</p>
+<p>what we want are priors that lead to good IOU scores, thus comes the distance metric：</p>
+<script type="math/tex; mode=display">
+d(box, centroid) = 1 - IOU(box, centroid)</script></li>
+<li><p>direct location prediction：</p>
+<p>YOLOv1 encounter model instability issue for predicting the (x, y) locations for the box</p>
+<p>RPN also takes a long time to stabilize  by predicting a (tx, ty) and obtain the (x, y) center coordinates indirectly because this formulation is unconstrained so any anchor box can end up at any point in the image：</p>
+<script type="math/tex; mode=display">
+x = t_x * w_a - x_a\\
+y = t_y * h_a - y_a</script><blockquote>
+<p>学习RPN：回归一个相对量，比盲猜回归一个绝对location（YOLOv1）更好学习</p>
+<p>学习YOLOv1：基于cell的预测，将bounding box限定在有限区域，不是全图飞（RPN）</p>
+</blockquote>
+<p>YOLOv2对每个cell，基于5个prior anchor size，预测5个bounding box，每个bounding box具有5维：</p>
+<script type="math/tex; mode=display">
+b_x = \sigma(t_x) + c_x\\
+b_y = \sigma(t_y) + c_y\\
+b_w = p_w e^{t_w}\\
+b_h = p_h e^{t_h}\\
+Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
+<li>$t_x\ \&amp;\ t_y$用于回归bounding box的位置，通过sigmoid激活函数被限定在0-1，通过上式能够间接得到bounding box的归一化位置（相对原图）</li>
+<li>$t_w\ \&amp;\ t_h$用于回归bounding box的尺度，输出应该不是0-1限定，$p_w\ \&amp;\ p_h$是先验框的归一化尺度，通过上式能够间接得到bounding box的归一化尺度（相对原图）</li>
+<li>$t_o$用于回归objectness，通过sigmoid限定在0-1之间，因为$Pr(object)\ \&amp;\ IOU(b,object)$都是0-1之间的值，IOU通过前面四个值能够求解，进而可以解耦objectness</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/regression.png" width="40%;"></p>
+</li>
+<li><p>fine-grained features：</p>
+<p>motive：小物体的检测依赖更加细粒度的特征</p>
+<p>cascade：Faster R-CNN and SSD both run their proposal networks at various feature maps in the network to get a range of resolutions</p>
+<p>【QUESTION】YOLOv2 simply adds a passthrough layer from an earlier layer at 26 × 26 resolution：</p>
+<blockquote>
+<p>latter featuremap —-&gt; upsampling</p>
+<p>concatenate with early featuremap</p>
+<p>the detector runs on top of this expanded feature map </p>
+</blockquote>
+<p>predicts a $N<em>N</em>(3*(4+1+80))$ tensor for each scale</p>
+</li>
+<li><p>multi-scale training：</p>
+<p>模型本身不限定输入尺寸：model only uses convolutional and pooling layers thus it can be resized on the fly </p>
+</li>
+</ol>
+<ul>
+<li>forces the network to learn to predict well across a variety of input dimensions <ul>
+<li>the same network can predict detections at different resolutions</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>loss：<strong>cited from the latter yolov3 paper</strong></p>
+<ul>
+<li>use sum of squared error loss for box coordinate(x,y,w,h)：then the gradient is $y_{true} - y_{pred}$</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>use logistic regression for objectness score：which should be 1 if the bounding box prior overlaps a ground truth object by more than any other bounding box prior<ul>
+<li>if a bounding box prior is not assigned to a ground truth object it incurs no loss(coordinate&amp;objectness)</li>
+</ul>
+</li>
+<li>use binary cross-entropy loss for multilabel classification</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>faster：</p>
+<ol>
+<li><p>darknet-19：</p>
+<p> YOLOv1中讨论过换VGG-16和YOLOv1使用的backbone对比，前者有map提升，但是耗时。</p>
+<p> YOLOv2的新backbone，参数更少，而且相对于VGG16在ImageNet上精度更高。</p>
+<p> <img src="/2019/11/28/yolo系列/darknet19.png" width="40%;"></p>
+</li>
+<li><p>training for classification：</p>
+<pre><code> * first train on ImageNet using 224*224
+
+ * then fine-tuning on 448*448
+</code></pre><ol>
+<li><p>training for detection：</p>
+<ul>
+<li><p>remove the last convolutional layer</p>
+</li>
+<li><p>add on three 3 × 3 convolutional layers with 1024 filters each followed by a final 1×1 convolutional layer with the number of outputs we need for detection </p>
+</li>
+<li>add a passthrough from the final 3 × 3 × 512 layer to the second to last convolutional layer so that our model can use fine grain features. </li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>stronger：</p>
+<p> jointly training：以后再填坑</p>
+<ul>
+<li>构造标签树</li>
+<li>classification sample用cls loss，detection sample用detect loss</li>
+<li>预测正确的classification sample给一个.3 IOU的假设值用于计算objectness loss</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="3-Yolov3-An-Incremental-Improvement"><a href="#3-Yolov3-An-Incremental-Improvement" class="headerlink" title="3. Yolov3: An Incremental Improvement"></a>3. Yolov3: An Incremental Improvement</h2><ol>
+<li><p>动机：</p>
+<p> nothing like super interesting, just a bunch of small changes that make it better</p>
+</li>
+<li><p>方法：</p>
+<ol>
+<li><p>bounding box prediction：</p>
+<p> use anchor boxes and predicts offsets for each bounding box</p>
+<p> use sum of squared error loss for training</p>
+<p> predicts the objectness score for each bounding box using logistic regression</p>
+<p> one ground truth coresponds to one best box and one loss</p>
+</li>
+<li><p>class prediction：</p>
+<p> use binary cross-entropy loss for multilabel classification</p>
+</li>
+<li><p><strong>【NEW】prediction across scales：</strong></p>
+<p> the detector：a few more convolutional layers following the feature map, the last of which predicts a 3-d(for 3 priors) tensor encoding bounding box, objectness, and class predictions</p>
+<p> expanded feature map：upsampling the deeper feature map by 2X and concatenating with the former features</p>
+<blockquote>
+<p>“With the new multi-scale predictions, YOLOv3 has better perfomance on small objects and comparatively worse performance on medium and larger size objects “</p>
+</blockquote>
+</li>
+<li><p><strong>【NEW】feature extractor：</strong></p>
+<p> darknet-53 !</p>
+<p> <img src="/2019/11/28/yolo系列/darknet53.png" width="40%;"></p>
+</li>
+<li><p>training：common skills</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="4-一些补充"><a href="#4-一些补充" class="headerlink" title="4. 一些补充"></a>4. 一些补充</h2><ol>
+<li><p>metrics：mAP</p>
+<p> 最早由PASCAL VOC提出，输出结果是一个ranked list，每一项包含框、confidence、class，</p>
+<p> yolov3提到了一个“COCOs weird average mean AP metric ”</p>
+<ul>
+<li><p>IoU：预测框与ground truth的交并比，也被称为Jaccard指数，我们通常用其来判断每个检测的正确性。PASCAL VOC数据集用0.5为阈值来判定预测框是True Positive还是False Positive，COCO数据集则建议对不同的IoU阈值进行计算。</p>
+<p><img src="/2019/11/28/yolo系列/iou.png" width="20%;"></p>
+</li>
+<li><p>置信度：通过改变置信度阈值，我们可以改变一个预测框是Positive还是 Negative。</p>
+</li>
+<li><p>precision &amp; recall：precision = TP ／(TP + FP)，recall = TP／(TP + FN)。图片中我们没有预测到的每个部分都是Negative，因此计算True Negatives比较难办。但是我们只需要计算False Negatives，即我们模型所漏检的物体。</p>
+<p>  <img src="/2019/11/28/yolo系列/pr.png" width="30%;"></p>
+</li>
+<li><p>AP：不同的置信度下会得到不同的precision-recall。为了得到precision-recall曲线，首先对模型预测结果进行排序，按照各个预测值置信度降序排列。给定不同的置信度阈值，就有不同的ranked output，Recall和Precision仅在高于该rank值的预测结果中计算。这里共选择11个不同的recall（[0, 0.1, …, 0.9, 1.0]），那么AP就定义为在这11个recall下precision的平均值，其可以表征整个precision-recall曲线（曲线下面积）。给定recall下的precision计算，是通过一种插值的方式：</p>
+<script type="math/tex; mode=display">
+  AP = \frac{1}{11}\sum_{r\in\{0,0.1,...,1.0\}}p_{interp}(r) \\
+  p_{interp}(r) = max_{\tilde r: \tilde r > r} p(\tilde r)</script></li>
+<li><p>mAP：此度量指标在<strong>信息检索</strong>和<strong>目标检测</strong>领域有不同的计算方式。对于目标检测，对于各个类别，分别按照上述方式计算AP，取所有类别的AP平均值就是mAP。</p>
+<p>  <img src="/2019/11/28/yolo系列/map.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>eval：</p>
+<ol>
+<li>yolo_head输出：box_xy是box的中心坐标，(0~1)相对值；box_wh是box的宽高，(0~1)相对值；box_confidence是框中物体置信度；box_class_probs是类别置信度；</li>
+<li>yolo_correct_boxes函数：能够将box中心的相对信息转换成[y_min,x_min,y_max,x_max]的绝对值</li>
+<li>yolo_boxes_and_scores函数：输出网络预测的所有box</li>
+<li>yolo_eval函数：基于score_threshold、max_boxes两项过滤，类内NMS，得到最终输出</li>
+</ol>
+</li>
+</ol>
+<h2 id="4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection"><a href="#4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection" class="headerlink" title="4. YOLOv4: Optimal Speed and Accuracy of Object Detection"></a>4. YOLOv4: Optimal Speed and Accuracy of Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Practical testing the tricks of improving CNN</li>
+<li>some features<ul>
+<li>work for certain problems/dataset exclusively</li>
+<li>applicable to the majority of models, tasks, and datasets</li>
+<li>only increase the training cost  [bag-of-freebies]</li>
+<li>only increase the inference cost by a small amount but can significantly improve the accuracy  [bag-of-specials]</li>
+</ul>
+</li>
+<li>Optimal Speed and Accuracy </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>head：<ul>
+<li>predict classes and bounding boxes </li>
+<li>one-stage head<ul>
+<li>YOLO, SSD, RetinaNet </li>
+<li>anchor-free：CenterNet, CornerNet, FCOS  </li>
+</ul>
+</li>
+<li>two-stage head<ul>
+<li>R-CNN series </li>
+<li>anchor-free：RepPoints </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>neck：<ul>
+<li>collect feature maps from different stages </li>
+<li>FPN, PAN, BiFPN, NAS-FPN </li>
+</ul>
+</li>
+<li><p>backbone：</p>
+<ul>
+<li>pre-trained on ImageNet</li>
+<li>VGG, ResNet, ResNeXt, DenseNet</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/detector.png" width="70%;"></p>
+</li>
+<li><p>Bag of freebies</p>
+<ul>
+<li>data augmentation <ul>
+<li>pixel-wise adjustments<ul>
+<li>photometric distortions：brightness, contrast, hue, saturation, and noise </li>
+<li>geometric distortions：random scaling, cropping, flipping, and rotating </li>
+</ul>
+</li>
+<li>object-wise<ul>
+<li>cut：<ul>
+<li>to image：CutOut </li>
+<li>to featuremaps：DropOut, DropConnect, DropBlock </li>
+</ul>
+</li>
+<li>add：MixUp, CutMix, GAN </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>data imbalance for classification<ul>
+<li>two-stage：hard example mining </li>
+<li>one-stage：focal loss, soft label  </li>
+</ul>
+</li>
+<li>bounding box regression <ul>
+<li>MSE-regression：treat [x,y,w,h] as independent variables</li>
+<li>IoU loss：consider the integrity &amp; scale invariant </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Bag of specials <ul>
+<li>enlarging receptive field：improved SPP, ASPP, RFB</li>
+<li>introducing attention mechanism <ul>
+<li>channel-wise attention：SE, increase the inference time by about 10%</li>
+<li>point-wise attention：Spatial Attention Module (SAM), does not affect the speed of inference</li>
+</ul>
+</li>
+<li>strengthening feature integration<ul>
+<li>channel-wise level：SFAM</li>
+<li>point-wise level：ASFF </li>
+<li>scale-wise level：BiFPN </li>
+</ul>
+</li>
+<li>activation function：A good activation function can make the gradient more efficiently propagated</li>
+<li>post-processing：各种NMS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>choose a backbone —- CSPDarknet53 </p>
+<ul>
+<li>Higher input network size (resolution) – for detecting multiple small-sized objects </li>
+<li>More conv layers – for a higher receptive field to cover the increased size of input network </li>
+<li>More parameters – for greater capacity of a model to detect multiple objects of different sizes in a single image </li>
+</ul>
+</li>
+<li><p>add the SPP block over the CSPDarknet53 </p>
+<ul>
+<li>significantly increases the receptive field </li>
+<li>separates out the most significant context features  </li>
+<li>causes almost no re- duction of the network operation speed</li>
+</ul>
+</li>
+<li><p>use PANet as the method of parameter aggregation </p>
+<ul>
+<li>Modified PAN</li>
+<li><p>replace shortcut connection of PAN to concatenation </p>
+<p><img src="/2019/11/28/yolo系列/pan.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>use YOLOv3 (anchor based) head </p>
+<ul>
+<li><p>encoding/decoding method变了！！！</p>
+</li>
+<li><p>代码和issue里面有说明：<a href="https://github.com/WongKinYiu/ScaledYOLOv4/issues/90#，但是论文里没显式的说明" target="_blank" rel="noopener">https://github.com/WongKinYiu/ScaledYOLOv4/issues/90#，但是论文里没显式的说明</a></p>
+<ul>
+<li><p>given pred offsets $t_x,t_y,t_w,t_h$</p>
+</li>
+<li><p>xy_offsets：for each grid centers</p>
+<script type="math/tex; mode=display">
+  b_x = sigmoid(t_x)*2 - 0.5 \\
+  b_y = sigmoid(t_y)*2 - 0.5</script></li>
+<li><p>wh_ratios：for each grid anchors</p>
+<script type="math/tex; mode=display">
+  b_w = (sigmoid(t_w)*2)^2 - 0.5 \\
+  b_h = (sigmoid(t_h)*2)^2 - 0.5</script></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Mosaic data augmentation</p>
+<ul>
+<li>mixes 4 training images </li>
+<li>allows detection of objects outside their normal context</li>
+<li>reduces the need for a large mini-batch size </li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/mosaic.png" width="40%;"></p>
+</li>
+<li><p>Self-Adversarial Training (SAT) data augmentation</p>
+<ul>
+<li>1st stage alters images</li>
+<li>2nd stage train on the modified images</li>
+</ul>
+</li>
+<li><p>CmBN：a CBN modified version </p>
+<p><img src="/2019/11/28/yolo系列/cmbn.png" width="40%;"></p>
+</li>
+<li><p>modified SAM：from spatial-wise attention to point- wise attention</p>
+<ul>
+<li>这里的SAM for 《An Empirical Study of Spatial <em>Attention</em> Mechanisms in Deep Networks》 ，空间注意力机制</li>
+<li>还有一篇SAM是《Sharpness-Aware Minimization for Efficiently Improving Generalization》，google的锐度感知最小化，用来提升模型泛化性能，注意区分</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/sam.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>Influence of different features on Classifier training </p>
+<ul>
+<li><p>Bluring和Swish没有提升</p>
+<p><img src="/2019/11/28/yolo系列/cls.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Influence of different features on Detector training </p>
+<ul>
+<li>IoU threshold, CmBN, Cosine annealing sheduler, CIOU有提升</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3"><a href="#POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3" class="headerlink" title="POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3"></a>POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>yoloV3’s weakness</p>
+<ul>
+<li>rewritten labels </li>
+<li>inefficient distribution of anchors </li>
+</ul>
+</li>
+<li><p>light backbone：</p>
+<ul>
+<li>stairstep upsampling </li>
+</ul>
+</li>
+<li>single scale output </li>
+<li>to extend instance segmentation <ul>
+<li>detect size-independent polygons defined on a polar grid </li>
+<li>real-time processing </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>yolov3</p>
+<ul>
+<li>real-time</li>
+<li>low precision cmp with RetinaNet, EfficientDet <ul>
+<li>low precision of the detection of big boxes </li>
+<li>rewriting of labels by each-other due to the coarse resolution </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper solution：</p>
+<ul>
+<li>解决yolo精度问题：propose a brand-new feature decoder with a single ouput tensor that goes to head with higher resolution</li>
+<li>多尺度特征融合：utilize stairstep upscaling</li>
+<li>实例分割：bounding polygon within a poly grid</li>
+</ul>
+</li>
+<li><p>instance segmentation</p>
+<ul>
+<li>two-stage：mask-rcnn</li>
+<li>one-stage：<ul>
+<li>top-down：segmenting this object within a bounding box</li>
+<li>bottom-up：start with clustering pixels</li>
+<li>direct methods：既不需要bounding box也不需要clustered pixels，PolarMask </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>cmp with PolarMask </p>
+<ul>
+<li>size-independent：尺度，大小目标都能检测</li>
+<li>dynamic number of vertices：多边形定点可变</li>
+</ul>
+</li>
+<li><p>yolov3 issues</p>
+<ul>
+<li><p>rewriting of labels：</p>
+<ul>
+<li>两个目标如果落在同一个格子里，在一个尺度上ground truth label只会保留一个box</li>
+<li><p>对越小的特征图，grid越大，这个问题越严重</p>
+<p><img src="/2019/11/28/yolo系列/rewriting.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>imbalanced distribution of anchors across output scales </p>
+<ul>
+<li>anchor如果选的不合理，会导致特征图尺度和anchor尺度不匹配</li>
+<li>most of the boxes will be captured by the middle output layer and the two other layers will be underused</li>
+<li>如上面车的case，大多数车的框很小，聚类出的给level0和level1的anchor shape还是很小，但是level0是稀疏grid<ul>
+<li>一方面，grid shape和anchor shape不匹配</li>
+<li>一方面，label rewriten问题会升级</li>
+</ul>
+</li>
+<li>反过来，如果dense grid上预测大目标，会受到感受野的制约</li>
+<li>一种解决方案是基于感受野首先对gt box分成三组，然后分别聚类，然后9选1</li>
+</ul>
+</li>
+<li><p>yolov3原文：YOLOv3 has relatively high $AP_{small}$ performance. However, it has comparatively worse performance on medium and larger size objects. More investigation is needed to get to the bottom of this.</p>
+<ul>
+<li>小目标performance更好，大目标worse，主要是就是因为coarse grid上存在label rewriten问题，存在部分gt box被抑制掉了。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture </p>
+<p>  <img src="/2019/11/28/yolo系列/poly-yolo.png" width="80%;"></p>
+<ul>
+<li><p>single output  </p>
+</li>
+<li><p>higher resolution：stride4</p>
+</li>
+<li><p>handle all the anchors at once </p>
+</li>
+<li><p>cross-scale fusion</p>
+<ul>
+<li>hypercolumn technique：add operation</li>
+<li><p>stairstep interpolation：x2 x2 …</p>
+<p><img src="/2019/11/28/yolo系列/hypercolumn.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SE-blocks</p>
+</li>
+<li>reduced the number of convolutional filters to 75%  in the feature extraction phase </li>
+</ul>
+</li>
+<li><p>bounding polygons </p>
+<ul>
+<li>extend the box tuple：$b_i=\{b_i^{x^1},b_i^{y^1},b_i^{x^2},b_i^{y^2},V_i\}$</li>
+<li>The center of a bounding box is used as the origin </li>
+<li>polygon tuple：$v_{i,j}=\{\alpha_{i,j},\beta_{i,j},\gamma_{i,j}\}$</li>
+<li>polar coordinate：distance &amp; oriented angle，相对距离（相对anchor box的对角线），相对角度（norm到[0,1]）</li>
+<li><p>polar cell：一定角度的扇形区域 内，如果sector内没有定点，conf=0</p>
+<p><img src="/2019/11/28/yolo系列/polar.png" width="80%;"></p>
+</li>
+<li><p>general shape：</p>
+<ul>
+<li>不同尺度，形状相同的object，在polar coord下表示是一样的</li>
+<li>distance*anchor box的对角线，转换成绝对尺度</li>
+<li>bounding box的两个对角预测，负责尺度估计，polygon只负责预测形状</li>
+<li>sharing values should make the learning easier</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>mix loss</p>
+<ul>
+<li>output：a*(4+1+3*n_vmax)</li>
+<li>box center loss：bce</li>
+<li>box wh loss：l2 loss</li>
+<li>conf loss：bce with ignore mask</li>
+<li>cls loss：bce</li>
+<li>polygon loss：$\gamma<em>(log(\frac{\alpha}{anchor^d})-\hat a)^2 + \gamma</em>bce(\beta,\hat{beta})+bce(\gamma, \hat \gamma)$</li>
+<li>auxiliary task learning：<ul>
+<li>任务间相互boost</li>
+<li>converge faster </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network"><a href="#Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network" class="headerlink" title="Scaled-YOLOv4: Scaling Cross Stage Partial Network"></a>Scaled-YOLOv4: Scaling Cross Stage Partial Network</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>model scaling method</li>
+<li>redesign yolov4 and propose yolov4-CSP</li>
+<li>develop scaled yolov4<ul>
+<li>yolov4-tiny</li>
+<li>yolov4-large</li>
+</ul>
+</li>
+<li>没什么技术细节，就是网络结构大更新</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>common technique changes depth &amp; width of the backbone</p>
+</li>
+<li><p>recently there are NAS</p>
+</li>
+<li><p>model scaling</p>
+<ul>
+<li><p>input size、width、depth对网络计算量呈现square, linear, and square increase</p>
+<p><img src="/2019/11/28/yolo系列/flop.png" width="50%;"></p>
+</li>
+<li><p>改成CSP版本以后，能够减少参数量、计算量，提高acc，缩短inference time</p>
+<p><img src="/2019/11/28/yolo系列/CSPflop.png" width="50%;"></p>
+</li>
+<li><p>检测的准确性高度依赖reception field，RF随着depth线性增长，随着stride倍数增长，所以一般先组合调节input size和stage，然后再根据算力调整depth和width</p>
+<p>  <img src="/2019/11/28/yolo系列/reception.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>backbone：CSPDarknet53 </p>
+</li>
+<li><p>neck：CSP-PAN，减少40%计算量，SPP</p>
+<p>  <img src="/2019/11/28/yolo系列/CSPpan.png" width="50%;"></p>
+</li>
+<li><p>yoloV4-tiny</p>
+<p>  <img src="/2019/11/28/yolo系列/tiny.png" width="40%;"></p>
+</li>
+<li><p>yoloV4-large：P456</p>
+<p>  <img src="/2019/11/28/yolo系列/large.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>补充细节</p>
+<ul>
+<li><p>box regression</p>
+<p>  <img src="/2019/11/28/yolo系列/offset_v5.png" width="25%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/11/13/triplet-center-loss论文/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1775,6 +2687,16 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 </ul>
 </li>
 </ul>
+<p>14.4 get layer output</p>
+<ul>
+<li>有时候我们用Model类去定义一个层，以便获得更自由的表达能力，但是在inference阶段用get_layer(xxx).output去获取这个层的输出的时候会报错：multi-node… get_output_at…</li>
+<li>说这个层含有多个输出节点，需要用get_output_at来声明<ul>
+<li>get_output_at(0)是当前模型level的节点</li>
+<li>get_output_at(1)是当前模型作为层对象的输出节点</li>
+<li>这俩本质是一样的，但是Model类就是会创建这样的副本，这可能就是目前keras复现版本的显存占用要高于pytorch版的原因</li>
+</ul>
+</li>
+</ul>
 <h2 id="15-low-level-training-amp-evaluation-loops"><a href="#15-low-level-training-amp-evaluation-loops" class="headerlink" title="15. low-level training &amp; evaluation loops"></a>15. low-level training &amp; evaluation loops</h2><p>15.1 keras的Model类提供了build-in的train/eval方法</p>
 <pre><code>* fit()
 * evaluate()
@@ -1896,6 +2818,8 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">history = model.fit_generator(train_gen,</span><br><span class="line">							  steps_per_epoch=<span class="number">32</span>,</span><br><span class="line">							  epochs=<span class="number">3</span>,</span><br><span class="line">							  validation_data=val_gen,</span><br><span class="line">							  validation_steps=<span class="number">8</span>,</span><br><span class="line">)</span><br><span class="line">print(history.history)</span><br><span class="line">print(history.epoch)</span><br><span class="line">print(history.history[<span class="string">'val_loss'</span>])</span><br></pre></td></tr></table></figure>
 <p>18.3 保存：就是保存字典</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	pickle.dump(history.history, f)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'rb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	history = pickle.load(f)</span><br></pre></td></tr></table></figure>
+<h2 id="19-keras-分层学习率"><a href="#19-keras-分层学习率" class="headerlink" title="19. keras 分层学习率"></a>19. keras 分层学习率</h2><p>19.1 包装层，添加层参数</p>
+<p>19.2 写在optmizer里面</p>
 
           
         
@@ -2367,140 +3291,6 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/04/Occupancy-Grid-Map/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/12/04/Occupancy-Grid-Map/" itemprop="url">Occupancy Grid Map</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-04T14:13:01+08:00">
-                2018-12-04
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/12/04/Occupancy-Grid-Map/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/04/Occupancy-Grid-Map/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>to be completed…</p>
-<ul>
-<li>Inverse Sensor Model</li>
-<li>Incremental Updating</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2555,7 +3345,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">147</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

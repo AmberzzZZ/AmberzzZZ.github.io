@@ -635,142 +635,6 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/10/leetcode-81-搜索旋转数组2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/10/leetcode-81-搜索旋转数组2/" itemprop="url">leetcode 81 搜索旋转数组2</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-10T14:55:26+08:00">
-                2018-06-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/10/leetcode-81-搜索旋转数组2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/10/leetcode-81-搜索旋转数组2/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>实名diss这道题，一看是旋转排序数组直接做了，然后才发现测试样例里面出现了左右边界重合的情况，然后仔细再审题才发现这行小字：</p>
-<p><img src="/2018/06/10/leetcode-81-搜索旋转数组2/屏幕快照 2018-06-10 14.59.19.png" alt=""></p>
-<p>不包含重复元素的情况下代码实现如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt;= nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
-<p>因为数组中现在存在重复的元素，因此有一个特殊的情况：左右边界值相同，并且nums[mid]值与边界值也相同，这时nums[mid]可能位于两段数组的任意一边。因此要独立讨论一下这个情况：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">            	<span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt; nums[end]:</span><br><span class="line">            <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                end = mid - <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">elif</span> nums[mid] &gt; nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># nums[mid] = nums[end]的情况</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">            	end -= <span class="number">1</span></span><br><span class="line">		</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
-<p>测试用时50ms，因为边界重复的循环没有有效地二分数组，但是思路贼简单啊。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/07/PnP-Perspective-n-Point/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1216,7 +1080,7 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/04/leetcode79-单词搜索/">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/04/leetcode/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="amber.zhang">
@@ -1235,7 +1099,7 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/06/04/leetcode79-单词搜索/" itemprop="url">leetcode79 单词搜索</a></h1>
+                <a class="post-title-link" href="/2018/06/04/leetcode/" itemprop="url">leetcode</a></h1>
         
 
         <div class="post-meta">
@@ -1266,8 +1130,8 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/06/04/leetcode79-单词搜索/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/04/leetcode79-单词搜索/" itemprop="commentCount"></span>
+                <a href="/2018/06/04/leetcode/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/04/leetcode/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1297,7 +1161,7 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
       
         
           
-            <p>挂一道很猥琐的题，二维网格中搜索单词，同一单元格不能重复使用：</p>
+            <h2 id="lc79"><a href="#lc79" class="headerlink" title="lc79"></a>lc79</h2><p>挂一道很猥琐的题，二维网格中搜索单词，同一单元格不能重复使用：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">board =</span><br><span class="line">[</span><br><span class="line">  [&apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;E&apos;],</span><br><span class="line">  [&apos;S&apos;,&apos;F&apos;,&apos;C&apos;,&apos;S&apos;],</span><br><span class="line">  [&apos;A&apos;,&apos;D&apos;,&apos;E&apos;,&apos;E&apos;]</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">给定 word = &quot;ABCCED&quot;, 返回 true.</span><br><span class="line">给定 word = &quot;SEE&quot;, 返回 true.</span><br><span class="line">给定 word = &quot;ABCB&quot;, 返回 false.</span><br></pre></td></tr></table></figure>
 <p>没啥好算法，就是DFS，但是坑在于visited的存储，python数组默认浅拷贝，递归传进去再回到上一层网格状态就变了，之前一贯的做法就是新开一块内存空间，传新的数组进去，然而这次超时了，因为测试用例的二维数组尺寸贼大，终于有机会正视这个问题，并获取正确的打开方式：</p>
 <ul>
@@ -1307,9 +1171,36 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">search_tail</span><span class="params">(board, word, h, w)</span>:</span></span><br><span class="line">    size = len(word)</span><br><span class="line">    char = word[<span class="number">0</span>]</span><br><span class="line">    height, width = len(board), len(board[<span class="number">0</span>])</span><br><span class="line">    exist = <span class="keyword">False</span></span><br><span class="line">    <span class="keyword">if</span> h - <span class="number">1</span> &gt;= <span class="number">0</span> <span class="keyword">and</span> board[h<span class="number">-1</span>][w] == char:</span><br><span class="line">        <span class="keyword">if</span> size == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            tmp = board[h<span class="number">-1</span>][w]</span><br><span class="line">            board[h<span class="number">-1</span>][w] = <span class="string">'INF'</span></span><br><span class="line">            exist = search_tail(board, word[<span class="number">1</span>:], h<span class="number">-1</span>, w)</span><br><span class="line">            <span class="keyword">if</span> exist:</span><br><span class="line">				<span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line">            board[h<span class="number">-1</span>][w] = tmp</span><br><span class="line">    <span class="keyword">if</span> h + <span class="number">1</span> &lt; height <span class="keyword">and</span> board[h+<span class="number">1</span>][w] == char:</span><br><span class="line">        ...</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>然后针对本题还有一个骚操作，很多人专门创建一个visited表来记录搜索路径，但是因为本题的二维数组限定存储字母，所以任意一个非字母都可以作为标志位，美滋滋又省下一个O(m*n)。</p>
-<p><img src="/2018/06/04/leetcode79-单词搜索/188ms.png" alt="188ms"></p>
 </li>
 </ul>
+<h2 id="lc81"><a href="#lc81" class="headerlink" title="lc81"></a>lc81</h2><p>实名diss这道题，一看是旋转排序数组直接做了，然后才发现测试样例里面出现了左右边界重合的情况，然后仔细再审题才发现这行小字：</p>
+<p><u>这是搜索旋转排序数组的延伸题目，本题中nums可能包含重复元素</u></p>
+<p>不包含重复元素的情况下代码实现如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt;= nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
+<p>因为数组中现在存在重复的元素，因此有一个特殊的情况：左右边界值相同，并且nums[mid]值与边界值也相同，这时nums[mid]可能位于两段数组的任意一边。因此要独立讨论一下这个情况：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, nums, target)</span>:</span></span><br><span class="line"></span><br><span class="line">        size = len(nums)</span><br><span class="line">        start = <span class="number">0</span></span><br><span class="line">        end = size - <span class="number">1</span></span><br><span class="line">        <span class="keyword">while</span> start &lt;= end:</span><br><span class="line"></span><br><span class="line">            mid = (start + end) // <span class="number">2</span></span><br><span class="line">            <span class="keyword">if</span> nums[mid] == target:</span><br><span class="line">            	<span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> nums[mid] &lt; nums[end]:</span><br><span class="line">            <span class="keyword">if</span> target &lt; nums[mid] <span class="keyword">or</span> target &gt; nums[end]:</span><br><span class="line">                end = mid - <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                start = mid + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">elif</span> nums[mid] &gt; nums[end]:</span><br><span class="line">                <span class="keyword">if</span> target &gt; nums[mid] <span class="keyword">or</span> target &lt; nums[start]:</span><br><span class="line">                    start = mid + <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    end = mid - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># nums[mid] = nums[end]的情况</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">            	end -= <span class="number">1</span></span><br><span class="line">		</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">False</span></span><br></pre></td></tr></table></figure>
+<p>测试用时50ms，因为边界重复的循环没有有效地二分数组，但是思路贼简单啊。</p>
+<h2 id="lc95"><a href="#lc95" class="headerlink" title="lc95"></a>lc95</h2><p>96和95都是二叉搜索树，先做的96，求树的结构有几种，没注意结点大小关系，用<strong>动态规划</strong>来做，$dp[i] = dp[0]<em>dp[i-1] + … + dp[i-1]</em>dp[0]$。注意递归调用的时间复杂度，<strong>自底向上</strong>来算：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">numTrees</span><span class="params">(self, n)</span>:</span></span><br><span class="line">	res = [<span class="number">1</span>, <span class="number">1</span>]</span><br><span class="line">    <span class="keyword">if</span> n &lt; <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">return</span> res[n]</span><br><span class="line">    </span><br><span class="line">    res += [<span class="number">0</span>]*(n<span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>, n+<span class="number">1</span>):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(i):</span><br><span class="line">            res[i] += res[j]*res[i<span class="number">-1</span>-j]</span><br><span class="line">	</span><br><span class="line">    <span class="keyword">return</span> res[n]</span><br></pre></td></tr></table></figure>
+<p>95要列出结构了，才发现<strong>什么是二叉搜索树来着</strong>——左子树的结点值均小于根节点，右子树的结点值均大于根节点。按照惯例，求数量用DP，求枚举则用DFS：</p>
+<p>遍历每一个数字$i$作为根节点，那么$[1, 2, …, i-1]$构成其左子树，$[i+1, i+2, …, n]$构成其右子树。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">generateTrees</span><span class="params">(self, n)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> n == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> self.dfs(<span class="number">1</span>,n)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dfs</span><span class="params">(self, b, e)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> b &gt; e:</span><br><span class="line">        <span class="keyword">return</span> [<span class="keyword">None</span>]</span><br><span class="line">    res = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(b, e+<span class="number">1</span>):</span><br><span class="line">        <span class="comment"># set as the root node</span></span><br><span class="line">        leftTrees = self.dfs(b, i<span class="number">-1</span>)</span><br><span class="line">        rightTrees = self.dfs(i+<span class="number">1</span>, e)</span><br><span class="line">        <span class="keyword">for</span> left <span class="keyword">in</span> leftTrees:</span><br><span class="line">            <span class="keyword">for</span> right <span class="keyword">in</span> rightTrees:</span><br><span class="line">                root = TreeNode(i)</span><br><span class="line">                root.left = left</span><br><span class="line">                root.right = right</span><br><span class="line">                res.append(root)</span><br><span class="line">	<span class="keyword">return</span> res</span><br></pre></td></tr></table></figure>
+<h2 id="lc28"><a href="#lc28" class="headerlink" title="lc28"></a>lc28</h2><p>实现 strStr() 函数。给你两个字符串 haystack 和 needle ，请你在 haystack 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。如果不存在，则返回  -1 。</p>
+<p>KMP算法，两个难点：</p>
+<ul>
+<li>O(m)计算needle中每个子串 needle[:k]的最长前缀</li>
+<li>O(n)计算无回溯匹配needle</li>
+</ul>
+<p>【先分析第一个：</p>
+<p>needle的长度为m，那么维护一个等长的前缀数组next，next[0]=0，首字母没有真正意义的前/后缀</p>
+<p>对于子串needle[:i]，首先查看子串needle[:i-1]的前缀长度，j=next[i-1]</p>
+<ul>
+<li>如果needle[j]=needle[i]，next[i]=j+1</li>
+<li>如果不相等，我们目前有needle[:i-1]的前/后缀，needle[0:j]和needle[i-j:i]，显然needle[:i]的前缀只能是needle[0:j]的前缀子串，最长为needle[0:j-1]，同时它还得是needle[i-j:i]的后缀子串，说白了就是在子串needle[0:j]中要最大匹配前/后缀：迭代j=next[next[i-1]-1]，如果子串没有共享前/后缀就是0</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">next = [<span class="number">0</span>] * len(needle)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,len(needle)):</span><br><span class="line">	j = next[i<span class="number">-1</span>]</span><br><span class="line">	<span class="keyword">while</span> j&gt;<span class="number">0</span> <span class="keyword">and</span> needle[i]!=needle[j]:</span><br><span class="line">		j = next[j<span class="number">-1</span>]</span><br><span class="line">        </span><br><span class="line">	<span class="keyword">if</span> needle[i]==needle[j]:</span><br><span class="line">		next[i] = j+<span class="number">1</span></span><br><span class="line"></span><br><span class="line">print(<span class="string">'next'</span>, next)</span><br></pre></td></tr></table></figure>
+<p>【再分析查找阶段，对于给定字符串haystack，暴力解法是从头开始匹配，遇到mismatch就回溯到起始点下一位重新开始匹配，这样的时间复杂度是O(nm)，之所以能够做到无回溯匹配，就是因为有了前缀数组，当我们匹配到needle的一半遇到mismatch了，对于已经匹配上的子串，不需要回溯到起始位置，而是可以从共享前/后缀开始匹配，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">needle_idx = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(haystack)):</span><br><span class="line">	<span class="keyword">while</span> needle_idx <span class="keyword">and</span> haystack[i]!=needle[needle_idx]:</span><br><span class="line">		needle_idx = next[max(<span class="number">0</span>,needle_idx<span class="number">-1</span>)]</span><br><span class="line">	<span class="keyword">if</span> haystack[i]==needle[needle_idx]:</span><br><span class="line">		needle_idx += <span class="number">1</span></span><br><span class="line">	<span class="keyword">if</span> needle_idx&gt;=len(needle):</span><br><span class="line">		<span class="keyword">return</span> i-len(needle)+<span class="number">1</span></span><br><span class="line"><span class="keyword">return</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
 
           
         
@@ -2482,6 +2373,258 @@ I & -(Rp+t)^{\wedge}\\
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/08/cmake/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/08/cmake/" itemprop="url">cmake for record</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-08T00:06:03+08:00">
+                2018-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/08/cmake/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/08/cmake/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="0-变量"><a href="#0-变量" class="headerlink" title="0. 变量"></a>0. 变量</h4><p>变量使用 ${ } 的方式取值，但是在if控制语句中直接使用变量名。</p>
+<h4 id="1-project"><a href="#1-project" class="headerlink" title="1. project"></a>1. project</h4><p>project ( project_name [CXX] [C] [Java] )</p>
+<p>用来指定工程名称和工程语言（可省略），指令隐式定义了projectname_BINARY_DIR和projectname_SOURCE_DIR两个变量（写在cmake_cache里面），指的是<strong>编译发生</strong>的当前目录。</p>
+<h4 id="2-set"><a href="#2-set" class="headerlink" title="2. set"></a>2. set</h4><p>set ( VAR  [VALUE] )</p>
+<p>用来显式定义变量，如set (SRC_LIST main.c t1.c t2.c) 。（竟然不用套括号？）</p>
+<h4 id="3-message"><a href="#3-message" class="headerlink" title="3. message"></a>3. message</h4><p>message ( [SEND_ERROR | STATUS | FATAL_ERROR]  “message to display”  VAR ) </p>
+<p>用来向终端输出用户定义的信息。</p>
+<h4 id="4-add-executable"><a href="#4-add-executable" class="headerlink" title="4. add_executable"></a>4. add_executable</h4><p>add_executable ( executable_filename  [source_filename] )</p>
+<p>生成名字为executable_filename的可执行文件，相关的源文件 [source_filename] 可以是一个源文件列表。</p>
+<h4 id="5-清理构建结果"><a href="#5-清理构建结果" class="headerlink" title="5. 清理构建结果"></a>5. 清理构建结果</h4><p>make clean</p>
+<p>对构建出的可执行文件进行清理。</p>
+<h4 id="6-外部构建"><a href="#6-外部构建" class="headerlink" title="6. 外部构建"></a>6. 外部构建</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>所有编译动作发生在编译目录，对原有工程没有任何影响。</p>
+<h4 id="7-add-subdirectory"><a href="#7-add-subdirectory" class="headerlink" title="7. add_subdirectory"></a>7. add_subdirectory</h4><p>add_subdirectory ( source_dir  [binary_dir]   [EXCLUDE_FROM_ALL] )</p>
+<p>向当前工程目录添加存放源文件的子目录source_dir，并指定存放中间二进制文件和目标二进制文件的位置binary_dir。指令隐式修改 EXECUTABLE_OUTPUT_PATH 和 LIBRARY_OUTPUT_PATH 两个变量。</p>
+<h4 id="8-更加像一个工程"><a href="#8-更加像一个工程" class="headerlink" title="8. 更加像一个工程"></a>8. 更加像一个工程</h4><ul>
+<li>创建工程根目录，创建CMakeLists.txt。</li>
+</ul>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定最低编译版本</span></span><br><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.7</span>)</span><br><span class="line"><span class="comment"># 指定工程名字</span></span><br><span class="line"><span class="keyword">PROJECT</span>(HELLO)</span><br><span class="line"><span class="comment"># 测试类打印信息</span></span><br><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"This is BINARY dir "</span> <span class="variable">$&#123;HELLO_BINARY_DIR&#125;</span>)</span><br><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"This is SOURCE dir "</span> <span class="variable">$&#123;HELLO_SOURCE_DIR&#125;</span>)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>添加子目录src，用来存放源文件，为子目录创建CMakeLists.txt。</li>
+</ul>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在根目录CMakeLists.txt中添加子目录声明</span></span><br><span class="line"><span class="keyword">add_subdirectory</span>(src bin)</span><br><span class="line"><span class="comment"># 编译产生的中间文件以及目标文件将保存在编译文件夹的bin子目录下</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编写当前子目录的CMakeLists.txt</span></span><br><span class="line"><span class="keyword">add_executable</span>(hello main.c)</span><br><span class="line"><span class="comment"># 修改最终生成的可执行文件以及库的路径，这两个指令要追随对应的add_executable()和add_library()指令</span></span><br><span class="line"><span class="keyword">set</span>(EXECUTABLE_OUTPUT_PATH <span class="variable">$&#123;PROJECT_BINARY_PATH&#125;</span>/bin)</span><br><span class="line"><span class="keyword">set</span>(LIBRARY_OUTPUT_PATH <span class="variable">$&#123;PROJECT_BINARY_DIR&#125;</span>/lib)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>添加子目录build，作为外部编译文件夹（ ${PROJECT_BINARY_DIR} ），存放编译的过程和目标文件。    </li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<ul>
+<li>添加子目录doc，用来存放工程文档hello.txt。</li>
+<li>添加文本文件README，COPYRIGHT。</li>
+<li>添加runhello.sh脚本，用来调用可执行文件hello。</li>
+</ul>
+<h4 id="9-打包安装"><a href="#9-打包安装" class="headerlink" title="9. 打包安装"></a>9. 打包安装</h4><ul>
+<li>在根目录的CMakeList.txt中添加安装信息</li>
+</ul>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装COPYRIGHT/README到&lt;prefix&gt;/share/doc/cmake/t2</span></span><br><span class="line"><span class="keyword">INSTALL</span>(FILES COPYRIGHT README DESTINATION share/doc/cmake/t2)</span><br><span class="line"><span class="comment"># 安装runhello.sh到&lt;prefix&gt;/bin</span></span><br><span class="line"><span class="keyword">INSTALL</span>(PROGRAMS runhello.sh DESTINATION bin)</span><br><span class="line"><span class="comment"># 安装工程文档到&lt;prefix&gt;/share/doc/cmake/t2</span></span><br><span class="line"><span class="keyword">INSTALL</span>(DIRECTORY doc/ DESTINATION share/doc/cmake/t2)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在子目录的CMakeList.txt中添加安装信息</li>
+</ul>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装脚本要调用的可执行文件hello到&lt;prefix&gt;/bin，</span></span><br><span class="line"><span class="comment"># 注意install(targets)指令也要追随对应add_executable()和add_library()指令的路径</span></span><br><span class="line"><span class="keyword">INSTALL</span>(TARGETS hello</span><br><span class="line">		RUNTIME DESTINATION bin)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>安装程序包</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cd build</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在cmake命令中指明安装目录的前缀&lt;prefix&gt;</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> CMAKE_INSTALL_PREFIX 默认是/usr/<span class="built_in">local</span></span></span><br><span class="line">cmake -DCMAKE_INSTALL_PREFIX=/Users/carrol/tmp ..</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看目标文件夹</span></span><br><span class="line">j tmp</span><br><span class="line">tree -a</span><br></pre></td></tr></table></figure>
+<h4 id="10-add-library"><a href="#10-add-library" class="headerlink" title="10. add_library"></a>10. add_library</h4><p>add_library ( name  [SHARED | STATIC | MODULE]  [source_filename] )</p>
+<p>生成名字为<strong>libname.X</strong>的库文件。</p>
+<ul>
+<li>SHARED，动态库，libname.dylib</li>
+<li>STATIC，静态库，libname.a</li>
+</ul>
+<p><strong>设置目标动态库和静态库同名 set_target_properties</strong></p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置目标动静态库同名</span></span><br><span class="line"><span class="keyword">add_library</span>(hello SHARED hello.c)</span><br><span class="line"><span class="keyword">add_library</span>(hello_static hello.c)</span><br><span class="line"><span class="keyword">set_target_properties</span>(hello_static</span><br><span class="line">                      PROPERTIES OUTPUT_NAME hello)</span><br></pre></td></tr></table></figure>
+<p><strong>防止构建中清理同名文件 set_target_properties</strong></p>
+<p>cmake在构建一个target时，会尝试清理掉其他使用这个名字的库——在构建libhello.a时会清理掉libhello.dylib。</p>
+<blockquote>
+<p>我实际操作时候会保留两个库文件，但是在作为第三方被引用的时候会报错：</p>
+<p>dyld: Library not loaded: libhello.dylib</p>
+<p>Reason: image not found</p>
+</blockquote>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET_TARGET_PROPERTIES</span>(hello </span><br><span class="line">                      PROPERTIES CLEAN_DIRECT_OUTPUT <span class="number">1</span>)</span><br><span class="line"><span class="keyword">SET_TARGET_PROPERTIES</span>(hello_static </span><br><span class="line">                      PROPERTIES CLEAN_DIRECT_OUTPUT <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>设置动态版本号 set_target_properties</strong></p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置动态库版本号</span></span><br><span class="line"><span class="keyword">set_target_properties</span>(hello</span><br><span class="line">                      PROPERTIES VERSION <span class="number">1.2</span></span><br><span class="line">                      SOVERSION <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>编译文件夹下生成了libhello.1.2.dylib、libhello.1.dylib、libhello.dylib三个动态库文件，只有一个是真的，另外两个是替身。</p>
+<p><strong>安装共享库和头文件</strong></p>
+<p>修改库的源文件夹下的CMakeLIsts.txt</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 库文件</span></span><br><span class="line"><span class="keyword">install</span>(TARGETS hello hello_static</span><br><span class="line">        ARCHIVE DESTINATION lib   //静态库</span><br><span class="line">        LIBRARY DESTINATION lib)  //动态库</span><br><span class="line"><span class="comment"># 头文件</span></span><br><span class="line"><span class="keyword">install</span>(FILES hello.h DESTINATION <span class="keyword">include</span>/hello)</span><br></pre></td></tr></table></figure>
+<h4 id="11-include-directories"><a href="#11-include-directories" class="headerlink" title="11. include_directories"></a>11. include_directories</h4><p>include_directories( dir1 dir2 … )</p>
+<p>用来向工程添加多个特定的<strong>头文件搜索路径</strong></p>
+<h4 id="12-link-directories-amp-target-link-libraries"><a href="#12-link-directories-amp-target-link-libraries" class="headerlink" title="12. link_directories &amp; target_link_libraries"></a>12. link_directories &amp; target_link_libraries</h4><p>link_directories( dir1 dir2 … )</p>
+<p>添加非标准的<strong>共享库搜索路径</strong></p>
+<p>target_link_libraries( target lib1 lib2 … )</p>
+<p>用来为目标target添加需要链接的共享库，target可以是一个可执行文件，也可以是一个库文件。</p>
+<p><strong>查看生成目标的库依赖情况</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 生成的目标可执行文件为main</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> OSX</span></span><br><span class="line">otool -L main</span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> linux</span></span><br><span class="line">ldd main</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>只能列出动态库。</p>
+</blockquote>
+<h4 id="13-常用变量"><a href="#13-常用变量" class="headerlink" title="13. 常用变量"></a>13. 常用变量</h4><p><strong>PROJECT_BINARY_DIR</strong>：编译发生的目录</p>
+<p><strong>PROJECT_SOURCE_DIR</strong>：工程顶层目录</p>
+<p><strong>CMAKE_CURRENT_SOURCE_DIR</strong>：当前CMakeLists.txt所在目录</p>
+<p><strong>CMAKE_MODULE_PATH</strong>：自定义的<strong>cmake模块</strong>所在路径</p>
+<p><strong>LIBRARY_OUTPUT_PATH</strong>：重定义目标库文件存放目录</p>
+<p><strong>EXECUTABLE_OUTPUT_PATH</strong>：重定义目标可执行文件存放目录</p>
+<h4 id="14-findNAME-cmake模块"><a href="#14-findNAME-cmake模块" class="headerlink" title="14. findNAME.cmake模块"></a>14. findNAME.cmake模块</h4><ol>
+<li>在工程目录中创建cmake文件夹，并创建FindHELLO.cmake模块：</li>
+</ol>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例</span></span><br><span class="line"><span class="keyword">FIND_PATH</span>(HELLO_INCLUDE_DIR hello.h /usr/local/<span class="keyword">include</span>/hello)</span><br><span class="line"><span class="keyword">FIND_LIBRARY</span>(HELLO_LIBRARY hello /usr/local/lib)</span><br><span class="line"><span class="keyword">IF</span> (HELLO_INCLUDE_DIR <span class="keyword">AND</span> HELLO_LIBRARY)</span><br><span class="line">	<span class="keyword">SET</span>(HELLO_FOUND <span class="keyword">TRUE</span>)</span><br><span class="line"><span class="keyword">ENDIF</span> (HELLO_INCLUDE_DIR <span class="keyword">AND</span> HELLO_LIBRARY)</span><br><span class="line"><span class="keyword">IF</span> (HELLO_FOUND)</span><br><span class="line">	<span class="keyword">IF</span> (NOT HELLO_FIND_QUIETLY)</span><br><span class="line">		<span class="keyword">MESSAGE</span>(STATUS <span class="string">"Found Hello: $&#123;HELLO_LIBRARY&#125;"</span>)</span><br><span class="line">	<span class="keyword">ENDIF</span> (NOT HELLO_FIND_QUIETLY)</span><br><span class="line"><span class="keyword">ELSE</span> (HELLO_FOUND)</span><br><span class="line">	<span class="keyword">IF</span> (HELLO_FIND_REQUIRED)</span><br><span class="line">		<span class="keyword">MESSAGE</span>(FATAL_ERROR <span class="string">"Could not find hello library"</span>)</span><br><span class="line">	<span class="keyword">ENDIF</span> (HELLO_FIND_REQUIRED)</span><br><span class="line"><span class="keyword">ENDIF</span> (HELLO_FOUND)</span><br></pre></td></tr></table></figure>
+<ol>
+<li>在主目录CMakeLists.txt中添加cmake模块所在路径：</li>
+</ol>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为find_package()指令成功执行</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_MODULE_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/cmake)</span><br></pre></td></tr></table></figure>
+<ol>
+<li>然后就可以在源文件CMakeLists.txt中调用 find_package：</li>
+</ol>
+<p>find_package ( name  [QUIET]  [REQUIRED] )</p>
+<p>用来调用预定义在<strong>CMAKE_MODULE_PATH</strong>下的Find\<name>.cmake模块。</name></p>
+<p>每一个模块都会定义以下几个变量：</p>
+<ul>
+<li>NAME_FOUND</li>
+<li>NAME_INCLUDE_DIR or NAME_INCLUDES </li>
+<li>NAME_LIBRARY or NAME_LIBRARIES </li>
+</ul>
+<p>根据指令后面的参数还会有以下变量：</p>
+<ul>
+<li><p>NAME_FIND_QUIETLY，如果指定了QUIET参数，就不会执行如下语句：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"Found Hello: $&#123;NAME_LIBRARY&#125;"</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>NAME_FIND_REQUIRED，如果指定了REQUIRED参数，就是指这个共享库是工程必须的，如果找不到，工程就不能编译，对应地会执行如下语句：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">MESSAGE</span>(FATAL_ERROR <span class="string">"Could not find NAME library"</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以通过\<name>_FOUND判断模块是否被找到，并执行不同的操作（如添加非标准路径、输出错误信息等）。</name></p>
+<h4 id="15-find-指令"><a href="#15-find-指令" class="headerlink" title="15. find_指令"></a>15. find_指令</h4><ul>
+<li><p><strong>find_path</strong></p>
+<p>find_path ( VAR name1 path1 path2 … )</p>
+<p>VAR变量代表<strong>包含</strong>name1文件的<strong>路径</strong>——路径。</p>
+</li>
+<li><p><strong>find_library</strong></p>
+<p>find_library ( VAR name1 path1 path2 …)    </p>
+<p>VAR变量包含找到的库的<strong>全路径</strong>，<strong>包括库文件名</strong>——路径下的所有文件。</p>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -2536,7 +2679,7 @@ I & -(Rp+t)^{\wedge}\\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">147</span>
+                  <span class="site-state-item-count">146</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
