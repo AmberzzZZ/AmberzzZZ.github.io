@@ -88,7 +88,7 @@
 <meta property="og:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/08/14/keras-note/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/keras-note/slice.png">
-<meta property="og:updated_time" content="2022-02-21T07:41:24.197Z">
+<meta property="og:updated_time" content="2022-04-25T08:38:50.155Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="keras note">
 <meta name="twitter:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
@@ -457,6 +457,8 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化基础模型，这样定义模型权重会存储在CPU内存中</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'/cpu:0'</span>):</span><br><span class="line">		model = Resnet50(input_shape=(<span class="number">512</span>,<span class="number">512</span>,<span class="number">3</span>), classes=<span class="number">4</span>, weights=<span class="keyword">None</span>)</span><br><span class="line">		</span><br><span class="line">parallel_model = multi_gpu_model(model, GPU_COUNT)</span><br><span class="line">parallel_model.fit(x,y, epochs=<span class="number">20</span>, batch_size=<span class="number">32</span>)</span><br><span class="line">model.save(<span class="string">'model.h5'</span>)</span><br></pre></td></tr></table></figure>
 <p>​    【attention】同理，在load权重时，也是load单模型的权重，再调用multi_gpu_model将模型复制到多个GPU上：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">model = Model(inputs=[anchor_input,positive_input,negative_input], outputs=[x, merged])</span><br><span class="line"><span class="keyword">if</span> multi_gpu:</span><br><span class="line">		<span class="keyword">if</span> os.path.exists(weight_pt):</span><br><span class="line">		model.load_weights(weight_pt)</span><br><span class="line">  	model = multi_gpu_model(model, GPU_COUNT)</span><br></pre></td></tr></table></figure>
+<p>​    step4. 如果保存成了多GPU权重，可以如下代码解封：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = EfficientV2(input_shape=<span class="number">380</span>, n_classes=<span class="number">2</span>)</span><br><span class="line">model = multi_gpu_model(model, <span class="number">2</span>)</span><br><span class="line">model.load_weigts(<span class="string">'multi.h5'</span>)</span><br><span class="line"></span><br><span class="line">single_model = model.layers[<span class="number">-2</span>]</span><br><span class="line">single_model.save_weights(<span class="string">'single.h5'</span>)</span><br></pre></td></tr></table></figure>
 <p>【ATTENTION】实验中发现一个问题：在有些case中，我们使用了自定义loss作为网络的输出，<strong>此时网络的输出是个标量</strong>，但是在调用multi_gpu_model这个方法时，具体实现在multi_gpu_utils.py中，最后一个步骤要merge几个device的输出，通过axis=0的concat实现，网络输出是标量的话就会报错——list assignment index out of range。</p>
 <p>尝试的解决方案是改成相加：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Merge outputs under expected scope.</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'/cpu:0'</span> <span class="keyword">if</span> cpu_merge <span class="keyword">else</span> <span class="string">'/gpu:%d'</span> % target_gpu_ids[<span class="number">0</span>]):</span><br><span class="line">    merged = []</span><br><span class="line">    <span class="keyword">for</span> name, outputs <span class="keyword">in</span> zip(output_names, all_outputs):</span><br><span class="line">        merged.append(Lambda(<span class="keyword">lambda</span> x: K.sum(x))(outputs)) 	</span><br><span class="line">        <span class="comment"># merged.append(concatenate(outputs, axis=0, name=name))</span></span><br><span class="line">    <span class="keyword">return</span> Model(model.inputs, merged)</span><br></pre></td></tr></table></figure>
@@ -1119,7 +1121,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-count">152</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1132,7 +1134,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">83</span>
+                  <span class="site-state-item-count">88</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
