@@ -79,13 +79,13 @@
 
 
 
-<meta name="description" content="papers： [DIM -Matting 2017] Deep Image Matting，Matting网络始祖， [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portr">
+<meta name="description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
 <meta name="keywords" content="Matting, 抠图算法，瞄边大师">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Matting">
 <meta property="og:url" content="https://amberzzzz.github.io/2022/05/05/Matting/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="papers： [DIM -Matting 2017] Deep Image Matting，Matting网络始祖， [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portr">
+<meta property="og:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/pp-matting.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/semantic%20loss.png">
@@ -94,10 +94,17 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/fusion%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/composition%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/final%20loss.png">
-<meta property="og:updated_time" content="2022-05-06T05:28:10.446Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/approaches.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/MODNet.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/lossS.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/lossD.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/composition%20loss.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/lossF.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/MODNet%20loss.png">
+<meta property="og:updated_time" content="2022-05-10T07:48:29.500Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Matting">
-<meta name="twitter:description" content="papers： [DIM -Matting 2017] Deep Image Matting，Matting网络始祖， [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portr">
+<meta name="twitter:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2022/05/05/Matting/pp-matting.png">
 
 
@@ -363,10 +370,10 @@
 
       
         <p>papers：</p>
-<p>[DIM -Matting 2017] Deep Image Matting，Matting网络始祖，</p>
+<p>[DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based</p>
 <p>[BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测</p>
-<p>[MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portrait Matting，摒弃了辅助信息，直接实现Alpha预测</p>
-<p>[PP-Matting 2022] High-Accuracy Natural Image Matting，在MODNet基础上改进</p>
+<p>[MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portrait Matting，商汤，摒弃了辅助信息，直接实现Alpha预测</p>
+<p>[PP-Matting 2022] High-Accuracy Natural Image Matting，百度，在MODNet基础上改进</p>
 <h2 id="PP-Matting-High-Accuracy-Natural-Image-Matting"><a href="#PP-Matting-High-Accuracy-Natural-Image-Matting" class="headerlink" title="PP-Matting: High-Accuracy Natural Image Matting"></a>PP-Matting: High-Accuracy Natural Image Matting</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -548,8 +555,154 @@
 <li>connectivity (Conn) </li>
 </ul>
 </li>
-<li></li>
 </ul>
+</li>
+</ol>
+<h2 id="MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><a href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition" class="headerlink" title="MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition"></a>MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>existing methods<ul>
+<li>either require auxiliary inputs</li>
+<li>or involve multiple stages</li>
+</ul>
+</li>
+<li>thus we propose MODNet (matting objective decomposition network)<ul>
+<li>light-weight</li>
+<li>real-time</li>
+<li>end-to-end</li>
+<li>single-input</li>
+<li>portrait matting</li>
+</ul>
+</li>
+<li>two novel techniques<ul>
+<li>an Efficient Atrous Spatial Pyramid Pooling (e-ASPP) module：fuse multi-scale</li>
+<li>a self-supervised sub-objectives consistency (SOC) strategy：domain shift problem</li>
+</ul>
+</li>
+<li>test device：GTX 1080Ti GPU</li>
+<li>dataset：a carefully designed photographic portrait matting (PPM-100) benchmark &amp; Adobe Matting Dataset</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Matting Approaches</p>
+<ul>
+<li><p>本文方法能够同时自动化完成matting task的子任务：背景提取 &amp; 前景语义</p>
+<p><img src="/2022/05/05/Matting/approaches.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Image Matting</p>
+<ul>
+<li>an alpha matte predicting task：$I^i = \alpha^i F^i + (1-\alpha^i)B^i$</li>
+<li>ill-posed explanation：上面这个公式，等式右边的参数全是未知的，3通道像素值也就是3+3+1=7个未知数per pixel</li>
+<li>所以通常才需要trimap辅助信息：提供0/0.5/1三种alpha构成的mask，划分为absolute foreground (α = 1), absolute background (α = 0), and unknown area (α = 0.5)，这样任务就简化为之需要预测unknown region的alpha probability</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>divide into three parts<ul>
+<li>semantic estimation：前背景</li>
+<li>detail prediction：边界细节</li>
+<li>semantic-detail fusion：信息融合，得到最终的alpha matte prediction</li>
+</ul>
+</li>
+<li><p>Architecture</p>
+<p><img src="/2022/05/05/Matting/MODNet.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Semantic Estimation</p>
+<ul>
+<li><p>the low-resolution branch S</p>
+</li>
+<li><p>use an encoder MobileNetV2 to predict a coarse mask：16x downsamp</p>
+</li>
+<li><p>ground truth也是粗糙版：ground truth matte也做16x下采样+blur，去除了一些fine feature，专心提前景整体</p>
+</li>
+<li><p>Efficient ASPP (e-ASPP)：</p>
+<ul>
+<li>标准的ASPP能解决分割前景有洞的情况，但是huge computation</li>
+<li>空洞卷积多尺度提取+常规卷积融合——modify it in three steps：<ul>
+<li>空洞卷积分解成depth-wise conv和point-wise conv</li>
+<li>调换point-wise和fuse conv的顺序</li>
+<li>fuse conv也替换为更cheaper的depth-wise conv</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>L2 loss</p>
+<ul>
+<li>$s_p$：predict alpha</li>
+<li><p>$G(\alpha_g)$：粗糙化以后的ground truth alpha matte</p>
+<p><img src="/2022/05/05/Matting/lossS.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Detail Prediction</p>
+<ul>
+<li><p>the high-resolution branch D</p>
+</li>
+<li><p>用原始图像I、Semantic Branch的输出S(I)、以及Semantic Branch的中间结果(low-level features) 作为输入</p>
+</li>
+<li><p>Branch D 超级轻量</p>
+<ul>
+<li>层数少：12个conv</li>
+<li>通道数少：64 maximum</li>
+<li>没有保留原始解析率：第一层就下采样到4x，最后两层再复原，impact is negligible owing to skip link</li>
+</ul>
+</li>
+<li><p>L1 loss：focus on transition region only </p>
+<ul>
+<li>$m_d$：boundary mask，对$\alpha_g$先膨胀再腐蚀得到</li>
+<li>$d_p$：D(I, S(I))，branch输出</li>
+<li><p>$\alpha_g$：ground truth alpha matte</p>
+<p><img src="/2022/05/05/Matting/lossD.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Semantic-Detail Fusion</p>
+<ul>
+<li><p>the fusion branch F</p>
+</li>
+<li><p>combine semantics and details</p>
+<ul>
+<li>upsample S(I)</li>
+<li>then concat S(I) &amp; D(I, S(I))</li>
+<li>然后是convs+sigmoid，得到final predict matte</li>
+</ul>
+</li>
+<li><p>L1 loss + compositional loss</p>
+<ul>
+<li><p>$L_c$： the absolute difference between input image I and the composited image，跟PP-matting公式10一样，用均方根～</p>
+<p><img src="/2022/05/05/Matting/composition loss.png" width="50%;"></p>
+</li>
+<li><p>$\alpha_p$：final prediction</p>
+<p><img src="/2022/05/05/Matting/lossF.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>train end-to-end through the sum of losses above</p>
+<ul>
+<li>$\lambda_s = \lambda_a = 1$</li>
+<li><p>$\lambda_d = 10$</p>
+<p><img src="/2022/05/05/Matting/MODNet loss.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
 </li>
 </ol>
 
@@ -730,7 +883,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">1.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">1.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><span class="nav-number">2.</span> <span class="nav-text">MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</span></a></li></ol></div>
             
 
           </div>
