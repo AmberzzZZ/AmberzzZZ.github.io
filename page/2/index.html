@@ -276,6 +276,221 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/13/MAE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/01/13/MAE/" itemprop="url">MAE</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-13T11:08:34+08:00">
+                2022-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/13/MAE/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/13/MAE/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Masked-Autoencoders-Are-Scalable-Vision-Learners"><a href="#Masked-Autoencoders-Are-Scalable-Vision-Learners" class="headerlink" title="Masked Autoencoders Are Scalable Vision Learners"></a>Masked Autoencoders Are Scalable Vision Learners</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>一种自监督训练(pretraining)方式，用来提升模型泛化性能</li>
+<li>技术方案：<ul>
+<li>mask &amp; reconstruct</li>
+<li>encoder-decoder architecture<ul>
+<li>encoder operates only on visible patches：首先对input patches做random sampling，只选取少量patches给到encoder</li>
+<li>lightweight decoder run reconstruction on (masked) tokens：将encoded patches和mask tokens组合，给到decoder，用于重建原始图像</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>精度<ul>
+<li>with MAE pretraining，ViT-Huge on ImageNet-1k：87.8%</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>自监督路线能给到模型更大体量的数据，like NLP，masked autoencoding也是经典的BERT训练方式，but现实是autoencoding methods in vision lags behind NLP</p>
+<ul>
+<li>information density：NLP是通过提取高级语义信息去推断空缺的，而图像如果有充足的邻里低级空间信息，就能重建出来不错的效果，导致模型没学到啥高级语义信息就收敛了，本文的解决方案是random mask极大比例的patches，largely reduce redundancy</li>
+<li>decoder plays a different role be- tween reconstructing text and images：和上一条呼应，visual decoder重建的是像素，低级信息，NLP decoder重建的是词向量，是高级表征，因此BERT用了个贼微小的结构来建模decoder——一个MLP，但是图像这边decoder的设计就重要的多——plays a key role in determining the semantic level of the learned latent representations </li>
+</ul>
+</li>
+<li><p>our MAE</p>
+<ul>
+<li>不对称encoder-decoder</li>
+<li>high portion masking：既提升acc又减少计算量，easy to scale-up</li>
+<li><p>workflow</p>
+<ul>
+<li>MAE pretraing：encode random sampled patches，decode encoded&amp;masked tokens</li>
+<li>down stream task：save encoder for recognition tasks</li>
+</ul>
+<p><img src="/2022/01/13/MAE/MAE.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>masking<ul>
+<li>切分图像：non-overlapping patches</li>
+<li>随机采样：random sample the patches following a uniform distribution</li>
+<li>high masking ratio：一定要构建这样的task，不能简单通过邻里低级信息恢复出来，必须要深入挖掘高级语义信息，才能推断出空缺是啥</li>
+</ul>
+</li>
+<li>MAE encoder<ul>
+<li>ViT</li>
+<li>given patches：linear proj + PE</li>
+<li>operates on a small visible subset(25%) of the full set</li>
+<li>负责recognition任务</li>
+</ul>
+</li>
+<li>MAE decoder<ul>
+<li>a series of Transformer blocks：远小于encoder，narrower and shallower，单个token的计算量是encoder的&lt;10%</li>
+<li>given full set tokens<ul>
+<li>mask tokens：a shared &amp; learned vector 用来表征missing patches</li>
+<li>add PE：从而区别不同的mask token</li>
+</ul>
+</li>
+<li>负责reconstruction任务</li>
+</ul>
+</li>
+<li>Reconstruction target<ul>
+<li>decoder gives the full set reconstructed tokens：[b,N,D]<ul>
+<li>N：patch sequence length</li>
+<li>D：patch pixel values</li>
+</ul>
+</li>
+<li>reshape：[b,H,W,C]</li>
+<li>重建loss，per-pixel MSE：compute only on masked patches</li>
+<li>【QUESTION，这个还没理解】还有一个变体，官方代码里叫norm_pix_loss，声称是for better representation learning，以每个patch的norm作为target：<ul>
+<li>对每个masked patch，计算mean&amp;std，</li>
+<li>然后normalize，</li>
+<li>这个normed patch作为reconstruction target</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/12/08/det-transformers/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3039,242 +3254,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/10/SAM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/10/SAM/" itemprop="url">SAM</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-10T11:08:26+08:00">
-                2021-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/10/SAM/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/10/SAM/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>google brain，引用量51，但是ImageNet榜单/SOTA模型的对比实验里面经常能够看到这个SAM，出圈形式为分类模型+SAM</p>
-<p>SAM：Sharpness-Aware Minimization，锐度感知最小化</p>
-<p>official repo：<a href="https://github.com/google-research/sam" target="_blank" rel="noopener">https://github.com/google-research/sam</a></p>
-<h2 id="Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization"><a href="#Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization" class="headerlink" title="Sharpness-Aware Minimization for Efficiently Improving Generalization"></a>Sharpness-Aware Minimization for Efficiently Improving Generalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>heavily overparametered models：training loss能训到极小，但是generalization issue</li>
-<li>we propose<ul>
-<li>Sharpness-Aware Minimization (SAM)</li>
-<li>同时最小化loss和loss sharpness</li>
-<li>improve model generalization</li>
-<li>robustness to label noise</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>CIFAR 10&amp;100</li>
-<li>ImageNet</li>
-<li>finetuning tasks</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>typical loss &amp; optimizer</p>
-<ul>
-<li>population loss：我们实际想得到的是在当前训练集所代表的分布下的最优解</li>
-<li><p>training set loss：但事实上我们只能用所有的训练样本来代表这个分布</p>
-<p><img src="/2021/09/10/SAM/loss.png" width="80%;"></p>
-</li>
-<li><p>因为loss函数是non-convex的，所以可能存在多个local even global minima对应的loss value是一样的，但是generalization performance确是不同的</p>
-</li>
-</ul>
-</li>
-<li><p>成熟的全套防止过拟合手段</p>
-<ul>
-<li>loss</li>
-<li>optimizer</li>
-<li>dropout</li>
-<li>batch normalization</li>
-<li>mixed sample augmentations</li>
-</ul>
-</li>
-<li>our approach<ul>
-<li>directly leverage the geometry of the loss landscape</li>
-<li>and its connection to generalization (generalization bound)</li>
-<li>proved additive to existing techniques</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>motivation</p>
-<ul>
-<li>rather than 寻找一个weight value that have low loss，我们寻找的是那种连带他临近的value都能有low loss的value</li>
-<li>也就是既有low loss又有low曲度</li>
-</ul>
-</li>
-<li><p>sharpness term</p>
-<ul>
-<li>$\max \limits_{||\epsilon||_p &lt; \rho} L_s(w+\epsilon) - L_s(w)$</li>
-<li>衡量模型在w处的sharpness</li>
-</ul>
-</li>
-<li><p>Sharpness-Aware Minimization (SAM) formulation</p>
-<ul>
-<li>sharpness term再加上train loss再加上regularization term</li>
-<li>$L_S^{SAM}(w)=\max\limits_{a} L_s(w+\epsilon)$</li>
-<li>$\min \limits_{w} L_S^{SAM}(w) + \lambda ||w||^2_2$</li>
-<li>prevent the model from converting to a sharp minimum</li>
-</ul>
-</li>
-<li><p>effective approximation</p>
-<ul>
-<li><p>bound</p>
-<ul>
-<li>with $\frac{1}{p} + \frac{1}{q} = 1$</li>
-</ul>
-<p><img src="/2021/09/10/SAM/bound.png" width="80%;"></p>
-</li>
-<li><p>approximation</p>
-<p><img src="/2021/09/10/SAM/approximation.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>pseudo code</p>
-<p>  <img src="/2021/09/10/SAM/algorithm.png" width="80%;"></p>
-<ul>
-<li>given a min-batch</li>
-<li>首先计算当前batch的training loss，和当前梯度，$w_t$ to $w_{t+1}$</li>
-<li>然后计算近似为梯度norm的步长$\hat\epsilon(w)$，equation2，$w_t$ to $w_{adv}$，这里面的adv联动了另一篇论文《AdvProp: Adversarial Examples Improve Image Recognition》</li>
-<li>然后计算近似的sharpness term，可以理解为training loss在w邻居处的梯度，equation3，应该是蓝色箭头的反方向，图上没标记出来</li>
-<li>用w邻居的梯度来更新w的权重，用负梯度（蓝色箭头）</li>
-<li>overll就是：要向前走之前，先回退，缺点是两次梯度计算，时间double</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验结论</p>
-<ul>
-<li><p>能优化到损失的最平坦的最小值的地方，增强泛化能力</p>
-<p>  <img src="/2021/09/10/SAM/minimum.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3329,7 +3308,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">152</span>
+                  <span class="site-state-item-count">153</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

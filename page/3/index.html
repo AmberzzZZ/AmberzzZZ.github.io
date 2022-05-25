@@ -276,6 +276,242 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/10/SAM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/10/SAM/" itemprop="url">SAM</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-10T11:08:26+08:00">
+                2021-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/10/SAM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/10/SAM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>google brain，引用量51，但是ImageNet榜单/SOTA模型的对比实验里面经常能够看到这个SAM，出圈形式为分类模型+SAM</p>
+<p>SAM：Sharpness-Aware Minimization，锐度感知最小化</p>
+<p>official repo：<a href="https://github.com/google-research/sam" target="_blank" rel="noopener">https://github.com/google-research/sam</a></p>
+<h2 id="Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization"><a href="#Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization" class="headerlink" title="Sharpness-Aware Minimization for Efficiently Improving Generalization"></a>Sharpness-Aware Minimization for Efficiently Improving Generalization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>heavily overparametered models：training loss能训到极小，但是generalization issue</li>
+<li>we propose<ul>
+<li>Sharpness-Aware Minimization (SAM)</li>
+<li>同时最小化loss和loss sharpness</li>
+<li>improve model generalization</li>
+<li>robustness to label noise</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>CIFAR 10&amp;100</li>
+<li>ImageNet</li>
+<li>finetuning tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>typical loss &amp; optimizer</p>
+<ul>
+<li>population loss：我们实际想得到的是在当前训练集所代表的分布下的最优解</li>
+<li><p>training set loss：但事实上我们只能用所有的训练样本来代表这个分布</p>
+<p><img src="/2021/09/10/SAM/loss.png" width="80%;"></p>
+</li>
+<li><p>因为loss函数是non-convex的，所以可能存在多个local even global minima对应的loss value是一样的，但是generalization performance确是不同的</p>
+</li>
+</ul>
+</li>
+<li><p>成熟的全套防止过拟合手段</p>
+<ul>
+<li>loss</li>
+<li>optimizer</li>
+<li>dropout</li>
+<li>batch normalization</li>
+<li>mixed sample augmentations</li>
+</ul>
+</li>
+<li>our approach<ul>
+<li>directly leverage the geometry of the loss landscape</li>
+<li>and its connection to generalization (generalization bound)</li>
+<li>proved additive to existing techniques</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>motivation</p>
+<ul>
+<li>rather than 寻找一个weight value that have low loss，我们寻找的是那种连带他临近的value都能有low loss的value</li>
+<li>也就是既有low loss又有low曲度</li>
+</ul>
+</li>
+<li><p>sharpness term</p>
+<ul>
+<li>$\max \limits_{||\epsilon||_p &lt; \rho} L_s(w+\epsilon) - L_s(w)$</li>
+<li>衡量模型在w处的sharpness</li>
+</ul>
+</li>
+<li><p>Sharpness-Aware Minimization (SAM) formulation</p>
+<ul>
+<li>sharpness term再加上train loss再加上regularization term</li>
+<li>$L_S^{SAM}(w)=\max\limits_{a} L_s(w+\epsilon)$</li>
+<li>$\min \limits_{w} L_S^{SAM}(w) + \lambda ||w||^2_2$</li>
+<li>prevent the model from converting to a sharp minimum</li>
+</ul>
+</li>
+<li><p>effective approximation</p>
+<ul>
+<li><p>bound</p>
+<ul>
+<li>with $\frac{1}{p} + \frac{1}{q} = 1$</li>
+</ul>
+<p><img src="/2021/09/10/SAM/bound.png" width="80%;"></p>
+</li>
+<li><p>approximation</p>
+<p><img src="/2021/09/10/SAM/approximation.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>pseudo code</p>
+<p>  <img src="/2021/09/10/SAM/algorithm.png" width="80%;"></p>
+<ul>
+<li>given a min-batch</li>
+<li>首先计算当前batch的training loss，和当前梯度，$w_t$ to $w_{t+1}$</li>
+<li>然后计算近似为梯度norm的步长$\hat\epsilon(w)$，equation2，$w_t$ to $w_{adv}$，这里面的adv联动了另一篇论文《AdvProp: Adversarial Examples Improve Image Recognition》</li>
+<li>然后计算近似的sharpness term，可以理解为training loss在w邻居处的梯度，equation3，应该是蓝色箭头的反方向，图上没标记出来</li>
+<li>用w邻居的梯度来更新w的权重，用负梯度（蓝色箭头）</li>
+<li>overll就是：要向前走之前，先回退，缺点是两次梯度计算，时间double</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验结论</p>
+<ul>
+<li><p>能优化到损失的最平坦的最小值的地方，增强泛化能力</p>
+<p>  <img src="/2021/09/10/SAM/minimum.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/01/MuST/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3295,297 +3531,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/re-labeling/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/27/re-labeling/" itemprop="url">re-labeling</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T15:01:58+08:00">
-                2021-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/27/re-labeling/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/re-labeling/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Re-labeling-ImageNet-from-Single-to-Multi-Labels-from-Global-to-Localized-Labels"><a href="#Re-labeling-ImageNet-from-Single-to-Multi-Labels-from-Global-to-Localized-Labels" class="headerlink" title="Re-labeling ImageNet: from Single to Multi-Labels, from Global to Localized Labels"></a>Re-labeling ImageNet: from Single to Multi-Labels, from Global to Localized Labels</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>label noise<ul>
-<li>single-label benchmark</li>
-<li>but contains multiple classes in one sample</li>
-<li>a random crop may contain an entirely different object from the gt label</li>
-<li>exhaustive multi-label annotations per image is too cost</li>
-</ul>
-</li>
-<li>mismatch<ul>
-<li>researches refine the validation set with multi-labels</li>
-<li>propose new multi-label evaluation metrics</li>
-<li>但是造成数据集的mismatch</li>
-</ul>
-</li>
-<li>we propose<ul>
-<li>re-label</li>
-<li>use a strong image classifier trained on extra source of data to generate the multi-labels</li>
-<li>use pixel-wise multi-label predictions before GAP：addtional location-specific supervision</li>
-<li>then trained on re-labeled samples</li>
-<li>further boost with CutMix</li>
-</ul>
-</li>
-<li>from single to multi-labels：多标签</li>
-<li><p>from global to localized：dense prediction map</p>
-<p><img src="/2021/05/27/re-labeling/re-labeling.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>single-label<ul>
-<li>和multi-label validation set的mismatch</li>
-<li>random crop augmentation加剧了问题</li>
-<li>除了多目标还有前背景，只有23%的random crops IOU&gt;0.5</li>
-</ul>
-</li>
-<li>ideally label<ul>
-<li>the full set of classes——multi-label</li>
-<li>where each objects——localized label</li>
-<li>results in a dense pixel labeling $L\in \{0,1\}^{HWC}$</li>
-</ul>
-</li>
-<li><p>we propose a re-labeling strategy</p>
-<ul>
-<li>ReLabel <ul>
-<li>strong classifier</li>
-<li>external training data</li>
-<li>generate feature map predictions</li>
-</ul>
-</li>
-<li>LabelPooling<ul>
-<li>with dense labels &amp; random crop</li>
-<li>pooling the label scores from crop region</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>evaluations</p>
-<ul>
-<li>baseline r50：77.5%</li>
-<li>r50 + ReLabel：78.9%</li>
-<li>r50 + ReLabel + CutMix：80.2%</li>
-</ul>
-</li>
-<li><p>【QUESTION】同样是引入外部数据实现无痛长点，与noisy student的区别/好坏？？？</p>
-<ul>
-<li><p>目前论文提到的就只有efficiency，ReLabel是one-time cost的，知识蒸馏是iterative&amp;on-the-fly的</p>
-<p><img src="/2021/05/27/re-labeling/differences.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Re-labeling</p>
-<ul>
-<li><p>super annotator</p>
-<ul>
-<li>state-of-the-art classifier</li>
-<li>trained on super large dataset</li>
-<li>fine-tuned on ImageNet</li>
-<li>and predict ImageNet labels</li>
-</ul>
-</li>
-<li><p>we use open-source trained weights as annotators</p>
-<ul>
-<li>though trained with single-label supervision</li>
-<li>still tend to make multi-label predictions</li>
-<li>EfficientNet-L2</li>
-<li>input size 475</li>
-<li>feature map size 15x15x5504</li>
-<li><p>output dense label size 15x15x1000</p>
-<p><img src="/2021/05/27/re-labeling/relabel.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>location-specific labels</p>
-<ul>
-<li>remove GAP heads</li>
-<li>add a 1x1 conv</li>
-<li>说白了就是一个fcn</li>
-<li>original classifier的fc层权重与新添加的1x1 conv层的权重是一样的</li>
-<li><p>label的每个channel对应了一个类别的heatmap，可以看到disjointly located at each object’s position</p>
-<p><img src="/2021/05/27/re-labeling/labelmap.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>LabelPooling</p>
-<p>  <img src="/2021/05/27/re-labeling/labelpooling.png" width="40%;"></p>
-<ul>
-<li>loads the pre-computed label map</li>
-<li>region pooling (RoIAlign) on the label map</li>
-<li>GAP + softmax to get multi-label vector</li>
-<li>train a classifier with the multi-label vector</li>
-<li><p>uses CE</p>
-<p><img src="/2021/05/27/re-labeling/algorithm.png" width="90%;"></p>
-</li>
-</ul>
-</li>
-<li><p>choices</p>
-<ul>
-<li><p>space consumption</p>
-<ul>
-<li>主要是存储label map的空间</li>
-<li>store only top-5 predictions per image：10GB</li>
-</ul>
-</li>
-<li><p>time consumption</p>
-<ul>
-<li>主要是说生成label map的one-shot-inference time和labelPooling引入的额外计算时间</li>
-<li>relabeling：10-GPU hours</li>
-<li>labelPooling：0.5% additiona training time</li>
-<li>more efficient than KD</li>
-</ul>
-</li>
-<li><p>annotators</p>
-<ul>
-<li><p>标注工具哪家强：目前看下来eff-L2的supervision效果最强</p>
-<p><img src="/2021/05/27/re-labeling/annotators.png" width="40%;"></p>
-</li>
-<li><p>supervision confidence</p>
-<ul>
-<li>随着image crop与前景物体的IOU增大，confidence逐渐增加</li>
-<li><p>说明supervision provides some uncertainty when low IOU</p>
-<p><img src="/2021/05/27/re-labeling/supervision.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3640,7 +3585,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">152</span>
+                  <span class="site-state-item-count">153</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
