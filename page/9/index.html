@@ -276,6 +276,444 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/SOLO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/17/SOLO/" itemprop="url">SOLO</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-17T11:31:20+08:00">
+                2020-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/17/SOLO/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/17/SOLO/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[SOLO] SOLO: Segmenting Objects by Locations：字节，目前绝大多数方法实例分割的结构都是间接得到——检测框内语义分割／全图语义分割聚类，主要原因是formulation issue，很难把实例分割定义成一个结构化的问题</p>
+<p>[SOLOv2] SOLOv2: Dynamic, Faster and Stronger：best 41.7% AP </p>
+<h2 id="SOLO-Segmenting-Objects-by-Locations"><a href="#SOLO-Segmenting-Objects-by-Locations" class="headerlink" title="SOLO: Segmenting Objects by Locations"></a>SOLO: Segmenting Objects by Locations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>challenging：arbitrary number of instances</li>
+<li>form the task into a classification-solvable problem</li>
+<li>direct &amp; end-to-end &amp; one-stage &amp; using mask annotations solely</li>
+<li>on par accuracy with Mask R-CNN</li>
+<li>outperforming recent single-shot instance segmenters</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>formulating<ul>
+<li>Objects in an image belong to a fixed set of semantic categories——semantic segmentation can be easily formulated as a dense per-pixel classification problem</li>
+<li>the number of instances varies</li>
+</ul>
+</li>
+<li>existing methods<ul>
+<li>检测／聚类：step-wise and indirect</li>
+<li>累积误差</li>
+</ul>
+</li>
+<li>core idea <ul>
+<li>in most cases two instances in an image either have different center locations or have different object sizes </li>
+<li>location：<ul>
+<li>think image as a divided grid of cells</li>
+<li>an object instance is assigned to one of the grid cells as its center location category </li>
+<li>encode center location categories as the channel axis </li>
+</ul>
+</li>
+<li>size<ul>
+<li>FPN</li>
+<li>assign objects of different sizes to different levels of feature maps</li>
+</ul>
+</li>
+<li>SOLO converts coordinate regression into classification by discrete quantization </li>
+<li>One feat of doing so is the avoidance of heuristic coordination normalization and log-transformation typically used in detectors【？？？不懂这句话想表达啥】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>problem formulation</p>
+<ul>
+<li>divided grids</li>
+<li><p>simultaneous task</p>
+<ul>
+<li>category-aware prediction  </li>
+<li>instance-aware mask generation</li>
+</ul>
+<p><img src="/2020/07/17/SOLO/solo.png" width="70%;"></p>
+</li>
+<li><p>category prediction</p>
+<ul>
+<li>predict instance for each grid：$S<em>S</em>C$</li>
+<li>grid size：$S*S$</li>
+<li>number of classes：$C$</li>
+<li>based on the assumption that each cell must belong to one individual instance</li>
+<li>C-dim vec indicates the class probability for each object instance in each grid</li>
+</ul>
+</li>
+<li>mask prediction<ul>
+<li>predict instance mask for each positive cell：$H<em>W</em>S^2$</li>
+<li>the channel corresponding to the location</li>
+<li>position sensitive：因为每个grid中分割的mask是要映射到对应的channel的，因此我们希望特征图是spatially variant<ul>
+<li>让特征图spatially variant的最直接办法就是加一维spatially variant的信息</li>
+<li>inspired by CoordConv：添加两个通道，normed_x和normed_y，[-1,1]</li>
+<li>original feature tensor $H<em>W</em>D$ becomes $H<em>W</em>(D+2)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>final results<ul>
+<li>gather category prediction &amp; mask prediction</li>
+<li>NMS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>network</p>
+<ul>
+<li>backbone：resnet</li>
+<li>FCN：256-d</li>
+<li><p>heads：weights are shared across different levels except for the last 1x1 conv</p>
+<p><img src="/2020/07/17/SOLO/head.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>learning</p>
+<ul>
+<li>positive grid：falls into a center region<ul>
+<li>mask：mask center $(c_x, c_y)$，mask size $(h,w)$</li>
+<li>center region：$(c_x,c_y,\epsilon w, \epsilon h)$，set $\epsilon = 0.2$</li>
+</ul>
+</li>
+<li>loss：$L = L_{cate} + \lambda L_{seg}$<ul>
+<li>cate loss：focal loss</li>
+<li>seg loss：dice，$L_{mask} = \frac{1}{N_{pos}}\sum_k 1_{p^<em>_{i,j}&gt;0} dice(m_k, m^</em>_k) $，带星号的是groud truth</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li><p>use a confidence threshold of 0.1 to filter out low spacial predictions</p>
+</li>
+<li><p>use a threshold of 0.5 to binary the soft masks</p>
+</li>
+<li><p>select the top 500 scoring masks </p>
+</li>
+<li><p>NMS </p>
+<ul>
+<li>Only one instance will be activated at each grid</li>
+<li><p>and one in- stance may be predicted by multiple adjacent mask channels </p>
+<p><img src="/2020/07/17/SOLO/results.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>keep top 100</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>grid number</p>
+<ul>
+<li>适当增加有提升，主要提升还是在FPN</li>
+<li><img src="/2020/07/17/SOLO/grid.png" width="40%;"></li>
+</ul>
+</li>
+<li><p>fpn</p>
+<ul>
+<li>五个FPN pyramids </li>
+<li><p>大特征图，小感受野，用来分配小目标，grid数量要增大</p>
+</li>
+<li><p><img src="/2020/07/17/SOLO/fpn.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>feature alignment</p>
+<ul>
+<li>在分类branch，$H<em>W$特征图要转换成$S</em>S$的特征图<ul>
+<li>interpolation：bilinear interpolating </li>
+<li>adaptive-pool：apply a 2D adaptive max-pool </li>
+<li>region-grid- interpolation：对每个cell，采样多个点做双线性插值，然后取平均</li>
+</ul>
+</li>
+<li>is no noticeable performance gap between these variants </li>
+<li>（可能因为最终是分类任务</li>
+</ul>
+</li>
+<li><p>head depth</p>
+<ul>
+<li>4-7有涨点</li>
+<li>所以本文选了7</li>
+<li><img src="/2020/07/17/SOLO/depth.png" width="40%;"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>decoupled SOLO</p>
+<ul>
+<li><p>mask branch预测的channel数是$S^2$，其中大部分channel其实是没有贡献的，空占内存</p>
+</li>
+<li><p>prediction is somewhat redundant as in most cases the objects are located sparsely in the image </p>
+</li>
+<li><p>element-wise multiplication </p>
+<p>  <img src="/2020/07/17/SOLO/decoupled.png" width="40%;"></p>
+</li>
+<li><p>实验下来</p>
+<ul>
+<li>achieves the same performance </li>
+<li>efficient and equivalent variant  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SOLOv2-Dynamic-Faster-and-Stronger"><a href="#SOLOv2-Dynamic-Faster-and-Stronger" class="headerlink" title="SOLOv2: Dynamic, Faster and Stronger"></a>SOLOv2: Dynamic, Faster and Stronger</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>take one step further on the mask head<ul>
+<li>dynamically learning the mask head</li>
+<li>decoupled into mask kernel branch and mask feature branch</li>
+</ul>
+</li>
+<li>propose Matrix NMS<ul>
+<li>faster &amp; better results</li>
+</ul>
+</li>
+<li>try object detection  and panoptic segmentation</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>SOLO develop pure instance segmentation </li>
+<li>instance segmentation <ul>
+<li>requires instance-level and pixel-level predictions simultaneously </li>
+<li>most existing instance segmentation methods build on the top of bounding boxes </li>
+<li>SOLO develop pure instance segmentation </li>
+</ul>
+</li>
+<li>SOLOv2 improve SOLO<ul>
+<li>mask learning：dynamic scheme </li>
+<li>mask NMS：parallel matrix operations，outperforms Fast NMS </li>
+</ul>
+</li>
+<li>Dynamic Convolutions <ul>
+<li>STN：adaptively transform feature maps conditioned on the input </li>
+<li>Deformable Convolutional Networks：learn location</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>revisit SOLOv1</p>
+<ul>
+<li>redundant mask prediction</li>
+<li>decouple</li>
+<li><p>dynamic：dynamically pick the valid ones from predicted $s^2$ classifiers and perform the convolution </p>
+<p><img src="/2020/07/17/SOLO/dynamic.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SOLOv2</p>
+<ul>
+<li><p>dynamic mask segmentation head</p>
+<ul>
+<li>mask kernel branch</li>
+<li>mask feature branch</li>
+</ul>
+</li>
+<li><p>mask kernel branch</p>
+<ul>
+<li>prediction heads：4 convs + 1 final conv，shared across scale</li>
+<li>no activation on the output</li>
+<li>concat normalized coordinates in two additional input channels at start</li>
+<li>ouputs D-dims kernel weights for each grid：e.g.  for 3x3 conv with E input channels, outputs $S<em>S</em>9E$</li>
+</ul>
+</li>
+<li><p>mask feature branch</p>
+<ul>
+<li><p>predict instance-aware feature：$F \in R^{H<em>W</em>E}$</p>
+</li>
+<li><p>unified and high-resolution mask feature：只输出一个尺度的特征图，encoded x32 feature with coordinates info</p>
+<ul>
+<li>we feed normalized pixel coordinates to the deepest FPN level (at 1/32 scale)</li>
+<li>repeated 【3x3 conv, group norm, ReLU, 2x bilinear upsampling】</li>
+<li>element-wise sum</li>
+<li><p>last layer：1x1 conv, group norm, ReLU</p>
+<p><img src="/2020/07/17/SOLO/unified mask.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>instance mask</p>
+<ul>
+<li>mask feature branch conved by the mask kernel branch：final conv $H<em>W</em>S^2$</li>
+<li>mask NMS</li>
+</ul>
+</li>
+<li><p>train</p>
+<ul>
+<li>loss：$L = L_{cate} + \lambda L_{seg}$<ul>
+<li>cate loss：focal loss</li>
+<li>seg loss：dice，$L_{mask} = \frac{1}{N_{pos}}\sum_k 1_{p^<em>_{i,j}&gt;0} dice(m_k, m^</em>_k) $，带星号的是groud truth</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li>category score：first use a confidence threshold of 0.1 to filter out predictions with low confidence </li>
+<li>mask branch：run convolution based on the filtered category map</li>
+<li>sigmoid</li>
+<li>use a threshold of 0.5 to convert predicted soft masks to binary masks </li>
+<li>Matrix NMS</li>
+</ul>
+</li>
+<li><p>Matrix NMS</p>
+<ul>
+<li>decremented functions  <ul>
+<li>linear：$f(iou_{i,j}=1-iou_{i,j})$</li>
+<li>gaussian：$f(iou_{i,j}=exp(-\frac{iou_{i,j}^2}{\sigma})$</li>
+</ul>
+</li>
+<li>the most overlapped prediction for $m_i$：max iou<ul>
+<li>$f(iou_{*,i}) = min_{s_k}f(iou_{k,i})$</li>
+</ul>
+</li>
+<li>decay factor  <ul>
+<li>$decay_i = min \frac{f(iou_{i,j})}{f(iou_{*,i})}$</li>
+</ul>
+</li>
+<li><img src="/2020/07/17/SOLO/matrix nms.png" width="60%;"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/29/polarMask/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2933,236 +3371,6 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/25/GANomaly/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/25/GANomaly/" itemprop="url">GANomaly</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-25T22:12:37+08:00">
-                2020-05-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/25/GANomaly/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/25/GANomaly/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training"><a href="#GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training" class="headerlink" title="GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training"></a>GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Anomaly detection <ul>
-<li>highly biased towards one class (normal) </li>
-<li>insufficient sample size of the other class (abnormal)</li>
-</ul>
-</li>
-<li>semi-supervised learning <ul>
-<li>detecting the unknown/unseen anomaly case  </li>
-<li>trained on normal samples </li>
-<li>tested on normal and abnormal samples </li>
-</ul>
-</li>
-<li>encoder-decoder-encoder  <ul>
-<li>minimizing the distance between the images </li>
-<li>and the latent vectors  </li>
-<li>a larger distance metric </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>supervised approaches heavily depend on large, labeled datasets </li>
-<li>Generative Adversarial Networks (GAN) have emerged as a leading methodology across both unsupervised and semi-supervised problems</li>
-<li>reconstruction-based anomaly techniques<ul>
-<li>Overall prior work strongly supports the hypothesis that the use of autoencoders and GAN </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>GAN<ul>
-<li>unsupervised </li>
-<li>to generate realistic images </li>
-<li>compete<ul>
-<li>generator tries to generate an image, decoder- alike network, map input to latent space</li>
-<li>discriminator decides whether the generated image is a real or a fake, classical classification architecture, reading an input image, and determining its validity </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Adversarial Auto-Encoders (AAE) </p>
-<ul>
-<li>encoder + decoder </li>
-<li>reconstruction: maps the input to latent space and remaps back to input data space</li>
-<li>train autoencoders with adversarial setting </li>
-</ul>
-</li>
-<li><p>inverse mapping</p>
-<ul>
-<li>with the additional use of an encoder, a vanilla GAN network is capable of learning inverse mapping </li>
-</ul>
-</li>
-<li><p>model</p>
-<p>  <img src="/2020/05/25/GANomaly/GANomaly.png" width="50%;"></p>
-<ul>
-<li>learns both the normal data distribution and minimizes the output anomaly score </li>
-<li>two encoder, one decoder, a discriminator</li>
-<li>encoder<ul>
-<li>convolutional layers followed by batch-norm and leaky ReLU() activation </li>
-<li>compress to a vector z</li>
-</ul>
-</li>
-<li>decoder<ul>
-<li>convolutional transpose layers, ReLU() activation and batch-norm </li>
-<li>a tanh layer at the end</li>
-</ul>
-</li>
-<li>2nd encoder<ul>
-<li>with the same architectural </li>
-<li>but different parametrization</li>
-</ul>
-</li>
-<li>discriminator <ul>
-<li>DCGAN discriminator </li>
-</ul>
-</li>
-<li>Adversarial Loss <ul>
-<li>不是基于GAN的traditional 0/1 ouput</li>
-<li>而是选了一个中间层，计算real／fake(reconstructed)的L2 distance</li>
-</ul>
-</li>
-<li>Contextual Loss <ul>
-<li>L1 yields less blurry results than L2</li>
-<li>计算输入图像和重建图像的L1 distance</li>
-</ul>
-</li>
-<li>Encoder Loss <ul>
-<li>an additional encoder loss to minimize the distance of the bottleneck features </li>
-<li>计算两个高维向量的L2 distance</li>
-<li>在测试的时候用它来scoring the abnormality  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3217,7 +3425,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">153</span>
+                  <span class="site-state-item-count">154</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3230,7 +3438,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">89</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

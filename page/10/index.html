@@ -276,6 +276,236 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/25/GANomaly/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/05/25/GANomaly/" itemprop="url">GANomaly</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-25T22:12:37+08:00">
+                2020-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/25/GANomaly/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/25/GANomaly/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training"><a href="#GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training" class="headerlink" title="GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training"></a>GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Anomaly detection <ul>
+<li>highly biased towards one class (normal) </li>
+<li>insufficient sample size of the other class (abnormal)</li>
+</ul>
+</li>
+<li>semi-supervised learning <ul>
+<li>detecting the unknown/unseen anomaly case  </li>
+<li>trained on normal samples </li>
+<li>tested on normal and abnormal samples </li>
+</ul>
+</li>
+<li>encoder-decoder-encoder  <ul>
+<li>minimizing the distance between the images </li>
+<li>and the latent vectors  </li>
+<li>a larger distance metric </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>supervised approaches heavily depend on large, labeled datasets </li>
+<li>Generative Adversarial Networks (GAN) have emerged as a leading methodology across both unsupervised and semi-supervised problems</li>
+<li>reconstruction-based anomaly techniques<ul>
+<li>Overall prior work strongly supports the hypothesis that the use of autoencoders and GAN </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>GAN<ul>
+<li>unsupervised </li>
+<li>to generate realistic images </li>
+<li>compete<ul>
+<li>generator tries to generate an image, decoder- alike network, map input to latent space</li>
+<li>discriminator decides whether the generated image is a real or a fake, classical classification architecture, reading an input image, and determining its validity </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Adversarial Auto-Encoders (AAE) </p>
+<ul>
+<li>encoder + decoder </li>
+<li>reconstruction: maps the input to latent space and remaps back to input data space</li>
+<li>train autoencoders with adversarial setting </li>
+</ul>
+</li>
+<li><p>inverse mapping</p>
+<ul>
+<li>with the additional use of an encoder, a vanilla GAN network is capable of learning inverse mapping </li>
+</ul>
+</li>
+<li><p>model</p>
+<p>  <img src="/2020/05/25/GANomaly/GANomaly.png" width="50%;"></p>
+<ul>
+<li>learns both the normal data distribution and minimizes the output anomaly score </li>
+<li>two encoder, one decoder, a discriminator</li>
+<li>encoder<ul>
+<li>convolutional layers followed by batch-norm and leaky ReLU() activation </li>
+<li>compress to a vector z</li>
+</ul>
+</li>
+<li>decoder<ul>
+<li>convolutional transpose layers, ReLU() activation and batch-norm </li>
+<li>a tanh layer at the end</li>
+</ul>
+</li>
+<li>2nd encoder<ul>
+<li>with the same architectural </li>
+<li>but different parametrization</li>
+</ul>
+</li>
+<li>discriminator <ul>
+<li>DCGAN discriminator </li>
+</ul>
+</li>
+<li>Adversarial Loss <ul>
+<li>不是基于GAN的traditional 0/1 ouput</li>
+<li>而是选了一个中间层，计算real／fake(reconstructed)的L2 distance</li>
+</ul>
+</li>
+<li>Contextual Loss <ul>
+<li>L1 yields less blurry results than L2</li>
+<li>计算输入图像和重建图像的L1 distance</li>
+</ul>
+</li>
+<li>Encoder Loss <ul>
+<li>an additional encoder loss to minimize the distance of the bottleneck features </li>
+<li>计算两个高维向量的L2 distance</li>
+<li>在测试的时候用它来scoring the abnormality  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/23/resnets/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3810,273 +4040,6 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/03/28/FCN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/03/28/FCN/" itemprop="url">FCN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-28T12:45:29+08:00">
-                2020-03-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/03/28/FCN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/03/28/FCN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="FCN-Fully-Convolutional-Networks-for-Semantic-Segmentation"><a href="#FCN-Fully-Convolutional-Networks-for-Semantic-Segmentation" class="headerlink" title="FCN: Fully Convolutional Networks for Semantic Segmentation"></a>FCN: Fully Convolutional Networks for Semantic Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>take input of arbitrary size</li>
-<li>pixelwise prediction (semantic segmentation) </li>
-<li>efficient inference and learning</li>
-<li>end-to-end</li>
-<li>with superwised-pretraining</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>fully connected layers brings heavy computation</li>
-<li>patchwise/proposals training with less efficiency (为了对一个像素分类，要扣它周围的patch，一张图的存储容量上升到k*k倍，而且相邻patch重叠的部分引入大量重复计算，同时<strong>感受野太小</strong>，没法有效利用全局信息)</li>
-<li>fully convolutional structure are used to get a feature extractor which yield a localized, fixed-length feature </li>
-<li>Semantic segmentation faces an inherent tension between<strong> semantics</strong> and <strong>location</strong>: global information resolves what while local information resolves where. Deep feature hierarchies jointly encode location and semantics in a local-to-global pyramid. </li>
-<li>other semantic works (RCNN) are not end-to-end</li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>把全连接层换成<strong>1*1卷积</strong>，用于提取特征，形成热点图</li>
-<li><strong>反卷积</strong>将小尺寸的热点图上采样到原尺寸的语义分割图像</li>
-</ul>
-<p><img src="/2020/03/28/FCN/fcn1.png" width="40%"></p>
-<ul>
-<li>a novel “skip” architecture to combine deep, coarse, semantic information and shallow, fine, appearance information</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>fully convolutional network</p>
-<ul>
-<li><strong>receptive fields</strong>:  Locations in higher layers correspond to the locations in the image they are path-connected to</li>
-<li>typical recognition nets: <ul>
-<li>fixed-input</li>
-<li>patches</li>
-<li>the fully connected layers can be viewed as convolutions with kernels that cover their entire input regions</li>
-</ul>
-</li>
-<li>our structure:<ul>
-<li>arbitrary-input</li>
-<li>the computation is saved by computing the overlapping regions of those patches only once</li>
-<li>output size corresponds to the input(H/16, W/16)<ul>
-<li>heatmap: the (H/16 * W/16) high-dims feature-map corresponds to the 1000 classes</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/03/28/FCN/fcn.png" width="50%"></p>
-<ul>
-<li><p><a href="https://blog.csdn.net/HMH2_YY/article/details/80935394" target="_blank" rel="noopener">coarse predictions to dense</a></p>
-<ul>
-<li>OverFeat introduced</li>
-<li>对于高维特征图上一个元素，对应了原图感受野一片区域，将reception field中c位填上这个元素的值</li>
-<li>移动原图，相应的感受野对应的图片也发生了移动，高维特征图的输出变了，c位变了</li>
-<li>移动范围stride*stride，就会得到原图尺寸的输出了</li>
-</ul>
-</li>
-<li><p>upsampling</p>
-<ul>
-<li>simplest: bilinear interpolation</li>
-<li><strong>in-network upsampling</strong>: backwards convolution (deconvolution) with an output stride of f</li>
-<li>A stack of deconvolution layers and activation functions can even learn a <strong>nonlinear</strong> upsampling </li>
-<li>factor: FCN里面inputsize和outputsize之间存在线性关系，就是所有卷积pooling层的累积采样步长乘积</li>
-<li>kernelsize：$2 * factor - factor \% 2$</li>
-<li>stride：$factor$</li>
-<li>padding：$ceil((factor - 1) / 2.)$</li>
-</ul>
-<p><img src="/2020/03/28/FCN/deconv2.gif" width="30%"></p>
-<p>这块的计算有点绕，$stride=factor$比较好确定，这是将特征图恢复的原图尺寸要rescale的尺度。然后在输入的相邻元素之间插入s-1个0元素，原图尺寸变为$(s-1)<em>(input_size-1)+input_size = s</em>input_size + (s-1)$，为了得到$output_size=s*input_size$输出，再至少$padding=[(s-1)/2]_{ceil}$，然后根据：</p>
-<script type="math/tex; mode=display">
-(s-1) * (in-1) + in + 2p -k + 1 = out</script><p>有：</p>
-<script type="math/tex; mode=display">
-2p-k+2 = s</script><p>在keras里面可以调用库函数Conv2DTranspose来实现：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">x = Input(shape=(<span class="number">64</span>,<span class="number">64</span>,<span class="number">16</span>))</span><br><span class="line">y = Conv2DTranspose(filters=<span class="number">16</span>, kernel_size=<span class="number">20</span>, strides=<span class="number">8</span>, padding=<span class="string">'same'</span>)(x)</span><br><span class="line">model = Model(x, y)</span><br><span class="line">model.summary()</span><br><span class="line"><span class="comment"># input: (None, 64, 64, 16)   output: (None, 512, 512, 16)   params: 102,416</span></span><br><span class="line"></span><br><span class="line">x = Input(shape=(<span class="number">32</span>,<span class="number">32</span>,<span class="number">16</span>))</span><br><span class="line">y = Conv2DTranspose(filters=<span class="number">16</span>, kernel_size=<span class="number">48</span>, strides=<span class="number">16</span>, padding=<span class="string">'same'</span>)(x)</span><br><span class="line"><span class="comment"># input: (None, 32, 32, 16)   output: (None, 512, 512, 16)   params: 589,840</span></span><br><span class="line"></span><br><span class="line">x = Input(shape=(<span class="number">16</span>,<span class="number">16</span>,<span class="number">16</span>))</span><br><span class="line">y = Conv2DTranspose(filters=<span class="number">16</span>, kernel_size=<span class="number">80</span>, strides=<span class="number">32</span>, padding=<span class="string">'same'</span>)(x)</span><br><span class="line"><span class="comment"># input: (None, 16, 16, 16)   output: (None, 512, 512, 16)   params: 1,638,416</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数参考：orig unet的total参数量为36,605,042</span></span><br><span class="line"><span class="comment"># 各级transpose的参数量为：</span></span><br><span class="line"><span class="comment"># (None, 16, 16, 512)     4,194,816</span></span><br><span class="line"><span class="comment"># (None, 32, 32, 512)     4,194,816</span></span><br><span class="line"><span class="comment"># (None, 64, 64, 256)     1,048,832</span></span><br><span class="line"><span class="comment"># (None, 128, 128, 128)   262,272</span></span><br><span class="line"><span class="comment"># (None, 256, 256, 32)    16,416</span></span><br></pre></td></tr></table></figure>
-<p>可以看到kernel_size变大，对参数量的影响极大。（kernel_size设置的小了，只能提取到单个元素，我觉得kernel_size至少要大于stride）</p>
-</li>
-<li><p>Segmentation Architecture </p>
-<ul>
-<li>use pre-trained model</li>
-<li>convert all fully connected layers to convolutions </li>
-<li>append a 1*1 conv with channel dimension(including background)  to predict scores </li>
-<li>followed by a deconvolution layer to upsample the coarse outputs to dense outputs</li>
-</ul>
-</li>
-<li><p>skips</p>
-<ul>
-<li>the 32 pixel stride at the final prediction layer limits the scale of detail in the upsampled output</li>
-<li>逐层upsampling，融合前几层的feature map，element-wise add</li>
-</ul>
-</li>
-<li><p>finer layers: “As they see fewer pixels, the finer scale predictions should need fewer layers.” 这是针对前面的卷积网络来说，随着网络加深，特征图上的感受野变大，就需要更多的channel来记录更多的低级特征组合</p>
-<ul>
-<li>add a 1*1 conv on top of pool4 (zero-initialized)</li>
-<li>adding a 2x upsampling layer on top of conv7 (We <strong>initialize this 2xupsampling to bilinear interpolation</strong>, but allow the parameters to be learned)</li>
-<li><strong>sum</strong> the above two stride16 predictions (“Max fusion made learning difficult due to gradient switching”)</li>
-<li>16x upsampled back to the image </li>
-<li><p>做到第三行再往下，结果又会变差，所以做到这里就停下</p>
-<p><img src="/2020/03/28/FCN/skip.png" width="90%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>总结</p>
-<ul>
-<li><p>在升采样过程中，分阶段增大比一步到位效果更好</p>
-</li>
-<li><p>在升采样的每个阶段，使用降采样对应层的特征进行辅助</p>
-</li>
-<li><p>8倍上采样虽然比32倍的效果好了很多，但是<strong>结果还是比较模糊</strong>和平滑，对图像中的细节不敏感，许多研究者采用MRF算法或CRF算法对FCN的输出结果做进一步优化</p>
-</li>
-<li><p>x8为啥好于x32：1. x32的特征图<strong>感受野过大</strong>，对小物体不敏感   2. x32的放大比例造成的失真更大</p>
-</li>
-<li><p><strong>unet的区别</strong>：</p>
-<ul>
-<li><p>unet没用imagenet的预训练模型，因为是医学图像</p>
-</li>
-<li><p>unet在进行浅层特征融合的时候用了concat而非element-wise add</p>
-</li>
-<li><p>逐层上采样，x2 vs. x8/x32</p>
-</li>
-<li><p>orig unet没用pad，输出小于输入，FCN则pad+crop</p>
-</li>
-<li><p>数据增强，FCN没用这些‘machinery’，医学图像需要强augmentation</p>
-</li>
-<li><p>加权loss</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>​    </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4131,7 +4094,7 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">153</span>
+                  <span class="site-state-item-count">154</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4144,7 +4107,7 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">89</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

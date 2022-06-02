@@ -276,6 +276,269 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/02/PANet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/02/PANet/" itemprop="url">PANet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-02T13:15:59+08:00">
+                2020-12-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/02/PANet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/02/PANet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="PANet-Path-Aggregation-Network-for-Instance-Segmentation"><a href="#PANet-Path-Aggregation-Network-for-Instance-Segmentation" class="headerlink" title="PANet: Path Aggregation Network for Instance Segmentation"></a>PANet: Path Aggregation Network for Instance Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>boost the information flow</li>
+<li>bottom-up path<ul>
+<li>shorten information path </li>
+<li>enhance  accurate localization </li>
+</ul>
+</li>
+<li>adaptive feature pooling <ul>
+<li>aggregate all levels</li>
+<li>avoiding arbitrarily assigned results </li>
+</ul>
+</li>
+<li>mask prediction head<ul>
+<li>fcn + fc</li>
+<li>captures different views, possess complementary properties </li>
+</ul>
+</li>
+<li>subtle extra computational</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>previous skills: fcn, fpn, residual, dense</li>
+<li>findings<ul>
+<li>高层特征类别准，底层特征定位准，但是高层和底层特征之间的path太长了，不利于双高</li>
+<li>past proposals make predictions based on one level</li>
+</ul>
+</li>
+<li>PANet <ul>
+<li>bottom-up path<ul>
+<li>shorten information path </li>
+<li>enhance  accurate localization </li>
+</ul>
+</li>
+<li>adaptive feature pooling <ul>
+<li>aggregate all levels</li>
+<li>avoiding arbitrarily assigned results </li>
+</ul>
+</li>
+<li>mask prediction head<ul>
+<li>fcn + fc</li>
+<li>captures different views, possess complementary properties </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>framework</p>
+<p> <img src="/2020/12/02/PANet/PAN.png" width="80%;"></p>
+<ul>
+<li>b: bottom-up path</li>
+<li>c: adaptive feature pooling </li>
+<li>e: fusion mask branch</li>
+</ul>
+</li>
+<li><p>bottom-up path</p>
+<ul>
+<li>fpn’s top-down path:<ul>
+<li>to propagate strong semantical information</li>
+<li>to ensure reasonable classification capability </li>
+<li>long path: red line, 100+ layers</li>
+</ul>
+</li>
+<li>bottom-up path:  <ul>
+<li>enhances the localization capability  </li>
+<li>short path: green line, less than 10 layers</li>
+</ul>
+</li>
+<li><p>for each level $N_l$</p>
+<ul>
+<li>input: $N_{l+1}$ &amp; $P_l$</li>
+<li>$N_{l+1}$ 3x3 conv &amp; $P_l$ id path - add - 3x3 conv</li>
+<li>channel 256</li>
+<li>ReLU after conv</li>
+</ul>
+<p><img src="/2020/12/02/PANet/bottom-up.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>adaptive feature pooling </p>
+<ul>
+<li><p>pool features from all levels, then fuse, then predict</p>
+</li>
+<li><p>steps</p>
+<ul>
+<li>map each proposal to all feature levels</li>
+<li>roi align</li>
+<li>go through one layer of the following sub-networks independently</li>
+<li>fusion operation (element-wise max or sum) </li>
+<li><p>例如，box branch是两个fc层，来自各个level的roi align之后的proposal features，先各自经过一个fc层，再share the following till the head，mask branch是4个conv层，来自各个level的roi align之后的proposal features，先各自经过一个conv层，再share the following till the head</p>
+<p><img src="/2020/12/02/PANet/fusion.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>fusion mask branch</p>
+<ul>
+<li>fc layers are location sensitive </li>
+<li>helpful to differentiate instances and recognize separate parts belonging to the same object </li>
+<li>conv分支<ul>
+<li>4个连续conv+1个deconv：3x3 conv，channel256，deconv factor=2</li>
+<li>predict mask of each class：output channel n_classes </li>
+</ul>
+</li>
+<li>fc分支<ul>
+<li>from conv分支的conv3输出</li>
+<li>2个连续conv，channel256，channel128</li>
+<li>fc，dim=28x28，特征图尺寸，用于前背景分类</li>
+</ul>
+</li>
+<li><p>final mask：add</p>
+<p><img src="/2020/12/02/PANet/mask.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>heavier head<ul>
+<li>4 consecutive 3x3 convs</li>
+<li>shared among reg &amp; cls</li>
+<li>在multi-task的情况下，对box的预测有效</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/11/17/CSPNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3441,215 +3704,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/14/label-smoothing/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/14/label-smoothing/" itemprop="url">label smoothing</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-14T11:42:35+08:00">
-                2020-09-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/14/label-smoothing/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/14/label-smoothing/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>动机</p>
-<ul>
-<li>to understand label smoothing<ul>
-<li>improving generalization </li>
-<li>improves model calibration </li>
-<li>changes the representations learned by the penultimate layer of the network</li>
-<li>effect on knowledge distillation of a student network</li>
-</ul>
-</li>
-<li>soft targets：a hard target and the uniform distribution of other classes</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>label smoothing implicitly calibrates the learned models  <ul>
-<li>能让confidences更有解释性——more aligned with the accuracies of their predictions</li>
-<li>label smoothing impairs distillation——teacher用了label smoothing，student会表现变差，this adverse effect results from loss of information in the digits</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>modeling</p>
-<ul>
-<li>penultimate layer：fc with activation<ul>
-<li>$p_k = \frac{e^{wx}}{\sum e^{wx}}$</li>
-</ul>
-</li>
-<li>outputs：loss<ul>
-<li>$H(y,p)=\sum_{k=1}^K -y_klog(p_k)$</li>
-</ul>
-</li>
-<li>hard targets：$y_k$ is 1 for the correct class and 0 for the rest</li>
-<li>label smoothing：$y_k^{LS} = y_k(1-\alpha)+ \alpha /K$</li>
-</ul>
-</li>
-<li><p>visualization schem </p>
-<ul>
-<li>将dimK activation vector投影到正交平面上，a dim2 vector per example</li>
-<li><p>clusters are much tighter because label smoothing encourages that each example in training set to be equidistant from all the other class’s templates</p>
-</li>
-<li><p>3 classes shows triangle structure since ‘equidistant’</p>
-</li>
-<li>predictions‘ absolute values are much bigger without LM, representing over-confident</li>
-<li>semantically similar classes are harder to separate，但是总体上cluster形态还是好一点</li>
-<li>training without label smoothing there is continuous degree of change between two semantically similar classes，用了LM以后就观察不到了——相似class之间的语义相关性被破坏了，’erasure of information’</li>
-<li>have similar accuracies despite qualitatively different clustering，对分类精度的提升不明显，但是从cluster形态上看更好看</li>
-</ul>
-</li>
-<li><p>model calibration </p>
-<ul>
-<li><p>making the confidence of its predictions more accurately represent their accuracy </p>
-</li>
-<li><p>metric：expected calibration error (ECE) </p>
-</li>
-<li><p>reliability diagram </p>
-<p>  <img src="/2020/09/14/label-smoothing/calibration.png" width="70%"></p>
-</li>
-<li><p>better calibration compared to the unscaled network </p>
-</li>
-<li><p>Despite trying to collapse the training examples to tiny clusters, these networks generalize and are calibrated：在训练集上的cluster分布非常紧凑，encourage每个样本都和其他类别的cluster保持相同的距离，但是在测试集上，样本的分布就比较松散了，不会限定在小小的一坨内，说明网络没有over-confident，representing the full range of confidences for each prediction </p>
-</li>
-</ul>
-</li>
-<li><p>knowledge distillation </p>
-<ul>
-<li><p>even when label smoothing improves the accuracy of the teacher network, teachers trained with label smoothing produce inferior student networks </p>
-</li>
-<li><p>As the representations collapse to small clusters of points, much of the information that could have helped distinguish examples is lost </p>
-<p>  <img src="/2020/09/14/label-smoothing/knowledge.png" width="40%"></p>
-</li>
-<li><p>看training set的scatter，LM会倾向于将一类sample集中成为相似的表征，sample之间的差异性信息丢了：Therefore a teacher with better accuracy is not necessarily the one that distills better</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3704,7 +3758,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">153</span>
+                  <span class="site-state-item-count">154</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3717,7 +3771,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">89</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

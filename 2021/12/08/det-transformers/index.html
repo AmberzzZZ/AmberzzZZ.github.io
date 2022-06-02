@@ -95,7 +95,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/DETR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/Deformable%20Attention%20Module.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/multi.png">
-<meta property="og:updated_time" content="2022-02-24T10:39:02.111Z">
+<meta property="og:updated_time" content="2022-06-01T05:47:58.583Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="det-transformers">
 <meta name="twitter:description" content="目标检测leaderboard: https://paperswithcode.com/sota/object-detection-on-coco boxAP swin开启了霸榜时代：家族第一名63.1 接着是YOLO家族：家族第一名57.3，YOLOv4是55.8 DETR：论文里是44.9(没在榜单上)，只有一个deformable DETR是52.3 时代的眼泪Cascade Mask R">
@@ -376,9 +376,10 @@
 </ul>
 <ul>
 <li><p>papers    </p>
-<p>  [DETR] End-to-End Object Detection with Transformers：Facebook，</p>
-<p>  [Swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软</p>
-<p>  [deformable DETR] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤</p>
+<p>  [DETR] End-to-End Object Detection with Transformers：Facebook，首个端到端检测架构，无需nms等后处理，难优化，MSA的显存/计算量</p>
+<p>  [Swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，主要是swin-back的建模能力强，放在啥框架里都很行</p>
+<p>  [deformable DETR] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤，将MSA卷积话，解决transformer的high-resolution困境</p>
+<p>  [anchor DETR] Anchor DETR: Query Design for Transformer-Based Object Detection：旷视，也是针对attention结构的变种（cross-attention），精度更高，显存更少，速度更快，收敛更快</p>
 </li>
 </ul>
 <h2 id="Swin-details-for-object-detection"><a href="#Swin-details-for-object-detection" class="headerlink" title="Swin details for object detection"></a>Swin details for object detection</h2><ol>
@@ -780,7 +781,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">153</span>
+                  <span class="site-state-item-count">154</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -793,7 +794,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">89</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

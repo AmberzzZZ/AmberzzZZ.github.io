@@ -276,6 +276,218 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/07/PnP-Perspective-n-Point/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/PnP-Perspective-n-Point/" itemprop="url">PnP, Perspective-n-Point</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T10:21:11+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/07/PnP-Perspective-n-Point/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/07/PnP-Perspective-n-Point/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>PnP是求解3D到2D点对运动的方法，它描述了当知道n个3D空间点及其投影位置时，如何估计相机的位姿变换。最少只需要3个点对就可以估计相机的运动。</p>
+</blockquote>
+<p>该方法使用的条件是，参考点为世界坐标系下的特征点，其空间位置已知，并且知道query帧中对应参考点的像素坐标。</p>
+<p>PnP问题的求解方法有很多种：</p>
+<ul>
+<li>直接线性变换</li>
+<li>P3P</li>
+<li>非线性优化方法——Bundle Ajustment</li>
+</ul>
+<p>本节着眼于BA求解方法，其他方法暂时不做展开。</p>
+<h3 id="2-Bundle-Ajustment"><a href="#2-Bundle-Ajustment" class="headerlink" title="2. Bundle Ajustment"></a>2. Bundle Ajustment</h3><p>利用优化求解的思路是：<strong>最小化重投影误差</strong>——期望计算query帧的相机位姿$R, t$，它的李代数为$\xi$，空间特征点的坐标为$P_i = [X_i, Y_i, Z_i]^T$，其在query帧上的像素坐标为$u_i = [u_i, v_i]^T$，那么理论上：</p>
+<script type="math/tex; mode=display">
+s_i u_i = K exp(\xi^{\wedge})P_i</script><p>构建成最小二乘问题就是：寻找最优的相机位姿$\xi$，使得误差最小化：</p>
+<script type="math/tex; mode=display">
+\xi^* = argmin_{\xi} \frac{1}{2}\sum_{i=1}^{n}||u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i||^2_2</script><p>在使用优化库来求解之前，还有一个问题——每个误差项$e_i = u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i$的导数$J_i$。</p>
+<blockquote>
+<p>回忆<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>中讲过的，优化问题最终转化成为矩阵的线性求解$H\Delta x = g$，其中矩阵$H$是由单个误差项一阶展开$e(x+\Delta x) = e(x) + J\Delta x$中的雅可比矩阵$J_i$ 构成的稀疏对称阵。</p>
+</blockquote>
+<p>误差项是一个二维向量（像素坐标差），优化变量是一个六维向量（空间位姿李代数），因此$J$是一个2*6的矩阵。</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi} = \lim_{\delta \xi \rightarrow0} \frac{\partial e}{\partial P^{'}}\frac{\partial P^{'}}{\partial \delta \xi}</script><p>其中$P^{‘}$是特征点转换到相机坐标系下的空间坐标：</p>
+<script type="math/tex; mode=display">
+su = KP^{'}\\
+u = f_x \frac{X^{'}}{Z^{'}} + c_x\\
+v = f_y \frac{X^{'}}{Z^{'}} + c_y</script><p>因此误差项导数的第一项为：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P^{'}} = -
+\begin{bmatrix}
+\frac{\partial u}{\partial X^{'}} & \frac{\partial u}{\partial Y^{'}} & \frac{\partial u}{\partial Z^{'}}\\
+\frac{\partial v}{\partial X^{'}} & \frac{\partial v}{\partial Y^{'}} & \frac{\partial v}{\partial Z^{'}}
+\end{bmatrix}
+=-
+\begin{bmatrix}
+\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}}\\
+0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}\\
+\end{bmatrix}</script><p>误差项的第二项为变换后的点关于李代数的导数，参考<a href="https://amberzzzz.github.io/2018/05/12/%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8-%E6%9D%8E%E4%BB%A3%E6%95%B0/">李代数</a>节：</p>
+<script type="math/tex; mode=display">
+\frac{\partial TP}{\partial \delta \xi} = 
+\begin{bmatrix}
+I & -P^{'\wedge}\\
+0^T & 0^T
+\end{bmatrix}</script><p>其中$P^{‘\wedge}$是$P^{‘}$的反对称阵：</p>
+<script type="math/tex; mode=display">
+P^{'\wedge} = 
+\begin{bmatrix}
+0 & -Z^{'} & Y^{'}\\
+Z^{'} & 0 & -X^{'}\\
+-Y^{'} & X^{'} & 0
+\end{bmatrix}</script><p>因此得到完整的雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi} =\frac{\partial e}{\partial P^{'}}
+\begin{bmatrix}
+I & P^{'\wedge}
+\end{bmatrix}=-
+\begin{bmatrix}
+\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}} & |& -\frac{f_xX^{'}Y^{'}}{Z^{'2}} & f_x + \frac{f_xX^{'2}}{Z^{'2}} & -\frac{f_xY^{'}}{Z^{'}}\\
+0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}& | & - f_y - \frac{f_xY^{'2}}{Z^{'2}}  & \frac{f_yX^{'}Y^{'}}{Z^{'2}} &  \frac{f_yX^{'}}{Z^{'}}\\
+\end{bmatrix}</script><p>除了优化相机位姿以外，还可以同时优化特征点的空间位置$P$：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P} = \frac{\partial e}{\partial P^{'}} \frac{\partial P^{'}}{\partial P}</script><p>其中的第二项为：</p>
+<script type="math/tex; mode=display">
+P^{'} = exp(\xi^{\wedge})P = RP +t\\
+\therefore \frac{\partial P^{'}}{\partial P} = R^T</script><h3 id="3-优化库使用"><a href="#3-优化库使用" class="headerlink" title="3. 优化库使用"></a>3. 优化库使用</h3><p>构建图模型：</p>
+<ul>
+<li>优化变量1：节点1：query相机位姿（六维向量李代数）</li>
+<li>优化变量2：节点2：特征点空间位置（三维向量坐标描述）</li>
+<li>预测值：边n：根据当前estimate的优化量，投影到投影平面的像素坐标$z_i = h(\xi, P_i)$</li>
+<li>观测值：能够直接读出的，query帧上对应特征点的实际投影坐标$u_i$</li>
+</ul>
+<p>g2o中已经提供了相近的基类（在g2o/types/sba/types_six_dof_expmap.h中）：李代数位姿节点VertexSE3Expmap、空间点位置节点VertexSBAPointXYZ、投影方程边EdgeProjectXYZ2UV。</p>
+<p>边类里面要关注linearizeOplus函数，这个函数描述的是非线性函数进行线性化的过程中，求导的解析解（当然也可以使用数值解），最后函数给出的是每个节点的导数矩阵（$\frac{\partial e}{\partial \delta \xi} $和$\frac{\partial e}{\partial P_i}$） 。<strong>这点是Ceres库和g2o库的一点主要差别：Ceres都是使用自动的数值导数，g2o要自己求导</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> EdgeProjectXYZ2UV::linearizeOplus()</span><br><span class="line">&#123;</span><br><span class="line">    VertexSE3Expmap * vj = <span class="keyword">static_cast</span>&lt;VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">    VertexSBAPointXYZ* vi = <span class="keyword">static_cast</span>&lt;VertexSBAPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    _jacobianOplusXi = <span class="number">-1.</span>/z * tmp * T.rotation().toRotationMatrix();</span><br><span class="line"> </span><br><span class="line">    _jacobianOplusXj(<span class="number">0</span>,<span class="number">0</span>) = x*y/z^<span class="number">2</span> * cam-&gt;focal_length;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-OpenCV内置函数"><a href="#4-OpenCV内置函数" class="headerlink" title="4. OpenCV内置函数"></a>4. OpenCV内置函数</h3><p><strong>basic：</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line"></span><br><span class="line">Mat r, t, R;</span><br><span class="line">cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line">cv::Rodrigues ( r, R );     <span class="comment">// 旋转向量和旋转矩阵的转换</span></span><br></pre></td></tr></table></figure>
+<p><strong>advanced：</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> cv::solvePnPRansac( </span><br><span class="line">    InputArray objectPoints,      <span class="comment">// 3D空间坐标 vector&lt;cv::Point3f&gt; pts3d</span></span><br><span class="line">    InputArray imagePoints,       <span class="comment">// 2D像素坐标 vector&lt;cv::Point2f&gt; pts2d</span></span><br><span class="line">    InputArray cameraMatrix,      <span class="comment">// 相机内部参数矩阵 K</span></span><br><span class="line">    InputArray distCoeffs,        <span class="comment">// 畸变系数向量 cv::Mat()</span></span><br><span class="line">    OutputArray rvec,             <span class="comment">// 旋转向量</span></span><br><span class="line">    OutputArray tvec,             <span class="comment">// 平移向量</span></span><br><span class="line">    <span class="keyword">bool</span> useExtrinsicGuess = <span class="literal">false</span>, <span class="comment">// If true, the function uses the provided rvec and tvec values as initial</span></span><br><span class="line">    <span class="keyword">int</span> iterationsCount = <span class="number">100</span>,    <span class="comment">// Number of iterations</span></span><br><span class="line">    <span class="keyword">float</span> reprojectionError = <span class="number">8.0</span>,<span class="comment">// 重投影误差最大值</span></span><br><span class="line">    <span class="keyword">double</span> confidence = <span class="number">0.99</span>,</span><br><span class="line">    OutputArray inliers = noArray(), <span class="comment">// Output vector that contains indices of inliers in objectPoints and imagePoints .</span></span><br><span class="line">    <span class="keyword">int</span> flags = SOLVEPNP_ITERATIVE   <span class="comment">// method for solving PnP</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Ransac：考虑到我们提供的匹配里面存在误匹配的情况，OpenCV采用“随机采样一致性算法”（Random Sample Consensus），从现有匹配中随机取一部分用来估计运动（PnP的解析解法最少只需要三个点就能计算相对位姿），正确的匹配结果都是近似的，从而剔除误匹配。</li>
+<li>inlier：内点，函数最终给出的匹配可信的点。</li>
+<li>RANSAC只采用少数几个随机点来计算PnP，容易受到噪声影响。工程上通常使用RANSAC的解作为初值，再使用非线性优化方法求解最优值。</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Ransac粗匹配</span></span><br><span class="line">cv::solvePnPRansac( pts3d, pts2d, K, Mat(), rvec, tvec, <span class="literal">false</span>, <span class="number">100</span>, <span class="number">4.0</span>, <span class="number">0.99</span>, inliers );</span><br><span class="line">cv::Rodrigues ( rvec, R ); </span><br><span class="line">Eigen::Matrix3d rotation_matrix = R.at&lt;<span class="keyword">double</span>&gt;;</span><br><span class="line">T_c_r_estimated_ = SE3d(</span><br><span class="line">        SO3d(rotation_matrix),</span><br><span class="line">        Vector3d( tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"><span class="comment">// BA局部优化</span></span><br><span class="line">g2o::VertexSE3Expmap* pose <span class="keyword">new</span> g2o::VertexSE3Expmap();</span><br><span class="line">...</span><br><span class="line">pose-&gt;setEstimate(g2o::SE3Quat( T_c_r_estimated_.rotationMatrix(), T_c_r_estimated_.translation()));</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2395,435 +2607,6 @@ e_i(\xi + \delta \xi) = e(\xi) + J(\xi)\delta \xi</script><p>其中的<strong>�
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/02/graph-based-optimization/" itemprop="url">Graph-based Optimization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-02T15:32:59+08:00">
-                2018-05-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/02/graph-based-optimization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/02/graph-based-optimization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h3><p>基于图优化的slam主要分为以下三个部分：</p>
-<ul>
-<li>前端：基于传感器数据建图，<strong>匹配相邻帧</strong>，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。<strong>位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈</strong>。</li>
-<li>后端：<strong>优化</strong>图，<strong>基于历史信息的约束</strong>，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。</li>
-<li>宏观的闭环检测：根据闭环信息<strong>优化</strong>矫正整个拓扑图。</li>
-</ul>
-<p>这里面涉及到了<strong>两个优化</strong>，一个是后端局部优化，一个是全局闭环优化，两者计算的思路是一样的。</p>
-<h3 id="2-优化"><a href="#2-优化" class="headerlink" title="2 优化"></a>2 优化</h3><h4 id="2-1-全局闭环优化，用于矫正整个拓扑图"><a href="#2-1-全局闭环优化，用于矫正整个拓扑图" class="headerlink" title="2.1 全局闭环优化，用于矫正整个拓扑图"></a>2.1 全局闭环优化，用于矫正整个拓扑图</h4><p>前端后端完成的事情是<strong>探索并创建新的节点</strong>，获得新的测量值，添加新的位姿关系方程：</p>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{split}
-& x_0 + z_{01} = x_1\\
-& x_1 + z_{12} = x_2\\
-& ...\\
-& x_{k-1} + z_{k-1, k} = x_{k}\\
-\end{split}
-\end{eqnarray}</script><p>而全局闭环检测<strong>添加已知节点之间</strong>的位姿约束关系：</p>
-<script type="math/tex; mode=display">
-\begin{equation}
-x_i + z_{i j} = x_j, \ \ \ \ i,j\in [0, k]
-\end{equation}</script><p>再添加一个<strong>初始条件</strong>（不是必须的，但是后面实验表明固定一个顶点比不固定效果要好——相当于有一个明确可信的基准）：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><ul>
-<li>以上线性方程组中，<strong>闭环检测部分的方程中的两个结点都在前面出现过，因此不增加矩阵的秩</strong>，因此最终要求解包含$k$个方程$k+1$个未知数的线性方程组。</li>
-<li>闭环的关键性：如果没有闭环条件，方程组$Ax=b$左右两边秩是相等的——有唯一解，添加了闭环条件以后，相当于方程组左侧$A$的秩不变，但是右侧$b$的秩则增加了，$rank(A) &lt; rank(A, b)$——没有解析解，只有最优。</li>
-<li>实际上状态$\textbf x$是一个包含夹角$\theta$的向量$[x, y, \theta]$，实际相对位姿的计算<strong>并非简单的线性叠加</strong>：</li>
-</ul>
-<script type="math/tex; mode=display">
-\textbf x \oplus \Delta \textbf x = 
-\begin{pmatrix}
-x + \Delta x cos\theta - \Delta y sin \theta  \\
-y + \Delta x sin\theta + \Delta y cos \theta  \\
-normAngle(\theta + \Delta \theta)
-\end{pmatrix}</script><p><strong>举个栗子</strong>：</p>
-<blockquote>
-<p>机器人从起始位置$x_0=0$处出发，里程计测得它向前移动了1m，到达$x_1$，接着测得它向后移动了0.8m，到达$x_2$，这时通过闭环检测，发现他回到了起始位置。</p>
-</blockquote>
-<p>首先根据给出信息构建图：</p>
-<script type="math/tex; mode=display">
-x_0 + 1 = x_1\\
-x_1 - 0.8 = x_2</script><p>然后根据闭环条件添加约束：</p>
-<script type="math/tex; mode=display">
-x_2 = x_0</script><p>补充初始条件：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><p>使用<strong>最小二乘法</strong>求上述方程组的最优解，首先构建<strong>残差平方和函数</strong>：</p>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{split}
-& f_1 = x_0 = 0\\
-& f_2 = x_1 - x_0 - 1 = 0\\
-& f_3 = x_2 - x_1 + 0.8 = 0\\
-& f_4 = x_2 - x_0 = 0
-\end{split}
-\end{eqnarray}</script><script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 + (x_2-x_1+0.8)^2 + (x_2-x_0)^2</script><p>然后对每个参数<strong>求偏导</strong>：</p>
-<script type="math/tex; mode=display">
-\frac{\partial c}{\partial x_1} = -x_0 + 2x_1-x_2 -1.8=0\\
-\frac{\partial c}{\partial x_2} = -x_0 - x_1 +2x_2 + 0.8 = 0</script><p>解得$x_1 = 0.93, x_2 = 0.07$，可以看到闭环矫正了所有节点的位姿，优化了整个拓扑图。</p>
-<h4 id="2-2-后端局部优化，用于矫正局部地图"><a href="#2-2-后端局部优化，用于矫正局部地图" class="headerlink" title="2.2 后端局部优化，用于矫正局部地图"></a>2.2 后端局部优化，用于矫正局部地图</h4><p>再举个栗子：</p>
-<blockquote>
-<p>机器人从起始位置$x_0=0$处出发，并观测到其正前方2m处有一个路标$l_0$，里程计测得它向前移动了1m，到达$x_1$，这时观测到路标在其正前方0.8m处。</p>
-</blockquote>
-<p>首先根据前端信息建图 raw graph（这样建图明显是存在累积误差的）：</p>
-<script type="math/tex; mode=display">
-x_0 + 1 = x_1</script><p>然后添加闭环约束：</p>
-<script type="math/tex; mode=display">
-x_1 + 0.8 = l_0\\
-x_0 + 2 = l_0</script><p>初始条件：</p>
-<script type="math/tex; mode=display">
-x_0 = 0</script><p>构建残差平方和：</p>
-<script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>求偏导求解：$x_1 = 1.07, l_0 = 1.93$，可以看到后端是对前端新添加进来的节点位姿做了矫正，消除部分测量误差。</p>
-<p>这里面涉及到两种传感器信息——里程计和激光雷达，两种传感器的精度是有差别的，我们对其的信任程度也应该不同，反映到公式中就是<strong>要为不同传感器信息赋予不同的权重</strong>。假设编码器信息更准确，那么：</p>
-<script type="math/tex; mode=display">
-c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + \textbf{10}(x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>调整权重之后解得：$x_1 = 1.01, l_0 = 1.9$，可以看到<strong>计算结果会向着更信任的传感器的测量结果靠近</strong>。</p>
-<h4 id="2-3-严格推导"><a href="#2-3-严格推导" class="headerlink" title="2.3 严格推导"></a>2.3 严格推导</h4><p><strong>2.3.1 信息矩阵（误差权重矩阵)</strong></p>
-<p>图优化问题转化为最小二乘问题，首先是带权重的残差平方和函数的一般形式：</p>
-<script type="math/tex; mode=display">
-F(x) = \Sigma_{i,j} e(x_i, x_j, z_{i,j})^T\Omega_{i,j}e(x_i, x_j, z_{i,j})</script><script type="math/tex; mode=display">
-x^{*} = argminF(x)</script><p>其中的$\Omega_{i,j}$项就是上文提到的误差权重矩阵，它的正式名字叫<strong>信息矩阵</strong>。</p>
-<p>传感器的测量值，可以看作是以真值为中心的多元高斯分布：</p>
-<script type="math/tex; mode=display">
-f_x(x_1, x_2, ..., x_k) = \frac{1}{\sqrt{}(2\pi)^k|\Sigma|}exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))</script><p>协方差矩阵$\Sigma$对角线上的值表示每一维对应的方差，该方差值越大表示该维度不确定性越大，对应的信息权重应该越小。<strong>实际上拓扑图上每条边对应的信息矩阵就是对应测量协方差矩阵的逆</strong>。</p>
-<p><strong>2.3.2 非线性</strong></p>
-<p>上文已经提到，位姿变化非线性——<strong>非线性最小二乘问题</strong>，要采用迭代法求解。迭代法需要有一个<strong>好的初始假设值</strong>，然后在这个值附近<strong>增量式迭代</strong>寻找最优解。</p>
-<script type="math/tex; mode=display">
-f(x) = \Sigma e^T\Omega e\\
-最小二乘问题目标函数：min \frac{1}{2}||f(x)||_2^2</script><p>首先要将非线性函数转化成关于增量$\Delta x$的线性函数——泰勒展开，根据具体的展开形式又分为：</p>
-<ul>
-<li><p>一阶、二阶梯度法</p>
-<p>直接<strong>对目标函数</strong>在$x$附近进行泰勒展开：</p>
-<script type="math/tex; mode=display">
-||f(x+\Delta x)||_2^2 \approx ||f(x)||_2^2 +J(x) \Delta x = \frac{1}{2} \Delta x^T H \Delta x</script><p><strong>一阶梯度法（最速下降法）</strong>：只保留一阶梯度，并引入步长$\lambda$：</p>
-<script type="math/tex; mode=display">
-\Delta x^* = -\lambda J^T(x)</script><p><strong>二阶梯度法（牛顿法）</strong>：保留一阶和二阶梯度信息</p>
-<script type="math/tex; mode=display">
-J^T(x)+H\Delta x^*=0</script><p>最速下降法过于贪心，容易走出锯齿路线，增加迭代次数。牛顿法需要计算目标函数的二阶导数（Hessian矩阵），计算困难。</p>
-</li>
-</ul>
-<ul>
-<li><p>高斯牛顿法</p>
-<p><strong>对$f(x)$而不是目标函数$f(x)^2$</strong>在$x$附近进行一阶泰勒展开：</p>
-<script type="math/tex; mode=display">
-f(x+\Delta x) \approx f(x) + J(x) \Delta x</script><p>对应每一个误差函数$e_{ij}$：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-& e_{ij}(x_i+\Delta x_i, x_j+\Delta x_j) = e_{i,j}(x+\Delta x)  \\
-&\approx e_{ij} +\frac{\partial e_{ij}}{\partial x}\Delta x = e_{ij} +  J_{ij}\Delta x
-\end{split}</script><p>​            其中$J_{ij}$为初始值附近的雅可比矩阵（定义见卡尔曼滤波）。</p>
-<p>带入目标函数得到<strong>近似二阶展开</strong>：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-& F_{ij}(x+\Delta x) = e_{ij}(x+\Delta x)^T \Omega_{ij}e_{ij}(x+\Delta x)\\
-& \approx (e_{ij} +  J_{ij}\Delta x)^T \Omega_{ij}(e_{ij} +  J_{ij}\Delta x)\\
-& = \underbrace{e_{ij}^T\Omega_{ij}e_{ij}}_{c_{ij}} + 2\underbrace{e_{ij}^T\Omega_{ij}J_{ij}}_{b_{ij}^T}\Delta x + \Delta x^T \underbrace{J_{ij}^T\Omega_{ij}J_{ij}}_{H_{ij}}\Delta x\\
-& = c_{ij} + 2b_{ij}^T\Delta x + \Delta x^T H_{ij}\Delta x
-\end{split}</script><p>求解增量$\Delta x$：</p>
-<script type="math/tex; mode=display">
-2b + 2H\Delta x^* = 0\\
-高斯牛顿方程：H\Delta x^* = -b\\</script><p>对比牛顿法可见，<strong>高斯牛顿法用$J^TJ$作为二阶Hessian矩阵的近似，简化了计算</strong>。</p>
-<p>上述算法要求近似$H$矩阵是正定且可逆的，实际数据很难满足，因而在使用高斯牛顿算法时可能出现<strong>$H$为奇异矩阵或病态</strong>的情况，增量稳定性较差，导致算法不收敛。</p>
-<blockquote>
-<p>图形上来思考，就是近似后的梯度方向不再是梯度变化最快的方向，可能引起不稳定。</p>
-</blockquote>
-</li>
-</ul>
-<ul>
-<li><p>列文伯格—马夸尔特法</p>
-<p>为$\Delta x$添加一个信赖区域，不让它因为过大而使得近似$f(x+\Delta x) = f(x) + J(x)\Delta x$不准确。</p>
-<script type="math/tex; mode=display">
-\rho = \frac{f(x+\Delta x) - f(x)}{J(x) \Delta x}</script><p>可以看到如果$\rho$接近1，说明近似比较好。如果$\rho$比较大，说明实际减小的值远大于估计减小的值，需要放大近似范围，反之你懂的。</p>
-<script type="math/tex; mode=display">
-||D\Delta x_k||_2^2 \leq \mu</script><p>将每次迭代得到的$\Delta x$限定在一个半径为信赖区域的椭球中，根据$\rho$的大小修改信赖区域。于是问题转化成为了<strong>带不等式约束的优化问题</strong>：</p>
-<script type="math/tex; mode=display">
-min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2, \ \ s.t. ||D \Delta x ||^2 = \mu</script><p>用拉格朗日乘子转化成无约束问题：</p>
-<script type="math/tex; mode=display">
-min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2 + \frac{\lambda}{2}||D \Delta x ||^2</script><p>展开后得到如下形式：</p>
-<script type="math/tex; mode=display">
-(H + \lambda D^TD)\Delta x^* = -b</script><p>通常把$D$取值为单位阵$I$，得到更简化形式：</p>
-<script type="math/tex; mode=display">
-(H + \lambda I)\Delta x^* = -b</script><p>当$\lambda$较小时，$H$占主要地位，说明二次近似模型较好，LM算法更接近高斯牛顿法。当$\lambda$较大时，$\lambda I$占主要地位，LM算法更接近一阶梯度法。修正了线性方程组矩阵的病态问题，比高斯牛顿法更加健壮，但是收敛速度也更慢。</p>
-<blockquote>
-<p>图形上思考，LM算法修正了高斯牛顿法得到的梯度，以此固定一个搜索区域，在区域内寻找最优。</p>
-</blockquote>
-</li>
-</ul>
-<p><strong>2.3.3 稀疏矩阵</strong></p>
-<p>对于误差函数$e_{ij}$，它只和$e_i$和$e_j$有关，因此它的雅可比矩阵有如下结构（行数是$x$的维度，列数是拓扑图中节点映射关系的数目）：</p>
-<script type="math/tex; mode=display">
-J_{ij} = 
-\begin{bmatrix}
-0 & ... & 0 & \underbrace{\frac{\partial e_{i}}{\partial x_i}}_{A_{ij}} & 0 & ... &  \underbrace{\frac{\partial e_{j}}{\partial x_j}}_{B_{ij}} & 0 & ... & 0
-\end{bmatrix}</script><p>相应地$b_{ij}$是一个包含很多0的列向量：</p>
-<script type="math/tex; mode=display">
-\begin{split}
- b_{ij}^T& = e_{ij}^T \Omega_{ij} J_{ij}\\
-&= e_{ij}^T\Omega_{ij} (0 ... A_{ij}...B_{ij}...0)\\
-&=(0...e_{ij}^T\Omega_{ij}A_{ij}...e_{ij}^T\Omega_{ij}B_{ij}...0)
-\end{split}</script><p>$b = \Sigma_{ij} b_{ij}$：</p>
-<p><img src="/2018/05/02/graph-based-optimization/b.png" alt=""></p>
-<p>$H_{ij}$是一个包含很多0的对称阵：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-H_{ij}& = J_{ij}^T \Omega_{ij}J_{ij} \\
-& = 
-\begin{pmatrix}
-...\\
-A_{ij}^T\\
-...\\
-B_{ij}^T\\
-...
-\end{pmatrix}
-\Omega_{ij}
-\begin{pmatrix}
-... & A_{ij} & ... & B_{ij} & ...
-\end{pmatrix}\\
-& =
-\begin{pmatrix}
-    &  \\
-& A_{ij}^T\Omega{ij}A_{ij} & A_{ij}^T\Omega_{ij}B_{ij} & \\
-  & \\
-& B{ij}^T\Omega_{ij}A_{ij} & B_{ij}^T\Omega_{ij}B_{ij}& \\
-   & 
-\end{pmatrix}
-\end{split}</script><p>$H=\Sigma_{ij}H_{ij}$：</p>
-<p><img src="/2018/05/02/graph-based-optimization/H.png" alt=""></p>
-<p>梳理一下计算流程：$e_{ij} \to  J_{ij}  \to A_{ij}, B_{ij} \to b_{ij}, H_{ij} \to b, H \to \Delta x^* \to x$</p>
-<p><strong>2.3.4 误差函数</strong></p>
-<p>前面定义过位姿的非线性叠加，显然位姿误差也不是简单的线性加减关系：</p>
-<script type="math/tex; mode=display">
-e_{ij}(x_i, x_j) = t2v(Z_{ij}^{-1}(X_i^{-1}.X_j))</script><p>其中的$Z_{ij}$、$X_i$、$X_j$都是矩阵形式。$X_i^{-1}X_j$表示节点j到节点i之间的位姿差异$\hat Z_{ij}$，假设这个转移矩阵形式如下：</p>
-<script type="math/tex; mode=display">
-\hat Z_{ij} = 
-\begin{bmatrix}
-R_{2*2} & t_{2*1} \\
-0 & 1
-\end{bmatrix}</script><p>假设测量值$Z_{ij}$形式如下：</p>
-<script type="math/tex; mode=display">
-Z_{ij} = 
-\begin{bmatrix}
-R^{'} & t^{'}\\
-0 & 1
-\end{bmatrix}</script><p>分块矩阵的求逆过程如下：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}^{-1}& =
-\begin{bmatrix}
-\begin{bmatrix}
-I & t\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-R & 0\\
-0 & 1
-\end{bmatrix}
-\end{bmatrix}^{-1}=
-\begin{bmatrix}
-R & 0\\
-0 & 1
-\end{bmatrix}^{-1}
-\begin{bmatrix}
-I & t\\
-0 & 1
-\end{bmatrix}^{-1}\\
-& =\begin{bmatrix}
-R^T & 0\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-I & -t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^T & -R^Tt\\
-0 & 1
-\end{bmatrix}
-\end{split}</script><p>所以误差$e_{ij}$计算如下：</p>
-<script type="math/tex; mode=display">
-E_{ij} = Z_{ij}^{-1}\hat Z_{ij} = 
-\begin{bmatrix}
-R^{'} & t^{'}\\
-0 & 1
-\end{bmatrix}^{-1}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^{'T} & -R^{'T}t^{'}\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix}=
-\begin{bmatrix}
-R^{'T}R & R^{'T}(t-t^{'})\\
-0 & 1
-\end{bmatrix}</script><script type="math/tex; mode=display">
-e_{ij} = t2v(E_{ij})=
-\begin{bmatrix}
-R_z(t_{\hat z} - t_z)_{2*1}\\
-\theta_\hat z - \theta_z
-\end{bmatrix}_{3*1}=
-\begin{bmatrix}
-R_z(x_{\hat z} - x_z)\\
-R_z(y_{\hat z} - y_z)\\
-\theta_\hat z - \theta_z
-\end{bmatrix}=
-\begin{bmatrix}
-R_z[R_i(x_{j} - x_i) - x_z]\\
-R_z[R_i(y_{j} - y_{i}) - y_z]\\
-\theta_j - \theta_i - \theta_z
-\end{bmatrix}</script><p>求解雅可比矩阵$J_{ij}$：</p>
-<script type="math/tex; mode=display">
-A_{ij} = 
-\begin{bmatrix}
-\frac{\partial e_1}{\partial x_i} & \frac{\partial e_1}{\partial y_i} & \frac{\partial e_1}{\partial \theta_i}\\
-\frac{\partial e_2}{\partial x_i} & \frac{\partial e_2}{\partial y_i} & \frac{\partial e_2}{\partial \theta_i}\\
-\frac{\partial e_3}{\partial x_i} & \frac{\partial e_3}{\partial y_i} & \frac{\partial e_3}{\partial \theta_i}\\
-\end{bmatrix}=
-\begin{bmatrix}
--R_z^TR_i^T & 0 & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(x_j-x_i)\\
-0 & -R_z^TR_i^T  & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(y_j-y_i)\\
-0 & 0 & -1
-\end{bmatrix}</script><script type="math/tex; mode=display">
-B_{ij} = 
-\begin{bmatrix}
-R_z^TR_i^T & 0\\
-0 & 1
-\end{bmatrix}</script><p>累加$b$和$H$矩阵： </p>
-<script type="math/tex; mode=display">
-b_{[i]} += A_{ij}\Omega_{ij}e_{ij}\\
-b_{[j]} += B_{ij}^T\Omega_{ij}e_{ij}\\
-H_{[ii]} += A_{ij}^T\Omega_{ij}A_{ij}\\
-H_{[ij]} += A_{ij}^T\Omega_{ij}B_{ij}\\
-H_{[ji]} += B_{ij}^T\Omega_{ij}A_{ij}\\
-H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2878,7 +2661,7 @@ H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">153</span>
+                  <span class="site-state-item-count">154</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2891,7 +2674,7 @@ H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">89</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
