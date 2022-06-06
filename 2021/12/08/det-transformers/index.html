@@ -95,7 +95,12 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/DETR.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/Deformable%20Attention%20Module.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/multi.png">
-<meta property="og:updated_time" content="2022-06-01T05:47:58.583Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/prediction%20slots.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/anchor.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/attention.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/decoupled%20attention.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/anchor%20DETR.png">
+<meta property="og:updated_time" content="2022-06-02T11:21:17.687Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="det-transformers">
 <meta name="twitter:description" content="目标检测leaderboard: https://paperswithcode.com/sota/object-detection-on-coco boxAP swin开启了霸榜时代：家族第一名63.1 接着是YOLO家族：家族第一名57.3，YOLOv4是55.8 DETR：论文里是44.9(没在榜单上)，只有一个deformable DETR是52.3 时代的眼泪Cascade Mask R">
@@ -376,10 +381,10 @@
 </ul>
 <ul>
 <li><p>papers    </p>
-<p>  [DETR] End-to-End Object Detection with Transformers：Facebook，首个端到端检测架构，无需nms等后处理，难优化，MSA的显存/计算量</p>
-<p>  [Swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，主要是swin-back的建模能力强，放在啥框架里都很行</p>
-<p>  [deformable DETR] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤，将MSA卷积话，解决transformer的high-resolution困境</p>
-<p>  [anchor DETR] Anchor DETR: Query Design for Transformer-Based Object Detection：旷视，也是针对attention结构的变种（cross-attention），精度更高，显存更少，速度更快，收敛更快</p>
+<p>  [DETR 2020] End-to-End Object Detection with Transformers：Facebook，首个端到端检测架构，无需nms等后处理，难优化，MSA的显存/计算量</p>
+<p>  [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，主要是swin-back的建模能力强，放在啥框架里都很行</p>
+<p>  [deformable DETR 2021] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤，将MSA卷积话，解决transformer的high-resolution困境</p>
+<p>  [anchor DETR 2022] Anchor DETR: Query Design for Transformer-Based Object Detection：旷视，new query design，也是针对attention结构的变种（cross-attention），精度更高，显存更少，速度更快，收敛更快</p>
 </li>
 </ul>
 <h2 id="Swin-details-for-object-detection"><a href="#Swin-details-for-object-detection" class="headerlink" title="Swin details for object detection"></a>Swin details for object detection</h2><ol>
@@ -655,6 +660,163 @@
 </ul>
 </li>
 </ol>
+<h2 id="Anchor-DETR-Query-Design-for-Transformer-Based-Object-Detection"><a href="#Anchor-DETR-Query-Design-for-Transformer-Based-Object-Detection" class="headerlink" title="Anchor DETR: Query Design for Transformer-Based Object Detection"></a>Anchor DETR: Query Design for Transformer-Based Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>previous DETRs<ul>
+<li>decoder输入的object queries是一系列learned embeddings</li>
+<li>do not have explicit physical meanings</li>
+<li>difficult to optimize</li>
+</ul>
+</li>
+<li>we propose Anchor DETR<ul>
+<li>a novel query design based on anchors：enable ‘one region multiple objects’</li>
+<li>an attention variant：reduce memory</li>
+<li>better performance and fewer training epochs</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>MSCOCO</li>
+<li>ResNet50-DC5 feature，44.2 AP with 19 FPS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Visualization of the prediction slots</p>
+<ul>
+<li><p>a图是DETR的prediction boxes的中心点，绿-红-蓝表示box由小到大，可以看到绿box分布在全图，红蓝则集中在中心，其实类似枚举，没有什么物理意义</p>
+</li>
+<li><p>b图是Anchor DETR的prediction slots，黑点是anchor points，可以看到box的中心点都分布在anchor附近</p>
+</li>
+<li>说明本文方法are more related to a specific position than DETR</li>
+</ul>
+<p><img src="/2021/12/08/det-transformers/prediction slots.png" width="40%;"></p>
+</li>
+<li><p>回看CNN</p>
+<ul>
+<li>anchors are highly related to position</li>
+<li>contain interpretable physical meanings</li>
+</ul>
+</li>
+<li><p>we propose this novel query design</p>
+<ul>
+<li>首先用anchor coordinates去编码query</li>
+<li>其次针对一个位置多个目标的情况：adding multiple patterns to each anchor point</li>
+<li>CNN是highly anchor-driven，位置和尺寸都包含了，DETR是完全放飞，随意初始化，本文方法在中间，用了anchor position，但是没有scale</li>
+<li>这样还是保证网络预测的格子都在anchor附近：easier to optimize</li>
+</ul>
+</li>
+<li><p>we also propose an attention variant that we call Row-Column Decouple Attention (RCDA)</p>
+<ul>
+<li>行列解耦：2D key feature decouple into 1D row and 1D column</li>
+<li>串行执行row attention &amp; column attention</li>
+<li><p>reduce memory cost </p>
+</li>
+<li><p>similar or better performance</p>
+</li>
+<li>这个其实可以理解的，MSA的global attention太dense computation了，所以才会出现Swin那种WMSA去分块，deformable DETR那种先filter出attention区域，包括本文的解耦，都是在尝试稀疏化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>anchor points</p>
+<ul>
+<li><p>CNN detector里面anchor points永远对应着feature grids</p>
+</li>
+<li><p>但是在transformer里面，这个点可以更flexible，可以是learned points sequence</p>
+</li>
+<li><p>本文两种都尝试了</p>
+<ul>
+<li>fixed anchor points就是grid coordinates</li>
+<li><p>learned anchors就是random uniform初始化，然后加入learned layers，最后输出的learned coordinates</p>
+<p><img src="/2021/12/08/det-transformers/anchor.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>最终的网络预测都加在这个anchor coordinates上，也就是网络又变成预测偏移量了</p>
+</li>
+</ul>
+</li>
+<li><p>attention formulation：the DETR-like attention </p>
+<ul>
+<li><p>也就是最原始的transformer里面的MSA，QKV首先各自过一层linear layer，然后如下计算：</p>
+<p><img src="/2021/12/08/det-transformers/attention.png" width="45%;"></p>
+</li>
+<li><p>下标f是feature，下标p是position</p>
+</li>
+<li>decoder里面有两种attention：self-attention和cross-attention<ul>
+<li>self-attention里面$Q_f,K_f, V_f$是一样的，来自前面的输出，$Q_p, K_p$是一样的，来自learned positional embedding</li>
+<li>decoder的第一个query输入$Q^{init}_f \in R^{N_q \times D}$可以是一个常量/一个learned embedding</li>
+<li>cross-attention里面Q的来源不变，但是KV变成了encoder的输出，$K_p$是sine-cosine positional embedding，是个常量</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>anchor points to object query</p>
+<ul>
+<li>原始的DETR用learned positional embedding作为object query，用来distinguishing different objects，缺少可解释性</li>
+<li>we use anchor points $Pos_q \in R^{N_A \times 2}$<ul>
+<li>$N_A$个点坐标</li>
+<li>2是xy-dim，range 0-1</li>
+</ul>
+</li>
+<li>encode as the object queries $Q_p$<ul>
+<li>we use a small MLP with 2 linear layers</li>
+<li>$Q_p = Encode(Pos_q) \in R^{N_A \times D}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>multiple objects issue</p>
+<ul>
+<li>one position may have multiple objects</li>
+<li>回想原始的object query，是用embedding生成的$Q_f^{init}$，每个$Q_f^i \in R^D$相当于一个pattern，用来代表当前位置/index</li>
+<li>如果给到多个pattern给一个object query：<ul>
+<li>use a small set pattern embedding $Q_f^i \in R^{N_p \times D}$</li>
+<li>用embedding来生成：$Q_f^i = Embedding(N_p, D)$</li>
+<li>相当于to detect objects with different patterns at each position</li>
+<li>$N_p=3$，类似scale</li>
+</ul>
+</li>
+<li>overall的object queries就是$Q_f \in R^{N_pN_A \times D}$</li>
+<li>positional embeddings则是$Q_p \in R^{N_pN_A \times D}$，它的Np是复制过来的（3个pattern的PE相同）</li>
+</ul>
+</li>
+<li><p>Row-Column Decoupled Attention (RCDA) </p>
+<ul>
+<li>memory issue，限制了resolution</li>
+<li>decouple the key feature $K_f \in R^{H \times W \times D}$ to the row feature $K_{fx} \in R^{ W \times D}$ and column feature $K_{fy} \in R^{H \times D}$：通过1D global average pooling</li>
+<li><p>then perform row attention and column attention successively</p>
+<p><img src="/2021/12/08/det-transformers/decoupled attention.png" width="45%;"></p>
+</li>
+<li><p>$g_{1D}$是1D的position encoding function：learned MLP for Q &amp; sin-cos for K</p>
+</li>
+<li><p>之前的计算量：(Nq)*(HW)</p>
+</li>
+<li>现在的计算量：(Nq)*(H+W)</li>
+</ul>
+</li>
+<li><p>overall pipeline</p>
+<p>  <img src="/2021/12/08/det-transformers/anchor DETR.png" width="80%;"></p>
+<ul>
+<li>宏观结构跟DETR一毛一样</li>
+<li>但就是encoder/decoder内部的attention module变成了RCDA</li>
+<li>然后就是pattern embeddings从Embedding(100,256)变成了Embedding(Np,D)，用(Na,D)的anchor grids一广播就变成了(NpNa,D)的query inputs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>settings</li>
+<li></li>
+</ul>
+</li>
+</ol>
 
       
     </div>
@@ -781,7 +943,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">154</span>
+                  <span class="site-state-item-count">155</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -794,7 +956,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">89</span>
+                  <span class="site-state-item-count">90</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -837,7 +999,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-details-for-object-detection"><span class="nav-number">1.</span> <span class="nav-text">Swin details for object detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">2.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION"><span class="nav-number">3.</span> <span class="nav-text">DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-details-for-object-detection"><span class="nav-number">1.</span> <span class="nav-text">Swin details for object detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">2.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DEFORMABLE-DETR-DEFORMABLE-TRANSFORMERS-FOR-END-TO-END-OBJECT-DETECTION"><span class="nav-number">3.</span> <span class="nav-text">DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Anchor-DETR-Query-Design-for-Transformer-Based-Object-Detection"><span class="nav-number">4.</span> <span class="nav-text">Anchor DETR: Query Design for Transformer-Based Object Detection</span></a></li></ol></div>
             
 
           </div>

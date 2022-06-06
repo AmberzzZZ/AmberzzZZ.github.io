@@ -95,7 +95,10 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/decoder.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/swinUnet.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/swin%20block.png">
-<meta property="og:updated_time" content="2021-11-30T02:05:19.092Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/Broden+.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/datasets.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/UPerNet.png">
+<meta property="og:updated_time" content="2022-06-06T04:20:47.486Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="seg-transformers">
 <meta name="twitter:description" content="之前那篇《transformers》太长了，新开一个分割方向的专题，papers： ——————————previous—————————-  [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transforme">
@@ -379,6 +382,7 @@
 <ul>
 <li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
 <li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
+<li>[UPerNet 2018] Unified Perceptual Parsing for Scene Understanding，PKU&amp;字节，Swin Segmentaion的补充材料，Swin的down-stream task选择用UperNet as base framework</li>
 </ul>
 <h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
 <ul>
@@ -631,6 +635,186 @@
 <li><p>实验</p>
 </li>
 </ol>
+<h2 id="UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding"><a href="#UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding" class="headerlink" title="UPerNet: Unified Perceptual Parsing for Scene Understanding"></a>UPerNet: Unified Perceptual Parsing for Scene Understanding</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>人类对于图像的识别是存在多个层次的<ul>
+<li>scenes</li>
+<li>objects inside</li>
+<li>compositional parts</li>
+<li>textures and surfaces</li>
+</ul>
+</li>
+<li>our work<ul>
+<li>study a new task caled Unified Perceptual Parsing（UPP）：建立了一个“统一感知解析”的任务</li>
+<li>要求模型recognize as many visual concepts as possible</li>
+<li>propose a multi-task framework UPerNet &amp; a training strategy</li>
+</ul>
+</li>
+<li>repo：<a href="https://github.com/CSAILVision/unifiedparsing" target="_blank" rel="noopener">https://github.com/CSAILVision/unifiedparsing</a><ul>
+<li>semantic segmentation</li>
+<li>multi-task</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>various visual recognition tasks are mostly studied independently<ul>
+<li>过去的task总是将不同level的视觉信息分开研究</li>
+<li>is it possible for a neural network to solve several visual recognition tasks simultaneously? </li>
+</ul>
+</li>
+<li>thus we propose Unified Perceptual Parsing（UPP）task<ul>
+<li>有两个data issue</li>
+<li>no single dataset annotated with all levels of visual information</li>
+<li>不同perceptual levels的标注形式也不统一</li>
+</ul>
+</li>
+<li>thus we propose UPerNet<ul>
+<li>overcome the heterogeneity of different datasets</li>
+<li>learns to detect various visual concepts jointly</li>
+<li>主要实现方式是每个iteration只选取一种数据集，同时只更新相关网络层</li>
+</ul>
+</li>
+<li>we further propose a training method<ul>
+<li>enable the network to predict pixel-wise texture labels using only image-level annotations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Defining Unified Perceptual Parsing</p>
+<ul>
+<li><p>统一感知解析：从一张图中获取各种维度的视觉信息</p>
+<ul>
+<li>scene labels</li>
+<li>objects</li>
+<li>parts of objects</li>
+<li>materials and textures of objects</li>
+</ul>
+</li>
+<li><p>datasets</p>
+<ul>
+<li><p>使用了Broadly and Densely Labeled Dataset：整合了好几个数据集，contains various visual concepts</p>
+</li>
+<li><p>Objects, object parts and materials are segmented down to pixel level while textures and scenes are annotated</p>
+<p>  at image level：目标、组成成分、材质是像素级标注，纹理和场景是图像级标注</p>
+<p>  <img src="/2021/11/18/seg-transformers/Broden+.png" width="60%;"></p>
+</li>
+<li><p>standardize调整</p>
+<ul>
+<li>data imabalance issue：丢掉一部分尾部数据</li>
+<li>merge across dataset：合并不同数据集的同类数据</li>
+<li>merge under-sampled labels：合并子类</li>
+</ul>
+</li>
+<li><p>our Broden+</p>
+<ul>
+<li>57, 095 images in total：51,617 training /5, 478 validation</li>
+<li><p>22, 210 images from ADE20K, 10, 103 images from Pascal-Context and Pascal-Part, 19, 142 images from Open- Surfaces and 5, 640 images from DTD</p>
+<p><img src="/2021/11/18/seg-transformers/datasets.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>metrics</p>
+<ul>
+<li>Pixel Accuracy (P.A.)：the proportion of correctly classified pixels</li>
+<li>mean IoU (mIoU)：目标前景的平均IoU，会影响bg分割的表现</li>
+<li>mIoU-bg：前景占比很小的时候，再加上bg IoU，object parts</li>
+<li>top-1 acc：图像级标注使用top1 acc，scene and texture classification</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Designing Networks for Unified Perceptual Parsing</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/11/18/seg-transformers/UPerNet.png" width="70%;"></p>
+<ul>
+<li>因为包含high/low level visual tasks，所以网络也是multi-level的：FPN with a PPM</li>
+<li>scene head是image-level classification label，直接接PPM的输出</li>
+<li>object and part heads是多尺度的，使用FPN fusion的输出</li>
+<li>material head是细粒度任务，使用FPN的highest resolution featuremap的输出</li>
+<li>texture head是更加细粒度任务，接在backobne的Res-2 block后面，而且是在网络训练完其他任务以后再fine-tuning的</li>
+</ul>
+</li>
+<li><p>FPN</p>
+<ul>
+<li>multi-level feature</li>
+<li>use [top-down path + lateral connections] to fuse  high-level semantic information into middle &amp; low</li>
+<li>conv-BN-ReLU，channel = 512</li>
+<li></li>
+</ul>
+</li>
+<li><p>PPM</p>
+<ul>
+<li>from PSPNet</li>
+<li>用来解决CNN理论上感受野足够大，但实际上相当小这个问题</li>
+<li>相比较于用dilated methods去扩大感受野的方式，好处是down-sampling rate更大（还是x32），能够提取high-level semantics</li>
+</ul>
+</li>
+<li><p>ResNet</p>
+<ul>
+<li>使用每个stage的输出作为level feature map，{C2, C3,C4,C5}，x4-x32</li>
+<li>FPN的输出feature map，{P2, P3,P4,P5}，P5是PPM的输出</li>
+</ul>
+</li>
+<li><p>heads</p>
+<ul>
+<li>scene head：分类器，接PPM输出，global average pooling + linear layer</li>
+<li>object/parts head：实验发现使用fusion map表现好于P2，fusion map通过bilinear interpolating &amp; concat &amp; conv</li>
+<li>materials head：on top of P2 rather than fused features</li>
+<li>texture head：<ul>
+<li>texture label是图像级的，而且来自non-natural images</li>
+<li>directly fusing these images with other natural images is harmful to other tasks</li>
+<li>同时我们希望预测是pixel-level</li>
+<li>我们把它接在C2上，append several convolutional layers，感受野small enough，而且backbone layers不回传梯度，只更新head layers</li>
+<li>training images使用64x64的，确保模型只focus在local detail上</li>
+<li>only fine-tune a few epochs</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training settings</p>
+<ul>
+<li>poly learning rate，initial=0.2，power=0.9</li>
+<li>weight decay=1e-4，momentum=0.9</li>
+<li>training inputs：常用的目标检测rescale方法，随机将shorter side变成{300, 375, 450, 525, 600}</li>
+<li>inference inputs：使用fixed shorter side 450</li>
+<li>longer side &lt; 1200</li>
+<li>为了防止noisy gradient，每个mini-batch随机选一种data source，按照数据集大小采样，只梯度更新相关path的参数</li>
+<li>object and material segmentation计算前景loss</li>
+<li>part segmentation计算前景+背景</li>
+<li>on each GPU a mini-batch involves 2 images</li>
+<li>sync-SGD &amp; sync BN across 8 GPUs</li>
+<li>training iterations of ADE20k (20k images) is 100k，其他数据集对应rescale</li>
+</ul>
+</li>
+<li><p>Design discussion</p>
+<ul>
+<li>previous segmentation networks主要是FCN，用pretrained backbones搭配dilated convs，扩大感受野的同时维持比较大的resolution</li>
+<li>但是原始的backobne，通常在stage4/5的时候有比较多的层，如resnet101的res4&amp;res5就占了78层<ul>
+<li>改用dilated convs一是计算量memory飙升</li>
+<li>二是有违最初的设计逻辑，未必还能发挥出原始的效能</li>
+<li>第三就是不好兼顾本文任务的classification task</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li></li>
+</ul>
+</li>
+</ol>
 
       
     </div>
@@ -757,7 +941,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">154</span>
+                  <span class="site-state-item-count">155</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -770,7 +954,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">89</span>
+                  <span class="site-state-item-count">90</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -813,7 +997,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-for-Semantic-Segmentaion"><span class="nav-number">1.</span> <span class="nav-text">Swin Transformer for Semantic Segmentaion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-for-Semantic-Segmentaion"><span class="nav-number">1.</span> <span class="nav-text">Swin Transformer for Semantic Segmentaion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding"><span class="nav-number">4.</span> <span class="nav-text">UPerNet: Unified Perceptual Parsing for Scene Understanding</span></a></li></ol></div>
             
 
           </div>

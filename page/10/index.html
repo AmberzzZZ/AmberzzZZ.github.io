@@ -276,6 +276,250 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/27/densenet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/05/27/densenet/" itemprop="url">densenet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-27T09:14:38+08:00">
+                2020-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/27/densenet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/27/densenet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>动机</p>
+<ul>
+<li>embrace shorter connections</li>
+<li>the feature-maps of all preceding layers are used as inputs</li>
+<li>advantages<ul>
+<li>alleviate vanishing-gradient</li>
+<li>encourage feature reuse</li>
+<li>reduce the number of parameters</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>Dense<ul>
+<li>each layer obtains additional inputs from all preceding lay- ers and passes on its own feature-maps to all subsequent layers</li>
+<li>feature reuse</li>
+<li>combine features by concatenating：the summation in ResNet may impede the information flow in the network</li>
+</ul>
+</li>
+<li>information preservation<ul>
+<li>id shortcut/additive identity transformations</li>
+</ul>
+</li>
+<li><p>fewer params</p>
+<ul>
+<li>DenseNet layers are very narrow </li>
+<li>add only a small set of feature-maps to the “collective knowledge”</li>
+</ul>
+</li>
+<li><p>gradients flow</p>
+<ul>
+<li>each layer has direct access to the gradients from the loss function  </li>
+<li>have regularizing effect </li>
+</ul>
+<p><img src="/2020/05/27/densenet/densenet.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>architecture</p>
+<p>  <img src="/2020/05/27/densenet/block.png" width="70%;"></p>
+<ul>
+<li>dense blocks<ul>
+<li>concat</li>
+<li>BN-ReLU-3x3 conv</li>
+<li>$x_l = H_l([x_0, x_1, …, x_{l-1}])$</li>
+</ul>
+</li>
+<li>transition layers<ul>
+<li>change the size of feature-maps</li>
+<li>BN-1x1 conv-2x2 avg pooling</li>
+</ul>
+</li>
+<li><p>growth rate k</p>
+<ul>
+<li>$H_l$ produces feature- maps</li>
+<li>narrow：<em>e.g.</em>, k = 12 </li>
+<li>One can view the feature-maps as the global state of the network </li>
+<li>The growth rate regulates <strong>how much new information</strong> each layer contributes to the global state</li>
+</ul>
+<p><img src="/2020/05/27/densenet/architectures.png" width="80%;"></p>
+</li>
+<li><p>bottleneck —- DenseNet-B </p>
+<ul>
+<li>in dense block stage</li>
+<li>1x1 conv reduce dimension first</li>
+<li>number of channels：4k </li>
+</ul>
+</li>
+<li><p>compression —- DenseNet-C</p>
+<ul>
+<li>in transition stage</li>
+<li>reduce the number of feature-maps </li>
+<li>number of channels：$\theta k$</li>
+</ul>
+</li>
+<li><p>structure configurations </p>
+<ul>
+<li>1st conv channels：第一层卷积通道数</li>
+<li>number of dense blocks</li>
+<li>L：dense block里面的layer数</li>
+<li>k：growth rate</li>
+<li>B：bottleneck 4k</li>
+<li>C：compression 0.5k</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>讨论</p>
+<ul>
+<li><p>concat replace sum：</p>
+<ul>
+<li>seemingly small modification lead to substantially different behaviors of the two network architectures </li>
+<li>feature reuse：feature can be accessed anywhere</li>
+<li>parameter efficient：同样参数量，test acc更高，同样acc，参数量更少</li>
+<li><p>deep supervision：classifiers attached to every hidden layer</p>
+</li>
+<li><p>weight assign</p>
+<ul>
+<li>All layers spread their weights over multi inputs (include transition layers)</li>
+<li>least weight are assigned to the transition layer, indicating that transition layers contain many redundant features, <strong>thus can be compressed</strong></li>
+<li>overall there seems to be concentration towards final feature-maps, suggesting that more high-level features are produced late in the network</li>
+</ul>
+<p><img src="/2020/05/27/densenet/weight.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/25/GANomaly/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3091,955 +3335,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/13/GoogLeNet系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/04/13/GoogLeNet系列/" itemprop="url">GoogLeNet系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-13T09:18:32+08:00">
-                2020-04-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/04/13/GoogLeNet系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/13/GoogLeNet系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li><p>papers</p>
-<ul>
-<li><p>[V1] Going Deeper with Convolutions, 6.67% test error</p>
-</li>
-<li><p>[V2] Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift, 4.8% test error</p>
-</li>
-<li><p>[V3] Rethinking the Inception Architecture for Computer Vision, 3.5% test error</p>
-</li>
-<li><p>[V4] Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning, 3.08% test error</p>
-</li>
-<li><p>[Xception] Xception: Deep Learning with Depthwise Separable Convolutions</p>
-</li>
-<li><p>[EfficientNet] EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks </p>
-</li>
-<li><p>[EfficientDet] EfficientDet: Scalable and Efficient Object Detection </p>
-</li>
-<li><p>[EfficientNetV2] EfficientNetV2: Smaller Models and Faster Training </p>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>大体思路</p>
-<ul>
-<li>inception V1：打破传统的conv block，设计了<strong>Inception block</strong>，将1*1、3*3、5*5的卷积结果concat，增加网络宽度</li>
-<li>inception V2：加入了<strong>BN层</strong>，减少Internal Covariate Shift，用两个3*3替代5*5，降低参数量</li>
-<li>inception V3：提出<strong>分解Factorization</strong>，7*7改成7*1和1*7，参数减少加速计算，增加网络深度和非线性</li>
-<li>inception V4：结合<strong>Residual</strong> Connection</li>
-<li>Xception：针对inception V3的分解结构的改进，使用<strong>可分离卷积</strong></li>
-<li>EfficientNet：主要研究model scaling，针对网络深度、宽度、图像分辨率，有效地扩展CNN</li>
-<li>EfficientDet：将EfficientNet从分类任务扩展到目标检测任务</li>
-</ul>
-</li>
-</ol>
-<h2 id="review"><a href="#review" class="headerlink" title="review"></a>review</h2><ol>
-<li><p>review0122：conv-BN层合并运算</p>
-<ul>
-<li><p>reference：<a href="https://nenadmarkus.com/p/fusing-batchnorm-and-conv/" target="_blank" rel="noopener">https://nenadmarkus.com/p/fusing-batchnorm-and-conv/</a></p>
-</li>
-<li><p>freezed BN可以看成1x1的卷积运算</p>
-</li>
-<li><p>两个线性运算是可以合并的</p>
-</li>
-<li><p>given $W_{conv} \in R^{C<em>C_{prev}</em>k<em>k}$，$b_{conv} \in R^C $，$W_{bn}\in R^{C</em>C}$，$b_{bn}\in R^C$</p>
-<script type="math/tex; mode=display">
-  F = W_{bn} * (W_{conv} * F_{prev} + b_{conv}) + b_{bn}</script></li>
-</ul>
-</li>
-</ol>
-<h2 id="V1-Going-deeper-with-convolutions"><a href="#V1-Going-deeper-with-convolutions" class="headerlink" title="V1: Going deeper with convolutions"></a>V1: Going deeper with convolutions</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>improved utilization of the computing resources</li>
-<li>increasing the depth and width of the network while keeping the computational budget</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>the recent trend has been to increase the number of layers and layer size, while using dropout to address the problem of overfitting </li>
-<li>major bottleneck：large network，large number of params，limited dataset，overfitting</li>
-<li>methods use filters of different sizes in order to handle multiple scales </li>
-<li>NiN use  1x1 convolutional layers to easily integrate in the current CNN pipelines</li>
-<li>we use 1x1 convs with a dual purpose of dimension reduction  </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Architectural</p>
-<ul>
-<li>1x1 conv+ReLU for compute reductions  </li>
-<li><p>an alternative parallel pooling path since pooling operations have been essential for the success </p>
-<p><img src="/2020/04/13/GoogLeNet系列/inceptionv1.png" width="80%"></p>
-</li>
-<li><p>overall architecture :</p>
-<p><img src="/2020/04/13/GoogLeNet系列/googlenet.png" width="80%"></p>
-</li>
-<li><p>细节：</p>
-<ul>
-<li><p>rectified linear activation</p>
-</li>
-<li><p>mean subtraction</p>
-</li>
-<li><p>a move from fully connected layers to average pooling improves acc</p>
-</li>
-<li><p>the use of dropout remained essential  </p>
-</li>
-<li><p>adding auxiliary classifiers(on 4c&amp;4d) with a discount weight  </p>
-<ul>
-<li>5x5 avg pool, stride 3</li>
-<li>1x1 conv+relu, 128 filters</li>
-<li>1024 fc+relu</li>
-<li>70% dropout</li>
-<li><p>1000 fc+softmax</p>
-<p><img src="/2020/04/13/GoogLeNet系列/auxilary.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>asynchronous stochastic gradient descent with 0.9 momentum </p>
-</li>
-<li><p>fixed learning rate schedule (de- creasing the learning rate by 4% every 8 epochs </p>
-</li>
-<li><p>photometric distortions useful to combat overfitting </p>
-</li>
-<li><p>random interpolation methods for resizing </p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="V2-Batch-Normalization-Accelerating-Deep-Network-Training-by-Reducing-Internal-Covariate-Shift"><a href="#V2-Batch-Normalization-Accelerating-Deep-Network-Training-by-Reducing-Internal-Covariate-Shift" class="headerlink" title="V2: Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift"></a>V2: Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>use much higher learning rates </li>
-<li>be less careful about initialization </li>
-<li>also acts as a regularizer,  eliminating the need for Dropout</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>SGD：optimizes the parameters $\theta$ of the network, so as to minimize the loss </p>
-<script type="math/tex; mode=display">
-  \theta = argmin_{\theta} \frac{1}{N}\sum_{i=1}^N loss(x_i, \theta)</script><p>  梯度更新：<script type="math/tex">\theta_{next-timestep} = \theta - \alpha \frac{\partial[\frac{1}{N}\sum_Nloss(\theta)]}{\partial \theta}</script>，$x_i$ is the full set</p>
-<p>  batch approximation：use $\frac{1}{m} \sum_M \frac{\partial loss(\theta)}{\partial \theta}$，$x_i$ is the mini-batch set</p>
-<ul>
-<li>quality improves as the batch size increases </li>
-<li>computation over a batch is much more efficient than m computations for individual examples</li>
-<li>the learning rate and the initial values require careful tuning </li>
-</ul>
-</li>
-<li><p>Internal covariate shift</p>
-<ul>
-<li>the input distribution of the layers changes</li>
-<li>consider a gradient descent step above，$x$的数据分布改变了，$\theta$就要相应地 readjust to compensate for the change in the distribution of x</li>
-</ul>
-</li>
-<li><p>activation</p>
-<ul>
-<li>对于神经元$z = sigmoid(Wx+b)$，前面层的参数变化，很容易导致当前神经元的响应值不在有效活动区间，从而导致过了当前激活函数以后梯度消失，slow down the convergence </li>
-<li>In practice, using ReLU &amp; careful initialization  &amp; small learning rates</li>
-<li>如果我们能使得the distribution of nonlinearity inputs remains more stable as the network trains，就不会出现神经元饱和的问题</li>
-</ul>
-</li>
-<li><p>whitening</p>
-<ul>
-<li>对training set的预处理：linearly transformed to have zero means and unit variances, and decorrelated</li>
-<li>使得输入数据的分布保持稳定，normal distribution</li>
-<li>同时去除了数据间的相关性</li>
-</ul>
-</li>
-<li><p>batch normalization</p>
-<ul>
-<li>fixes the means and variances of layer inputs </li>
-<li>reducing the dependence of gradients on the scale of the parameters or of their initial values</li>
-<li>makes it possible to use saturating nonlinearities </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>    * full whitening of each layer is costly
-    * so we normalize each layer independently, full set--&gt; mini-batch
-    * standard normal distribution并不是每个神经元所需的（如identity transform）：introduce, for each activation $x(k)$ , a pair of parameters $\gamma(k)$, $\beta(k)$, which scale and shift the normalized value to maintain the representation ability of the neuron
-
-    ​    
-
-    * for convolutional networks
-
-        * we add the BN transform immediately before the nonlinearity, $z = g(Wx+b)$ to $z = g(BN(Wx))$
-
-        * since we normalize $Wx+b$, the bias b can be ignored  
-        * obey the convolutional property——different elements of the same feature map, at different locations, are normalized in the same way
-        * We learn a pair of parameters $\gamma(k)$ and $\beta(k)$ **per feature map**, rather than per activation
-
-    * properties
-
-        * back-propagation through a layer is unaffected by the scale of its parameters
-        * Moreover, larger weights lead to smaller gradients, thus stabilizing the parameter growth
-        * regularizes the model：因为网络中mini-batch的数据之间是有互相影响的而非independent的
-</code></pre><ol>
-<li><p>方法</p>
-<ul>
-<li><p>batch normalization</p>
-<ul>
-<li>full whitening of each layer is costly</li>
-<li>so we normalize each layer independently, full set—&gt; mini-batch</li>
-<li><p>standard normal distribution并不是每个神经元所需的（如identity transform）：introduce, for each activation $x(k)$ , a pair of parameters $\gamma(k)$, $\beta(k)$, which scale and shift the normalized value to maintain the representation ability of the neuron</p>
-<p><img src="/2020/04/13/GoogLeNet系列/BN.png" width="40%"></p>
-</li>
-</ul>
-</li>
-<li><p>bp：</p>
-<p>  <img src="/2020/04/13/GoogLeNet系列/BNbp.png" width="40%"></p>
-</li>
-<li><p>inference阶段：</p>
-<ul>
-<li>首先两个可学习参数$\gamma$和$\beta$是定下来的</li>
-<li><p>而均值和方差不再通过输入数据来计算，而是载入训练过程中维护的参数（moving averages）</p>
-<p><img src="/2020/04/13/GoogLeNet系列/BNinfer.png" width="40%"></p>
-<p>​    </p>
-</li>
-</ul>
-</li>
-<li><p>for convolutional networks</p>
-<ul>
-<li><p>we add the BN transform immediately before the nonlinearity, $z = g(Wx+b)$ to $z = g(BN(Wx))$</p>
-</li>
-<li><p>since we normalize $Wx+b$, the bias b can be ignored  </p>
-</li>
-<li>obey the convolutional property——different elements of the same feature map, at different locations, are normalized in the same way</li>
-<li>We learn a pair of parameters $\gamma(k)$ and $\beta(k)$ <strong>per feature map</strong>, rather than per activation</li>
-</ul>
-</li>
-<li><p>properties</p>
-<ul>
-<li>back-propagation through a layer is unaffected by the scale of its parameters</li>
-<li>Moreover, larger weights lead to smaller gradients, thus stabilizing the parameter growth</li>
-<li>regularizes the model：因为网络中mini-batch的数据之间是有互相影响的而非independent的</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="V3-Rethinking-the-Inception-Architecture-for-Computer-Vision"><a href="#V3-Rethinking-the-Inception-Architecture-for-Computer-Vision" class="headerlink" title="V3: Rethinking the Inception Architecture for Computer Vision"></a>V3: Rethinking the Inception Architecture for Computer Vision</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>go deeper and wider：<ul>
-<li>enough labeled data</li>
-<li>computational efficiency</li>
-<li>parameter count</li>
-</ul>
-</li>
-<li>to scale up networks<ul>
-<li>utilizing the added computation as efficiently</li>
-<li>give general design principles and optimization ideas  <ul>
-<li>factorized convolutions</li>
-<li>aggressive regularization</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>GoogleNet does not provide a clear description about the contributing factors that lead to the various design </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>General Design Principles </p>
-<ul>
-<li>Avoid representational bottlenecks：特征图尺寸应该gently decrease，resolution的下降必须伴随着channel数的上升，<a href="https://www.zybuluo.com/Team/note/1332528" target="_blank" rel="noopener">避免使用max pooling层进行下采样，因为这样导致信息损失较大</a></li>
-<li>Higher dimensional representations are easier to process locally within a network. Increasing the activa- tions per tile in a convolutional network allows for more disentangled features. The resulting networks will train faster：前半句懂了，high-reso的特征图focus在局部信息，后半句不懂，根据上一篇paper，用了batch norm以后，scale up神经元不影响bp，同时会lead to smaller gradients，为啥能加速？</li>
-<li>Spatial aggregation can be done over lower dimensional embeddings：adjacent unit之间有strong correlation，所以可以reduce the dimension of the input representation before the spatial aggregation，不会有太大的信息损失，并且promotes faster learning</li>
-<li>The computational budget should therefore be distributed in a balanced way between the depth and width of the network.</li>
-</ul>
-</li>
-<li><p>Factorizing Convolutions Filter Size </p>
-<ul>
-<li>into smaller convolutions <ul>
-<li>大filter都可以拆解成多个3x3</li>
-<li>单纯去等价线性分解可以不使用非线性activation，但是我们使用了batch norm（increase variaty），所以观察到使用ReLU以后拟合效果更好</li>
-</ul>
-</li>
-<li>into Asymmetric Convolutions <ul>
-<li>n*n的filter拆解成1*n和n*1</li>
-<li>this factorization does not work well on early layers, but gives very good results on medium grid-sizes (ranges between 12 and 20, using 1x7 and 7x1</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Utility of Auxiliary Classifiers </p>
-<ul>
-<li>did not result in improved convergence early in the training：训练开始阶段没啥用，快收敛时候有点点acc提升</li>
-<li>removal of the lower auxiliary branch did not have any adverse effect on the final quality：拿掉对最终结果没影响</li>
-<li>所以最初的设想（help evolving the low-level features） 是错的，仅仅act as regularizer，auxiliary head里面加上batch norm会使得最终结果better</li>
-</ul>
-</li>
-<li><p>Efficient Grid Size Reduction下采样模块不再使用maxpooling</p>
-<ul>
-<li><p>dxdxk feature map expand to (d/2)x(d/2)x2k：</p>
-<ul>
-<li>1x1x2k conv，stride2 pool：kxdxdx2k computation</li>
-<li>1x1x2k stride2 conv：kx(d/2)x(d/2)x2k computation，计算量下降，但是违反principle1</li>
-<li>parallel stride P and C blocks：kx(d/2)x(d/2)xk computation，符合principle1:reduces the grid-size while expands the filter banks</li>
-</ul>
-<p><img src="/2020/04/13/GoogLeNet系列/bottleneck1.png" width="40%">  <img src="/2020/04/13/GoogLeNet系列/bottleneck2.png" width="40%"></p>
-</li>
-</ul>
-</li>
-<li><p>Inception-v3</p>
-<ul>
-<li>开头的7x7conv已经换成了多个3x3</li>
-<li>中间层featuremap降维到17x17的时候，开始用Asymmetric Factorization block</li>
-<li>到8x8的时候，做了expanding the filter bank outputs</li>
-</ul>
-<p><img src="/2020/04/13/GoogLeNet系列/v3.png" width="70%"></p>
-<p><img src="/2020/04/13/GoogLeNet系列/inceptionv3.png" width="40%"></p>
-</li>
-<li><p>Label Smoothing （<a href="https://zhuanlan.zhihu.com/p/116466239）" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/116466239）</a></p>
-<ul>
-<li><p>used the uniform distribution  $u(k)=1/K$</p>
-<script type="math/tex; mode=display">
-  q(k) = (1-\epsilon)\delta(k) + \frac{\epsilon}{K}</script></li>
-<li><p>对于softmax公式：$p(k)=\frac{exp(y_k)}{\sum exp(y_i)}$，这个loss训练的结果就是$y_k$无限趋近于1，其他$y_i$无限趋近于0，</p>
-</li>
-<li><p>交叉熵loss：$ce=\sum -y_{gt}log(y_k)$，加了label smoothing以后，loss上增加了阴性样本的regularization，正负样本的最优解被限定在有限值，通过抑制正负样本输出差值，使得网络有更强的泛化能力。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="V4-Inception-v4-Inception-ResNet-and-the-Impact-of-Residual-Connections-on-Learning"><a href="#V4-Inception-v4-Inception-ResNet-and-the-Impact-of-Residual-Connections-on-Learning" class="headerlink" title="V4: Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning"></a>V4: Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>residual：whether there are any benefit in combining the Inception architecture with residual connections</li>
-<li>inceptionV4：simplify the inception blocks</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>residual connections seems to improve the training speed greatly：但是没有也能训练深层网络</li>
-<li>made uniform choices for the Inception blocks for each grid size <ul>
-<li>Inception-A for 35x35</li>
-<li>Inception-B for 17x17</li>
-<li>Inception-C for 8x8</li>
-</ul>
-</li>
-<li>for residual versions  <ul>
-<li>use cheaper Inception blocks for residual versions：简化module，因为identity部分（直接相连的线）本身包含丰富的特征信息</li>
-<li>没有使用pooling</li>
-<li>replace the filter concatenation stage of the Inception architecture with residual connections：原来block里面的concatenation主体放在残差path中</li>
-<li>Each Inception block is followed by filter-expansion layer (1 × 1 convolution without activation) to match the depth of the input for addition：相加之前保证channel数一致</li>
-<li>used batch-normalization only on top of the traditional layers, but not on top of the summations：浪费内存</li>
-<li>number of filters exceeded 1000 causes instabilities </li>
-<li>scaling down the residuals before adding by factors between 0.1 and 0.3：残差通道响应值不要太大</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>blocks</p>
-<ul>
-<li><p>V4 ABC：</p>
-<p>  <img src="/2020/04/13/GoogLeNet系列/V4A.png" width="30%">  <img src="/2020/04/13/GoogLeNet系列/V4B.png" width="30%">    <img src="/2020/04/13/GoogLeNet系列/V4C.png" width="30%"></p>
-</li>
-<li><p>Res ABC：</p>
-<p>  <img src="/2020/04/13/GoogLeNet系列/ResA.png" width="25%">     <img src="/2020/04/13/GoogLeNet系列/ResB.png" width="25%">        <img src="/2020/04/13/GoogLeNet系列/ResC.png" width="25%"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Xception-Deep-Learning-with-Depthwise-Separable-Convolutions"><a href="#Xception-Deep-Learning-with-Depthwise-Separable-Convolutions" class="headerlink" title="Xception: Deep Learning with Depthwise Separable Convolutions"></a>Xception: Deep Learning with Depthwise Separable Convolutions</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Inception modules have been replaced with depthwise separable convolutions</li>
-<li>significantly outperforms Inception V3 on a larger dataset</li>
-<li>due to more efficient use of model parameters</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>early LeNet-style models </p>
-<ul>
-<li>simple stacks of convolutions for feature extraction and max-pooling operations for spatial sub-sampling </li>
-<li>increasingly deeper</li>
-</ul>
-</li>
-<li><p>complex blocks</p>
-<ul>
-<li>Inception modules inspired by NiN</li>
-<li>be capable of learning richer repre- sentations with less parameters </li>
-</ul>
-</li>
-<li><p>The Inception hypothesis</p>
-<ul>
-<li>a single convolution kernel is tasked with simultaneously mapping cross-channel correlations and spatial correlations</li>
-<li>while Inception factors it into a series of operations that independently look at cross-channel correlations(1x1 convs) and at spatial correlations(3x3/5x5 convs)</li>
-<li><p>suggesting that cross-channel correlations and spatial correlations are sufficiently decoupled that it is preferable not to map them jointly</p>
-<p><img src="/2020/04/13/GoogLeNet系列/inception.png" width="45%"></p>
-</li>
-</ul>
-</li>
-<li><p>inception block先用1x1的conv将原输出映射到3-4个lower space（cross-channel correlations），然后在这些小的3d spaces上做regular conv（maps all correlations ）——进一步假设，彻底解耦，第二步只做spatial correlations</p>
-<p><img src="/2020/04/13/GoogLeNet系列/extreme.png" width="45%"></p>
-</li>
-<li><p>main differences between <strong>“extreme ” Inception</strong> and <strong>depthwise separable convolution</strong></p>
-<ul>
-<li>order of the operations：1x1 first or latter</li>
-<li>non-linearity：depthwise separable convolutions are usually implemented without non-linearities【QUESTION：这和MobileNet里面说的不一样啊，M里面的depthwise也是每层都带了BN和ReLU的】</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>Convolutional neural networks </li>
-<li>The Inception family  </li>
-<li>Depthwise separable convolutions</li>
-<li>Residual connections</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architecture</p>
-<ul>
-<li>a linear stack of depthwise separable convolution layers with residual connections</li>
-<li>all conv are followed by BN</li>
-<li><p>keras的separableConv和depthwiseConv：前者由后者加上一个pointwiseConv组成，<strong>最后有activation，中间没有</strong></p>
-<p><img src="/2020/04/13/GoogLeNet系列/xception.png" width="80%;"></p>
-</li>
-<li><p>cmp</p>
-<ul>
-<li>Xception and Inception V3 have nearly the same number of parameters </li>
-<li>marginally better  on ImageNet</li>
-<li>much larger performance increasement on JFT </li>
-<li>Residual connections are clearly essential in helping with convergence, both in terms of speed and final classification performance. </li>
-<li><p><strong>Effect of intermediate activation：</strong>the absence of any non-linearity leads to both faster convergence and better final performance </p>
-<p><img src="/2020/04/13/GoogLeNet系列/intermediate.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Networks"><a href="#EfficientNet-Rethinking-Model-Scaling-for-Convolutional-Neural-Networks" class="headerlink" title="EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks"></a>EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>common sense：scaled up the network for better accuracy </li>
-<li>we systematically study model scaling</li>
-<li>and identify that carefully <strong>balancing network depth, width, and resolution</strong> can lead to better performance</li>
-<li>propose a new scaling method：using <strong>compound coefficient</strong> to uniformly scale all dimensions of depth/width/resolution <ul>
-<li>on MobileNets and ResNet</li>
-<li>a new baseline network family EfficientNets</li>
-</ul>
-</li>
-<li>much better accuracy and efficiency </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>previous work scale up one of the three dimensions  <ul>
-<li>depth：more layers</li>
-<li>width：more channels</li>
-<li>image resolution：higher resolution</li>
-</ul>
-</li>
-<li><strong>arbitrary scaling</strong> requires tedious manual tuning and often yields sub-optimal accuracy and efficiency </li>
-<li><p><strong>uniformly scaling</strong>：Our empirical study shows that it is critical to balance all dimensions of network width/depth/resolution, and surprisingly such balance can be achieved by simply scaling each of them with constant ratio. </p>
-<p><img src="/2020/04/13/GoogLeNet系列/modelscaling.png" width="70%;"></p>
-</li>
-<li><p><strong>neural architecture search：</strong>becomes increasingly popular in designing efficient mobile-size ConvNets </p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>problem formulation</p>
-<ul>
-<li><p>ConvNets：$N = \bigodot_{i=1…s} F_i^{L_i}(X_{<h_i,w_i,c_i>})$, s for stage, L for repeat times, F for function</h_i,w_i,c_i></p>
-</li>
-<li><p>simplify the design problem </p>
-<ul>
-<li>fixing $F_i$</li>
-<li>all layers must be scaled uniformly with constant ratio </li>
-</ul>
-</li>
-<li><p>an optimization problem：d for depth coefficients, w for width coefficients, r for resolution coefficients </p>
-<script type="math/tex; mode=display">
-  max_{d,w,r} \ \ \ Accuracy(N(d,w,r))\\
-  s.t. \ \ \ N(d,w,r) = \bigodot_{i=1...s} F_i^{d*L_i}(X_{<r*H_i,r*W_i,w*C_i>})</script></li>
-</ul>
-</li>
-<li><p>observation 1</p>
-<ul>
-<li>Scaling up any dimension of network (width, depth, or resolution) improves accuracy, but the accuracy gain diminishes for bigger models. 准确率都会提升，最终都会饱和</li>
-<li>depth：deeper ConvNet can capture richer and more complex features </li>
-<li>width：wider networks tend to be able to capture more fine-grained features and are easier to train （commonly used for small size models）但是深度和宽度最好匹配，一味加宽shallow network会较难提取高级特征</li>
-<li>resolution：higher resolution input can potentially capture more fine-grained patterns   </li>
-</ul>
-<p><img src="/2020/04/13/GoogLeNet系列/dimensions.png" width="60%;"></p>
-</li>
-<li><p>observation 2</p>
-<ul>
-<li><p>compound scaling：it is critical to balance all dimensions of network width, depth, and resolution</p>
-</li>
-<li><p>different scaling dimensions are not independent 输入更高的resolution，就需要更深的网络，以获取更大的感受野，同时还需要更宽的网络，以捕获更多的细粒度特征</p>
-</li>
-<li><p>compound coefficient $\phi$：</p>
-<script type="math/tex; mode=display">
-  d = \alpha ^ \phi\\
-  w = \beta ^ \phi\\
-  r = \gamma ^ \phi\\
-  s.t. \alpha * \beta^2 * \gamma^2 \approx 2, \ \alpha\geq1,\ \beta\geq1,\ \gamma\geq1</script><ul>
-<li>$\alpha, \beta, \gamma$ are constants determined by a small grid search, controling the assign among the 3 dimensions [d,w,r]</li>
-<li>$\phi$ controls how many more resources are available for model scaling</li>
-<li>the total FLOPS will approximately increase by $2^\phi$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>efficientNet architecture </p>
-<ul>
-<li><p>having a good baseline network is also critical</p>
-</li>
-<li><p>thus we developed a new <strong>mobile-size baseline</strong> called EfficientNet by leveraging a <strong>multi-objective neural architecture search</strong> that <strong>optimizes both accuracy and FLOPS</strong> </p>
-<p>  <img src="/2020/04/13/GoogLeNet系列/efficientB0.png" width="40%;"></p>
-</li>
-<li><p>compound scaling：fix $\phi=1$ and <strong>grid search</strong> $\alpha, \beta, \gamma$, fix $\alpha, \beta, \gamma$ and use different $\phi$</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>on MobileNets and ResNets </p>
-<ul>
-<li>compared to other single-dimension scaling methods</li>
-<li>compound scaling method improves the accuracy on all </li>
-</ul>
-</li>
-<li><p>on EfficientNet </p>
-<ul>
-<li>model with compound scaling tends to focus on more relevant regions with more object details</li>
-<li><p>while other models are either lack of object details or unable to capture all objects in the images</p>
-<p><img src="/2020/04/13/GoogLeNet系列/activationMap.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>implementing details</p>
-<ul>
-<li>RMSProp: decay=0.9, momentum(rho)=0.9，tpu上使用lars</li>
-<li>BN: momentum=0.99</li>
-<li>weight decay = 1e-5</li>
-<li>lr: initial=0.256, decays by 0.97 every 2.4 epochs</li>
-<li>SiLU activation</li>
-<li>AutoAugment</li>
-<li>Stochastic depth: survive_prob = 0.8</li>
-<li>dropout rate: 0.2 to 0.5 for B0 to B7</li>
-</ul>
-</li>
-</ol>
-<h2 id="EfficientDet-Scalable-and-Efficient-Object-Detection"><a href="#EfficientDet-Scalable-and-Efficient-Object-Detection" class="headerlink" title="EfficientDet: Scalable and Efficient Object Detection"></a>EfficientDet: Scalable and Efficient Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>model efficiency</li>
-<li>for object detection：based on <strong>one-stage</strong> detector  </li>
-<li>特征融合：propose a weighted bi-directional feature pyramid network (BiFPN)</li>
-<li>网络rescale：uniformly scales the resolution, depth, and width for all backbone</li>
-<li>achieve better accuracy with much fewer parameters and FLOPs </li>
-<li>also test on Pascal VOC 2012 semantic segmentation</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>previous work tends to achieve better efficiency by sacrificing accuracy</li>
-<li>previous work fuse feature at different resolutions by simply summing up without distinction </li>
-<li>EfficientNet <ul>
-<li>backbone：combine EfficientNet backbones with our propose BiFPN  </li>
-<li>scale up：jointly scales up the resolution/depth/width for all <strong>backbone, feature network, box/class prediction network</strong></li>
-</ul>
-</li>
-<li>Existing object detectors <ul>
-<li>two-stage：have a region-of-interest proposal step  </li>
-<li>one-stage：have not, use predefined anchors </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>BiFPN：efficient bidirectional cross-scale connec- tions and weighted feature fusion </p>
-<ul>
-<li><p>FPN：limit是只有top-bottom一条information flow</p>
-</li>
-<li><p>PANet：加上了一条bottom-up path，better accuracy但是more parameters and computations </p>
-</li>
-<li><p>NAS-FPN：基于网络搜索出的结构，irregular and difficult to interpret or modify </p>
-</li>
-<li><p>BiFPN</p>
-<ul>
-<li>remove those nodes that only have one input edge：只有一条输入的节点，没做到信息融合</li>
-<li>add an extra edge from the original input to output node if they are at the same level：fuse more features without adding much cost </li>
-<li><p>repeat blocks</p>
-<p><img src="/2020/04/13/GoogLeNet系列/fpn.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Weighted Feature Fusion </p>
-<ul>
-<li>since different input features are at different resolutions, they usually contribute to the output feature unequally</li>
-<li>learnable weight that can be a scalar (per-feature), a vector (per-channel), or a multi-dimensional tensor (per-pixel)</li>
-<li><p>weight normalization  </p>
-<ul>
-<li>Softmax-based：$O=\sum_i \frac{e^{w_i}}{\sum_j e^{w_j}}*I_i$</li>
-<li>Fast normalized：$O=\sum_i \frac{w_i}{\epsilon + \sum_j w_j}*I_i$，Relu is applied after each $w_i$ to keep non-negative</li>
-</ul>
-<script type="math/tex; mode=display">
-P_6^{td} = Conv(\frac{w_1P_6^{in}+w_2Resize(P_7^{in})}{\epsilon+w_1+w_2})\\
-P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_1+w_2+w_3})</script></li>
-</ul>
-</li>
-<li><p>EfficientDet </p>
-<ul>
-<li>ImageNet-pretrained Effi- cientNets as the backbone </li>
-<li>BiFPN serves as the feature network</li>
-<li><p>the fused features(level 3-7) are fed to a class and box network respectively </p>
-<p><img src="/2020/04/13/GoogLeNet系列/efficientDet.png" width="70%;"></p>
-</li>
-<li><p>compound scaling </p>
-<ul>
-<li><p>backbone：reuse the same width/depth scaling coefficients of EfficientNet-B0 to B6 </p>
-</li>
-<li><p>feature network：</p>
-<ul>
-<li>depth(layers)：$D=3+\phi$</li>
-<li>width(channes)：$W=64 \cdot (1.35^{\phi}) $</li>
-</ul>
-</li>
-<li><p>box/class prediction network：</p>
-<ul>
-<li>depth：$D=3+[\phi/3]$</li>
-<li>width：same as FPN</li>
-</ul>
-</li>
-<li><p>resolution</p>
-<ul>
-<li>use feature 3-7：must be dividable by $2^7$</li>
-<li>$R=512+128*\phi$</li>
-</ul>
-</li>
-<li><p>EfficientDet-D0 ($\phi=0$) to D7 ($\phi=7$) </p>
-<p>  <img src="/2020/04/13/GoogLeNet系列/scaling.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>for object detection <ul>
-<li>train<ul>
-<li>Learning rate is linearly increased from 0 to 0.16 in the first training epoch and then annealed down </li>
-<li>employ commonly-used focal loss </li>
-<li>3x3 anchors</li>
-</ul>
-</li>
-<li>compare<ul>
-<li>low-accuracy regime：低精度下，EfficientDet-D0和yoloV3差不多</li>
-<li>中等精度，EfficientDet-D1和Mask-RCNN差不多</li>
-<li>EfficientDet-D7 achieves a new state-of-the-art  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>for semantic segmentation <ul>
-<li>modify<ul>
-<li>keep feature level {P2,P3,…,P7} in BiFPN</li>
-<li>but only use P2 for the final per-pixel classification </li>
-<li>set the channel size to 128 for BiFPN and 256 for classification head </li>
-<li>Both BiFPN and classification head are repeated by 3 times</li>
-</ul>
-</li>
-<li>compare<ul>
-<li>和deeplabv3比的，COCO数据集</li>
-<li>better accuracy and fewer FLOPs </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>ablation study<ul>
-<li>backbone improves accuracy v.s. resnet50</li>
-<li>BiFPN improves accuracy v.s. FPN</li>
-<li>BiFPN achieves similar accuracy as repeated FPN+PANet</li>
-<li>BiFPN + weghting achieves the best accuracy</li>
-<li>Normalized：softmax和fast版本效果差不多，每个节点的weight在训练开始迅速变化（suggesting different features contribute to the feature fusion unequally）</li>
-<li>Compound Scaling：这个比其他只提高一个指标的效果好就不用说了</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>超参：</p>
-<p> efficientNet和efficientDet的resolution是不一样的，因为检测还有neck和head，层数更深，所以resolution更大</p>
-<p> <img src="/2020/04/13/GoogLeNet系列/hyper.png" width="60%;"></p>
-</li>
-</ol>
-<h2 id="EfficientNetV2-Smaller-Models-and-Faster-Training"><a href="#EfficientNetV2-Smaller-Models-and-Faster-Training" class="headerlink" title="EfficientNetV2: Smaller Models and Faster Training"></a>EfficientNetV2: Smaller Models and Faster Training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>faster training speed and better parameter efficiency </li>
-<li>use a new op: Fused-MBConv</li>
-<li>propose progressive learning：adaptively adjuts regularization &amp; image size</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>review of EfficientNet</p>
-<ul>
-<li><p>large image size </p>
-<ul>
-<li>large memory usage，small batch size，long training time</li>
-<li>thus propose increasing image size gradually in V2</li>
-</ul>
-</li>
-<li><p>extensive depthwise conv</p>
-<ul>
-<li>often cannot fully utilize modern accelerators</li>
-<li><p>thus introduce Fused-MBConv in V2：When applied in early stage 1-3, Fused-MBConv can improve training speed with a small overhead on parameters and FLOPs </p>
-<p><img src="/2020/04/13/GoogLeNet系列/Fused-MB.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>equally scaling up</p>
-<ul>
-<li>proved sub-optimal in nfnets</li>
-<li>since the stages are not equally contributed to the efficiency &amp; accuracy </li>
-<li>thus in V2<ul>
-<li>use a non-uniform scaling strategy：gradually add more layers to later stages(s5 &amp; s6)</li>
-<li>restrict the max image size</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>EfficientNet V2 Architecture </p>
-<ul>
-<li><p>basic ConvBlock</p>
-<ul>
-<li>use fused-MBConv in the early layers</li>
-<li>use MBConv in the latter layers</li>
-</ul>
-</li>
-<li><p>expansion ratios</p>
-<ul>
-<li>use smaller expansion ratios</li>
-<li>因为同样的通道数，fused-MB比MB的参数量大</li>
-</ul>
-</li>
-<li><p>kernel size</p>
-<ul>
-<li>全图3x3，没有5x5了</li>
-<li>add more layers to compensate the reduced receptive field </li>
-</ul>
-</li>
-<li><p>last stride 1 stage</p>
-<ul>
-<li>effv1是7个stage</li>
-<li><p>effv2有6个stage</p>
-<p><img src="/2020/04/13/GoogLeNet系列/efficientB0.png" width="40%;">   <img src="/2020/04/13/GoogLeNet系列/effv2.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>scaling policy</p>
-<ul>
-<li>compound scaling：R、W、D一起scale</li>
-<li>但是限制了最大inference image size=480（train=384）</li>
-<li>gradually add more layers to later stages (s5 &amp; s6)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>progressive learning</p>
-<ul>
-<li><p>large models require stronger regularization </p>
-</li>
-<li><p>larger image size leads to more computations with larger capacity，thus also needs stronger regularization </p>
-</li>
-<li><p>training process</p>
-<ul>
-<li>in the early training epochs, we train the network with smaller images and weak regularization</li>
-<li><p>gradually increase image size but also making learning more difficult by adding stronger regularization </p>
-<p><img src="/2020/04/13/GoogLeNet系列/progressive.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>adaptive params</p>
-<ul>
-<li>image size</li>
-<li>dropout rate</li>
-<li>randAug magnitude</li>
-<li>mixup alpha</li>
-<li><p>给定最大最小值，stage N，使用linear interpolation</p>
-<p><img src="/2020/04/13/GoogLeNet系列/v2S.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>train&amp;test details</p>
-<ul>
-<li>RMSProp optimizer with decay 0.9 and momentum 0.9 </li>
-<li>batch norm momentum 0.99 </li>
-<li>weight decay 1e-5 </li>
-<li>trained for 350 epochs with total batch size 4096 </li>
-<li>Learning rate is first warmed up from 0 to 0.256, and then decayed by 0.97 every 2.4 epochs </li>
-<li>exponential moving average with 0.9999 decay rate </li>
-<li><p>stochastic depth with 0.8 survival probability</p>
-</li>
-<li><p>4 stages (87 epochs per stage)：early stage with weak regularization &amp; later stronger</p>
-</li>
-<li>maximum image size for training is about 20% smaller than inference &amp; no further finetuning</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4094,7 +3389,7 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">154</span>
+                  <span class="site-state-item-count">155</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4107,7 +3402,7 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">89</span>
+                  <span class="site-state-item-count">90</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
