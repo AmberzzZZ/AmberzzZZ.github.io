@@ -116,7 +116,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETR%20pipeline.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/DETRseg.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/01/18/transformers/UNETR.png">
-<meta property="og:updated_time" content="2021-12-09T06:37:35.614Z">
+<meta property="og:updated_time" content="2022-06-09T01:57:42.170Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="transformers">
 <meta name="twitter:description" content="startupreference1：https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA reference2：https://zhuanlan.zhihu.com/p/308301901  NLP &amp;amp; RNN  文本涉及上下文关系 RNN时序串行，建立前后关系 缺点：对超长依赖关系失效，不好并行化   NLP &amp;amp; CNN  文本是1维">
@@ -470,15 +470,20 @@
 <p>​    * [ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim，可以看到跟bert基本一样，就是input sequence换成patch，后续基于它的提升有DeiT、LV-ViT</p>
 <p>​    * [BotNet 2021] Bottleneck Transformers for Visual Recognition，Google，将CNN backbone最后几个stage替换成MSA</p>
 <p>​    * [CvT 2021] CvT: Introducing Convolutions to Vision Transformers，微软，</p>
+<p>​    * [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
+<p>​    * [PVT2021] Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions，跟swin一样也是multi-scale features</p>
 <p>[detection]</p>
 <p>​    * [DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，CNN+transformer(en-de)+预测头，每个feature pixel作为一个input embedding，channel dim是vector dim</p>
-<p>​    * [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
+<p>​    * [Deformable DETR]</p>
+<p>​    * [Anchor DETR] </p>
+<p>​    * 详见《det-transformers》</p>
 <p>[segmentation]</p>
 <p>​    * [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transformer</p>
 <p>[Unet+Transformer]：</p>
 <p>​    * [UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达，直接使用transformer encoder做unet encoder</p>
 <p>​    * [TransUNet 2021] TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation，encoder stream里面加transformer block</p>
 <p>​    * [TransFuse 2021] TransFuse: Fusing Transformers and CNNs for Medical Image Segmentation，大学，CNN feature和Transformer feature进行bifusion</p>
+<p>​    * 详见《seg-transformers》</p>
 </li>
 </ol>
 <h2 id="Sequence-to-Sequence"><a href="#Sequence-to-Sequence" class="headerlink" title="Sequence to Sequence"></a>Sequence to Sequence</h2><ol>
@@ -1308,7 +1313,7 @@
 </ul>
 </li>
 </ol>
-<h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ol>
+<h2 id="win-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#win-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="win Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>win Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ol>
 <li><p>动机</p>
 <ul>
 <li>use Transformer as visual tasks’ backbone</li>
@@ -1932,7 +1937,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1945,7 +1950,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1988,7 +1993,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#startup"><span class="nav-number">1.</span> <span class="nav-text">startup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sequence-to-Sequence"><span class="nav-number">2.</span> <span class="nav-text">Sequence to Sequence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Attention-Is-All-You-Need"><span class="nav-number">3.</span> <span class="nav-text">Transformer: Attention Is All You Need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding"><span class="nav-number">4.</span> <span class="nav-text">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Survey-on-Visual-Transformer"><span class="nav-number">5.</span> <span class="nav-text">A Survey on Visual Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><span class="nav-number">6.</span> <span class="nav-text">ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><span class="nav-number">7.</span> <span class="nav-text">Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">8.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation"><span class="nav-number">9.</span> <span class="nav-text">UNETR: Transformers for 3D Medical Image Segmentation</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#startup"><span class="nav-number">1.</span> <span class="nav-text">startup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sequence-to-Sequence"><span class="nav-number">2.</span> <span class="nav-text">Sequence to Sequence</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transformer-Attention-Is-All-You-Need"><span class="nav-number">3.</span> <span class="nav-text">Transformer: Attention Is All You Need</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding"><span class="nav-number">4.</span> <span class="nav-text">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-Survey-on-Visual-Transformer"><span class="nav-number">5.</span> <span class="nav-text">A Survey on Visual Transformer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><span class="nav-number">6.</span> <span class="nav-text">ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#win-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><span class="nav-number">7.</span> <span class="nav-text">win Transformer: Hierarchical Vision Transformer using Shifted Windows</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DETR-End-to-End-Object-Detection-with-Transformers"><span class="nav-number">8.</span> <span class="nav-text">DETR: End-to-End Object Detection with Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation"><span class="nav-number">9.</span> <span class="nav-text">UNETR: Transformers for 3D Medical Image Segmentation</span></a></li></ol></div>
             
 
           </div>

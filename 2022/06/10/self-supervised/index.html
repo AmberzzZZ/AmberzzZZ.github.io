@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="self-supervised, MoCo, MAE, MIM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="自监督papers  MoCo系列：contrastive-based [2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming [2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Repres">
+<meta name="keywords" content="self-supervised, MoCo, MAE, MIM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="self-supervised">
+<meta property="og:url" content="https://amberzzzz.github.io/2022/06/10/self-supervised/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="自监督papers  MoCo系列：contrastive-based [2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming [2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Repres">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/SimMIM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/masking.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/SimMIM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/distance.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/entropy.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/diversity.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/CKA.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/classification.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/detection.png">
+<meta property="og:updated_time" content="2022-06-12T10:57:09.140Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="self-supervised">
+<meta name="twitter:description" content="自监督papers  MoCo系列：contrastive-based [2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming [2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Repres">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/SimMIM.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2022/06/10/self-supervised/"/>
+
+
+
+
+
+  <title>self-supervised | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/10/self-supervised/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">self-supervised</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-10T14:17:44+08:00">
+                2022-06-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/10/self-supervised/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/10/self-supervised/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li><p>自监督papers</p>
+<ul>
+<li><p>MoCo系列：contrastive-based</p>
+<p>[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming</p>
+<p>[2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Representations，Google Brain，混进来是因为它improve based on MoCo v1，而MoCo v2/v3又都是基于它改进</p>
+<p>[2020 MoCo v2] Improved Baselines with Momentum Contrastive Learning，kaiming</p>
+<p>[2021 MoCo v3] An Empirical Study of Training Self-Supervised Visual Transformers，kaiming</p>
+</li>
+<li><p>MAE：reconstruct-based</p>
+<p>[2021 MAE] Masked Autoencoders Are Scalable Vision Learners：恺明，将BERT的掩码自监督模式搬到图像领域，设计基于masked patches的图像重建任务</p>
+</li>
+<li><p>MIM：reconstruct-based</p>
+<p>[2021 SimMIM] SimMIM: A Simple Framework for Masked Image Modeling：微软，swin v2的scale up模型用了这个自监督方法来缓解data hungary issue</p>
+<p>[2022 MIM] Revealing the Dark Secrets of Masked Image Modeling：微软，类似上一篇的展开实验part，</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="SimMIM-a-Simple-Framework-for-Masked-Image-Modeling"><a href="#SimMIM-a-Simple-Framework-for-Masked-Image-Modeling" class="headerlink" title="SimMIM: a Simple Framework for Masked Image Modeling"></a><em>SimMIM</em>: a Simple Framework for Masked Image Modeling</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>propose a simple framework of MIM<ul>
+<li>without the need of special designs</li>
+<li>simple designs revealed strong learning performance</li>
+</ul>
+</li>
+<li>major components<ul>
+<li>使用较大patch size：random masking of the input image with a moderately large masked patch size (e.g., 32) makes a powerful pre-text task</li>
+<li>进行pixel-level的regression预测：predicting RGB values of raw pixels by direct regression performs no worse than the patch classification approaches with complex designs</li>
+<li>轻量的预测头：the prediction head can be as light as a linear layer, with no worse performance than heavier ones</li>
+</ul>
+</li>
+<li>proved on ImageNet<ul>
+<li>普通模型ViT-B：pretraing+finetuning，ImageNet-1k，83.8% top-1</li>
+<li>大模型SwinV2-H：87.1% top-1</li>
+<li>超大模型SwinV2-G：MIM能够leverage the data-hungry issue，使用更少量的数据训练超大模型至SOTA</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>自监督里面的numerous pretext tasks</p>
+<ul>
+<li>gray-scale image colorization：图像上色</li>
+<li>jigsaw puzzle solving：打乱的patches重新排序</li>
+<li>split-brain auto-encoding：图像分成两部分，两条分支，交叉预测对方</li>
+<li>rotation prediction：given变换前后的图像X&amp;Y，预测变换参数</li>
+<li>learning to cluster：「特征聚类，将簇心标签赋给其成员，训练一个task，特征聚类」，迭代这个过程</li>
+</ul>
+</li>
+<li><p>Masked signal modeling</p>
+<ul>
+<li>图像和NLP的主要区别<ul>
+<li>images exhibit stronger locality：neighbor pixels就是high related的，language的词序则不存在必然的距离相关性</li>
+<li>visual signals are raw and low-level：因此预测pixel-level的重建任务是否对high-level recognition task有增益？</li>
+<li>the visual signal is continuous, and the text token is discrete</li>
+</ul>
+</li>
+<li>bridge the modality gaps through several special designs<ul>
+<li>converting continuous signals into color clusters </li>
+<li>patch tokenization using an additional network</li>
+<li>block-wise masking strategy to break short-range connections</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li><p>propose a simple framework，无需上述复杂设计</p>
+<p><img src="/2022/06/10/self-supervised/SimMIM.png" width="40%;"></p>
+</li>
+<li><p>Random masking：</p>
+<ul>
+<li>patch-level的随机masking，适配vision transformer</li>
+<li>大一点的patch size(32) works for a wide range of masking ratio</li>
+<li>小的patch size(8) 需要masking ratio as high as 80% to perform well</li>
+<li>NLP里面的masking ratio通常比较小，如0.15，我们认为是因为info-level不一致</li>
+</ul>
+</li>
+<li>1-layer prediction head<ul>
+<li>extremely lightweight</li>
+<li>同时target resolution也不建议太大（12-96都可以好于192x192）</li>
+<li>achieves sligtly better transferring performance than heavy heads</li>
+<li>这个自监督的头预训练完了要丢弃的，所以越小越好，不要过多承担模型能力</li>
+</ul>
+</li>
+<li>pixel-level reconstruction use simple L1 loss<ul>
+<li>regression比较适配continuous signal</li>
+<li>performs no worse than classification approaches</li>
+<li>【QUESTION】分类任务一般怎么设计</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>A Masked Image Modeling Framework：4 major components</p>
+<ul>
+<li>masking strategy</li>
+<li>encoder architecture：ViT &amp; Swin </li>
+<li>prediction head</li>
+<li>prediction target：either the raw pixels or a transformation</li>
+</ul>
+</li>
+<li><p>Masking Strategy</p>
+<ul>
+<li>mask token<ul>
+<li>use a learnable mask token vector to replace each masked patch</li>
+<li>token dimension 和 visible那部分patch embedding一致</li>
+</ul>
+</li>
+<li>Patch-aligned random masking <ul>
+<li>就是以patch为单位随机masking</li>
+<li>swin的patch size是随阶段增长的，从4到32，we adopt 32</li>
+<li>for ViT we adopt 32</li>
+</ul>
+</li>
+<li><p>Other masking strategies：用了16/32</p>
+<ul>
+<li>square：随机放置的大方框</li>
+<li>block-wise：复杂设计的</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/masking.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Prediction Head</p>
+<ul>
+<li>as light as a linear layer</li>
+<li>实验也尝试过2-layer MLP、an inverse Swin-T、an inverse Swin-B 这种逐渐heavy的</li>
+<li>上采样 if required：<ul>
+<li>ViT编码得到x16的feature maps</li>
+<li>Swin编码得到x32的feature maps</li>
+<li>用一个1x1 conv / linear，将feature dim扩展到patch size <em> patch size </em> 3，如swin-RGB就是32*32*3=3072</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Prediction Targets</p>
+<ul>
+<li><p>regression</p>
+<ul>
+<li>也可以考虑将grouth-truth降采样到feature size</li>
+<li>L1 loss：计算masked区域RGB像素的L1 loss，然后mean on pixels</li>
+<li>实验也尝试了L2 / smoothL1</li>
+</ul>
+</li>
+<li><p>Other prediction targets</p>
+<ul>
+<li>previous approaches大多数将masked signals转化成clusters or classes，然后perform a classification task</li>
+<li>Color clustering（iGPT）：将巨型dataset的RGB values聚类成512个cluster，每个预测pixel is assigned to最邻近的cluster</li>
+<li>Vision tokenization（BEiT）：用一个pretrained discrete VAE network将image patches转化成token，并作为classification target</li>
+<li>Channel-wise bin color discretization：每个颜色通道独立分类，灰度值离散化为8/256 bins</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Evaluation protocols</p>
+<ul>
+<li>首先将模型在imagenet1k上finetuning，然后看分类精度</li>
+<li>或者其他down-stream tasks的指标来评估</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>AvgDist</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li></li>
+</ul>
+<h2 id="Revealing-the-Dark-Secrets-of-Masked-Image-Modeling"><a href="#Revealing-the-Dark-Secrets-of-Masked-Image-Modeling" class="headerlink" title="Revealing the Dark Secrets of Masked Image Modeling"></a>Revealing the Dark Secrets of Masked Image Modeling</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Masked image modeling (MIM) as pre-training<ul>
+<li>proved effective</li>
+<li>but how it works remains unclear</li>
+</ul>
+</li>
+<li>we compare MIM with mainstream supervised models<ul>
+<li>through visualizations &amp; experiments</li>
+<li>to cover the key representational differents</li>
+</ul>
+</li>
+<li>visualizations <ul>
+<li>发现MIM brings locality inductive bias to all layers：信息流更不丢东西？</li>
+<li>相比之下supervised models在lower layers更关注局部信息，在higher layers则更关注全局信息</li>
+<li>supervised models在last layers的attention head基本没啥差别（都是global semantic info），但是MIM在last layers仍旧能够keep diversity on attention heads</li>
+<li>less diversity harms the fine-tuning performance</li>
+</ul>
+</li>
+<li>experiments<ul>
+<li>发现MIM相比较于supervised models更胜任tasks with weak semantics / fine-grained tasks</li>
+<li>【猜测】image-level label 驱动 pixel-level study的效果更好？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>masked signal modeling</p>
+<ul>
+<li>mask a portion of input signals and tries to predict them</li>
+<li>属于比较经典的recover-based自监督任务设计</li>
+<li>language, vision, and speech场景都有在用</li>
+</ul>
+</li>
+<li><p>masked image modeling (MIM)</p>
+<ul>
+<li>achieve very high fine-tuning accuracy</li>
+<li>thus this paper wants a deeper understanding </li>
+<li><p>we use SimMIM framework：就是基于ViT/swin-back+light-weight head重建pixel-level图像的任务</p>
+<ul>
+<li>random masking with large patch size</li>
+<li>a-linear-layer prediction head</li>
+<li>predict raw RGB pixels use L1 loss</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/SimMIM.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Visualizations</p>
+<ul>
+<li><p>attention weights have a clear meaning：每个token比重多大</p>
+</li>
+<li><p>从三个方面来分析</p>
+<ul>
+<li>averaged attention distance to measure whether it is local attention or global attention</li>
+<li>entropy of attention distribution to measure whether it is focused attention or broad attention：这跟上面不一个意思吗</li>
+<li>KL divergence of different attention heads to investigate that attention heads are attending different tokens or similar ones</li>
+</ul>
+</li>
+<li><p>Local Attention or Global Attention</p>
+<ul>
+<li><p>图像信息带有strong locality：neighbor pixels天然地highly correlated，所以才会有conv这样的带有local priors的设计，但是transformer结构有没有这种inductive bias就值得讨论了</p>
+</li>
+<li><p>computing averaged attention distance in each attention head of each layer</p>
+<p>  <img src="/2022/06/10/self-supervised/distance.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，lower layer focus locally，higher layers focus more globally</li>
+<li>MIM模型每层的attention heads则表现的充满diversity，始终保有local &amp; global pixels</li>
+<li>说明MIM brings locality inductive bias【不太理解】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Focused Attention or Broad Attention</p>
+<ul>
+<li><p>averaging the entropy of each head’s attention distribution</p>
+<p>  <img src="/2022/06/10/self-supervised/entropy.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，lower layer的一些attention heads有非常focused attention，大部分higher layers的attention heads则focus very broadly</li>
+<li>MIM模型每层都很diverse，每层都兼顾了focused attention &amp; broad attention</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Diversity on Attention Heads</p>
+<ul>
+<li><p>看每个attention head关注的token是否相似</p>
+</li>
+<li><p>computing the KL divergence between different heads</p>
+<p>  <img src="/2022/06/10/self-supervised/diversity.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，diversity逐渐变小，最后几层甚至都没了</li>
+<li>losing diversity limits the capacity of the model：损害了模型表达能力</li>
+<li>去掉supervised模型的后面几层去进行下游任务精度会保持甚至提升，说明supervised pretrained model后面几层确实对下游任务有负面影响</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Investigating the Representation Structures via CKA similarity</p>
+<ul>
+<li><p>前面都是在看同层不同attention heads，这里观察不同层的feature maps</p>
+</li>
+<li><p>via the CKA similarity between feature representations of different layers</p>
+<p><img src="/2022/06/10/self-supervised/CKA.png" width="80%;"></p>
+<ul>
+<li>MIM和constastive模型表现类似，每层的feature representation structures高度相似</li>
+<li>supervised模型则每层差异比较大</li>
+<li>给这些预训练模型加载权重的时候随机调换一些层进行下游任务，MIM只有轻微掉点，但是supervised会受影响更大</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Experiments</p>
+<ul>
+<li><p>on 3 types of downstream tasks</p>
+<ul>
+<li>semantic understanding tasks：classification，Concept Generalization (CoG)  &amp; 12-dataset (K12) &amp; iNaturalist-18 (iNat18)</li>
+<li>geometric and motion tasks：pose/depth estimation/video tracking，COCO &amp; CrowdPose &amp; NYUv2</li>
+<li>combined tasks：object detection，COCO</li>
+</ul>
+</li>
+<li><p>Semantic Understanding Tasks</p>
+<ul>
+<li>用了三个数据集，从ImageNet pretrained去transfer</li>
+<li>settings<ul>
+<li>AdamW</li>
+<li>cosine learning rate schedule</li>
+<li>100 epochs with 20 warm-up</li>
+<li>input 224x224</li>
+<li>DropPath</li>
+</ul>
+</li>
+<li>发现ImageNet cover的类别supervised模型会好于MIM模型，没cover的类/fine-grained的类都是MIM精度更高，说明MIM的 representation power的transfer能力更强</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/classification.png" width="80%;"></p>
+</li>
+<li><p>Geometric and Motion Tasks</p>
+<ul>
+<li>主要测试目标定位能力，不太关注高级语义信息</li>
+<li>全面超越</li>
+</ul>
+</li>
+<li><p>Combined Task of Object Detection</p>
+<ul>
+<li>COCO目标检测</li>
+<li>Mask-RCNN framework</li>
+<li>也是clearly outperform</li>
+<li>然后观察到MIM模型的定位task收敛的faster and better，supervised模型则对分类能力更有用，也说明了MIM更专注geometric and motion tasks</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/detection.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/self-supervised-MoCo-MAE-MIM/" rel="tag"># self-supervised, MoCo, MAE, MIM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/06/03/FAN-full-attention-networks/" rel="next" title="FAN:full attention networks">
+                <i class="fa fa-chevron-left"></i> FAN:full attention networks
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SimMIM-a-Simple-Framework-for-Masked-Image-Modeling"><span class="nav-number">1.</span> <span class="nav-text">SimMIM: a Simple Framework for Masked Image Modeling</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Revealing-the-Dark-Secrets-of-Masked-Image-Modeling"><span class="nav-number">2.</span> <span class="nav-text">Revealing the Dark Secrets of Masked Image Modeling</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -98,7 +98,11 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/Broden+.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/datasets.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/UPerNet.png">
-<meta property="og:updated_time" content="2022-06-06T04:20:47.486Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/segformer精度.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/segformer.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/erf.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/all-mlp%20decoder.png">
+<meta property="og:updated_time" content="2022-06-09T07:28:41.216Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="seg-transformers">
 <meta name="twitter:description" content="之前那篇《transformers》太长了，新开一个分割方向的专题，papers： ——————————previous—————————-  [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transforme">
@@ -383,6 +387,7 @@
 <li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
 <li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
 <li>[UPerNet 2018] Unified Perceptual Parsing for Scene Understanding，PKU&amp;字节，Swin Segmentaion的补充材料，Swin的down-stream task选择用UperNet as base framework</li>
+<li>[SegFormer 2021] SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers，港大&amp;英伟达，参照FCN范式的(CNN+FPN+seg head)，设计了swin+MLP decoder的全linear网络，用于分割</li>
 </ul>
 <h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
 <ul>
@@ -810,8 +815,129 @@
 </ul>
 </li>
 <li><p>实验</p>
+</li>
+</ol>
+<h2 id="SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers"><a href="#SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers" class="headerlink" title="SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers"></a>SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers</h2><ol>
+<li><p>repo: <a href="https://github.com/NVlabs/SegFormer" target="_blank" rel="noopener">https://github.com/NVlabs/SegFormer</a></p>
+</li>
+<li><p>动机</p>
 <ul>
-<li></li>
+<li>propose a semantic segmentation framework SegFormer<ul>
+<li>simple, lightweight, efficient, powerful</li>
+<li>hierarchical transformer + MLP decoder</li>
+</ul>
+</li>
+<li><p>特点</p>
+<ul>
+<li>does not need positional encoding：在inference阶段切换图像分辨率不会引起性能变化</li>
+<li>avoids complex decoders：MLP decoder主要就是merge multi levels</li>
+</ul>
+</li>
+<li><p>scale up to obtain a family of models：SegFormer-B0 to SegFormer-B5</p>
+</li>
+<li><p>verified on </p>
+<ul>
+<li>SegFormer-B4：50.3% mIoU on ADE20K，SOTA</li>
+<li><p>SegFormer-B5：84.0% mIoU on Cityscapes</p>
+<p><img src="/2021/11/18/seg-transformers/segformer精度.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>SETR<ul>
+<li>ViT-back + several CNN decoders</li>
+<li>ViT主要是计算量 &amp; single-scale issue</li>
+<li>后续methods提出PVT、Swin、Twins等，主要focus在优化multi-scale的backbone，忽略了decoder的设计</li>
+</ul>
+</li>
+<li>this paper （SegFormer）<ul>
+<li>redesigns both the encoder and the decoder</li>
+<li>改进的Transformer encoder：hierarchical &amp; positional-encoding-free</li>
+<li>设计的all-MLP decoder：lightweight but powerful，设计的核心思想是 to take advantage of the Transformer-induced features where the attentions of lower layers tend to stay local, whereas the ones of the highest layers are highly non-local</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/11/18/seg-transformers/segformer.png" width="80%;"></p>
+<ul>
+<li>encoder：<ul>
+<li>使用了4x4的patch size，相比较于16x16的ViT，fine-grained patches is more preferred by semantic segmentation</li>
+<li>multi-level features：x4，x8，x16，x32</li>
+</ul>
+</li>
+<li>decoder<ul>
+<li>输入上述的multi-level features</li>
+<li>输出x4的segmentation mask</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Hierarchical Transformer Encoder</p>
+<ul>
+<li>We design a series of Mix Transformer encoders (MiT)：MiT-B0 to MiT-B5</li>
+<li>基于PVT的efficient self-attention module<ul>
+<li>针对原始attention block的平方时间复杂度</li>
+<li>use a reduction ratio R to reduce the length of sequence K：注意是改变K的长度，而不是Q</li>
+<li>given原始序列长度$N=HW$，feature dimensions $C$<ul>
+<li>先reshape：$\hat K = Reshape(\frac{N}{R},CR)(K)$</li>
+<li>再降维：$K=Linear(CR,C)(\hat K)$</li>
+</ul>
+</li>
+<li>计算量从O(N^2)下降到O(N^2/R)</li>
+<li>set R to [64, 16, 4, 1] from stage-1 to stage-4</li>
+</ul>
+</li>
+<li>同时提出了several novel designs<ul>
+<li>overlapped patch merging<ul>
+<li>本文的一个论点是ViT用non-overlapping patches去做patch merging，相邻patch之间没有保留local continuity，所以需要positional encoding</li>
+<li>所以use an overlapping patch merging process</li>
+<li>notations<ul>
+<li>patch size K=7/3</li>
+<li>stride S=4/2</li>
+<li>padding size P=3/1 (valid padding)</li>
+<li>patch merging操作仍旧通过卷积来实现</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>positional-encoding-free design <ul>
+<li>ViT修改resolution要同步interpolatePE，还是会引起掉点</li>
+<li>we introduce Mix-FFN<ul>
+<li>在FFN中夹了一个conv3x3</li>
+<li>sufficient to provide positional information</li>
+<li>甚至可以用depth-wise convolutions节省参数量</li>
+</ul>
+</li>
+<li>we argure that adding PE is not necessary in semantic segmentation</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Lightweight All-MLP Decoder</p>
+<ul>
+<li><p>idea是transformer有着远大于传统CNN的有效感受野，所以decoder可以轻量一点，不用再堆block</p>
+<p>  <img src="/2021/11/18/seg-transformers/erf.png" width="60%;"></p>
+</li>
+<li><p>4 main steps</p>
+<ul>
+<li>unify：multi-level的feature maps各自通过MLP layer to unify the channel dimension</li>
+<li>upsample：所有的features上采样到x4</li>
+<li>fuse：concat + MLP(实际代码里用了1x1conv-bn-relu)</li>
+<li><p>seg head：MLP，预测mask仍在x4尺度上</p>
+<p><img src="/2021/11/18/seg-transformers/all-mlp decoder.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
@@ -941,7 +1067,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -954,7 +1080,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -997,7 +1123,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-for-Semantic-Segmentaion"><span class="nav-number">1.</span> <span class="nav-text">Swin Transformer for Semantic Segmentaion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding"><span class="nav-number">4.</span> <span class="nav-text">UPerNet: Unified Perceptual Parsing for Scene Understanding</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Transformer-for-Semantic-Segmentaion"><span class="nav-number">1.</span> <span class="nav-text">Swin Transformer for Semantic Segmentaion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">nnFormer: Interleaved Transformer for Volumetric Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding"><span class="nav-number">4.</span> <span class="nav-text">UPerNet: Unified Perceptual Parsing for Scene Understanding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers"><span class="nav-number">5.</span> <span class="nav-text">SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers</span></a></li></ol></div>
             
 
           </div>

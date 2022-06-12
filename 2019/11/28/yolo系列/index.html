@@ -113,7 +113,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/tiny.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/large.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/offset_v5.png">
-<meta property="og:updated_time" content="2021-12-29T07:05:29.633Z">
+<meta property="og:updated_time" content="2022-06-08T02:39:04.469Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="yolo系列">
 <meta name="twitter:description" content="综述 [yolov1] Yolov1: You Only Look Once: Unified, Real-Time Object Detection [yolov2] Yolov2: YOLO9000: Better, Faster, Stronger [yolov3] Yolov3: An Incremental Improvement  [yolov4] YOLOv4: Optimal Sp">
@@ -547,7 +547,8 @@
 </li>
 </ol>
 <h2 id="2-Yolov2-YOLO9000-Better-Faster-Stronger"><a href="#2-Yolov2-YOLO9000-Better-Faster-Stronger" class="headerlink" title="2. Yolov2: YOLO9000: Better, Faster, Stronger"></a>2. Yolov2: YOLO9000: Better, Faster, Stronger</h2><ol>
-<li>动机：<ul>
+<li><p>动机：</p>
+<ul>
 <li>run at varying sizes：offering an easy tradeoff between speed and accuracy</li>
 <li>recognize a wide variety of objects ：jointly train on object detection and classification, so that the model can predict objects that aren’t labelled in detection data</li>
 <li>better performance but still fast</li>
@@ -689,23 +690,20 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 <p> <img src="/2019/11/28/yolo系列/darknet19.png" width="40%;"></p>
 </li>
 <li><p>training for classification：</p>
-<pre><code> * first train on ImageNet using 224*224
-
- * then fine-tuning on 448*448
-</code></pre><ol>
+<ul>
+<li>first train on ImageNet using 224*224</li>
+<li>then fine-tuning on 448*448</li>
+</ul>
+</li>
 <li><p>training for detection：</p>
 <ul>
-<li><p>remove the last convolutional layer</p>
-</li>
-<li><p>add on three 3 × 3 convolutional layers with 1024 filters each followed by a final 1×1 convolutional layer with the number of outputs we need for detection </p>
-</li>
+<li>remove the last convolutional layer</li>
+<li>add on three 3 × 3 convolutional layers with 1024 filters each followed by a final 1×1 convolutional layer with the number of outputs we need for detection </li>
 <li>add a passthrough from the final 3 × 3 × 512 layer to the second to last convolutional layer so that our model can use fine grain features. </li>
 </ul>
 </li>
-</ol>
-</li>
 <li><p>stronger：</p>
-<p> jointly training：以后再填坑</p>
+<p>jointly training：以后再填坑</p>
 <ul>
 <li>构造标签树</li>
 <li>classification sample用cls loss，detection sample用detect loss</li>
@@ -1290,7 +1288,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1303,7 +1301,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

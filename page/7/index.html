@@ -276,6 +276,234 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/18/megDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/18/megDet/" itemprop="url">megDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-18T17:40:52+08:00">
+                2020-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/18/megDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/18/megDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="MegDet-A-Large-Mini-Batch-Object-Detector"><a href="#MegDet-A-Large-Mini-Batch-Object-Detector" class="headerlink" title="MegDet: A Large Mini-Batch Object Detector"></a>MegDet: A Large Mini-Batch Object Detector</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>past methods mainly come from novel framework or loss design</li>
+<li><p>this paper studies the mini-batch size</p>
+<ul>
+<li>enable training with a large mini-batch size</li>
+<li>warmup learning rate policy</li>
+<li>cross-gpu batch normalization</li>
+</ul>
+</li>
+<li><p>faster &amp; better acc</p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>potential drawbacks with small mini-batch sizes</p>
+<ul>
+<li><p>long training time</p>
+</li>
+<li><p>inaccurate statistics for BN：previous methods use fixed statistics from ImageNet which is a sub-optimal trade-off</p>
+</li>
+<li><p>positive &amp; negative training examples are more likely imblanced</p>
+</li>
+<li><p>加大batch size以后，正负样本比例有提升，所以yolov3会先锁着back开大batchsize做warmup</p>
+<p>  <img src="/2020/12/18/megDet/ratio.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>learning rate dilemma</p>
+<ul>
+<li>large min-batch size usually requires large learning rate </li>
+<li>large learning rate is likely leading to convergence failure</li>
+<li>a smaller learning rate often obtains inferior results </li>
+</ul>
+</li>
+<li><p>solution of the paper</p>
+<ul>
+<li>linear scaling rule </li>
+<li>warmup</li>
+<li>Cross-GPU Batch Normalization (CGBN) </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>warmup</p>
+<ul>
+<li>set up the learning rate small enough at the be- ginning</li>
+<li>then increase the learning rate with a constant speed after every iteration, until fixed</li>
+</ul>
+</li>
+<li><p>Cross-GPU Batch Normalization </p>
+<ul>
+<li>两次同步</li>
+<li><p>tensorpack里面有</p>
+<p><img src="/2020/12/18/megDet/CGBN.png" width="40%;"></p>
+<p><img src="/2020/12/18/megDet/Cross-GPU.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>一次同步</p>
+<ul>
+<li><p>异步BN：batch size 较小时，每张卡计算得到的统计量可能与整体数据样本具有较大差异</p>
+<p> <img src="/2020/12/18/megDet/unsync.png" width="40%;"></p>
+</li>
+<li><p>同步：</p>
+</li>
+<li><p>需要同步的是每张卡上计算的统计量，即BN层用到的均值$\mu$和方差$\sigma^2$</p>
+</li>
+<li><p>这样多卡训练结果才与单卡训练效果相当</p>
+</li>
+<li><p>两次同步：</p>
+</li>
+<li><p>第一次同步均值：计算全局均值</p>
+</li>
+<li><p>第二次同步方差：基于全局均值计算各自方差，再取平均</p>
+</li>
+<li><p>一次同步：</p>
+<ul>
+<li><p>核心在于方差的计算</p>
+</li>
+<li><p>首先均值：$\mu = \frac{1}{m} \sum_{i=1}^m x_i$</p>
+<ul>
+<li>然后是方差：<script type="math/tex; mode=display">
+  \sigma^2 = \frac{1}{m} \sum_{i=1}^m (x_i-\mu)^2 = \frac{1}{m} \sum_{i=1}^m x_i^2 - \mu^2\\
+  =\frac{1}{m} \sum_{i=1}^m x_i^2 - (\frac{1}{m} \sum_{i=1}^m x_i)^2</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>  * 计算每张卡的$\sum x_i$和$\sum x_i^2$，就可以一次性算出总均值和总方差
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/16/RFB/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3279,382 +3507,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/hrnet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/hrnet/" itemprop="url">hrnet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T12:18:47+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/hrnet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/hrnet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<ul>
-<li>[v1 2019] Deep High-Resolution Representation Learning for Human Pose Estimation：base HRNet，提出parallel multi-resolution subnetworks，highest resolution output作为输出</li>
-<li>[v2 2019] High-Resolution Representations for Labeling Pixels and Regions：simple modification，在末端输出的时候加了一步融合，将所有resolution-level的feature上采样到output-level然后concat</li>
-</ul>
-<h2 id="Deep-High-Resolution-Representation-Learning-for-Human-Pose-Estimation"><a href="#Deep-High-Resolution-Representation-Learning-for-Human-Pose-Estimation" class="headerlink" title="Deep High-Resolution Representation Learning for Human Pose Estimation"></a>Deep High-Resolution Representation Learning for Human Pose Estimation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>human pose estimation</li>
-<li>high-resolution representations through<ul>
-<li>existing methods recover high-res feature from the low，大多数方法是recover系</li>
-<li>this methods maintain the high-res from start to the end，本文是maintaining系</li>
-<li>add high-to-low resolution subnetworks</li>
-<li>repeated multi-scale fusions</li>
-</ul>
-</li>
-<li>more accurate and spatially more precise</li>
-<li>estimate on the high-res output，最后的high-res representation作为输出，接各种task heads</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>in parallel rather than in series：potentially spatially more precise，相比较于recover类的架构，不会导致过多的spatial resolution loss，recover类的架构有时会用空洞卷积来维持resolution来降低spatial resolution loss</p>
-</li>
-<li><p>repeated multi- scale fusions：boost both high&amp;low representations，more accurate</p>
-</li>
-<li><p>pose estimation </p>
-<ul>
-<li>probabilistic graphical model </li>
-<li>regression</li>
-<li>heatmap</li>
-</ul>
-</li>
-<li><p>High-to-low and low-to-high frameworks</p>
-<ul>
-<li>Symmetric high-to-low and low-to-high：Hourglass</li>
-<li>Heavy high-to-low and light low-to-high：ResNet back + simple bilinear upsampling</li>
-<li><p>Heavy high-to-low with dilated convolutions and further lighter low-to-high：ResNet with atrous conv + fewer bilinear upsampling</p>
-<p><img src="/2020/09/18/hrnet/recover.png" width="90%;"></p>
-</li>
-<li><p>high-to-low part和low-to-hight part：有对称和不对称两种，对称就如Hourglass，不对称就是down-path使用heavy classification backboens，up-path使用轻量的上采样</p>
-</li>
-<li>fusion：<ul>
-<li>a和b都有skip-connections，将down-path和up-path的特征融合，目的是融合low-level和high-level的特征</li>
-<li>a里面还有不同resolution level的融合</li>
-<li>fusion方式有sum/concat</li>
-</ul>
-</li>
-<li>refinenet：也就是up-path，可以用upSampling/transpose convs</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>task description</p>
-<ul>
-<li>human pose estimation = keypoint detection </li>
-<li>detect K keypoints from an Image (H,W,3)</li>
-<li>state-of-the art methods：predict K heatmaps，each indicates one of the keypoint<ul>
-<li>a stem with 2 strided conv</li>
-<li>a body outputting features with the same input resolution</li>
-<li>a regressor estimating heatmaps</li>
-</ul>
-</li>
-<li>we focus on the design of the main body</li>
-</ul>
-</li>
-<li><p>sequential &amp; parallel multi-resolution networks</p>
-<ul>
-<li><p>notation：$N_{sr}$</p>
-<ul>
-<li>s is the stage</li>
-<li>r is the resolution index，denotes $\frac{1}{2^{r-1}}$ of the resolution of the first subnetwork</li>
-</ul>
-</li>
-<li><p>sequential </p>
-<p>  <img src="/2020/09/18/hrnet/sequential.png" width="50%;"></p>
-</li>
-<li><p>parallel</p>
-<p>  <img src="/2020/09/18/hrnet/parallel.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>overview</p>
-<p><img src="/2020/09/18/hrnet/hrnet.png" width="50%;"></p>
-<ul>
-<li>four stages </li>
-<li>channels double when halve the res</li>
-<li>1st stage<ul>
-<li>第一个stage是一个high-resolution subnetwork，没有下采样，没有parallel分支</li>
-<li>4 residual units，bottleneck resblock</li>
-<li>width=64</li>
-<li>3x3 conv reducing width to C</li>
-</ul>
-</li>
-<li>2、3、4 stages<ul>
-<li>接下来的stage gradually add high-to-low subnetwork</li>
-<li>是multi-resolution subnetworks</li>
-<li>每个subnetwork都比前一个多一个extra lower one resolution</li>
-<li>contain 1, 4, 3 exchange blocks respectively </li>
-<li>exchange block<ul>
-<li>conv：4 residual units，two 3x3 conv</li>
-<li>exchange unit</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>width<ul>
-<li>C：width of the high-resolution subnetworks in last three stages</li>
-<li>other three parallel subnetworks <ul>
-<li>HRNet-W32：64, 128, 256</li>
-<li>HRNet-W48：96, 192, 384  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>repeated multi-scale fusion</p>
-<ul>
-<li><p>exchange blocks：每个high-to-low subnetwork包含多个parallel分支，每条path称为exchange block，每个exchange block包含一系列3-conv-units + a exchange unit </p>
-</li>
-<li><p>3-conv-units：堆叠卷积核，提取特征，加深网络</p>
-</li>
-<li><p>exchange unit：交换不同resolution level的信息</p>
-<ul>
-<li><p>notations：一系列输入$\{X_1,X_2, …, X_r\}$，一系列输出$\{Y_1,Y_2, …, Y_r\}$，如果跨stage还有一个$Y_{r+1}$</p>
-</li>
-<li><p>每个$Y_k$都是一个aggregation of the input maps：$Y_k=\sum^s_i a(X_i,k)$</p>
-<ul>
-<li>i&lt;k：需要下采样，每下采样一倍都是一个stride2-3x3-conv</li>
-<li>i=k：identify connection</li>
-<li>i&gt;k：需要上采样，nearest neighbor upsamp + 1x1-align-conv</li>
-<li><p>k=$r+1$：需要在$Y_r$的基础上，在执行一次stride2-3x3-conv下采样得到</p>
-<p><img src="/2020/09/18/hrnet/exchange unit.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>fusion：sum，所以上/下采样都需要通道对齐，输出map和对应level的输入map保持尺寸不变</p>
-</li>
-</ul>
-</li>
-<li><p>heatmap estimation</p>
-<ul>
-<li>from the last high-res exchange unit</li>
-<li>mse</li>
-<li>gt gassian map：std=1</li>
-</ul>
-</li>
-<li><p>network instantiation</p>
-<ul>
-<li>stem + 4 stages</li>
-<li>每个new stage input：res halved and channel doubled</li>
-<li>stem<ul>
-<li>两个s2-conv-bn-relu，channel 64</li>
-</ul>
-</li>
-<li>first stage：<ul>
-<li>使用和ResNet-50中一样的4个residual units，channel 64</li>
-<li>然后用一个3x3-conv调整channel到一个起始channel C</li>
-</ul>
-</li>
-<li>2/3/4 stage<ul>
-<li>堆叠exchange blocks，分别有1/4/3个exchange block</li>
-<li>每个exchange block使用4个residual units和1个exchange unit</li>
-<li>也就是总共有8次multi-scale fusion</li>
-<li>channel C/2C/4C</li>
-</ul>
-</li>
-<li>HRNet-32：C=64</li>
-<li>HRNet-48：C=96</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="HRNet-v2-High-Resolution-Representations-for-Labeling-Pixels-and-Regions"><a href="#HRNet-v2-High-Resolution-Representations-for-Labeling-Pixels-and-Regions" class="headerlink" title="HRNet v2: High-Resolution Representations for Labeling Pixels and Regions"></a>HRNet v2: High-Resolution Representations for Labeling Pixels and Regions</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>High-resolution representation很重要</li>
-<li>HRNet v1已经有不错的结果</li>
-<li>a further study on high resolution representations</li>
-<li>a small modification：之前只关注high-resolution representations，现在关注所有level的output representations</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>获得high resolution representation的两大方式</p>
-<ul>
-<li>recover系：先下采样，然后用low-resolution重建，Hourglass，U-net，encoder-decoder</li>
-<li>maintain系：始终保留high-resolution的representation，同时不断用parallel low-resolution representations来strengthen，HRNet</li>
-</ul>
-</li>
-<li><p>HRNet</p>
-<ul>
-<li>maintains high-resolution representations</li>
-<li>connecting high-to-low resolution convolutions in parallel</li>
-<li>repeatedly conducting multi-scale fusions across levels</li>
-<li>简单来说，就是在每个阶段，保留现有resolution level，同时</li>
-<li><p>不仅representation足够强大（融合了low-level high semantic info），还spatially precise</p>
-<p><img src="/2020/09/18/hrnet/hrnet v1.png" width="85%;"></p>
-</li>
-</ul>
-</li>
-<li><p>our modification HRNetV2</p>
-<ul>
-<li>HRNet 里面我们只关注最上面的high-resolution representation</li>
-<li>HRNet V2里面我们探索所有high-to-low parallel paths上面的representations</li>
-<li>在语意分割任务中我们使用output high resolution representations来生成heatmaps</li>
-<li>在检测任务中我们将multi-level的representations给到FastRCNN</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Architecture</p>
-<ul>
-<li>multi-resolution block<ul>
-<li>multi-resolution group convolution：在每个representation level分别执行分组卷积，deeper</li>
-<li>multi-resolution convolution：发生在所有representation level上</li>
-<li>下采样：stride-2 3x3 conv</li>
-<li>上采样：bilinear /nearest neighbor</li>
-</ul>
-</li>
-<li><img src="/2020/09/18/hrnet/multi-resolution.png" width="45%;"></li>
-</ul>
-</li>
-<li><p>Modification</p>
-<ul>
-<li>HRNetV1：只把最后一个阶段 highest resolution的representation作为输出</li>
-<li><p>HRNetV2：最后一个阶段，每个resolution level的representations都上采样到highest，然后concat作为输出，甚至还将这个输出进一步下采样得到feature pyramid</p>
-<p><img src="/2020/09/18/hrnet/hrnet v2.png" width="85%;"></p>
-</li>
-<li><p>HRNet for classification：也可以反向操作，将最后一个阶段每个resolution level的representations都下采样到lowest，然后sum，最后output 2048-dim representation is fed into the classifier</p>
-<p><img src="/2020/09/18/hrnet/hrnet_cls.png" width="100%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3709,7 +3561,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3722,7 +3574,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

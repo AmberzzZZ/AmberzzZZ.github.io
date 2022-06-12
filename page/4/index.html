@@ -276,6 +276,193 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/07/13/GNN-GCN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/07/13/GNN-GCN/" itemprop="url">GNN&GCN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-13T15:48:56+08:00">
+                2021-07-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/07/13/GNN-GCN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/07/13/GNN-GCN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>reference：<a href="https://www.cnblogs.com/siviltaram/p/graph_neural_network_2.html" target="_blank" rel="noopener">https://www.cnblogs.com/siviltaram/p/graph_neural_network_2.html</a></p>
+</li>
+<li><p>key concepts</p>
+<ul>
+<li>图神经网络（Graph Neural Network，GNN）</li>
+<li>图卷积神经网络（Graph Convolutional Neural Network）</li>
+<li>频域（Spectral-domain）</li>
+<li>空域（Spatial-domain）</li>
+</ul>
+</li>
+<li><p>图神经网络</p>
+<ul>
+<li><p>image &amp; graph</p>
+<p>  <img src="/2021/07/13/GNN-GCN/image.png" width="45%;"></p>
+</li>
+<li><p>节点（Node）</p>
+<ul>
+<li>每个节点有其特征，用$x_v$表示</li>
+</ul>
+</li>
+<li><p>边（Edge）</p>
+<ul>
+<li>连接两个节点的边也有其特征，用$x_{v,u}$表示</li>
+</ul>
+</li>
+<li><p>隐藏状态</p>
+<ul>
+<li>图的学习目标是获得每个节点的隐藏状态</li>
+</ul>
+</li>
+<li><p>局部输出函数</p>
+<ul>
+<li>选取一个节点</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>图卷积</p>
+<ul>
+<li><p>一张图片就可以看作一个非常稠密的图，阴影部分代表卷积核，右侧则是一个普通的图，和图卷积核</p>
+<ul>
+<li>在image为代表的欧式空间中，结点的邻居数量都是固定的，但在graph这种非欧空间中，结点有多少邻居并不固定</li>
+<li><p>传统的卷积核不能直接用于抽取图上结点的特征</p>
+<p><img src="/2021/07/13/GNN-GCN/gcn.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>两个主流思路</p>
+<ul>
+<li>把非欧空间的图转换成欧式空间，然后使用传统卷积</li>
+<li>找出一种可处理变长邻居结点的卷积核在图上抽取特征</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/06/22/few-shot/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3897,180 +4084,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/11/regnet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/11/regnet/" itemprop="url">regnet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-11T21:10:42+08:00">
-                2021-03-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/11/regnet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/11/regnet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RegNet-Designing-Network-Design-Spaces"><a href="#RegNet-Designing-Network-Design-Spaces" class="headerlink" title="RegNet: Designing Network Design Spaces"></a>RegNet: Designing Network Design Spaces</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>study the network design principles</li>
-<li>design RegNet </li>
-<li>outperforms efficientNet and 5x faster<ul>
-<li>top1 error：20.1 （eff-b5：21.5）</li>
-<li>larger batch size</li>
-<li>1/4 的 train/test latency</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>manual network design<ul>
-<li>AlexNet, ResNet family, DenseNet, MobileNet</li>
-<li>focus on discovering new design choices that improve acc </li>
-</ul>
-</li>
-<li>the recent popular approach NAS<ul>
-<li>search the best in a fixed search space of possible networks</li>
-<li>limitations：generalize to new settings，lack of interpretability  </li>
-</ul>
-</li>
-<li>network scaling<ul>
-<li>上面两个focus on 找出一个basenet for a specific regime</li>
-<li>scaling rules aims at tuning the optimal network in any target regime </li>
-</ul>
-</li>
-<li>comparing networks<ul>
-<li>the reliable comparison metric to guide the design process</li>
-</ul>
-</li>
-<li>our method<ul>
-<li>combines the disadvantages of manual design and NAS</li>
-<li>first AnyNet</li>
-<li>then RegNet</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4125,7 +4138,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4138,7 +4151,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,295 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/" itemprop="url">HMC: Hierarchical Multi-Label Classification Networks</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-02-25T17:50:18+08:00">
+                2022-02-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ICML2018，multi-label，hierarchical </p>
+<p>理想数据集的类别间是互斥的，但是现实往往存在层级/包含关系，多个数据集合并时也会有这个情况</p>
+<p>reference code: <a href="https://github.com/Tencent/NeuralNLP-NeuralClassifier/blob/master/model/classification/hmcn.py" target="_blank" rel="noopener">https://github.com/Tencent/NeuralNLP-NeuralClassifier/blob/master/model/classification/hmcn.py</a></p>
+<h2 id="HMCN-Hierarchical-Multi-Label-Classification-Networks"><a href="#HMCN-Hierarchical-Multi-Label-Classification-Networks" class="headerlink" title="HMCN: Hierarchical Multi-Label Classification Networks"></a>HMCN: Hierarchical Multi-Label Classification Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>HMC：hierarchical multi-label classification<ul>
+<li>classes are hierarchically structured，类别是有层级关系的</li>
+<li>objects can be assigned to multiple paths，目标可能点亮多条tree path——多标签</li>
+</ul>
+</li>
+<li>application domains<ul>
+<li>text classification</li>
+<li>image annotation</li>
+<li>bioinformatics tasks such as protein function prediction</li>
+</ul>
+</li>
+<li>propose HMCN<ul>
+<li>local + global loss</li>
+<li>local：discover local hierarchical class-relationships </li>
+<li>global：global information from the entire class while penalizing hierarchical violations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>common methods<ul>
+<li>local-based：<ul>
+<li>建立层级的top-down局部分类器，每个局部分类器用于区分当前层级，combine losses</li>
+<li>computation expensive，更善于提取wordTree局部的信息，容易overfitting</li>
+</ul>
+</li>
+<li>global-based：<ul>
+<li>只有一个分类器，将global structure associate起来</li>
+<li>cheap，没有error-propagation problem，容易underfitting</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>our novel approach<ul>
+<li>combine两者的优点</li>
+<li>recurrent / non-recurrent版本都有</li>
+<li>由multiple outputs构成<ul>
+<li>每个class hierarchy level有一个输出：local output</li>
+<li>全局还有一个global output</li>
+</ul>
+</li>
+<li>also introduce a hierarchical violation penalty</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>a feed-forward architecture (HMCN-F)</p>
+<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/HMCN-F.png" width="50%;"></p>
+<ul>
+<li>notations<ul>
+<li>feature vec $x \in R^{D}$：输入向量</li>
+<li>$C^h$：每层的节点</li>
+<li>$|H|$：总层数</li>
+<li>$|C|$：总类数</li>
+</ul>
+</li>
+<li>global flow<ul>
+<li>第一行横向的data flow</li>
+<li>将$i^{th}$层的信息carry到第$(i+1)^{th}$层</li>
+<li>第一层：$A_G^1 = \phi(W_G^1 x +b_G^1)$</li>
+<li>接下来的层：$A_G^h = \phi(W_G^h(A_G^{h-1} \odot x) +b_G^h)$</li>
+<li>最终的global prediction：$P_G=\sigma(W_G^{H+1}A_G^{H}+b_G^{H+1}) \in R^{|C|}$</li>
+</ul>
+</li>
+<li>local flow<ul>
+<li>start from 每个level的global hidden layer</li>
+<li>local hidden layer：$A_L^h = \phi(W_T^hA_G^{h} +b_T^h)$</li>
+<li>local prediction：$P_L^h = \sigma(W_L^hA_L^{h} +b_L^h) \in R^{C^h}$</li>
+</ul>
+</li>
+<li>merge information<ul>
+<li>将local的prediction vectors concat起来</li>
+<li>然后和global preds相加</li>
+<li>$P_F = \beta (P_L^1 \odot P_L^2 \odot… P_L^1) + (1-\beta) P_G$</li>
+</ul>
+</li>
+<li>hyperparams<ul>
+<li>$\beta=0.5$</li>
+<li>fc-bn-dropout：dim=384，drop_rate=0.6</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>a recurrent architecture (HMCN-R)</p>
+<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/HMCN-R.png" width="70%;"></p>
+</li>
+<li><p>training details</p>
+<ul>
+<li>small datasets with large number of classes</li>
+<li>Adam</li>
+<li>lr=1e-3</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>【小batch反而结果更好】one can achieve better results by training HMCN models with smaller batches</li>
+<li></li>
+</ul>
+</li>
+</ol>
+<h2 id="YOLO9000-回顾yolov2的wordTree"><a href="#YOLO9000-回顾yolov2的wordTree" class="headerlink" title="YOLO9000: 回顾yolov2的wordTree"></a>YOLO9000: 回顾yolov2的wordTree</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>联合训练，为了扩展类数<ul>
+<li>检测样本梯度回传full loss</li>
+<li>分类样本只梯度回传分类loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Hierarchical classification</p>
+<ul>
+<li><p>构建WordTree</p>
+</li>
+<li><p>对每个节点的预测是一个条件概率：$Pr(child_node|parent_node)$</p>
+</li>
+<li><p>这个节点的绝对概率是整条链路的乘积</p>
+</li>
+<li><p>每个样本的根节点概率$Pr(object)$是1</p>
+</li>
+<li><p>对每个节点下面的所有children做softmax</p>
+<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/wordTree.jpeg" width="50%;"></p>
+</li>
+<li><p>首先论文就先用darknet19训了一个1369个节点的层次分类任务</p>
+<ul>
+<li>1000类flat softmax on ImageNet：72.9% top-1，91.2% top-5</li>
+<li>1369类wordTree softmax on ImageNet：71.9% top-1，90.4% top-5</li>
+<li>观察到Performance degrades gracefully：总体精度下降很少，而且即使分不清是什么狗品种，狗这一类的概率还是能比较高</li>
+</ul>
+</li>
+<li><p>然后用在检测上</p>
+<ul>
+<li>每个目标框的根节点概率$Pr(object)$是yolo的obj prob</li>
+<li>仍旧对每个节点做softmax，标签是高于0.5的最深节点，不用连乘条件概率<ul>
+<li>take the highest confidence path at every split</li>
+<li>until we reach some threshold</li>
+<li>and we predict that object class</li>
+</ul>
+</li>
+<li>对一个分类样本<ul>
+<li>我们用全图类别概率最大的bounding box，作为它的分类概率</li>
+<li>然后还有objectness loss，预测的obj prob用0.3IOU来threshold：即如果这个bnd box的obj prob&lt;0.3是要算漏检的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/21/ConvNext/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1667,8 +1956,10 @@
             <ul>
 <li>papers</li>
 </ul>
-<p>[swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：</p>
+<p>[swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，multi-level features，window-based</p>
 <p>[swin V2] Swin Transformer V2: Scaling Up Capacity and Resolution：卷死了卷死了，同年就上V2，</p>
+<p>[PVT 2021] Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions，商汤，也是金字塔形结构，引入reduction ratio来降低computation cost</p>
+<p>[Twins 2021] Twins: Revisiting the Design of Spatial Attention in Vision Transformers，美团</p>
 <h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ul>
 <li><p>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：</p>
 <ul>
@@ -2013,6 +2304,7 @@
 <li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
 <li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
 <li>[UPerNet 2018] Unified Perceptual Parsing for Scene Understanding，PKU&amp;字节，Swin Segmentaion的补充材料，Swin的down-stream task选择用UperNet as base framework</li>
+<li>[SegFormer 2021] SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers，港大&amp;英伟达，参照FCN范式的(CNN+FPN+seg head)，设计了swin+MLP decoder的全linear网络，用于分割</li>
 </ul>
 <h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
 <ul>
@@ -2440,8 +2732,129 @@
 </ul>
 </li>
 <li><p>实验</p>
+</li>
+</ol>
+<h2 id="SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers"><a href="#SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers" class="headerlink" title="SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers"></a>SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers</h2><ol>
+<li><p>repo: <a href="https://github.com/NVlabs/SegFormer" target="_blank" rel="noopener">https://github.com/NVlabs/SegFormer</a></p>
+</li>
+<li><p>动机</p>
 <ul>
-<li></li>
+<li>propose a semantic segmentation framework SegFormer<ul>
+<li>simple, lightweight, efficient, powerful</li>
+<li>hierarchical transformer + MLP decoder</li>
+</ul>
+</li>
+<li><p>特点</p>
+<ul>
+<li>does not need positional encoding：在inference阶段切换图像分辨率不会引起性能变化</li>
+<li>avoids complex decoders：MLP decoder主要就是merge multi levels</li>
+</ul>
+</li>
+<li><p>scale up to obtain a family of models：SegFormer-B0 to SegFormer-B5</p>
+</li>
+<li><p>verified on </p>
+<ul>
+<li>SegFormer-B4：50.3% mIoU on ADE20K，SOTA</li>
+<li><p>SegFormer-B5：84.0% mIoU on Cityscapes</p>
+<p><img src="/2021/11/18/seg-transformers/segformer精度.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>SETR<ul>
+<li>ViT-back + several CNN decoders</li>
+<li>ViT主要是计算量 &amp; single-scale issue</li>
+<li>后续methods提出PVT、Swin、Twins等，主要focus在优化multi-scale的backbone，忽略了decoder的设计</li>
+</ul>
+</li>
+<li>this paper （SegFormer）<ul>
+<li>redesigns both the encoder and the decoder</li>
+<li>改进的Transformer encoder：hierarchical &amp; positional-encoding-free</li>
+<li>设计的all-MLP decoder：lightweight but powerful，设计的核心思想是 to take advantage of the Transformer-induced features where the attentions of lower layers tend to stay local, whereas the ones of the highest layers are highly non-local</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2021/11/18/seg-transformers/segformer.png" width="80%;"></p>
+<ul>
+<li>encoder：<ul>
+<li>使用了4x4的patch size，相比较于16x16的ViT，fine-grained patches is more preferred by semantic segmentation</li>
+<li>multi-level features：x4，x8，x16，x32</li>
+</ul>
+</li>
+<li>decoder<ul>
+<li>输入上述的multi-level features</li>
+<li>输出x4的segmentation mask</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Hierarchical Transformer Encoder</p>
+<ul>
+<li>We design a series of Mix Transformer encoders (MiT)：MiT-B0 to MiT-B5</li>
+<li>基于PVT的efficient self-attention module<ul>
+<li>针对原始attention block的平方时间复杂度</li>
+<li>use a reduction ratio R to reduce the length of sequence K：注意是改变K的长度，而不是Q</li>
+<li>given原始序列长度$N=HW$，feature dimensions $C$<ul>
+<li>先reshape：$\hat K = Reshape(\frac{N}{R},CR)(K)$</li>
+<li>再降维：$K=Linear(CR,C)(\hat K)$</li>
+</ul>
+</li>
+<li>计算量从O(N^2)下降到O(N^2/R)</li>
+<li>set R to [64, 16, 4, 1] from stage-1 to stage-4</li>
+</ul>
+</li>
+<li>同时提出了several novel designs<ul>
+<li>overlapped patch merging<ul>
+<li>本文的一个论点是ViT用non-overlapping patches去做patch merging，相邻patch之间没有保留local continuity，所以需要positional encoding</li>
+<li>所以use an overlapping patch merging process</li>
+<li>notations<ul>
+<li>patch size K=7/3</li>
+<li>stride S=4/2</li>
+<li>padding size P=3/1 (valid padding)</li>
+<li>patch merging操作仍旧通过卷积来实现</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>positional-encoding-free design <ul>
+<li>ViT修改resolution要同步interpolatePE，还是会引起掉点</li>
+<li>we introduce Mix-FFN<ul>
+<li>在FFN中夹了一个conv3x3</li>
+<li>sufficient to provide positional information</li>
+<li>甚至可以用depth-wise convolutions节省参数量</li>
+</ul>
+</li>
+<li>we argure that adding PE is not necessary in semantic segmentation</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Lightweight All-MLP Decoder</p>
+<ul>
+<li><p>idea是transformer有着远大于传统CNN的有效感受野，所以decoder可以轻量一点，不用再堆block</p>
+<p>  <img src="/2021/11/18/seg-transformers/erf.png" width="60%;"></p>
+</li>
+<li><p>4 main steps</p>
+<ul>
+<li>unify：multi-level的feature maps各自通过MLP layer to unify the channel dimension</li>
+<li>upsample：所有的features上采样到x4</li>
+<li>fuse：concat + MLP(实际代码里用了1x1conv-bn-relu)</li>
+<li><p>seg head：MLP，预测mask仍在x4尺度上</p>
+<p><img src="/2021/11/18/seg-transformers/all-mlp decoder.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
@@ -3500,165 +3913,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/27/KL-Divergence/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/27/KL-Divergence/" itemprop="url">KL Divergence</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-27T16:48:39+08:00">
-                2021-09-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/27/KL-Divergence/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/27/KL-Divergence/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li>KL divergence用于度量两个分布P和Q的差异，这种度量【不具有】对称性<ul>
-<li>P是实际分布（pred probs）</li>
-<li>Q是建模分布（gt）</li>
-<li>$D_{KL}(P||Q)=\sum_i P(i)ln\frac{P(i)}{Q(i)}$</li>
-<li>散度定义为分布P和分布Q之间的对数差异的加权和，用P的概率去加权</li>
-<li>当Q是one-hot label的时候，要先clip再log</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>torch.nn.functional.kl_div(input, target, size_average=None, reduce=None, reduction=’mean’)<ul>
-<li>input：对数概率</li>
-<li>target：概率</li>
-</ul>
-</li>
-<li>tf.distributions.kl_divergence(distribution_a, distribution_b, allow_nan_stats=True, name=None)<ul>
-<li>distribution_a&amp;b 来自tf.distributions.Categorical(logits=None, prob=None, …)</li>
-<li>传入logits/probs，先转换成distribution，再计算kl divergence</li>
-</ul>
-</li>
-<li>torch.nn.KLDivLoss</li>
-<li>tf.keras.losses.KLDivergence</li>
-<li>tf.keras.losses.kullback_leibler_divergence</li>
-</ul>
-</li>
-<li><p>code</p>
-</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># torch version</span></span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">KL</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">  	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, args)</span>:</span></span><br><span class="line">      	super(KL, self).__init__()</span><br><span class="line">        self.T = args.temperature</span><br><span class="line">        </span><br><span class="line">		<span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, logits_p, logits_q)</span>:</span></span><br><span class="line">      	log_p = F.log_softmax(logits_p/self.T, dim=<span class="number">1</span>)</span><br><span class="line">        q = F.softmax(logits_q/self.T, dim=<span class="number">1</span>)</span><br><span class="line">        loss = F.kl_div(log_p, p_t)</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"><span class="comment"># keras version</span></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> keras.backend <span class="keyword">as</span> K</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kl_div</span><span class="params">(logits_p, logits_q)</span>:</span></span><br><span class="line">  	T = <span class="number">4.</span></span><br><span class="line">    log_p = tf.nn.log_softmax(logits_p/T)      <span class="comment"># (b,cls)</span></span><br><span class="line">    log_q = tf.nn.log_softmax(logits_q/T)</span><br><span class="line">    p = K.exp(log_p)</span><br><span class="line">    <span class="keyword">return</span> K.sum(p*(log_p-log_q), axis=<span class="number">-1</span>)   <span class="comment"># (b,)</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3713,7 +3967,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">155</span>
+                  <span class="site-state-item-count">156</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3726,7 +3980,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">90</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
