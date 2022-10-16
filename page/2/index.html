@@ -276,6 +276,850 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/28/ArcFace/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/03/28/ArcFace/" itemprop="url">ArcFace</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-28T11:05:56+08:00">
+                2022-03-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/03/28/ArcFace/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/28/ArcFace/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>一些metric loss特点的总结：</p>
+<pre><code>* margin-loss：样本与自身类簇心的距离要小于样本与其他类簇心的距离——标准center loss
+* intra-loss：对样本和对应类簇心的距离做约束——小于一定距离
+* inter-loss：对样本和其他类簇心的距离做约束——大于一定距离
+* triplet-loss：样本与同类样本的距离要小于样本与其他类样本的距离
+</code></pre><p><img src="/2022/03/28/ArcFace/metric loss.png" width="50%;"></p>
+<h2 id="ArcFace-Additive-Angular-Margin-Loss-for-Deep-Face-Recognition"><a href="#ArcFace-Additive-Angular-Margin-Loss-for-Deep-Face-Recognition" class="headerlink" title="ArcFace: Additive Angular Margin Loss for Deep Face Recognition"></a>ArcFace: Additive Angular Margin Loss for Deep Face Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>场景：人脸，</li>
+<li>常规要素：<ul>
+<li>hypersphere：投影空间</li>
+<li>metric learning：距离(Angles/Euclidean) &amp; class centres</li>
+</ul>
+</li>
+<li>we propose<ul>
+<li>an additive angular margin loss：ArcFace</li>
+<li>has a clear geometric interpretation</li>
+<li>SOTA on face &amp; video datasets</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>face recognition<ul>
+<li>given face image</li>
+<li>pose normalisation</li>
+<li>Deep Convolutional Neural Network (DCNN)</li>
+<li>into feature that has small intra-class and large inter-class distance</li>
+</ul>
+</li>
+<li>two main lines<ul>
+<li>train a classifier：softmax<ul>
+<li>最后的分类层参数量与类别数成正比</li>
+<li>not discriminative enough for the open-set</li>
+</ul>
+</li>
+<li>train embedding：triplet loss<ul>
+<li>triplet-pair的数量激增，大数据集的iterations特别多</li>
+<li>sampling mining很重要，对精度&amp;收敛速度</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>to enhance softmax loss<ul>
+<li>center loss：在分类的基础上，压缩feature vecs的类内距离</li>
+<li>multiplicative angular margin penalty：类特别多的时候，center就不好更新了，用last fc weights能够替代center，但是会不稳定</li>
+<li>CosFace：直接计算logit的cosine margin penalty，better &amp; easier</li>
+</ul>
+</li>
+<li>ArcFace<ul>
+<li>improve the discriminative power</li>
+<li>stabilise the training meanwhile</li>
+<li>margin-loss：Distance(类内)+m &lt; Distance(类间)</li>
+<li>核心idea：normed feature和normed weights的dot product等价于在求他俩的 cosine distance，我们用arccos就能得到feature vec和target weight的夹角，给这个夹角加上一个margin，然后求回cos，作为pred logit，最后softmax</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>ArcFace</p>
+<ul>
+<li><p>transitional softmax</p>
+<ul>
+<li><img src="/2022/03/28/ArcFace/softmax.png" width="50%;"></li>
+<li>not explicitly enforce intra-class similarity &amp; inter-class diversity</li>
+<li>对于类内variations大/large-scale测试集的场景往往有performance gap</li>
+</ul>
+</li>
+<li><p>our modification</p>
+<ul>
+<li><p>fix the bias $b_j=0$ for simplicity  </p>
+</li>
+<li><p>transform the logit $W_j^T x=||W_j||\ ||x||cos\theta_j$，$\theta_j$是weight $W_j \in R^d$和样本feature $x \in R^d$的夹角</p>
+</li>
+<li><p>fix the $||W_j||$ by l2 norm：$||W_j||=1$</p>
+</li>
+<li><p>fix the embedding $||x||$ by l2 norm and rescale： $||x||=s$</p>
+</li>
+<li><p>thus only depend on angle：这使得feature embedding分布在一个高维球面上，最小化与gt class的轴（对应channel的weight vec，也可以看作class center）夹角</p>
+<p>  <img src="/2022/03/28/ArcFace/loss2.png" width="50%;"></p>
+</li>
+<li><p>add an additive angular margin penalty：simultaneously enhance the intra-class compactness and inter-class discrepancy</p>
+<p>  <img src="/2022/03/28/ArcFace/loss3.png" width="50%;"></p>
+</li>
+<li><p>作用</p>
+<ul>
+<li>softmax produce noticeable ambiguity in decision boundaries</li>
+<li><p>ArcFace loss can enforce a more evident gap</p>
+<p><img src="/2022/03/28/ArcFace/cmp.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>pipeline</p>
+<p>  <img src="/2022/03/28/ArcFace/pipeline.png" width="100%;"></p>
+<ul>
+<li></li>
+</ul>
+</li>
+<li><p>实现</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>​                </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/21/DA-WSOL-object-localization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/03/21/DA-WSOL-object-localization/" itemprop="url">DA-WSOL: object localization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-21T10:34:32+08:00">
+                2022-03-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/03/21/DA-WSOL-object-localization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/21/DA-WSOL-object-localization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Weakly-Supervised-Object-Localization-as-Domain-Adaption"><a href="#Weakly-Supervised-Object-Localization-as-Domain-Adaption" class="headerlink" title="Weakly Supervised Object Localization as Domain Adaption"></a>Weakly Supervised Object Localization as Domain Adaption</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Weakly supervised object localization (WSOL)<ul>
+<li>localizing objects only with the supervision of image-level classification label</li>
+<li>previous method use classification structure and CAM to generate the localization score：CAM通常不完全focus在目标上，定位能力weak</li>
+</ul>
+</li>
+<li>our method<ul>
+<li>将任务建模成域迁移任务，domain-adaption(DA) task</li>
+<li>score estimiator用image-level信息来训练，用像素级信息来测试</li>
+<li>a DA-WSOL pipeline<ul>
+<li>a target sampling strategy</li>
+<li>domain adaption localization (DAL) loss</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>CAM的表现不佳</p>
+<ul>
+<li>核心在于domain shift：用分类架构，训练一个分类任务，是对image-level feature的优化，但是目标却是 localization score，这是pixel-level feature，两者之间没有建立联系</li>
+<li>最终estimator会get overfitting on source domain(也就是image-level target)</li>
+<li>一个直观的想法：引入DA，align the distribution of these two domains，avoid overfitting——activating the discriminative parts of objects</li>
+</ul>
+</li>
+<li><p>mechanisms</p>
+<p>  <img src="/2022/03/21/DA-WSOL-object-localization/pipeline.png" width="55%;"></p>
+<ul>
+<li>B: Multi-instance learning(MIL) based WSOL<ul>
+<li>分类架构</li>
+<li>类别目标驱动</li>
+<li>通过各种data augmentation/cut mix来strengthen</li>
+<li>印象里原论文是先训一个纯分类网络（CNN+fc），然后去掉头，改成CNN+GAP+fc，做finetuning，得到能产生CAM的网络(提取对应类别权重对特征图加权)，因为需要两步训练，后面如果要看cam一半都是用grad-cam(用梯度的平均作为权重，无需重新训练)，performance据说等价</li>
+</ul>
+</li>
+<li>C: Separated-structure based WSOL<ul>
+<li>一个目标分类任务</li>
+<li>一个目标定位任务：伪标签、多阶段</li>
+</ul>
+</li>
+<li>A: Domain Adaption<ul>
+<li>引入DA to better assist WSOL task：align feature distribution between src/tgt domain</li>
+<li>end-to-end</li>
+<li>a target sampling strategy <ul>
+<li>target domain features has a much larger scale than source domain features：显然image-level task下，训练出的特征提取器更多的保留前景特征，但是pixel-level下还包含背景之类的</li>
+<li>sampling旨在选取source-related target samples &amp; source unseen target samples</li>
+</ul>
+</li>
+<li>domain adaption localization (DAL) loss<ul>
+<li>上述的两类samples fed into这个loss</li>
+<li>source-related target samples：to solve the sample imbal- ance between two domains</li>
+<li>source unseen target samples：viewed as the Universum to perceive target cues</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Revisiting the WOSL</p>
+<ul>
+<li>task description：给定$image X\in R^{3 \times N} $，3通道N个pixel，需要分辨任意像素$X_{:,i}$是否属于a certain class 0-k</li>
+<li>a feature extractor f(~)：用来提取pixel-level features $Z = f(X) \in R^{C \times N}$</li>
+<li>a score estimator e(~)：用来估计pixel的localization score $Y=e(Z) \in R^{K \times N}$</li>
+<li>在有监督场景下，pixel-level target Y是直接给定的，但是在无监督场景下，我们只有image-level mask，即$y=(max(Y_{0:}), max(Y_{1:}), …, max(Y_{k:})) \in R^{K \times 1}$，即每个feature map的global max/avg value构成的feature vector</li>
+<li>an additional aggregator g (~)：用来聚合feature map，将pixel-level feature转换成image-level $z=g(Z) \in R^{C\times 1}$，如GAP</li>
+<li>然后再fed into the score estimator above：$y^* = e(z) \in R^{K \times 1}$</li>
+<li>用classification loss来监督$y$和$y^*$，这就是一个分类任务</li>
+<li>but at test time：the estimator is projected back onto the pixel-level feature Z to predict the localization scores，这就是获取CAM</li>
+</ul>
+</li>
+<li><p>Modeling WSOL as Domain Adaption</p>
+<ul>
+<li>对每个sample X，建立两个feature sets S &amp; T<ul>
+<li>source domain：$s = z = (gf)(X)$</li>
+<li>target domain：$\{t_1,t_2,…,t_N\} =\{Z_{1,:},Z{2,:},…,Z{N,:}\}=f(X)$</li>
+</ul>
+</li>
+<li>aim at minimizing the target risk without accessing the target label set (pixel-level mask)，可以转化为：<ul>
+<li>minimizing source risk</li>
+<li>minimizing domain discrepancy</li>
+<li>$L(S,Y^S,T) = L_{cls}(S,Y^S) + L_a(S,T)$</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>L_cls就是常规的分类loss，在image-level上train</li>
+<li>L_a是proposed adaption loss，用来最小化S和T的discrepancy，会force  f(~)和g (~)去学习domain-invariant features</li>
+<li>使得 e(~)在S和在T上的performance相似</li>
+</ul>
+</li>
+<li><p>properties to notice</p>
+<ul>
+<li>some samples在set T中存在，而在set S中不存在，如background，不能强行align两个set</li>
+<li>两个分布的scale比例十分imbalance，1:N——the S set in some degree insufficient</li>
+<li>两个分布的差异是已知的，就是aggregator g (~)，这是个先验知识</li>
+</ul>
+</li>
+<li><p>mechanism as in figure</p>
+<ul>
+<li>起初两个分布并不一致，方框1/2是image level feature，圆圈1/2是pixel level feature，圆圈问号类是pixel map上的bg patches</li>
+<li>用class loss去监督如CAM method，能够区分方框1/2，在一定程度上也能够区分圆圈1/2，但是不能精准定位目标，因为S和T存在discrepancy——bg patches</li>
+<li>引入domain adaption loss，能够tighten两个set，使得两个分布更加align，这样class bound在方框1/2和圆圈1/2上的效果都一样好</li>
+<li><p>引入Universum regularization，推动decision boundary into Universum samples，使得分类边界也有意义</p>
+<p><img src="/2022/03/21/DA-WSOL-object-localization/mechanism.png" width="100%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Domain Adaption Localization Loss $L_a$(~)</p>
+<ul>
+<li>首先进一步切分target set T<ul>
+<li>Universum $T^u$：不包含前景类别/bg样本</li>
+<li>the fake $T^f$：和source domain的sample highly correlated的样本（在GAP时候被保留下来的样本）</li>
+<li>the real $T^t$：aside from above two的样本</li>
+</ul>
+</li>
+<li>recall the properties<ul>
+<li>the fake之所以会highly correlated source domain，就是因为先验知识GAP (property3)，我们知道他就是在GAP阶段被留下来的target sample</li>
+<li>我们可以将其作为source domain的补充样本，以弥补insufficient issue  (property2)</li>
+<li>关于unmatched data space (property1)，T-Universum就与S保持same label space了</li>
+</ul>
+</li>
+<li>based on these subsets，overall的DAL loss包含两个部分<ul>
+<li>domain adaption loss $L_d$：UDA，unsupervised，align the distribution</li>
+<li>Universum regularization $L_u$：feature-based L1 regularization，所有bg像素的绝对值之和，如果他们都在分类边界上，不属于任何一个前景类，localization score的响应值就都是0，那么loss就是0</li>
+<li>$L_a(S,T) = \lambda_1L_d(S \cup T^f, T^t) + \lambda_2 L_u(T^u)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Target Sampling Strategy （这个有点不太理解）</p>
+<ul>
+<li>a target sample assigner(TSA)</li>
+<li>a cache matrix $M \in R^{C \times (K+1)}$<ul>
+<li>column 0：represents the anchor of $T^u$</li>
+<li>the rest column：represents the anchor of certain class of $T^t$</li>
+<li>感觉就是记录了每类column vec的簇心</li>
+</ul>
+</li>
+<li><p>init</p>
+<ul>
+<li>column 0：zero-init</li>
+<li>the rest：当遇到第一个这一类的样本的时候，用src vec $z+\epsilon$初始化</li>
+</ul>
+</li>
+<li><p>update</p>
+<ul>
+<li>首先基于image-level label得到类别id：$k = argmax(y)$，注意使用ground truth，不是prediction vec</li>
+<li>然后拿到cache matrix中对应的anchor：$a^u = M_{:,0}, \ \ a^t = M_{:,k+1}$</li>
+<li>然后再加上image-level predict作为初始的cluster：$C_{init} = \{a^u, a^t, z\} \in R^{C \times 3}$</li>
+<li>对当前target samples做K-means，得到三类样本，进而计算adaption loss</li>
+<li><p>用聚类得到的新center C，加权平均更新cache matrix，权重$r_k$是对应类images的数目的倒数</p>
+<p><img src="/2022/03/21/DA-WSOL-object-localization/update.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>overall</p>
+<p>  <img src="/2022/03/21/DA-WSOL-object-localization/TSA.png" width="100%;"></p>
+</li>
+</ul>
+</li>
+<li><p>pipeline summary</p>
+<ul>
+<li><p>首先获得S和T，f(~)是classification backbone(resnet/inception)，g(~)是 global average pooling，e(~)是作用在source domain feature vector的 fully-connected layer ，generate the image-level classification score，supervised with cross-entropy</p>
+<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_cls.png" width="50%;"></p>
+</li>
+<li><p>然后通过S、T以及ground truth label id得到3个target subsets</p>
+<ul>
+<li><p>$T^u$用来计算$L_u$</p>
+<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_u.png" width="50%;"></p>
+</li>
+<li><p>$S$和$T^f$和$T^t$用来计算$L_d$：MMD (Maximum Mean Discrepancy)，h(~)是高斯kernel</p>
+<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_d.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/07/ImageSearch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/03/07/ImageSearch/" itemprop="url">ImageSearch</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-07T11:07:12+08:00">
+                2022-03-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/03/07/ImageSearch/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/07/ImageSearch/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="以图搜图"><a href="#以图搜图" class="headerlink" title="以图搜图"></a>以图搜图</h2><ol>
+<li><p>两大类</p>
+<ul>
+<li>pHash + hamming距离</li>
+<li>CNN + cos距离</li>
+</ul>
+</li>
+<li><p>pHash</p>
+<p> cv2的dct变换和库函数imagehash调用的scipy.fftpack.dct结果不太一样，所以编码结果也不一样</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> imagehash</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pHash</span><span class="params">(img_file)</span>:</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># step1: gray, 0-255, 32x32</span></span><br><span class="line">    img = cv2.imread(img_file, <span class="number">0</span>)</span><br><span class="line">    img = cv2.resize(img, (<span class="number">32</span>,<span class="number">32</span>), interpolation=cv2.INTER_CUBIC)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># step2: dct, left-top 8x8</span></span><br><span class="line">    img = cv2.dct(img.astype(np.float32))</span><br><span class="line">    img = img[:<span class="number">8</span>,:<span class="number">8</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># step3: flatten, mean, 0-1 binary</span></span><br><span class="line">    img = img.reshape((<span class="number">-1</span>)).tolist()</span><br><span class="line">    mean = sum(img)/len(img)</span><br><span class="line">    img_print = [<span class="string">'1'</span> <span class="keyword">if</span> i&gt;mean <span class="keyword">else</span> <span class="string">'0'</span> <span class="keyword">for</span> i <span class="keyword">in</span> img]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># hex encoding</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>.join([<span class="string">'%x'</span> % int(<span class="string">''</span>.join(img_print[i:i+<span class="number">4</span>]),<span class="number">2</span>) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">32</span>*<span class="number">32</span>,<span class="number">4</span>)])</span><br><span class="line">    </span><br><span class="line">cv_hash = pHash(img_file)</span><br><span class="line">scipy_hash = imagehash.phash(Image.open(img_file), hash_size=<span class="number">8</span>, highfreq_factor=<span class="number">4</span>)  <span class="comment"># imagehash object</span></span><br><span class="line">scipy_hash = scipy_hash.__str__()</span><br></pre></td></tr></table></figure>
+<p> 以上编码得到16位的16进制编码，类似这张图像的低级特征指纹。</p>
+<p> Hamming距离：两个等长字符串，在对应位置的不同字符的个数</p>
+<ul>
+<li>如果不同字符数不超过5，说明近似</li>
+<li>如果大于10，说明不同</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/02/Faiss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/03/02/Faiss/" itemprop="url">Faiss</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-02T10:55:52+08:00">
+                2022-03-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/03/02/Faiss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/02/Faiss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Faiss-A-library-for-efficient-similarity-search"><a href="#Faiss-A-library-for-efficient-similarity-search" class="headerlink" title="Faiss: A library for efficient similarity search"></a>Faiss: A library for efficient similarity search</h2><ol>
+<li><p>official site：</p>
+<p> 主页：<a href="https://ai.facebook.com/tools/faiss/" target="_blank" rel="noopener">https://ai.facebook.com/tools/faiss/</a></p>
+<p> repo/wiki：<a href="https://github.com/facebookresearch/faiss" target="_blank" rel="noopener">https://github.com/facebookresearch/faiss</a></p>
+</li>
+<li></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -916,7 +1760,10 @@
       
         
           
-            <p>Google，rwightman，这些个点其实原论文都提到过了</p>
+            <p>炼丹大法：</p>
+<p>[Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了</p>
+<p>[Google 2022] Model soups: averaging weights of multiple fine-tuned models improves accuracy without increasing inference time，多个模型权重做平均</p>
+<p>[Facebook DeiT 2021] Training data-efficient image transformers &amp; distillation through attention，常规技巧大全</p>
 <h2 id="How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><a href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers" class="headerlink" title="How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers"></a>How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -996,22 +1843,22 @@
 </li>
 <li><p>结论</p>
 <ul>
-<li><p>Scaling datasets with AugReg and compute</p>
+<li><p>Scaling datasets with AugReg and compute：加大数据量，加强aug&amp;reg</p>
 <ul>
 <li><p>proper的AugReg和10x的数据量都能引导模型精度提升，而且是差不多的水平</p>
 <p><img src="/2022/01/20/how-to-train-ViT/f1.png" width="40%;"></p>
 </li>
 </ul>
 </li>
-<li><p>Transfer is the better option</p>
+<li><p>Transfer is the better option：永远用预权重去transfer，尤其大模型</p>
 <ul>
 <li>在数据量有限的情况下，train from scratch基本上不能追上transfer learning的精度</li>
 </ul>
 <p><img src="/2022/01/20/how-to-train-ViT/f2.png" width="40%;"></p>
 </li>
-<li><p>More data yields more generic models</p>
+<li><p>More data yields more generic models：加大数据，越大范化性越好</p>
 </li>
-<li><p>Prefer augmentation to regularization</p>
+<li><p>Prefer augmentation to regularization：非要比的话aug &gt; reg，成年人两个都要</p>
 <ul>
 <li>for mid-size dataset like ImageNet-1k any kind of AugReg helps</li>
 <li>for a larger dataset like ImageNet-21k regularization almost hurts，但是aug始终有用</li>
@@ -1020,9 +1867,133 @@
 </li>
 <li><p>Choosing which pre-trained model to transfer</p>
 </li>
-<li>Prefer increasing patch-size to shrinking model-size<ul>
+<li>Prefer increasing patch-size to shrinking model-size：显存有限情况下优先加大patch size<ul>
 <li>相似的计算时间，Ti-16要比S-32差</li>
 <li>因为patch-size只影响计算量，而model-size影响了参数量，直接影响模型性能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Training-data-efficient-image-transformers-amp-distillation-through-attention"><a href="#Training-data-efficient-image-transformers-amp-distillation-through-attention" class="headerlink" title="Training data-efficient image transformers &amp; distillation through attention"></a>Training data-efficient image transformers &amp; distillation through attention</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>大数据+大模型的高精度模型不是谁都负担得起的</li>
+<li>we produce competitive model<ul>
+<li>use Imagenet only</li>
+<li>on single computer，8-gpu</li>
+<li>less than 3 days，53 hours pretraining + 20 hours finetuning</li>
+<li>模型：86M，top-1 83.1%</li>
+<li>脸厂接地气！！！</li>
+</ul>
+</li>
+<li>we also propose a tranformer-specific teacher-student strategy<ul>
+<li>token-based distillation</li>
+<li>use a convnet as teacher</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>本文就是在探索训练transformer的hyper-parameters、各种训练技巧</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit.png" width="50%;"></p>
+</li>
+<li><p>Knowledge Distillation (KD)</p>
+<ul>
+<li>本文主要关注teacher-student</li>
+<li>用teacher生成的softmax结果（soft label）去训练学生，相当于用student蒸馏teacher</li>
+</ul>
+</li>
+<li>the class token<ul>
+<li>a trainable vector</li>
+<li>和patch token接在一起</li>
+<li>然后接transformer layers</li>
+<li>然后 projected with a linear layer to predict the class</li>
+<li>这种结构force self-attention在patch token和class token之间进行信息交换</li>
+<li>因为class token是唯一的监督信息，而patch token是唯一的输入变量</li>
+</ul>
+</li>
+<li>contributions<ul>
+<li>scaling down models：DeiT-S和DeiT-Ti，向下挑战resnet50和resnet18</li>
+<li>introduce a new distillation procedure based on a distillation token，类似class token的角色</li>
+<li>特殊的distillation机制使得transformer相比较于从同类结构更能从convnet上学到更多</li>
+<li>well transfer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>首先假设我们有了一个strong teacher，我们的任务是通过exploiting the teacher来训练一个高质量的transformer</p>
+</li>
+<li><p>Soft distillation</p>
+<ul>
+<li>teacher的softmax logits不直接做标签，而是计算两个KL divergence</li>
+<li><p>CE + KL loss</p>
+<p><img src="/2022/01/20/how-to-train-ViT/Soft distillation.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Hard-label distillation</p>
+<ul>
+<li>就直接用作label</li>
+<li><p>CE + CE</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hard distillation.png" width="80%;"></p>
+</li>
+<li><p>实验发现hard比soft结果好</p>
+</li>
+</ul>
+</li>
+<li><p>Distillation token</p>
+<ul>
+<li>在token list上再添加一个new token</li>
+<li>跟class token的工作任务一样</li>
+<li>distillation token的优化目标是上述loss的distillation component</li>
+<li>与class token相辅相成</li>
+<li><p>作为对比，也尝试了用原本的CE loss训练两个独立的class token，发现这样最终两个class token的cosine similarity高度接近1，说明额外的class token没有带来有用的东西，但是class token和distillation token的相似度最多也就0.93，说明distillation branch给模型add something，【难道不是因为target不同所以才不同吗？？？】</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit1.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Fine-tuning with distillation</p>
+<ul>
+<li>finetuning阶段用teacher label还是ground truth label？</li>
+<li>实验结果是teacher label好一点</li>
+</ul>
+</li>
+<li><p>Joint classifiers</p>
+<ul>
+<li>两个softmax head相加</li>
+<li>然后make the prediction</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training details &amp; ablation</p>
+<ul>
+<li><p>Initialization</p>
+<ul>
+<li>Transformers are highly sensitive to initialization，可能会导致不收敛</li>
+<li>推荐是weights用truncated normal distribution</li>
+</ul>
+</li>
+<li><p>Data-Augmentation</p>
+<ul>
+<li>Auto-Augment, Rand-Augment, random erasing, Mixup等等</li>
+<li>transformers require a strong data augmentation：几乎都有用</li>
+<li><p>除了Dropout：所以我们把Dropout置零了</p>
+<p><img src="/2022/01/20/how-to-train-ViT/training details.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Optimizers &amp; Regularization</p>
+<ul>
+<li>AdamW</li>
+<li>和ViT一样的learning rate</li>
+<li><p>但是much smaller weight decay：发现weight decay会hurt convergence</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hyper.png" width="60%;"></p>
+</li>
 </ul>
 </li>
 </ul>
@@ -1387,11 +2358,30 @@
 </li>
 </ul>
 <ul>
+<li>目前检测架构的几个霸榜算法<ul>
+<li>DETR系列end-to-end</li>
+<li>Swin放在传统二阶段架构里面</li>
+<li>YOLO</li>
+<li>tricks加持：multi-scale、TTA、self-training、cascade、GIoU</li>
+</ul>
+</li>
+</ul>
+<ul>
 <li><p>papers    </p>
 <p>  [DETR 2020] End-to-End Object Detection with Transformers：Facebook，首个端到端检测架构，无需nms等后处理，难优化，MSA的显存/计算量</p>
 <p>  [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，主要是swin-back的建模能力强，放在啥框架里都很行</p>
 <p>  [deformable DETR 2021] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤，将MSA卷积话，解决transformer的high-resolution困境</p>
 <p>  [anchor DETR 2022] Anchor DETR: Query Design for Transformer-Based Object Detection：旷视，new query design，也是针对attention结构的变种（cross-attention），精度更高，显存更少，速度更快，收敛更快</p>
+<p>  [DDQ 2022] What Are Expected Queries in End-to-End Object Detection?  商汤，基于DETR，讨论新的dense queries</p>
+</li>
+</ul>
+<ul>
+<li><p>repo</p>
+<p>  <a href="https://github.com/facebookresearch/detr" target="_blank" rel="noopener">https://github.com/facebookresearch/detr</a></p>
+<p>  <a href="https://github.com/facebookresearch/3detr，3D版本" target="_blank" rel="noopener">https://github.com/facebookresearch/3detr，3D版本</a></p>
+<p>  <a href="https://github.com/fundamentalvision/Deformable-DETR" target="_blank" rel="noopener">https://github.com/fundamentalvision/Deformable-DETR</a></p>
+<p>  <a href="https://github.com/megvii-research/AnchorDETR" target="_blank" rel="noopener">https://github.com/megvii-research/AnchorDETR</a></p>
+<p>  <a href="https://github.com/jshilong/DDQ，暂时没开源代码，只有主页" target="_blank" rel="noopener">https://github.com/jshilong/DDQ，暂时没开源代码，只有主页</a></p>
 </li>
 </ul>
 <h2 id="Swin-details-for-object-detection"><a href="#Swin-details-for-object-detection" class="headerlink" title="Swin details for object detection"></a>Swin details for object detection</h2><ol>
@@ -1639,7 +2629,7 @@
 <ul>
 <li>module的输入和输出都是same resolution的feature maps</li>
 <li>add a scale-level embedding $e_l$：用来指示输入的query pixel来自哪个scale level，但是它是随机初始化的，然后随着网络训练【？？？】</li>
-<li>query是pixels，reference points就是它自身</li>
+<li>query是pixels，reference points就是它自身：代码里是query embed + fc来实现</li>
 </ul>
 </li>
 </ul>
@@ -1960,9 +2950,9 @@
 <p>[swin V2] Swin Transformer V2: Scaling Up Capacity and Resolution：卷死了卷死了，同年就上V2，</p>
 <p>[PVT 2021] Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions，商汤，也是金字塔形结构，引入reduction ratio来降低computation cost</p>
 <p>[Twins 2021] Twins: Revisiting the Design of Spatial Attention in Vision Transformers，美团</p>
+<p>[MiT 2021] SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers，是一篇语义分割的paper里面，提出了a family of Mix Transformer encoders (MiT)，based on PVT，引入reduction ratio对K降维，起到计算量线性增长的效果</p>
 <h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ul>
-<li><p>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：</p>
-<ul>
+<li>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：<ul>
 <li>input embedding：absolute PE 替换成 relative PE</li>
 <li>basic stage<ul>
 <li>basic swin block：W-MSA &amp; SW-MSA</li>
@@ -1991,18 +2981,45 @@
 <li>linear project：增加表征复杂度</li>
 </ul>
 </li>
-<li><p>masking</p>
-<ul>
+<li>masking<ul>
 <li>used in decoder inputs</li>
 <li>decoder inputs query只计算它之前出现的keys的attention：将其之后的similarity value置为-inf，这样weights就无限接近0了</li>
 </ul>
 </li>
-<li><p>3类regularization：</p>
-<ul>
+<li>3类regularization：<ul>
 <li>Residual dropout：在每个residual path上面都增加了residual dropout</li>
 <li>PE dropout：在输入的PE embedding之后添加dropout</li>
 <li>adds dropout：在每个residual block的sums之后添加dropout</li>
 <li>$P_{drop}=0.1$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li><p>pretraning：</p>
+<ul>
+<li>AdamW：weight decay=0.01</li>
+<li>learning rate：linear decay，5-epoch warm-up，initial=0.001</li>
+<li>batch size：4096</li>
+<li>epochs：60</li>
+<li>an increasing degree of stochastic depth：0.2、0.3、0.5 for Swin-T, Swin-S, and Swin-B</li>
+</ul>
+</li>
+<li><p>finetuning：</p>
+<ul>
+<li>on larger resolution</li>
+<li>batch size：1024</li>
+<li>epochs：30</li>
+<li>a constant learning rate of 1e−5</li>
+<li>a weight decay of 1e−8</li>
+<li>the stochastic depth ratio to 0.1</li>
+</ul>
+</li>
+<li><p>weights transfer </p>
+<ul>
+<li>different resolution：swin是window-based的，resolution的改变不直接影响权重</li>
+<li>different window size：relative position bias需要插值到对应的window size，bi-cubic</li>
 </ul>
 </li>
 </ul>
@@ -2193,1726 +3210,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/11/18/seg-transformers/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/11/18/seg-transformers/" itemprop="url">seg-transformers</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-18T15:55:22+08:00">
-                2021-11-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/11/18/seg-transformers/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/11/18/seg-transformers/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前那篇《transformers》太长了，新开一个分割方向的专题，papers：</p>
-<p>——————————previous—————————-</p>
-<ul>
-<li><p>[SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transformer</p>
-</li>
-<li><p>[UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达，直接使用transformer encoder做unet encoder</p>
-</li>
-<li><p>[TransUNet 2021] TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation，encoder stream里面加transformer block</p>
-</li>
-<li><p>[TransFuse 2021] TransFuse: Fusing Transformers and CNNs for Medical Image Segmentation，大学，CNN feature和Transformer feature进行bifusion</p>
-</li>
-</ul>
-<p>———————————-new———————————-</p>
-<ul>
-<li>[Swin-Unet 2021] Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation，TUM，2D的Unet-like pure transformer，用swin做encoder，和与其对称的decoder</li>
-<li>[nnFormer 2021] nnFormer: Interleaved Transformer for Volumetric Segmentation，港大，对标nn-Unet，3D版本的Swin-Unet，完全就是照着上一篇写的</li>
-<li>[UPerNet 2018] Unified Perceptual Parsing for Scene Understanding，PKU&amp;字节，Swin Segmentaion的补充材料，Swin的down-stream task选择用UperNet as base framework</li>
-<li>[SegFormer 2021] SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers，港大&amp;英伟达，参照FCN范式的(CNN+FPN+seg head)，设计了swin+MLP decoder的全linear网络，用于分割</li>
-</ul>
-<h2 id="Swin-Transformer-for-Semantic-Segmentaion"><a href="#Swin-Transformer-for-Semantic-Segmentaion" class="headerlink" title="Swin Transformer for Semantic Segmentaion"></a>Swin Transformer for Semantic Segmentaion</h2><p>补充Swin paper附录里面关于分割的描述：</p>
-<ul>
-<li>dataset：<ul>
-<li>ADE20K：semantic segmentation</li>
-<li>150 categories</li>
-<li>25K/20K/2K/3K for total/train/val/test</li>
-<li>UperNet as base framework</li>
-</ul>
-</li>
-<li>benchmark：<a href="https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision" target="_blank" rel="noopener">https://paperswithcode.com/sota/semantic-segmentation-on-ade20k?p=swin-transformer-hierarchical-vision</a></li>
-</ul>
-<h2 id="nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation"><a href="#nnFormer-Interleaved-Transformer-for-Volumetric-Segmentation" class="headerlink" title="nnFormer: Interleaved Transformer for Volumetric Segmentation"></a>nnFormer: Interleaved Transformer for Volumetric Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>用transformer的ability to exploit long-term dependencies，去弥补卷积神经网络先天的spatial inductive bias</li>
-<li>recently transformer-based approaches<ul>
-<li>将transformer作为一个辅助模块，用于编码global context</li>
-<li>没有将transformer最核心的，self-attention，有效的整合进CNN</li>
-</ul>
-</li>
-<li>nnFormer：not-another transFormer<ul>
-<li>volume-based self-attention，极大降低计算量</li>
-<li>打败了Swin-Unet和nnUnet</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>Transformers</p>
-<ul>
-<li>self-attention</li>
-<li>capture long-range dependencies</li>
-<li>give predictions more consisitent with humans</li>
-</ul>
-</li>
-<li><p>previous approaches</p>
-<ul>
-<li>TransUNet：Unet结构类似，CNN提取特征，再接一个transformer辅助编码全局信息，但是一两层的transformer layer并不足以提取到这种长距离约束</li>
-<li>Swin-UNet：有了appropriate的下采样方法，transformer能够学习hierarchical object concepts at different scales，但它是一个纯transformer的结构，用hierarchical的transformer block构造encoder和decoder，整体也是Unet结构，没有探索如何将卷积和self-attention有机结合</li>
-</ul>
-</li>
-<li><p>nnFormer contributions</p>
-<ul>
-<li><p>hybrid stem：卷积和self-attention都用上了，并且都能充分发挥能力，他的encoder：</p>
-<ul>
-<li>首先是一个轻量的conv embedding layer，好处是卷积能够提供更precise的spatial information，</li>
-<li><p>然后是交替的transformer blocks和convolutional down-sampling blocks，capture long-term dependencies at various scales</p>
-<p><img src="/2021/11/18/seg-transformers/encoder.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>V-MSA：volume-based multi-head self-attention</p>
-<ul>
-<li>a computational-efficient way to capture inter-slice dependencies</li>
-<li>计算复杂度降低90%以上</li>
-<li>应该就是类似于swin那种inter-patch &amp; inter-patch吧？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li><p>U-net结构：</p>
-<ul>
-<li>embedding block + encoder + decoder + patch expanding block</li>
-<li>三次下采样 &amp; 三次上采样</li>
-<li>long residual connections</li>
-</ul>
-<p><img src="/2021/11/18/seg-transformers/overview.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>encoder</p>
-<ul>
-<li><p>input：3D patch $X \in R^{H \times W \times D}$</p>
-</li>
-<li><p>embedding block</p>
-<ul>
-<li>将3D patch转化成patch tokens，$X_e \in R^{\frac{H}{4}\frac{W}{4}\frac{D}{2}C}$，代表的是high-resolution spatial information</li>
-<li>$\frac{H}{4}\frac{W}{4}\frac{D}{2}$是token个数</li>
-<li>C是tensor channel，192/96</li>
-<li>4个连续的kernel3x3的卷积层替代Swin里面的big kernel：小卷积核给出的解释是计算量&amp;感受野，没什么特别的，用卷积embedding给出的解释是pixel-level编码局部spatial信息，more precisely</li>
-<li><p>前三层卷积后面+GELU+LN，stride在1、3层，如图</p>
-<p><img src="/2021/11/18/seg-transformers/emb.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>transformer block</p>
-<ul>
-<li><p>hierarchical</p>
-</li>
-<li><p>compute self-attention within 3D local volumes (instead of 2D local windows)</p>
-</li>
-<li><p>input：tokens representation of 3D patch， $X_t \in R^{L \times C}$</p>
-</li>
-<li><p>首先reshape：对token sequence，再次划分local volume，$\tilde X_t \in R^{N_V \times N_T \times C}$</p>
-<ul>
-<li>local volume里面包含一组空间相邻的tokens</li>
-<li>$N_V$是volume的数目（类似Swin里面window的数目）</li>
-<li>$N_T=S_H \times S_W \times S_D$ 是每个local volumes里面token的个数，{4,4,4}/{5,5,3}</li>
-</ul>
-</li>
-<li><p>然后跟Swin一样，两个连续的transformer blocks，3D windows instead of 2D</p>
-<ul>
-<li>V-MSA：volume-based multi-head self-attention</li>
-<li><p>SV-MSA：shifted version</p>
-<p><img src="/2021/11/18/seg-transformers/transblock.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>反正就是3D版的swin，回去看swin更清晰</p>
-</li>
-</ul>
-</li>
-<li><p>down-sampling block</p>
-<ul>
-<li><p>就是strided conv，说是相比较于neighboring concatenation，能产生更hierarchical的representation，有助于learn at multi scales</p>
-<p><img src="/2021/11/18/seg-transformers/downsamp.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>decoder</p>
-<ul>
-<li>和encoder高度对称</li>
-<li>down-samp对标替换成strided deconvolution</li>
-<li>然后和encoder之间还有long-range connection，融合semantic和fine-grained information</li>
-<li><p>最后的expanding block也是用了deconv</p>
-<p><img src="/2021/11/18/seg-transformers/decoder.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation"><a href="#Swin-Unet-Unet-like-Pure-Transformer-for-Medical-Image-Segmentation" class="headerlink" title="Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation"></a>Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation</h2><ol>
-<li>动机<ul>
-<li>Unet-like pure Transformer<ul>
-<li>用Swin transformer做encoder</li>
-<li>对称的decoder，用patch expanding layer做上采样</li>
-</ul>
-</li>
-<li>outperforms full-convolution / combined methods</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>CNN的局限性<ul>
-<li>提取explicit global &amp; long-range information</li>
-<li>meanwhile Swin在各项任务上SOTA了</li>
-</ul>
-</li>
-<li>Swin-Unet<ul>
-<li>the first pure Transformer-based Unet-shaped architecture</li>
-<li>consists of encoder, bottleneck, decoder and skip connections</li>
-<li>token：non-overlapping patches split from the input image</li>
-<li>fed into encoder：得到context features</li>
-<li>fed into decoder：将global features再upsample回input resolution</li>
-<li>patch expanding layer：不用conv/interpolation，实现spatial和feature-dim的increase</li>
-<li>skip connection：对Transformer-based的Unet结构仍旧有效</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/11/18/seg-transformers/swinUnet.png" width="70%;"></p>
-<ul>
-<li>patch partition<ul>
-<li>将图像切分成不重叠的patches，patch size是4x4</li>
-<li>每个patch的feature dimension就是4x4x3=48，也就是48-dim vec</li>
-</ul>
-</li>
-<li>linear embedding<ul>
-<li>将固定的patch dimension映射到任意给定维度C</li>
-</ul>
-</li>
-<li>交替的Swin Transformer blocks和Patch Merging<ul>
-<li>generate hierarchical feature representations</li>
-<li>Swin Transformer block 是负责学feature representation的</li>
-<li>Patch Merging是负责维度变换（下采样/上采样）的</li>
-</ul>
-</li>
-<li>对称的decoder：交替的Swin Transformer blocks和Patch Expanding<ul>
-<li>Patch Expanding将相邻特征图拼接起来，组成2x大的特征图，同时减少特征维度</li>
-</ul>
-</li>
-<li>最后一个Patch Expanding layer则执行4倍上采样</li>
-</ul>
-</li>
-<li><p>Swin Transformer block</p>
-<ul>
-<li>based on shifted windows</li>
-<li>两个连续的Transformer block为一组</li>
-<li>每个block内部都是LN-MSA-LN-MLP，residual，GELU</li>
-<li>第一个block的MSA是W-MSA</li>
-<li><p>第二个block的MSA是SW-MSA</p>
-<p><img src="/2021/11/18/seg-transformers/swin block.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>encoder</p>
-<ul>
-<li>input：C-dim tokens，$\frac{H}{4} \times \frac{W}{4}$个tokens</li>
-<li>patch merging layer<ul>
-<li>将patches切分成2x2的4个parts</li>
-<li>然后将4个part在特征维度上concat</li>
-<li>然后接一个linear layer，将特征维度的dim转换为2C</li>
-<li>这样spatial resolution就downsampled by 2x</li>
-<li>特征维度加倍了2x</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>bottleneck</p>
-<ul>
-<li>encoder和decoder中间那个部分</li>
-<li>用了两个连续的Swin transformer block</li>
-<li>【QUESTION】也是shifited windows的吗？</li>
-<li>这个part特征维度不变</li>
-</ul>
-</li>
-<li><p>decoder</p>
-<ul>
-<li>patch expanding layer<ul>
-<li>given input features：$(\frac{W}{32} \times \frac{H}{32}\times 8C)$</li>
-<li>先是一个linear layer，加倍feature dim：$(\frac{W}{32} \times \frac{H}{32}\times 16C)$</li>
-<li>然后合并相邻4个patch tokens：$(\frac{W}{16} \times \frac{H}{16}\times 4C)$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>skip connection</p>
-<ul>
-<li>concat以后接一个linear layer，保持特征维度不变</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding"><a href="#UPerNet-Unified-Perceptual-Parsing-for-Scene-Understanding" class="headerlink" title="UPerNet: Unified Perceptual Parsing for Scene Understanding"></a>UPerNet: Unified Perceptual Parsing for Scene Understanding</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>人类对于图像的识别是存在多个层次的<ul>
-<li>scenes</li>
-<li>objects inside</li>
-<li>compositional parts</li>
-<li>textures and surfaces</li>
-</ul>
-</li>
-<li>our work<ul>
-<li>study a new task caled Unified Perceptual Parsing（UPP）：建立了一个“统一感知解析”的任务</li>
-<li>要求模型recognize as many visual concepts as possible</li>
-<li>propose a multi-task framework UPerNet &amp; a training strategy</li>
-</ul>
-</li>
-<li>repo：<a href="https://github.com/CSAILVision/unifiedparsing" target="_blank" rel="noopener">https://github.com/CSAILVision/unifiedparsing</a><ul>
-<li>semantic segmentation</li>
-<li>multi-task</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>various visual recognition tasks are mostly studied independently<ul>
-<li>过去的task总是将不同level的视觉信息分开研究</li>
-<li>is it possible for a neural network to solve several visual recognition tasks simultaneously? </li>
-</ul>
-</li>
-<li>thus we propose Unified Perceptual Parsing（UPP）task<ul>
-<li>有两个data issue</li>
-<li>no single dataset annotated with all levels of visual information</li>
-<li>不同perceptual levels的标注形式也不统一</li>
-</ul>
-</li>
-<li>thus we propose UPerNet<ul>
-<li>overcome the heterogeneity of different datasets</li>
-<li>learns to detect various visual concepts jointly</li>
-<li>主要实现方式是每个iteration只选取一种数据集，同时只更新相关网络层</li>
-</ul>
-</li>
-<li>we further propose a training method<ul>
-<li>enable the network to predict pixel-wise texture labels using only image-level annotations</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Defining Unified Perceptual Parsing</p>
-<ul>
-<li><p>统一感知解析：从一张图中获取各种维度的视觉信息</p>
-<ul>
-<li>scene labels</li>
-<li>objects</li>
-<li>parts of objects</li>
-<li>materials and textures of objects</li>
-</ul>
-</li>
-<li><p>datasets</p>
-<ul>
-<li><p>使用了Broadly and Densely Labeled Dataset：整合了好几个数据集，contains various visual concepts</p>
-</li>
-<li><p>Objects, object parts and materials are segmented down to pixel level while textures and scenes are annotated</p>
-<p>  at image level：目标、组成成分、材质是像素级标注，纹理和场景是图像级标注</p>
-<p>  <img src="/2021/11/18/seg-transformers/Broden+.png" width="60%;"></p>
-</li>
-<li><p>standardize调整</p>
-<ul>
-<li>data imabalance issue：丢掉一部分尾部数据</li>
-<li>merge across dataset：合并不同数据集的同类数据</li>
-<li>merge under-sampled labels：合并子类</li>
-</ul>
-</li>
-<li><p>our Broden+</p>
-<ul>
-<li>57, 095 images in total：51,617 training /5, 478 validation</li>
-<li><p>22, 210 images from ADE20K, 10, 103 images from Pascal-Context and Pascal-Part, 19, 142 images from Open- Surfaces and 5, 640 images from DTD</p>
-<p><img src="/2021/11/18/seg-transformers/datasets.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>metrics</p>
-<ul>
-<li>Pixel Accuracy (P.A.)：the proportion of correctly classified pixels</li>
-<li>mean IoU (mIoU)：目标前景的平均IoU，会影响bg分割的表现</li>
-<li>mIoU-bg：前景占比很小的时候，再加上bg IoU，object parts</li>
-<li>top-1 acc：图像级标注使用top1 acc，scene and texture classification</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Designing Networks for Unified Perceptual Parsing</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/11/18/seg-transformers/UPerNet.png" width="70%;"></p>
-<ul>
-<li>因为包含high/low level visual tasks，所以网络也是multi-level的：FPN with a PPM</li>
-<li>scene head是image-level classification label，直接接PPM的输出</li>
-<li>object and part heads是多尺度的，使用FPN fusion的输出</li>
-<li>material head是细粒度任务，使用FPN的highest resolution featuremap的输出</li>
-<li>texture head是更加细粒度任务，接在backobne的Res-2 block后面，而且是在网络训练完其他任务以后再fine-tuning的</li>
-</ul>
-</li>
-<li><p>FPN</p>
-<ul>
-<li>multi-level feature</li>
-<li>use [top-down path + lateral connections] to fuse  high-level semantic information into middle &amp; low</li>
-<li>conv-BN-ReLU，channel = 512</li>
-<li></li>
-</ul>
-</li>
-<li><p>PPM</p>
-<ul>
-<li>from PSPNet</li>
-<li>用来解决CNN理论上感受野足够大，但实际上相当小这个问题</li>
-<li>相比较于用dilated methods去扩大感受野的方式，好处是down-sampling rate更大（还是x32），能够提取high-level semantics</li>
-</ul>
-</li>
-<li><p>ResNet</p>
-<ul>
-<li>使用每个stage的输出作为level feature map，{C2, C3,C4,C5}，x4-x32</li>
-<li>FPN的输出feature map，{P2, P3,P4,P5}，P5是PPM的输出</li>
-</ul>
-</li>
-<li><p>heads</p>
-<ul>
-<li>scene head：分类器，接PPM输出，global average pooling + linear layer</li>
-<li>object/parts head：实验发现使用fusion map表现好于P2，fusion map通过bilinear interpolating &amp; concat &amp; conv</li>
-<li>materials head：on top of P2 rather than fused features</li>
-<li>texture head：<ul>
-<li>texture label是图像级的，而且来自non-natural images</li>
-<li>directly fusing these images with other natural images is harmful to other tasks</li>
-<li>同时我们希望预测是pixel-level</li>
-<li>我们把它接在C2上，append several convolutional layers，感受野small enough，而且backbone layers不回传梯度，只更新head layers</li>
-<li>training images使用64x64的，确保模型只focus在local detail上</li>
-<li>only fine-tune a few epochs</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training settings</p>
-<ul>
-<li>poly learning rate，initial=0.2，power=0.9</li>
-<li>weight decay=1e-4，momentum=0.9</li>
-<li>training inputs：常用的目标检测rescale方法，随机将shorter side变成{300, 375, 450, 525, 600}</li>
-<li>inference inputs：使用fixed shorter side 450</li>
-<li>longer side &lt; 1200</li>
-<li>为了防止noisy gradient，每个mini-batch随机选一种data source，按照数据集大小采样，只梯度更新相关path的参数</li>
-<li>object and material segmentation计算前景loss</li>
-<li>part segmentation计算前景+背景</li>
-<li>on each GPU a mini-batch involves 2 images</li>
-<li>sync-SGD &amp; sync BN across 8 GPUs</li>
-<li>training iterations of ADE20k (20k images) is 100k，其他数据集对应rescale</li>
-</ul>
-</li>
-<li><p>Design discussion</p>
-<ul>
-<li>previous segmentation networks主要是FCN，用pretrained backbones搭配dilated convs，扩大感受野的同时维持比较大的resolution</li>
-<li>但是原始的backobne，通常在stage4/5的时候有比较多的层，如resnet101的res4&amp;res5就占了78层<ul>
-<li>改用dilated convs一是计算量memory飙升</li>
-<li>二是有违最初的设计逻辑，未必还能发挥出原始的效能</li>
-<li>第三就是不好兼顾本文任务的classification task</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers"><a href="#SegFormer-Simple-and-Efficient-Design-for-Semantic-Segmentation-with-Transformers" class="headerlink" title="SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers"></a>SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers</h2><ol>
-<li><p>repo: <a href="https://github.com/NVlabs/SegFormer" target="_blank" rel="noopener">https://github.com/NVlabs/SegFormer</a></p>
-</li>
-<li><p>动机</p>
-<ul>
-<li>propose a semantic segmentation framework SegFormer<ul>
-<li>simple, lightweight, efficient, powerful</li>
-<li>hierarchical transformer + MLP decoder</li>
-</ul>
-</li>
-<li><p>特点</p>
-<ul>
-<li>does not need positional encoding：在inference阶段切换图像分辨率不会引起性能变化</li>
-<li>avoids complex decoders：MLP decoder主要就是merge multi levels</li>
-</ul>
-</li>
-<li><p>scale up to obtain a family of models：SegFormer-B0 to SegFormer-B5</p>
-</li>
-<li><p>verified on </p>
-<ul>
-<li>SegFormer-B4：50.3% mIoU on ADE20K，SOTA</li>
-<li><p>SegFormer-B5：84.0% mIoU on Cityscapes</p>
-<p><img src="/2021/11/18/seg-transformers/segformer精度.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>SETR<ul>
-<li>ViT-back + several CNN decoders</li>
-<li>ViT主要是计算量 &amp; single-scale issue</li>
-<li>后续methods提出PVT、Swin、Twins等，主要focus在优化multi-scale的backbone，忽略了decoder的设计</li>
-</ul>
-</li>
-<li>this paper （SegFormer）<ul>
-<li>redesigns both the encoder and the decoder</li>
-<li>改进的Transformer encoder：hierarchical &amp; positional-encoding-free</li>
-<li>设计的all-MLP decoder：lightweight but powerful，设计的核心思想是 to take advantage of the Transformer-induced features where the attentions of lower layers tend to stay local, whereas the ones of the highest layers are highly non-local</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/11/18/seg-transformers/segformer.png" width="80%;"></p>
-<ul>
-<li>encoder：<ul>
-<li>使用了4x4的patch size，相比较于16x16的ViT，fine-grained patches is more preferred by semantic segmentation</li>
-<li>multi-level features：x4，x8，x16，x32</li>
-</ul>
-</li>
-<li>decoder<ul>
-<li>输入上述的multi-level features</li>
-<li>输出x4的segmentation mask</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Hierarchical Transformer Encoder</p>
-<ul>
-<li>We design a series of Mix Transformer encoders (MiT)：MiT-B0 to MiT-B5</li>
-<li>基于PVT的efficient self-attention module<ul>
-<li>针对原始attention block的平方时间复杂度</li>
-<li>use a reduction ratio R to reduce the length of sequence K：注意是改变K的长度，而不是Q</li>
-<li>given原始序列长度$N=HW$，feature dimensions $C$<ul>
-<li>先reshape：$\hat K = Reshape(\frac{N}{R},CR)(K)$</li>
-<li>再降维：$K=Linear(CR,C)(\hat K)$</li>
-</ul>
-</li>
-<li>计算量从O(N^2)下降到O(N^2/R)</li>
-<li>set R to [64, 16, 4, 1] from stage-1 to stage-4</li>
-</ul>
-</li>
-<li>同时提出了several novel designs<ul>
-<li>overlapped patch merging<ul>
-<li>本文的一个论点是ViT用non-overlapping patches去做patch merging，相邻patch之间没有保留local continuity，所以需要positional encoding</li>
-<li>所以use an overlapping patch merging process</li>
-<li>notations<ul>
-<li>patch size K=7/3</li>
-<li>stride S=4/2</li>
-<li>padding size P=3/1 (valid padding)</li>
-<li>patch merging操作仍旧通过卷积来实现</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>positional-encoding-free design <ul>
-<li>ViT修改resolution要同步interpolatePE，还是会引起掉点</li>
-<li>we introduce Mix-FFN<ul>
-<li>在FFN中夹了一个conv3x3</li>
-<li>sufficient to provide positional information</li>
-<li>甚至可以用depth-wise convolutions节省参数量</li>
-</ul>
-</li>
-<li>we argure that adding PE is not necessary in semantic segmentation</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Lightweight All-MLP Decoder</p>
-<ul>
-<li><p>idea是transformer有着远大于传统CNN的有效感受野，所以decoder可以轻量一点，不用再堆block</p>
-<p>  <img src="/2021/11/18/seg-transformers/erf.png" width="60%;"></p>
-</li>
-<li><p>4 main steps</p>
-<ul>
-<li>unify：multi-level的feature maps各自通过MLP layer to unify the channel dimension</li>
-<li>upsample：所有的features上采样到x4</li>
-<li>fuse：concat + MLP(实际代码里用了1x1conv-bn-relu)</li>
-<li><p>seg head：MLP，预测mask仍在x4尺度上</p>
-<p><img src="/2021/11/18/seg-transformers/all-mlp decoder.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/11/17/GRAPH-ATTENTION-NETWORKS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/11/17/GRAPH-ATTENTION-NETWORKS/" itemprop="url">GRAPH ATTENTION NETWORKS</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-17T16:25:29+08:00">
-                2021-11-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/11/17/GRAPH-ATTENTION-NETWORKS/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/11/17/GRAPH-ATTENTION-NETWORKS/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>official repo: <a href="https://github.com/PetarV-/GAT" target="_blank" rel="noopener">https://github.com/PetarV-/GAT</a></p>
-<p>reference: <a href="https://zhuanlan.zhihu.com/p/34232818" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/34232818</a></p>
-<ul>
-<li><strong>归纳学习（Inductive Learning）：</strong>先从训练样本中学习到一定的模式，然后利用其对测试样本进行预测（即首先从特殊到一般，然后再从一般到特殊），这类模型如常见的贝叶斯模型。</li>
-<li><strong>转导学习（Transductive Learning）：</strong>先观察特定的训练样本，然后对特定的测试样本做出预测（从特殊到特殊），这类模型如k近邻、SVM等。</li>
-</ul>
-<h2 id="GRAPH-ATTENTION-NETWORKS"><a href="#GRAPH-ATTENTION-NETWORKS" class="headerlink" title="GRAPH ATTENTION NETWORKS"></a>GRAPH ATTENTION NETWORKS</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>task：node classification</li>
-<li>在GCN基础上引入 masked self-attentional layers</li>
-<li>specify different weights to different nodes in a neighborhood，感觉是用attention矩阵替换邻接矩阵？</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>the attention architecture properties<ul>
-<li>parallelizable，计算高效</li>
-<li>can be applied to graph nodes having different degrees，这个邻接矩阵也可以啊</li>
-<li>directly applicable to inductive learning problems，是说原始GCN那种semi-supervised场景吗</li>
-<li>感觉后面两点有点牵强</li>
-</ul>
-</li>
-<li>GCN<ul>
-<li>可以避免复杂的矩阵运算</li>
-<li>但是依赖固定图结构，不能直接用于其他图</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>methods</p>
-<ul>
-<li><p>graph attentional layer</p>
-<ul>
-<li><p>input：node features</p>
-<ul>
-<li>N个节点，F-dim representation</li>
-<li>$h=\{\overrightarrow {h_1},\overrightarrow {h_2},…,\overrightarrow {h_N}  \}$，$\overrightarrow {h_i} \in R^F$</li>
-</ul>
-</li>
-<li><p>output：a new set of node features</p>
-<ul>
-<li>$h=\{\overrightarrow {h_1^{‘}},\overrightarrow {h_2^{‘}},…,\overrightarrow {h_N^{‘}}  \}$，$\overrightarrow {h_i} \in R^{F^{‘}}$</li>
-</ul>
-</li>
-<li><p>a weight matrix</p>
-<ul>
-<li>$W \in R^{F \times F^{‘}}$</li>
-<li>applied to every node</li>
-</ul>
-</li>
-<li><p>then self-attention</p>
-<ul>
-<li><p>compute attention coefficients：$e_{ij} = a(W\overrightarrow {h_i},W\overrightarrow {h_j})$</p>
-<ul>
-<li>attention mechanism a：是一个single-layer feedforward neural network + LeakyReLU(0.2)</li>
-<li>weight vector $\in R^{2F^{‘}}$</li>
-</ul>
-</li>
-<li><p>softmax norm</p>
-<p>  <img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/softmax.png" width="80%;"></p>
-</li>
-<li><p>overall expression</p>
-<ul>
-<li>两个feature vector concat到一起</li>
-<li>然后全连接层+LeakyReLU</li>
-<li><p>然后softmax</p>
-<p><img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/overall.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>表达的是节点j对节点i的重要性</p>
-</li>
-<li><p>masked attention：inject graph structure，只计算节点i的neighborhood的importance</p>
-</li>
-<li><p>neighborhood：the first-order neighbors</p>
-</li>
-<li><p>加权和 + nonlinearity</p>
-<p>  <img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/combine.png" width="80%;"></p>
-</li>
-<li><p>multi-head attention：</p>
-<ul>
-<li>trainable weights有多组，一个节点与其neighborhood的attention coefficients有多组</li>
-<li>最后每组weights计算出那个new node feature（加权平均+nonlinear unit），可以选择concat/avg，作为最终输出</li>
-<li><p>concat</p>
-<p><img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/multi.png" width="80%;"></p>
-</li>
-<li><p>如果是网络最后一层的MHA layer，先avg，再非线性激活函数：</p>
-<p><img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/avg.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>overall</p>
-<p>  <img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/layer.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>comparisons to related work</p>
-<ul>
-<li><p>our proposed GAT layer directly address several issues that were present in prior approaches</p>
-<ul>
-<li>computationally efficient，说是比矩阵操作高效，这个不懂</li>
-<li>assign different importance to nodes of a neighborhood，这个GCN with tranable adjacent matrix不也是一样性质的吗，不懂</li>
-<li>enable 有向图</li>
-<li>enable inductive learning，可以被直接用于解决归纳学习问题，即可以对从未见过的图结构进行处理，为啥可以不懂</li>
-</ul>
-</li>
-<li><p>数学表达上看，attention和adjacent matrix本质上都是用来建模graph edges的</p>
-<ul>
-<li>adj-trainable GCN：dag paper里面那种，adjacent matrix本身就是一个可训练变量(N,N)，随着训练更新参数</li>
-<li><p>GAT：attention的更新引入了新的线性层权重  $ W \in R^{2F^{‘}}$</p>
-<p><img src="/2021/11/17/GRAPH-ATTENTION-NETWORKS/math.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/10/27/GPT/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/10/27/GPT/" itemprop="url">GPT</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-27T14:10:20+08:00">
-                2021-10-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/10/27/GPT/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/10/27/GPT/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>GPT papers，openAI三部曲，通用预训练模型</p>
-<ul>
-<li>[2018 GPT-1] Improving Language Understanding by Generative Pre-Training：transformer-based，pre-training+task-specific finetuning，将所有的task的输入都整合成sequence-to-sequence form，结构上不需要task-specific architecture</li>
-<li>[2019 GPT-2] Language Models are Unsupervised Multitask Learners：对GPT-1结构上微调，引入huge dataset进行无监督训练</li>
-<li><p>[2020 GPT-3] Language models are few-shot learners：scaling up LMs，zero-shot</p>
-<p><img src="/2021/10/27/GPT/overview.png" width="55%;"></p>
-</li>
-<li><p>BERT有3亿参数</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="GPT-1-Improving-Language-Understanding-by-Generative-Pre-Training"><a href="#GPT-1-Improving-Language-Understanding-by-Generative-Pre-Training" class="headerlink" title="GPT-1: Improving Language Understanding by Generative Pre-Training"></a>GPT-1: Improving Language Understanding by Generative Pre-Training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>NLP tasks<ul>
-<li>textual entailment：文本蕴含</li>
-<li>question answering</li>
-<li>semantic similarity assessment</li>
-<li>document classification</li>
-</ul>
-</li>
-<li>labeled data少，unlabeled corpora充足</li>
-<li>large gains can be realized by<ul>
-<li>generative pre-training of a language model on diverse unlabeled corpus，无监督general model，learn universal representations</li>
-<li>discriminative fine-tuning on specific task，有监督task-specific model，adapt to wide range of tasks</li>
-</ul>
-</li>
-<li>general task-agnostic model能够打败discriminatively trained models</li>
-<li>use task-aware input transformations</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>learn from raw text &amp;alleviate the dependence on supervised learning still challenging：<ul>
-<li>不清楚选什么optmization objectives：language modeling/machine translation/discourse coherence</li>
-<li>effective way to transfer：加task-specific模型结构改动/auxiliary learning objectives/learning schemes</li>
-</ul>
-</li>
-<li>two-stage training procedure<ul>
-<li>pretrain + fine-tuning</li>
-<li>use Transformer：better handling long-term dependencies</li>
-<li>task-specific input adaptions将输入处理成structured词向量序列</li>
-</ul>
-</li>
-<li>evaluate on<ul>
-<li>natural language inference</li>
-<li>question answering</li>
-<li>semantic similarity</li>
-<li>text classification</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/10/27/GPT/GPT.png" width="25%;"></p>
-<ul>
-<li>architecture：transformer decoder</li>
-<li>training objectives<ul>
-<li>unsupervised：text prediction，前文预测后文</li>
-<li>supervised：task classifier，对整个序列分类</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Unsupervised pre-training</p>
-<ul>
-<li>given unsupervised corpus of tokens $U={u_1, …, u_n}$</li>
-<li>context window size $k$</li>
-<li>use standard language modeling objective：$L_1(U)=\sum log P(u_i|u_{i-k},…,u_{i-1};\Theta)$</li>
-<li>use multi-layer Transformer decoder<ul>
-<li>input：$h_0 = UW_e + W_p$</li>
-<li>attention blocks：$h_l = tranformer_block(h_{l-1}), \forall l\in[1,n]$</li>
-<li>output：$P(u)=softmax(h_l W_e^T)$</li>
-</ul>
-</li>
-<li>use SGD</li>
-</ul>
-</li>
-<li><p>Supervised fine-tuning</p>
-<ul>
-<li><p>given labeled dataset $C$ consists of $[x^1,…,x^m;y]$ instances</p>
-</li>
-<li><p>use the final transformer block’s activation $h_l^m$</p>
-</li>
-<li><p>fed into an linear+softmax output layer：$P(y|x^1,…,x^m)=softmax(h_l^mW_y)$</p>
-</li>
-<li><p>优化目标是y：$L_2(C) = \sum log(P(y|x^1,…,x^m))$</p>
-</li>
-<li><p>实验发现加上Unsupervised loss helps learning：提升泛化性，加速收敛</p>
-<script type="math/tex; mode=display">
-  L_3(C) = L_2(C) + \lambda * L_1(C)</script></li>
-</ul>
-</li>
-<li><p>Task-specific input transformations</p>
-<ul>
-<li>certain tasks has structured inputs如问答pairs/triplets</li>
-<li>we convert them into ordered sequences<ul>
-<li>Textual entailment：将前提premise和推理hypothesis concat在一起</li>
-<li>Similarity tasks：两个文本没有先后顺序关系，所以一对文本变成顺序交换的两个sequence，最后的hidden units $h^m_l$相加，然后接输出层</li>
-<li>Question Answering and Commonsense Reasoning：given document $z$, question $q$, and possible answers $\{a_k\}$，context $zq$和每个答案$a_i$都构造一组连接，然后分别independently processed with our model，最后共同接入一个softmax，生成对所有possible answers的概率分布</li>
-</ul>
-</li>
-<li>所有的连接都使用分隔符$</li>
-<li><p>所有的sequence的首尾都加上一个randomly initialized start&amp;end tokens</p>
-<p><img src="/2021/10/27/GPT/transformations.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="GPT-2-Language-Models-are-Unsupervised-Multitask-Learners"><a href="#GPT-2-Language-Models-are-Unsupervised-Multitask-Learners" class="headerlink" title="GPT-2: Language Models are Unsupervised Multitask Learners"></a>GPT-2: Language Models are Unsupervised Multitask Learners</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>more general models which can perform many tasks</li>
-<li>train language model<ul>
-<li>without explicit supervision</li>
-<li>trained on a new dataset of millions of webpages called WebText</li>
-<li>outperforms several baselines</li>
-</ul>
-</li>
-<li>GPT-2：a 1.5B parameter Transformer</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>Machine learning systems are sensitive to slight changes of<ul>
-<li>data distribution </li>
-<li>task specification</li>
-<li>‘narrow experts’</li>
-<li>lack of generalization since ingle task training on single domain datasets</li>
-</ul>
-</li>
-<li>methods<ul>
-<li>multitask training：还不成熟</li>
-<li>pretraining + finetuning：still require supervised training</li>
-</ul>
-</li>
-<li>this paper<ul>
-<li>connect the two lines above</li>
-<li>perform donw-stream tasks in a zero-shot setting</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>natural sequential characteristic makes the general formulation $p(output|input)$</p>
-<script type="math/tex; mode=display">
-  p(x) = \Pi_{i=1}^n p(s_{n-k}, ..., s_n|s_1, ..., s_{n-k-1})</script></li>
-<li><p>task specific system requires the probabilistic framework also condition on the task to be performed $p(output|input, task)$</p>
-<ul>
-<li>architectural level：task-specific encoders/decoders</li>
-<li>algorithmic level：like MAML</li>
-<li>or in a more flexible way to specify tasks：write all as sequences<ul>
-<li>translation：(translate to french, english text, french text)</li>
-<li>comprehension：(answer the question, document, question, answer)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training dataset</p>
-<ul>
-<li>海量document可以通过爬虫获得but significant data quality issues</li>
-<li>与target dataset similar的外部doc的子集能够给到提升</li>
-<li>因此本文设定了一个搜集文本的机制：Reddit的外链，去掉Wikipedia</li>
-</ul>
-</li>
-<li><p>input representation</p>
-<ul>
-<li><p>word-level language model VS byte-level language model</p>
-<ul>
-<li>word-level performs better</li>
-<li>但是受到vocabulary限制</li>
-</ul>
-</li>
-<li><p>Byte Pair Encoding (BPE)</p>
-<ul>
-<li><p>combine the empirical benefits of word-level LMs with the generality of byte-level approaches</p>
-</li>
-<li><p>具体改进还没理解</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>model</p>
-<ul>
-<li><p>Transformer-based，few modifications on GPT-1 model</p>
-<ul>
-<li>layer normalization was moved to the input of each sub-block</li>
-<li>additional layer normalization was added after the final self-attention block</li>
-<li>initialization on residual path：N个residual layers，就将residual weights rescale $\frac{1}{\sqrt{N}}$</li>
-<li>context size：1024</li>
-<li>batch size：512</li>
-</ul>
-</li>
-<li><p>residual block</p>
-<p>  <img src="/2021/10/27/GPT/GPT-2.png" width="30%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="GPT-3-Language-Models-are-Few-Shot-Learners"><a href="#GPT-3-Language-Models-are-Few-Shot-Learners" class="headerlink" title="GPT-3: Language Models are Few-Shot Learners"></a>GPT-3: Language Models are Few-Shot Learners</h2><ol>
-<li>动机<ul>
-<li>zero-shot：pretraining+finetuning scheme还是需要task-specific finetuning datset</li>
-<li>scale-up：scaling up language models greatly improves general few-shot performance</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/10/11/dag/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/10/11/dag/" itemprop="url">dag</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-11T12:14:00+08:00">
-                2021-10-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/10/11/dag/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/10/11/dag/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ul>
-<li>美研院的论文，检测，用于腰椎/髋关节关键点提取</li>
-<li>preparations<ol>
-<li>hrnet</li>
-<li>pspModule</li>
-</ol>
-</li>
-</ul>
-<h2 id="Structured-Landmark-Detection-via-Topology-Adapting-Deep-Graph-Learning"><a href="#Structured-Landmark-Detection-via-Topology-Adapting-Deep-Graph-Learning" class="headerlink" title="Structured Landmark Detection via Topology-Adapting Deep Graph Learning"></a>Structured Landmark Detection via Topology-Adapting Deep Graph Learning</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>landmark detection<ul>
-<li>特征点检测</li>
-<li>identify the locations of predefined fiducial points</li>
-<li>capture relationships among 解剖学特征点</li>
-</ul>
-</li>
-<li>一个难点：遮挡/复杂前景状态下，landmark的准确检测和定位——structual information</li>
-<li>the proposed method<ul>
-<li>用于facial and medical landmark detection</li>
-<li>topology-adapting：learnable connectivity</li>
-<li>learn end-to-end with two GCNs</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>heatmap regression based methods<ul>
-<li>将landmarks建模成heatmaps，然后回归</li>
-<li>lacking a global representation</li>
-<li>核心要素有bottom-up/top-down paths &amp; multi-scale fusions &amp; high resolution heatmap outputs</li>
-</ul>
-</li>
-<li>coordinate regression based methods<ul>
-<li>potentially incorporate structural knowledge but a lot yet to be explored</li>
-<li>falls behind heatmap-based ones</li>
-<li>核心要素是cascaded &amp; global &amp; local</li>
-<li>好处是结构化，不丢点，不多点，但是不一定准</li>
-</ul>
-</li>
-<li>graph methods<ul>
-<li>基于landmark locations和landmark-to-landmark-relationships构建图结构</li>
-<li>most methods relies on heatmap detection results</li>
-<li>we would directly regress landmark locations from raw input image</li>
-</ul>
-</li>
-<li>we propose<ul>
-<li>DAG：deep adaptive graph</li>
-<li>将landmarks建模成graph图</li>
-<li>employ global-to-local cascaded Graph Convolution Networks逐渐将landmark聚焦在目标位置</li>
-<li>graph signals combines<ul>
-<li>local image features</li>
-<li>graph shape features</li>
-</ul>
-</li>
-<li>cascade<ul>
-<li>two GCNs</li>
-<li>第一个预测一个global transform</li>
-<li>第二个预测local offsets to further adjust</li>
-</ul>
-</li>
-<li>contributions<ul>
-<li>effectively exploit the structural knowledge</li>
-<li>allow rich exchange among landmarks</li>
-<li>narrow the gap between coordinate &amp; heatmap based methods</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>the cascaded-regression framework</p>
-<ul>
-<li><p>input</p>
-<ul>
-<li>image</li>
-<li>initial landmarks from the mean shape</li>
-</ul>
-</li>
-<li><p>outputs</p>
-<ul>
-<li>predicted landmark coordinates in multiple steps</li>
-</ul>
-</li>
-<li><p>feature</p>
-<ul>
-<li>use graph representation</li>
-<li>G = (V,E,F)<ul>
-<li>V是节点，代表landmarks，也就是特征点，表示为(x,y)的坐标</li>
-<li>E是边，代表connectivity between landmarks，表示为(id_i, id_k)的无向/有向映射，整体的E matrix是个稀疏矩阵</li>
-<li>F是graph signals，capturing appearance and shape information，表示为高维向量，如256-dim vec，与节点V一一对应，用于储存节点信息，在GCN中实际进行计算交互</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>overview</p>
-<p>  <img src="/2021/10/11/dag/overview.png" width="60%;"></p>
-<ul>
-<li>summary<ul>
-<li>cascade：一个GCN-global做粗定位，迭代多个GCN-local做precise定位</li>
-<li>interpolation：feature map到feature nodes的转换，通过interpolation，【是global interp吗，是基于initial mean coords吗】</li>
-<li>regression：【targets的具体坐标表示？？？】</li>
-<li>inital graph：训练集的平均值</li>
-<li>graph signal：visual feature和shape feature</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Cascaded GCNs</p>
-<ul>
-<li><p>GCN-global：global transformation</p>
-</li>
-<li><p>GCN-local：coordinate offsets</p>
-</li>
-<li><p>share the same GCN architecture</p>
-</li>
-<li><p>graph convolution</p>
-<ul>
-<li><p>核心思想就是：给定一个图结构（with connectivity E），每一次堆叠graph convolution，就是在对每个图节点，基于其自身$f_k^i$和邻居节点$f_k^j$的当前graph feature，weighted aggregating，结果作为这个节点这次图卷积的输出$f_{k+1}^i$</p>
-<script type="math/tex; mode=display">
-  f_{k+1}^i = W_1 f_k^i + \sum_j e_{ij}W_2 f_k^j</script></li>
-<li><p>learnable weight matrices $W_1$ 和 $W_2$</p>
-</li>
-<li><p>可以看作是邻居节点间信息交互的一种方式</p>
-</li>
-</ul>
-</li>
-<li><p>Global Transformation GCN</p>
-<ul>
-<li><p>这个model的作用是将initial landmarks变换到coarse targets</p>
-</li>
-<li><p>参照STN，</p>
-<ul>
-<li><p>recall STN</p>
-<p>  <img src="/2021/10/11/dag/spacial transformer.png" width="70%;"></p>
-</li>
-<li><p>使用perspective transformation透视变换，引入9个scalars，进行图形变</p>
-<p><img src="/2021/10/11/dag/transformation.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>workflow</p>
-<ul>
-<li>given a target image</li>
-<li>initialize landmark locations $V^0$ using trainingset mean</li>
-<li>GCN-global + GIN 预测perspective transformation</li>
-<li>进而得到变换后的节点位置</li>
-</ul>
-</li>
-<li><p>graph isomorphism network (GIN)</p>
-<ul>
-<li><p>图的线性层</p>
-</li>
-<li><p>输入是GCN-global的graph features $\{f_k^i\}$</p>
-</li>
-<li><p>输出是9-dim vector</p>
-</li>
-<li><p>计算方式</p>
-<p>  <img src="/2021/10/11/dag/GIN.png" width="60%;"></p>
-<ul>
-<li>READOUT：sum the features from all nodes</li>
-<li>CONCAT：得到一个高维向量</li>
-<li>MLP：9-dim fc</li>
-<li>最后得到9-dim的perspective transformation scalar</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>coordinate update</p>
-<ul>
-<li>将9-dim $f^G$ reshape成3x3 transformation matrix M</li>
-<li><p>然后在当前的landmark locations $V^0$上施加变换——矩阵左乘</p>
-<p><img src="/2021/10/11/dag/update1.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Local Refinement GCN</p>
-<ul>
-<li><p>GCN结构与global的一致，但是不share权重</p>
-</li>
-<li><p>最后的GIN头变了</p>
-<ul>
-<li>输出改成2-dim vector</li>
-<li>represents coordinate offsets</li>
-</ul>
-</li>
-<li><p>coordinate update</p>
-<ul>
-<li><p>加法，分别在x/y轴坐标上</p>
-<p><img src="/2021/10/11/dag/update2.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>we perform T=3 iterations</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Graph signal with appearance and shape information</p>
-<ul>
-<li>Visual Feature<ul>
-<li>denote CNN输出的feature map H with D channels</li>
-<li>encoding整个feature map：bi-linear interpolation at the landmark location $v_i$，记作$p_i$，是个D-dim vector</li>
-</ul>
-</li>
-<li>Shape Feature<ul>
-<li>visual feature对节点间关系的建模，基于global map全局信息提取，比较隐式、间接</li>
-<li>事实上图结构能够直接对global landmarks shape进行encoding</li>
-<li>本文用displacement vectors，就是距离，每个节点的displacement vector记作$q_i=\{v_j-v_i\}_{j!=i}$，flatten成一维，对有N个节点的图，每个节点的q-vec维度为2*(N-1)</li>
-<li>shape feature保存了structural information，当人脸的嘴被遮住的情况下，基于眼睛和鼻子以及结构性信息，就能够推断嘴的位置，这是Visual Feature不能直接表达的</li>
-</ul>
-</li>
-<li>graph signal<ul>
-<li>concat</li>
-<li>result in a feature vector $f_i \in R^{D+2(N-1)}$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Landmark graph with learnable connectivity</p>
-<ul>
-<li>大多数方法的图基于先验知识构建</li>
-<li>we learn task-specific graph connectivity during training phase</li>
-<li>图的connectivity serves as a gate，用邻接矩阵表示，并将其作为learnable weights</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li><p>GCN-global</p>
-<ul>
-<li><p>margin loss</p>
-<p>  <img src="/2021/10/11/dag/margin.png" width="60%;"></p>
-</li>
-<li><p>$v_i^1$是GCN-global的预测节点坐标</p>
-</li>
-<li><p>m是margin</p>
-</li>
-<li><p>$[u]_+$是$max(0,u)$</p>
-</li>
-<li><p>push节点坐标到比较接近ground truth就停止了，防止不稳定</p>
-</li>
-</ul>
-</li>
-<li><p>GCN-local</p>
-<ul>
-<li><p>L1 loss</p>
-<p>  <img src="/2021/10/11/dag/l1.png" width="60%;"></p>
-</li>
-<li><p>$v_i^T$是第T个iteration GCN-local的预测节点坐标</p>
-</li>
-</ul>
-</li>
-<li><p>overall loss</p>
-<ul>
-<li>加权和</li>
-<li><img src="/2021/10/11/dag/overall.png" width="60%;"></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>网络结构</p>
-<ul>
-<li>GCN-global<ul>
-<li>三层basic graph convolution layer with residual（id path）</li>
-<li>concat distance vector</li>
-<li>一层basic graph convolution</li>
-<li>mean axis1（node axis）</li>
-<li>fc，输出9-dim scalar，(b,9)</li>
-</ul>
-</li>
-<li>GCN-local<ul>
-<li>三层basic graph convolution layer with residual（id path）</li>
-<li>relu</li>
-<li>concat distance vector</li>
-<li>一层basic graph convolution</li>
-<li>fc，输出2-dim coords for each node，(b,24,2)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3967,7 +3264,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3980,7 +3277,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

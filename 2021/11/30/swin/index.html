@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/30/swin/cmp.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/30/swin/linear.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/30/swin/log.png">
-<meta property="og:updated_time" content="2022-06-10T02:52:21.705Z">
+<meta property="og:updated_time" content="2022-06-20T02:54:54.567Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="swin">
 <meta name="twitter:description" content="papers  [swin] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，multi-level features，window-based [swin V2] Swin Transformer V2: Scaling Up Capacity and Resolution：卷死了卷死了，同年">
@@ -367,9 +367,9 @@
 <p>[swin V2] Swin Transformer V2: Scaling Up Capacity and Resolution：卷死了卷死了，同年就上V2，</p>
 <p>[PVT 2021] Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions，商汤，也是金字塔形结构，引入reduction ratio来降低computation cost</p>
 <p>[Twins 2021] Twins: Revisiting the Design of Spatial Attention in Vision Transformers，美团</p>
+<p>[MiT 2021] SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers，是一篇语义分割的paper里面，提出了a family of Mix Transformer encoders (MiT)，based on PVT，引入reduction ratio对K降维，起到计算量线性增长的效果</p>
 <h2 id="Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#Swin-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="Swin Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ul>
-<li><p>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：</p>
-<ul>
+<li>swin V1的paper note在：<a href="https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look">https://amberzzzz.github.io/2021/01/18/transformers/，我们简单look</a> back：<ul>
 <li>input embedding：absolute PE 替换成 relative PE</li>
 <li>basic stage<ul>
 <li>basic swin block：W-MSA &amp; SW-MSA</li>
@@ -398,18 +398,45 @@
 <li>linear project：增加表征复杂度</li>
 </ul>
 </li>
-<li><p>masking</p>
-<ul>
+<li>masking<ul>
 <li>used in decoder inputs</li>
 <li>decoder inputs query只计算它之前出现的keys的attention：将其之后的similarity value置为-inf，这样weights就无限接近0了</li>
 </ul>
 </li>
-<li><p>3类regularization：</p>
-<ul>
+<li>3类regularization：<ul>
 <li>Residual dropout：在每个residual path上面都增加了residual dropout</li>
 <li>PE dropout：在输入的PE embedding之后添加dropout</li>
 <li>adds dropout：在每个residual block的sums之后添加dropout</li>
 <li>$P_{drop}=0.1$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li><p>pretraning：</p>
+<ul>
+<li>AdamW：weight decay=0.01</li>
+<li>learning rate：linear decay，5-epoch warm-up，initial=0.001</li>
+<li>batch size：4096</li>
+<li>epochs：60</li>
+<li>an increasing degree of stochastic depth：0.2、0.3、0.5 for Swin-T, Swin-S, and Swin-B</li>
+</ul>
+</li>
+<li><p>finetuning：</p>
+<ul>
+<li>on larger resolution</li>
+<li>batch size：1024</li>
+<li>epochs：30</li>
+<li>a constant learning rate of 1e−5</li>
+<li>a weight decay of 1e−8</li>
+<li>the stochastic depth ratio to 0.1</li>
+</ul>
+</li>
+<li><p>weights transfer </p>
+<ul>
+<li>different resolution：swin是window-based的，resolution的改变不直接影响权重</li>
+<li>different window size：relative position bias需要插值到对应的window size，bi-cubic</li>
 </ul>
 </li>
 </ul>
@@ -691,7 +718,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -704,7 +731,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

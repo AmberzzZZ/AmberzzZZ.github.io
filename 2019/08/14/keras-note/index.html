@@ -88,7 +88,7 @@
 <meta property="og:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/08/14/keras-note/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/keras-note/slice.png">
-<meta property="og:updated_time" content="2022-04-25T08:38:50.155Z">
+<meta property="og:updated_time" content="2022-06-14T06:46:09.499Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="keras note">
 <meta name="twitter:description" content="1. keras Lambda自定义层官方文档：将任意表达式(function)封装为 Layer 对象。1keras.layers.Lambda(function, output_shape=None, mask=None, arguments=None)  function: 需要封装的函数。 将输入张量作为第一个参数。 output_shape: 预期的函数输出尺寸。(使用 TensorFl">
@@ -691,6 +691,42 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
 <p>axis表示mask的起始维度，被mask的维度只保留mask为True的数据，同时这部分数据flatten成一维，最终tensor的维度是N-K+1</p>
 <p>栗子：yolov3里面，把特征图上有object的grid提取出来：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># y_trues: [b,h,w,a,4]</span></span><br><span class="line"><span class="comment"># conf_gt: [b,h,w,a,1]</span></span><br><span class="line">true_box = tf.boolean_mask(y_trues[i][b,...,<span class="number">0</span>:<span class="number">4</span>], conf_gt[b,...,<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>8.7 tf.clip</p>
+<p>梯度阶段，用来在optmizer之前修正梯度，主要有以下4个方法：</p>
+<p>— tf.clip_by_value</p>
+<p>— tf.clip_by_norm</p>
+<p>— tf.clip_by_global_norm</p>
+<p>— tf.clip_by_average_norm</p>
+<ul>
+<li>tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>t中任意大于或者小于相应阈值的value都被截断</li>
+<li>然后返回这个截断后的t</li>
+</ul>
+</li>
+<li>tf.clip_by_norm(t, clip_norm, axes=None, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>首先计算它的l2norm</li>
+<li>如果l2norm(t)&gt;clip_norm，计算t * clip_norm / l2norm(t)，否则不改变t</li>
+<li>不指定axes默认计算all dimension的l2 norm（得到一个标量），指定的话计算对应维度（对应维度的dim变为1）</li>
+<li>返回这个修正后的t</li>
+</ul>
+</li>
+<li>tf.clip_by_global_norm(t_list, clip_norm, use_norm=None, name=None)<ul>
+<li>输入是一组tensors：t_list，当list里面只有一个元素的时候，就退化成了tf.clip_by_norm</li>
+<li>首先计算global norm：sqrt(sum([l2norm(t)**2 for t in t_list]))，所有梯度的l2norm的平方和的平方根</li>
+<li>对每个t，如果l2norm(t)&gt;global_norm，计算t * clip_norm / l2norm(t)，否则不改变t</li>
+<li>返回修正后的t_list，以及global_norm</li>
+</ul>
+</li>
+<li>tf.clip_by_average_norm(t, clip_norm, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>首先计算它的平均L2范数：l2norm_avg，【这是个啥？】</li>
+<li>如果l2norm_avg(t)&gt;clip_norm，计算t * clip_norm / l2norm_avg(t)，否则不改变t</li>
+<li>返回这个修正后的t</li>
+</ul>
+</li>
+</ul>
 <h2 id="9-keras自定义优化器optimizer"><a href="#9-keras自定义优化器optimizer" class="headerlink" title="9. keras自定义优化器optimizer"></a>9. keras自定义优化器optimizer</h2><p>9.1 关于梯度的优化器公共参数，用于梯度裁剪</p>
 <ul>
 <li>clipnorm：对所有梯度进行downscale，使得梯度vector中l2范数最大为1（g * 1 / max(1, l2_norm)）</li>
@@ -1121,7 +1157,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1134,7 +1170,7 @@ grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

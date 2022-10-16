@@ -79,22 +79,28 @@
 
 
 
-<meta name="description" content="Google，rwightman，这些个点其实原论文都提到过了 How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers 动机  ViT vs. CNN 没有了平移不变形 requires large dataset and strong AugReg   这篇paper的contrib">
+<meta name="description" content="炼丹大法： [Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了 [Google 2022] Model soups: averaging weights of multip">
 <meta name="keywords" content="ViT, transformer">
 <meta property="og:type" content="article">
 <meta property="og:title" content="how to train ViT">
 <meta property="og:url" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="Google，rwightman，这些个点其实原论文都提到过了 How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers 动机  ViT vs. CNN 没有了平移不变形 requires large dataset and strong AugReg   这篇paper的contrib">
+<meta property="og:description" content="炼丹大法： [Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了 [Google 2022] Model soups: averaging weights of multip">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/ViTs.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/f1.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/f2.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/f4.png">
-<meta property="og:updated_time" content="2022-01-21T08:34:19.589Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/deit.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/Soft%20distillation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/hard%20distillation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/deit1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/training%20details.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/hyper.png">
+<meta property="og:updated_time" content="2022-06-24T09:44:56.905Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="how to train ViT">
-<meta name="twitter:description" content="Google，rwightman，这些个点其实原论文都提到过了 How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers 动机  ViT vs. CNN 没有了平移不变形 requires large dataset and strong AugReg   这篇paper的contrib">
+<meta name="twitter:description" content="炼丹大法： [Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了 [Google 2022] Model soups: averaging weights of multip">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/ViTs.png">
 
 
@@ -359,7 +365,10 @@
       
 
       
-        <p>Google，rwightman，这些个点其实原论文都提到过了</p>
+        <p>炼丹大法：</p>
+<p>[Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了</p>
+<p>[Google 2022] Model soups: averaging weights of multiple fine-tuned models improves accuracy without increasing inference time，多个模型权重做平均</p>
+<p>[Facebook DeiT 2021] Training data-efficient image transformers &amp; distillation through attention，常规技巧大全</p>
 <h2 id="How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><a href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers" class="headerlink" title="How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers"></a>How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -439,22 +448,22 @@
 </li>
 <li><p>结论</p>
 <ul>
-<li><p>Scaling datasets with AugReg and compute</p>
+<li><p>Scaling datasets with AugReg and compute：加大数据量，加强aug&amp;reg</p>
 <ul>
 <li><p>proper的AugReg和10x的数据量都能引导模型精度提升，而且是差不多的水平</p>
 <p><img src="/2022/01/20/how-to-train-ViT/f1.png" width="40%;"></p>
 </li>
 </ul>
 </li>
-<li><p>Transfer is the better option</p>
+<li><p>Transfer is the better option：永远用预权重去transfer，尤其大模型</p>
 <ul>
 <li>在数据量有限的情况下，train from scratch基本上不能追上transfer learning的精度</li>
 </ul>
 <p><img src="/2022/01/20/how-to-train-ViT/f2.png" width="40%;"></p>
 </li>
-<li><p>More data yields more generic models</p>
+<li><p>More data yields more generic models：加大数据，越大范化性越好</p>
 </li>
-<li><p>Prefer augmentation to regularization</p>
+<li><p>Prefer augmentation to regularization：非要比的话aug &gt; reg，成年人两个都要</p>
 <ul>
 <li>for mid-size dataset like ImageNet-1k any kind of AugReg helps</li>
 <li>for a larger dataset like ImageNet-21k regularization almost hurts，但是aug始终有用</li>
@@ -463,9 +472,133 @@
 </li>
 <li><p>Choosing which pre-trained model to transfer</p>
 </li>
-<li>Prefer increasing patch-size to shrinking model-size<ul>
+<li>Prefer increasing patch-size to shrinking model-size：显存有限情况下优先加大patch size<ul>
 <li>相似的计算时间，Ti-16要比S-32差</li>
 <li>因为patch-size只影响计算量，而model-size影响了参数量，直接影响模型性能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Training-data-efficient-image-transformers-amp-distillation-through-attention"><a href="#Training-data-efficient-image-transformers-amp-distillation-through-attention" class="headerlink" title="Training data-efficient image transformers &amp; distillation through attention"></a>Training data-efficient image transformers &amp; distillation through attention</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>大数据+大模型的高精度模型不是谁都负担得起的</li>
+<li>we produce competitive model<ul>
+<li>use Imagenet only</li>
+<li>on single computer，8-gpu</li>
+<li>less than 3 days，53 hours pretraining + 20 hours finetuning</li>
+<li>模型：86M，top-1 83.1%</li>
+<li>脸厂接地气！！！</li>
+</ul>
+</li>
+<li>we also propose a tranformer-specific teacher-student strategy<ul>
+<li>token-based distillation</li>
+<li>use a convnet as teacher</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>本文就是在探索训练transformer的hyper-parameters、各种训练技巧</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit.png" width="50%;"></p>
+</li>
+<li><p>Knowledge Distillation (KD)</p>
+<ul>
+<li>本文主要关注teacher-student</li>
+<li>用teacher生成的softmax结果（soft label）去训练学生，相当于用student蒸馏teacher</li>
+</ul>
+</li>
+<li>the class token<ul>
+<li>a trainable vector</li>
+<li>和patch token接在一起</li>
+<li>然后接transformer layers</li>
+<li>然后 projected with a linear layer to predict the class</li>
+<li>这种结构force self-attention在patch token和class token之间进行信息交换</li>
+<li>因为class token是唯一的监督信息，而patch token是唯一的输入变量</li>
+</ul>
+</li>
+<li>contributions<ul>
+<li>scaling down models：DeiT-S和DeiT-Ti，向下挑战resnet50和resnet18</li>
+<li>introduce a new distillation procedure based on a distillation token，类似class token的角色</li>
+<li>特殊的distillation机制使得transformer相比较于从同类结构更能从convnet上学到更多</li>
+<li>well transfer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>首先假设我们有了一个strong teacher，我们的任务是通过exploiting the teacher来训练一个高质量的transformer</p>
+</li>
+<li><p>Soft distillation</p>
+<ul>
+<li>teacher的softmax logits不直接做标签，而是计算两个KL divergence</li>
+<li><p>CE + KL loss</p>
+<p><img src="/2022/01/20/how-to-train-ViT/Soft distillation.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Hard-label distillation</p>
+<ul>
+<li>就直接用作label</li>
+<li><p>CE + CE</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hard distillation.png" width="80%;"></p>
+</li>
+<li><p>实验发现hard比soft结果好</p>
+</li>
+</ul>
+</li>
+<li><p>Distillation token</p>
+<ul>
+<li>在token list上再添加一个new token</li>
+<li>跟class token的工作任务一样</li>
+<li>distillation token的优化目标是上述loss的distillation component</li>
+<li>与class token相辅相成</li>
+<li><p>作为对比，也尝试了用原本的CE loss训练两个独立的class token，发现这样最终两个class token的cosine similarity高度接近1，说明额外的class token没有带来有用的东西，但是class token和distillation token的相似度最多也就0.93，说明distillation branch给模型add something，【难道不是因为target不同所以才不同吗？？？】</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit1.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Fine-tuning with distillation</p>
+<ul>
+<li>finetuning阶段用teacher label还是ground truth label？</li>
+<li>实验结果是teacher label好一点</li>
+</ul>
+</li>
+<li><p>Joint classifiers</p>
+<ul>
+<li>两个softmax head相加</li>
+<li>然后make the prediction</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training details &amp; ablation</p>
+<ul>
+<li><p>Initialization</p>
+<ul>
+<li>Transformers are highly sensitive to initialization，可能会导致不收敛</li>
+<li>推荐是weights用truncated normal distribution</li>
+</ul>
+</li>
+<li><p>Data-Augmentation</p>
+<ul>
+<li>Auto-Augment, Rand-Augment, random erasing, Mixup等等</li>
+<li>transformers require a strong data augmentation：几乎都有用</li>
+<li><p>除了Dropout：所以我们把Dropout置零了</p>
+<p><img src="/2022/01/20/how-to-train-ViT/training details.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Optimizers &amp; Regularization</p>
+<ul>
+<li>AdamW</li>
+<li>和ViT一样的learning rate</li>
+<li><p>但是much smaller weight decay：发现weight decay会hurt convergence</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hyper.png" width="60%;"></p>
+</li>
 </ul>
 </li>
 </ul>
@@ -597,7 +730,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -610,7 +743,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -653,7 +786,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><span class="nav-number">1.</span> <span class="nav-text">How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><span class="nav-number">1.</span> <span class="nav-text">How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Training-data-efficient-image-transformers-amp-distillation-through-attention"><span class="nav-number">2.</span> <span class="nav-text">Training data-efficient image transformers &amp; distillation through attention</span></a></li></ol></div>
             
 
           </div>

@@ -276,6 +276,1547 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/14/Hausdorff-Distance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/05/14/Hausdorff-Distance/" itemprop="url">Hausdorff Distance</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-14T10:10:07+08:00">
+                2020-05-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/14/Hausdorff-Distance/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/14/Hausdorff-Distance/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks"><a href="#Reducing-the-Hausdorff-Distance-in-Medical-Image-Segmentation-with-Convolutional-Neural-Networks" class="headerlink" title="Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks"></a>Reducing the Hausdorff Distance in Medical Image Segmentation with Convolutional Neural Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>novel loss function to reduce HD directly </li>
+<li>propose three methods </li>
+<li>2D&amp;3D，ultra &amp; MR &amp; CT</li>
+<li>lead to approximately 18 − 45% reduction in HD without degrading other segmentation performance criteria </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>HD is one of the most informative and useful criteria because it is an indicator of the largest segmentation error </li>
+<li>current segmentation algorithms rarely aim at minimizing or reducing HD directly <ul>
+<li>HD is determined <strong>solely</strong> by the largest error instead of the overall segmentation performance </li>
+<li>HD‘s sensitivity to noise and outliers  —&gt; modified version</li>
+<li>the optimization diffculty</li>
+</ul>
+</li>
+<li>thus we propose an “HD- inspired” loss function </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>denotations</p>
+<ul>
+<li>probability：$q$</li>
+<li>binary mask：$\bar p$、$\bar q$</li>
+<li>boundary：$\delta p$、$\delta q$</li>
+<li><p>single hd：$hd(\bar p, \bar q)$、$hd(\bar q, \bar p)$</p>
+<p><img src="/2020/05/14/Hausdorff-Distance/start.png" width="40%"></p>
+</li>
+</ul>
+</li>
+<li><p>based on distance transforms </p>
+<ul>
+<li><p>distance map $d_p$：define the distance map as the unsigned distance to the boundary $\delta p$</p>
+<script type="math/tex; mode=display">
+  DT_X[i,j] = min_{[k,l]\in X}d([i,j], [k,l])</script><p>  距离场定义为：每个点到目标区域(X)的距离的最小值</p>
+<p>  <img src="/2020/05/14/Hausdorff-Distance/dt.png" width="40%"></p>
+</li>
+<li><p>HD based on DT：</p>
+<script type="math/tex; mode=display">
+  hd_{DT}(\delta p, \delta q) = max((\bar p \triangle \bar q)\circ d_p)\\
+  \bar p \triangle \bar q = |\bar p - \bar q|</script><ul>
+<li>finally have：<script type="math/tex; mode=display">
+  HD_{DT}(\delta p, \delta q) = max(hd_{DT}(\delta p, \delta q), hd_{DT}(\delta q, \delta p))</script></li>
+</ul>
+</li>
+<li><p>modified loss version of HD：</p>
+<script type="math/tex; mode=display">
+  Loss_{DT}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}+d_q^{\alpha}))</script><ul>
+<li>penalizely focus on areas instead of single point</li>
+<li>$\alpha$ determines how strongly we penalize larger errors</li>
+<li>use possibility instead of thresholded value</li>
+<li>use $(p-q)^2$ instead of $|p-q|$</li>
+</ul>
+</li>
+<li><p>correlations</p>
+<ul>
+<li>$HD_{DT}$：Pearson correlation coefficient above 0.99</li>
+<li><p>$Loss_{DT}$：Pearson correlation coefficient above 0.93</p>
+<p><img src="/2020/05/14/Hausdorff-Distance/correlation.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>drawback </p>
+<ul>
+<li><p><strong>high computational</strong> cost especially in 3D </p>
+</li>
+<li><p>$q$ changes along with training process thus $d_q$ changes while $d_p$ remains</p>
+</li>
+<li><p>modified one-sided HD (OS)：</p>
+<script type="math/tex; mode=display">
+  Loss_{DT-OS}(q,p) = \frac{1}{|\Omega|}\sum_{\Omega}((p-q)^2\circ(d_p^{\alpha}))</script></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>HD using Morphological Operations</p>
+<ul>
+<li><p>morphological erosion：</p>
+<script type="math/tex; mode=display">
+  S \ominus B = \{z\in \Omega | B(z) \subseteq S\}</script><p>  腐蚀操作定义为：在原始二值化图的前景区域，以每个像素为中心点，run structure element block B，如果B完全在原图内，则当前中心点在腐蚀后也是前景。</p>
+</li>
+<li><p>HD based on erosion：</p>
+<script type="math/tex; mode=display">
+  HD_{ER}(\delta p, \delta q)=2r^*\\
+  where\ r^* = min_r \{(\bar p \triangle \bar q) \ominus B_r = \varnothing\}</script><ul>
+<li>$HD_{ER}$ is a lower bound of the true value</li>
+<li>can be computed more efficiently using convolutional operations </li>
+</ul>
+</li>
+<li><p>modifid loss version：</p>
+<script type="math/tex; mode=display">
+  Loss_{ER}(q,p) = \frac{1}{|\Omega|}\sum_k \sum_{\Omega}((p-q)^2 \ominus_k B)k^{\alpha}</script><ul>
+<li>k successive erosions </li>
+<li><strong>cross-shaped kernel</strong> whose elements sum to one followed by a <strong>soft thresholding</strong> at 0.50</li>
+</ul>
+</li>
+<li><p>correlations</p>
+<ul>
+<li>$HD_{ER}$：Pearson correlation coefficient above 0.91</li>
+<li>$Loss_{ER}$：Pearson correlation coefficient above 0.83</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>HD using circular-shaped convolutional kernel </p>
+<ul>
+<li><p>circular-shaped kernel</p>
+<p>   <img src="/2020/05/14/Hausdorff-Distance/circle.png" width="40%"></p>
+</li>
+<li><p>HD based on circular-shaped kernel：</p>
+<script type="math/tex; mode=display">
+  hd_{CV}(\delta p, \delta q)=max(r_1, r_2)\\
+  where \ r_1=max_r (max_{\Omega}f_h(\bar p ^C * B_r)\circ(\bar q \backslash \bar p))\\
+  where \ r_2=max_r (max_{\Omega}f_h(\bar p * B_r)\circ(\bar p \backslash \bar q))\\</script><ul>
+<li>$\bar p^C$：complement 补集</li>
+<li>$f_h$：hard thresholding setting all values below 1 to zero </li>
+</ul>
+</li>
+<li><p>modified loss version：</p>
+<script type="math/tex; mode=display">
+  Loss_{CV}(q,p)=\frac{1}{|\Omega|}\sum_{r\in R}r^{\alpha}\sum_{\Omega}[f_s(Br*\bar p^C)\circ f_{\bar q\backslash \bar p} + f_s(B_r * \bar p) \circ f_{\bar p \backslash \bar q}\\
+  +f_s(Br*\bar q^C)\circ f_{\bar p\backslash \bar q} + f_s(B_r * \bar q) \circ f_{\bar q \backslash \bar p}]</script><ul>
+<li>soft thresholding</li>
+<li><script type="math/tex; mode=display">f_{\bar p\backslash \bar q} = (p-q)^2*p</script></li>
+</ul>
+</li>
+<li><p>correlations</p>
+<ul>
+<li>$HD_{CV}$：Pearson correlation coefficient above 0.99</li>
+<li>$Loss_{CV}$：Pearson correlation coefficient above 0.88</li>
+</ul>
+</li>
+<li><p>computation：</p>
+<ul>
+<li>kernel size<ul>
+<li>$HD_{ER}$ is computed using small fixed convolutional kernels (of size 3)</li>
+<li>$Loss_{CV}$ require applying filters of increasing size(we use a maximum kernel radius of 18 pixels in 2D and 9 voxels in 3D)</li>
+</ul>
+</li>
+<li>steps<ul>
+<li>choose R based on the expected range of segmentation errors </li>
+<li>set R = {3, 6, . . . 18} for 2D images and R = {3,6,9} for 3D </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training</p>
+<ul>
+<li>standard Unet</li>
+<li>augment our HD-based loss term with a DSC loss term for more stable training</li>
+<li>reweight both loss after every epoch</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>d</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/30/SE-block/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/30/SE-block/" itemprop="url">SE block</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-30T14:11:38+08:00">
+                2020-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/30/SE-block/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/30/SE-block/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>图像特征的提取能力是CNN的核心能力，而SE block可以起到为CNN校准采样的作用。</p>
+<p>根据感受野理论，特征矩阵主要来自于样本的中央区域，处在边缘位置的酒瓶的图像特征很大概率会被pooling层抛弃掉。而SE block的加入就可以通过来调整特征矩阵，增强酒瓶特征的比重，提高它的识别概率。</p>
+<p><img src="/2020/04/30/SE-block/bottle.png" width="25%"></p>
+<ol>
+<li>[SE-Net] Squeeze-and-Excitation Networks</li>
+<li>[SC-SE] Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks </li>
+<li>[CMPE-SE] Competitive Inner-Imaging Squeeze and Excitation for Residual Network</li>
+</ol>
+<h2 id="SENet-Squeeze-and-Excitation-Networks"><a href="#SENet-Squeeze-and-Excitation-Networks" class="headerlink" title="SENet: Squeeze-and-Excitation Networks"></a>SENet: Squeeze-and-Excitation Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>prior research has investigated the spatial component to achieve more powerful representations </li>
+<li>we focus on the channel relationship instead</li>
+<li>SE-block：adaptively recalibrates channel-wise feature responses by explicitly modelling interdependencies between channels</li>
+<li>enhancing the representational power </li>
+<li>in a computationally efficient manner</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>stronger network：<ul>
+<li>deeper</li>
+<li>NiN-like bocks</li>
+</ul>
+</li>
+<li>cross-channel correlations in prior work<ul>
+<li>mapped as new combinations of features through 1x1 conv</li>
+<li>concentrated on the objective of reducing model and computational complexity</li>
+</ul>
+</li>
+<li>In contrast, we found this mechanism <ul>
+<li>can ease the learning process</li>
+<li>and significantly enhance the representational power of the network</li>
+</ul>
+</li>
+<li>Attention<ul>
+<li>Attention can be interpreted as a means of biasing the allocation of available computational resources towards the most informative components<ul>
+<li>Some works provide interesting studies into the combined use of spatial and channel attention </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>SE-block</p>
+<ul>
+<li><p>The channel relationships modelled by convolution are inherently implicit and local </p>
+</li>
+<li><p>we would like to provide it with access to global information</p>
+</li>
+<li><p>squeeze：using global average pooling </p>
+</li>
+<li><p>excitation：nonlinear &amp; non-mutually-exclusive using sigmoid</p>
+<ul>
+<li><p>bottleneck：a dimensionality-reduction layer $W_1$ with reduction ratio $r$ and ReLU and a dimensionality-increasing layer $W_2$</p>
+</li>
+<li><p>$s = F_{ex}(z,W) = \sigma (W_2 \delta(W_1 z))$</p>
+<p><img src="/2020/04/30/SE-block/seblock.png" width="70%"></p>
+</li>
+</ul>
+</li>
+<li><p>integration</p>
+<ul>
+<li>insert after the non-linearity following each convolution</li>
+<li>inception：take the transformation $F_{tr}$ to be an entire Inception module </li>
+<li><p>residual：take the transformation $F_{tr}$ to be the non-identity branch of a residual module</p>
+<p><img src="/2020/04/30/SE-block/integrate.png" width="70%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>model and computational complexity</p>
+<ul>
+<li>ResNet50 vs. SE-ResNet50：0.26% relative increase GFLOPs approaching ResNet10’s accuracy </li>
+<li>the additional parameters result solely from the two FC layers, among which  the final stage FC claims the majority due to being performed across the greatest number of channels</li>
+<li>the costly final stage of SE blocks could be removed at only a small cost in performance </li>
+</ul>
+</li>
+<li><p>ablations</p>
+<ul>
+<li>FC<ul>
+<li>removing the biases of the FC layers  in the excitation facilitates the modelling of channel dependencies </li>
+</ul>
+</li>
+<li>reduction ratio<ul>
+<li>performance is robust to a range of reduction ratios </li>
+<li>In practice, using an identical ratio throughout a network may not be optimal due to the distinct roles performed by different layers </li>
+</ul>
+</li>
+<li>squeeze<ul>
+<li>global average pooling vs. global max pooling：average pooling slightly better </li>
+</ul>
+</li>
+<li>excitation<ul>
+<li>Sigmoid vs. ReLU vs. tanh：<ul>
+<li>tanh：slightly worse</li>
+<li>ReLU：dramatically worse   </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>stages<ul>
+<li>each stages brings benefits </li>
+<li>combination make even better</li>
+</ul>
+</li>
+<li>integration strategy<ul>
+<li>fairly robust to their location, provided that they are applied prior to branch aggregation</li>
+<li>inside the residual unit：fewer channels, fewer parameters, comparable accuracy </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>primitive understanding <ul>
+<li>squeeze<ul>
+<li>the use of <strong>global information</strong> has a significant influence on the model performance</li>
+</ul>
+</li>
+<li>excitation<ul>
+<li>the distribution across different classes is very similar at the earlier layers  (general features)</li>
+<li>the value of each channel becomes much more class-specific at greater depth</li>
+<li>SE_5_2 exhibits an interesting tendency towards a saturated state in which most of the activations are close to one</li>
+<li>SE_5_3 exhibits a similar pattern emerges over different classes, up to a modest change in scale</li>
+<li>suggesting that SE_5_2 and SE_5_3 are less important than previous blocks in providing recalibration to the network (thus can be removed)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>APPENDIX</p>
+<ul>
+<li>在ImageNet上SOTA的模型是SENet-154，top1-err是18.68，被标记在了efficientNet论文的折线图上<ul>
+<li>SE-ResNeXt-152（64x4d）<ul>
+<li>input=(224,224)：top1-err是18.68</li>
+<li>input=320/299：top1-err是17.28</li>
+</ul>
+</li>
+<li>further difference<ul>
+<li>each bottleneck building block的第一个1x1 convs的通道数减半</li>
+<li>stem的第一个7x7conv换成了3个连续的3x3 conv</li>
+<li>1x1的s2 conv换成了3x3的s2 conv</li>
+<li>fc之前添加dropout layer</li>
+<li>label smoothing</li>
+<li>最后几个training epoch将BN层的参数冻住，保证训练和测试的参数一致</li>
+<li>64 GPUs，batch size=2048（32 per GPU）</li>
+<li>initial lr=1.0</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks"><a href="#SC-SE-Concurrent-Spatial-and-Channel-‘Squeeze-amp-Excitation’-in-Fully-Convolutional-Networks" class="headerlink" title="SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks"></a>SC-SE: Concurrent Spatial and Channel ‘Squeeze &amp; Excitation’ in Fully Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>image segmentation task 上面SE-Net提出来主要是针对分类</li>
+<li>three variants of SE modules <ul>
+<li>squeezing spatially and exciting channel-wise (cSE)</li>
+<li>squeezing channel-wise and exciting spatially (sSE)</li>
+<li>concurrent spatial and channel squeeze &amp; excitation (scSE) </li>
+</ul>
+</li>
+<li>integrate within three different state-of-the- art F-CNNs (DenseNet, SD-Net, U-Net) </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>F-CNNs have become the tool of choice for many image segmentation tasks </li>
+<li>core：convolutions that capturing <strong>local spatial pattern along all input channels</strong> jointly </li>
+<li>SE block <strong>factors out the spatial dependency</strong> by global average pooling to learn a channel specific descriptor (later refered to as cSE /channel-SE)</li>
+<li>while for image segmentation, we hypothesize that the pixel-wise spatial information is more informative </li>
+<li>thus we propose sSE(spatial SE) and scSE(spatial and channel SE)</li>
+<li><p>can be seamlessly integrated by placing after every encoder and decoder block</p>
+<p><img src="/2020/04/30/SE-block/scse.png" width="60%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>cSE<ul>
+<li>GAP：embeds the global spatial information into a vector </li>
+<li>FC-ReLU-FC-Sigmoid：adaptively learns the importance  </li>
+<li>recalibrate</li>
+</ul>
+</li>
+<li>sSE<ul>
+<li>1x1 conv：generating a projection tensor representing the linearly combined representation for all channels C for a spatial location (i,j)</li>
+<li>Sigmoid：rescale </li>
+<li>recalibrate </li>
+</ul>
+</li>
+<li>scSE<ul>
+<li>by element-wise addition </li>
+<li>encourages the network to learn more meaningful feature maps ———- relevant both spatially and channel-wise</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>F-CNN architectures：</p>
+<ul>
+<li>4 encoder blocks, one bottleneck layer, 4 decoder blocks and a classification layer </li>
+<li>class imbalance：median frequency balancing ce</li>
+</ul>
+</li>
+<li><p>dice cmp：scSE &gt; sSE &gt; cSE &gt; vanilla</p>
+</li>
+<li><p>小区域类别的分割，观察到使用cSE可能会差于vanilla： might have got overlooked by only exciting the channels</p>
+</li>
+<li><p>定性分析：</p>
+<ul>
+<li>一些under segmented的地方，scSE improves with the inclusion </li>
+<li><p>一些over segmented的地方，scSE rectified the result</p>
+<p><img src="/2020/04/30/SE-block/qualitive.png" width="55%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network"><a href="#Competitive-Inner-Imaging-Squeeze-and-Excitation-for-Residual-Network" class="headerlink" title="Competitive Inner-Imaging Squeeze and Excitation for Residual Network"></a>Competitive Inner-Imaging Squeeze and Excitation for Residual Network</h2><ol>
+<li>动机<ul>
+<li>for residual network</li>
+<li>the residual architecture has been proved to be diverse and redundant</li>
+<li>model the competition between residual and identity mappings</li>
+<li>make the identity flow to control the complement of the residual feature maps</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>For analysis of ResNet, with the increase in depth, the residual network exhibits a certain amount of redundancy </li>
+<li><p>with the CMPE-SE mechanism, it makes residual mappings tend to provide more efficient supplementary for identity mappings</p>
+<p><img src="/2020/04/30/SE-block/cmpese.png" width="55%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>主要提出了三种变体：</p>
+<p><img src="/2020/04/30/SE-block/cmpeses.png" width="75%"></p>
+</li>
+<li><p>第一个变体：</p>
+<ul>
+<li>两个分支id和res分别GAP出一个vector，然后fc reduct by ratio，然后concat，然后channel back</li>
+<li>Implicitly, we can believe that the winning of the identity channels in this competition results in less weights of the residual channels </li>
+</ul>
+</li>
+<li><p>第二个变体：</p>
+<ul>
+<li><p>两种方案</p>
+<ul>
+<li>2x1 convs：对上下相应位置的元素求avg</li>
+<li>1x1 convs：对全部元素求avg，然后flatten</li>
+</ul>
+<p><img src="/2020/04/30/SE-block/sec.png" width="45%"></p>
+</li>
+</ul>
+</li>
+<li><p>第三个变体：</p>
+<ul>
+<li><p>两边的channel-wise vector叠起来，然后reshape成矩阵形式，然后3x3 conv，然后flatten</p>
+<p><img src="/2020/04/30/SE-block/trd.png" width="45%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>比较扯，不浪费时间分析了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/19/cv2-numpy-tobeadded/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/19/cv2-numpy-tobeadded/" itemprop="url">cv2&numpy&tobeadded</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-19T10:45:32+08:00">
+                2020-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/19/cv2-numpy-tobeadded/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/cv2-numpy-tobeadded/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li>矩阵乘法<ul>
+<li>np.dot(A,B)：真正的矩阵乘法</li>
+<li>np.multiply(A,B) &amp; np重载的*：element-wise product，矩阵中对应元素相乘</li>
+<li>cv的A.dot(B) &amp; cv重载的*：真正的矩阵乘法</li>
+<li>cv的A.mul(B) ：element-wise product，矩阵中对应元素相乘</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>图像旋转</p>
+<p> 通过仿射矩阵<code>cv2.getRotationMatrix2D</code>和仿射变换函数<code>cv2.warpAffine</code>来实现</p>
+<ul>
+<li><p>src：输入图像</p>
+</li>
+<li><p>M：变换矩阵</p>
+</li>
+<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
+</li>
+<li><p>flags：插值方法</p>
+</li>
+<li><p>borderMode：边界像素模式</p>
+</li>
+<li><p>borderValue：边界填充值，默认为0</p>
+<p>cv2.getRotationMatrix2D(center, angle, scale)：返回一个2x3的变换矩阵</p>
+</li>
+<li><p>center：旋转中心</p>
+</li>
+<li>angle：旋转角度，<strong>正值是逆时针旋转</strong></li>
+<li><p>scale：缩放因子</p>
+<p>cv2.warpAffine(src, M, dsize[, dst[, flags[, borderMode[, borderValue]]]]))：返回变换后的图像</p>
+</li>
+<li><p>src：输入图像</p>
+</li>
+<li><p>M：变换矩阵</p>
+</li>
+<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
+</li>
+<li><p>flags：插值方法</p>
+</li>
+<li><p>borderMode：边界像素模式</p>
+</li>
+<li><p>borderValue：边界填充值，默认为0</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rotate_img</span><span class="params">(angle, img, interpolation=cv2.INTER_LINEAR, points=[])</span>:</span></span><br><span class="line">    h, w = img.shape</span><br><span class="line">    rotataMat = cv2.getRotationMatrix2D((w/<span class="number">2</span>, h/<span class="number">2</span>), math.degrees(angle), <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># rotate_img1: 输出图像尺寸不变，超出原图像部分被cut掉</span></span><br><span class="line">    rotate_img1 = cv2.warpAffine(img, rotataMat, dsize=(w, h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">   	<span class="comment"># rotate_img2: 输出图像尺寸变大，保留超出原图像部分，新的坐标原点保证旋转中心仍旧位于图像中心</span></span><br><span class="line">    new_h = int(w*math.fabs(math.sin(angle)) + h*math.fabs(math.cos(angle)))</span><br><span class="line">    new_w = int(h*math.fabs(math.sin(angle)) + w*math.fabs(math.cos(angle)))</span><br><span class="line">    rotataMat[<span class="number">0</span>, <span class="number">2</span>] += (new_w - w) / <span class="number">2</span></span><br><span class="line">    rotataMat[<span class="number">1</span>, <span class="number">2</span>] += (new_h - h) / <span class="number">2</span></span><br><span class="line">    rotate_img2 = cv2.warpAffine(img, rotataMat, dsize=(new_w, new_h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 坐标点的变换</span></span><br><span class="line">    rotated_points = []</span><br><span class="line">    <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">        point = rotataMat.dot([[point[<span class="number">0</span>]], [point[<span class="number">1</span>]], [<span class="number">1</span>]])</span><br><span class="line">        rotated_points.append((int(point[<span class="number">0</span>]), int(point[<span class="number">1</span>])))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> rotate_img2, rotated_points</span><br></pre></td></tr></table></figure>
+<p>使用tips：</p>
+</li>
+<li><p>如果不修改仿射变换矩阵的平移参数，坐标原点的位置不发生改变</p>
+</li>
+<li><p>dsize指定的输出图像是从原点位置开始裁剪</p>
+</li>
+<li><p>坐标点的变换满足公式：</p>
+<script type="math/tex; mode=display">
+  dst(x,y) = src(M_{11}x+M_{12}y+M_{13}, M_{21}x+M_{22}y+M_{23})</script></li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>np.meshgrid(*xi,**kwargs)</p>
+<p> 这个函数神他妈坑，作用是Return coordinate matrices from coordinate vectors. Make N-D coordinate arrays for vectorized evaluations of N-D scalar/vector fields over N-D grids, given one-dimensional coordinate arrays x1, x2,…, xn. 但是尝试一下会发现：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z)</span><br><span class="line">print(x.shape)       <span class="comment"># (20, 10, 30)</span></span><br></pre></td></tr></table></figure>
+<p> xy轴坐标是反过来的，这是因为optional args里面有一个indexing：</p>
+<p> <strong>indexing</strong> : {‘xy’, ‘ij’}, Cartesian (‘xy’, default) or matrix (‘ij’) indexing of output.</p>
+<p> 我们想要得到的坐标系和输入的轴一一对应，得指定参数<code>indexing=&#39;ij&#39;</code></p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z, indexing=<span class="string">'ij'</span>)</span><br><span class="line">print(x.shape)      <span class="comment"># (10, 20, 30)</span></span><br></pre></td></tr></table></figure>
+<p> 还有一个参数sparse，因为每根轴的坐标都是复制的，所以可以稀疏存储，此时函数返回值变化：</p>
+<p> <strong>sparse</strong> : bool, If True a sparse grid is returned in order to conserve memory. Default is False.</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y)</span><br><span class="line">print(xx)        <span class="comment"># a 20x10 list</span></span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y, sparse=<span class="keyword">True</span>)</span><br><span class="line">print(xx)        <span class="comment"># a 1*10 list</span></span><br><span class="line">print(yy)        <span class="comment"># a 20*1 list</span></span><br><span class="line"><span class="comment"># 所以整体上还是个20*10的矩阵</span></span><br></pre></td></tr></table></figure>
+<p> 二维可视化：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">z = xx**<span class="number">2</span> + yy**<span class="number">2</span>            <span class="comment"># xx和yy既可以是dense convervation也可以是sparse convervation</span></span><br><span class="line">h = plt.contourf(x,y,z)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>np.tile(A,reps)</p>
+<p> 这个函数挺有用的，把数组沿着指定维度复制，比stack、concat啥的都优雅，能自动创建新的维度</p>
+<ul>
+<li>A：array_like, The input array.</li>
+<li>reps：array_like, The number of repetitions of <em>A</em> along each axis.</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>np.reshape(a, newshape, order=’C’)</p>
+<p> 这个函数贼常用，但是一般用于二维的时候没考虑重组顺序这件事</p>
+<ul>
+<li><p>order: {‘C’, ‘F’, ‘A’}, optional，简单理解，reshape的通用实现方式是先将真个array拉直，然后依次取数据填入指定维度，C是从最里面的维度开始拉直&amp;构造，F是从最外面的维度开始拉直&amp;构造，A for auto</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">a = np.arange(<span class="number">6</span>)</span><br><span class="line">array([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># C-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">       [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fortran-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>), order=<span class="string">'F'</span>)</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">4</span>, <span class="number">3</span>],</span><br><span class="line">       [<span class="number">2</span>, <span class="number">1</span>, <span class="number">5</span>]])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>tf和keras里面也有reshape，是没有order参数的，默认是’C’</p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/16/MobileNets/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/16/MobileNets/" itemprop="url">MobileNets</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-16T22:21:19+08:00">
+                2020-04-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/16/MobileNets/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/16/MobileNets/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="preview"><a href="#preview" class="headerlink" title="preview"></a>preview</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>计算力有限</li>
+<li>模型压缩／使用小模型</li>
+</ul>
+</li>
+<li><p>深度可分离卷积 Depthwise Separable Convolution</p>
+<ul>
+<li>将标准卷积拆分为两个操作：深度卷积(depthwise convolution) 和逐点卷积(pointwise convolution)</li>
+<li>标准卷积：参数量k*k*input_channel*output_channel</li>
+<li>深度卷积(depthwise convolution) ：针对每个输入通道采用不同的卷积核，参数量k*k*input_channel</li>
+<li>逐点卷积(pointwise convolution)：就是普通的卷积，只不过其采用1x1的卷积核，参数量1*1*input_channel*output_channel</li>
+<li><p>with BN and ReLU：</p>
+<p><img src="/2020/04/16/MobileNets/deepwise block.png" width="40%"></p>
+</li>
+<li><p>DW没有改变通道数的能力，如果输入层的通道数很少，DW也只能在低维空间提特征，因此V2提出先对原始输入做expansion，用一个非线性PW升维，然后DW，然后再使用一个PW降维，值得注意的是，第二个PW不使用非线性激活函数，因为作者认为，relu作用在低维空间上会导致信息损失。</p>
+</li>
+</ul>
+</li>
+<li><p>进一步缩减计算量</p>
+<ul>
+<li>通道数缩减：宽度因子 alpha</li>
+<li>分辨率缩减：分辨率因子rho</li>
+</ul>
+</li>
+<li><p>papers</p>
+<ul>
+<li>[V1 CVPR2017] MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications，Google，主要贡献Depthwise Separable Convolution</li>
+<li>[V2 CVPR2018] MobileNetV2: Inverted Residuals and Linear Bottlenecks，Google，主要贡献inverted residual with linear bottleneck</li>
+<li>[V3 ICCV2019] Searching for MobileNetV3，Google，模型结构升级多了SE(inverted-res-block + SE-block)，是通过NAS而非手动设计</li>
+<li>[EfficientNet-lite ICML2019]  EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks，efficientNet家族的scale-down版本，原始的EfficientNet是基于Mobile3的basic block，而Lite版本有很多专供移动端的改动：去掉SE、改用RELU6、</li>
+<li>[MobileOne 2022] An Improved One millisecond Mobile Backbone，Apple，</li>
+</ul>
+</li>
+</ol>
+<h2 id="MobileNets-Efficient-Convolutional-Neural-Networks-for-Mobile-Vision-Applications"><a href="#MobileNets-Efficient-Convolutional-Neural-Networks-for-Mobile-Vision-Applications" class="headerlink" title="MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications"></a>MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications</h2><ol>
+<li>动机<ul>
+<li>efficient models：uses depthwise separable convolutions and two simple global hyper-parameters</li>
+<li>resource and accuracy tradeoffs</li>
+<li>a class of network architectures that allows a model developer to specifically choose a small network that matches the resource restrictions (latency, size) for their application </li>
+</ul>
+</li>
+<li><p>论点：</p>
+<ul>
+<li>the general trend has been to make deeper and more complicated networks in order to achieve higher accuracy </li>
+<li>not efficient on computationally limited platform</li>
+<li>building small and efficient neural networks：either compressing pretrained networks or training small networks directly </li>
+<li>Many papers on small networks focus only on size but do not consider speed</li>
+<li>speed &amp; size 不完全对等</li>
+<li>size：depthwise separable convolutions, bottleneck approaches, compressing pretrained networks, distillation </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>depthwise separable convolutions </p>
+<ul>
+<li>a form of factorized convolutions：a standard conv splits into 2 layers</li>
+<li>factorize the filtering and combination steps of standard conv</li>
+<li>drastically reducing computation and model size to $\frac{1}{N} + \frac{1}{D_k^2}$</li>
+<li>use both batchnorm and ReLU nonlinearities for both layers</li>
+<li><p>MobileNet uses 3 × 3 depthwise separable convolutions which bring between 8 to 9 times less computation  </p>
+<p><img src="/2020/04/16/MobileNets/deepwise conv.png" width="30%"></p>
+</li>
+</ul>
+</li>
+<li><p>MobileNet</p>
+<ul>
+<li>the first layer is a full convolution, the rest depthwise separable convolutions  </li>
+<li>down sampling is handled with strided convolution</li>
+<li>all layers are followed by a BN and ReLU nonlinearity</li>
+<li>a final average pooling reduces the spatial resolution to 1 before the fully connected layer. </li>
+<li><p>the final fully connected layer has no nonlinearity and feeds into a softmax layer for classification</p>
+<p><img src="/2020/04/16/MobileNets/mobileNet structure.png" width="45%"></p>
+</li>
+</ul>
+</li>
+<li><p>training so few parameters</p>
+<ul>
+<li>RMSprop </li>
+<li>less regularization and data augmentation techniques because small models have less trouble with overfitting</li>
+<li>it was important to put very little or no weight decay (l2 regularization) </li>
+<li>do not use side heads or label smoothing or image distortions  </li>
+</ul>
+</li>
+<li><p>Width Multiplier: Thinner Models </p>
+<ul>
+<li>thin a network uniformly at each layer </li>
+<li>the input channels $M$ and output channels $N$ becomes $\alpha M$ and $\alpha N$</li>
+<li>$\alpha=1$：baseline MobileNet       $\alpha&lt;1$：reduced MobileNet</li>
+<li>reduce the parameters roughly by $\alpha^2$</li>
+</ul>
+</li>
+<li><p>Resolution Multiplier: Reduced Representation</p>
+<ul>
+<li>apply this to the input image</li>
+<li>the input resolution of the network is typically 224, 192, 160 or 128</li>
+<li>$\rho=1$：baseline MobileNet       $\rho&lt;1$：reduced MobileNet</li>
+<li><p>reduce the parameters roughly by $\rho^2$</p>
+<p><img src="/2020/04/16/MobileNets/param reduce.png" width="45%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>结论</p>
+<ul>
+<li>using depthwise separable convolutions compared to full convolutions only reduces accuracy by 1% on ImageNet but saving tremendously on mult-adds and parameters</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/cmp1.png" width="40%"></p>
+<ul>
+<li>at similar computation and number of parameters, thinner MobileNets is 3% better than making them shallower</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/cmp2.png" width="40%"></p>
+<ul>
+<li>trade-offs based on the two hyper-parameters</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/cmp3.png" width="40%"></p>
+</li>
+</ol>
+<h2 id="MobileNetV2-Inverted-Residuals-and-Linear-Bottlenecks"><a href="#MobileNetV2-Inverted-Residuals-and-Linear-Bottlenecks" class="headerlink" title="MobileNetV2: Inverted Residuals and Linear Bottlenecks"></a>MobileNetV2: Inverted Residuals and Linear Bottlenecks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>a new mobile architecture <ul>
+<li>based on an inverted residual structure</li>
+<li>remove non-linearities in the narrow layers in order to maintain representational power</li>
+</ul>
+</li>
+<li>prove on multiple tasks<ul>
+<li>object detection：SSDLite</li>
+<li>semantic segmentation：Mobile DeepLabv3</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Depthwise Separable Convolutions </p>
+<ul>
+<li>replace a full convolutional opera- tor with a factorized version </li>
+<li>depthwise convolution, it performs lightweight filtering per input channel</li>
+<li>pointwise convolution, computing linear combinations of the input channels</li>
+</ul>
+</li>
+<li><p>Linear Bottlenecks </p>
+<ul>
+<li>ReLU results in information loss in lower dimension space</li>
+<li><strong>expansion ratio</strong>：if we have lots of channels, information might still be preserved in the other channels</li>
+<li><p>linear：bottleneck上面不包含非线性激活单元</p>
+<p><img src="/2020/04/16/MobileNets/expansion.png" width="30%"></p>
+</li>
+</ul>
+</li>
+<li><p>Inverted residuals </p>
+<ul>
+<li>bottlenecks actually contain all the necessary information </li>
+<li>expansion layer acts merely as an implementation detail that accompanies a non-linear transformation</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/residual.png" width="30%"></p>
+<ul>
+<li>parameter count：</li>
+<li>basic building block is a bottleneck depth-separable convolution with residuals</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/blockparam.png" width="40%"></p>
+</li>
+</ol>
+<pre><code>* interpretation 
+
+    * provides a natural separation between the input/output
+    * expansion：capacity
+    * layer transformation：expressiveness
+
+* MobileNetV2 model architecture
+
+    * initial filters：32
+    * ReLU6：use ReLU6 as the non-linearity because of its robustness when used with low-precision computation  
+    * use constant expansion rate between 5 and 10 except the 1st：smaller network inclines smaller and larger larger
+
+    &lt;img src=&quot;MobileNets/MobileNetV2.png&quot; width=&quot;40%&quot; /&gt;
+
+    * comparison with other architectures
+
+    &lt;img src=&quot;MobileNets/cmpV2.png&quot; width=&quot;40%&quot; /&gt;
+</code></pre><ol>
+<li><p>实验</p>
+<ul>
+<li><p>Object Detection  </p>
+<ul>
+<li>evaluate the performance as feature extractors</li>
+<li>replace all the regular convolutions with separable convolutions <strong>in SSD prediction layers</strong>：backbone没有改动，只替换头部的卷积，降低计算量</li>
+<li>achieves competitive accuracy with significantly fewer parameters and smaller computational complexity </li>
+</ul>
+</li>
+<li><p>Semantic Segmentation </p>
+<ul>
+<li>build DeepLabv3 heads on top of the second last feature map of MobileNetV2  </li>
+<li>DeepLabv3 heads are computationally expensive and removing the ASPP module significantly reduces the MAdds </li>
+</ul>
+</li>
+<li><p>ablation</p>
+<ul>
+<li>inverted residual connections：shortcut connecting bottleneck perform better than shortcuts connecting the expanded layers 在少通道的特征上进行短连接</li>
+<li><p>linear bottlenecks：linear bottlenecks improve performance, <strong>providing support that non-linearity destroys information in low-dimensional space</strong></p>
+<p><img src="/2020/04/16/MobileNets/ablation.png" width="40%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Searching-for-MobileNetV3"><a href="#Searching-for-MobileNetV3" class="headerlink" title="Searching for MobileNetV3"></a>Searching for MobileNetV3</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>automated search algorithms and network design work together</li>
+<li>classification &amp; detection &amp; segmentation</li>
+<li>a new efficient segmentation decoder Lite Reduced Atrous Spatial Pyramid Pooling (LR-ASPP)</li>
+<li>new efficient versions of nonlinearities  </li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>reducing<ul>
+<li>the number of parameters </li>
+<li>the number of operations (MAdds)  </li>
+<li>inference latency</li>
+</ul>
+</li>
+<li>related work<ul>
+<li>SqueezeNet：1x1 convolutions </li>
+<li>MobileNetV1：separable convolution  </li>
+<li>MobileNetV2：inverted residuals </li>
+<li>ShuffleNet：group convolutions  </li>
+<li>CondenseNet：group convolutions  </li>
+<li>ShiftNet：shift operation </li>
+<li>MnasNet：MobileNetV2+SE-block，attention modules are placed after the depthwise filters in the expansion </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>base blocks </p>
+<ul>
+<li>combination of ideas from [MobileNetV1, MobileNetV2, MnasNet]</li>
+<li>inverted-res-block + SE-block</li>
+<li>swish nonlinearity  </li>
+<li>hard sigmoid</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/IR+SE.png" width="40%"></p>
+</li>
+<li><p>Network Search </p>
+<ul>
+<li>use platform-aware NAS to search for the global network structures </li>
+<li>use the NetAdapt algorithm to search per layer for the number of filters</li>
+</ul>
+</li>
+<li><p>Network Improvements </p>
+<ul>
+<li><p>redesign the computionally-expensive layers at the beginning and the end of the network</p>
+<ul>
+<li>the last block of MobileNetV2’s inverted bottleneck structure </li>
+<li>move this layer <strong>past</strong> the final average pooling：移动到GAP后面去，作用在1x1的featuremap上instead of 7x7，曲线救国</li>
+</ul>
+</li>
+<li><p>a new nonlinearity, h-swish</p>
+<ul>
+<li><p>the initial set of filters are also expensive：usually start with 32 filters in a full 3x3 convolution to build initial filter banks for edge detection </p>
+</li>
+<li><p>reduce the number of filters to 16 and use the hard swish nonlinearity </p>
+<script type="math/tex; mode=display">
+  swish\ [x]=x*\sigma(x)\\
+  h\_swish\ [x]=x\frac{ReLU6(x+3)}{6}</script><p><img src="/2020/04/16/MobileNets/swish.png" width="40%"></p>
+</li>
+<li><p>most of the benefits swish are realized by using them only in the deeper layers：只在后半段网络中用</p>
+</li>
+</ul>
+</li>
+<li><p>SE-block</p>
+<ul>
+<li>ratio：all to fixed to be 1/4 of the number of channels in expansion layer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MobileNetV3 architecture</p>
+<p> <img src="/2020/04/16/MobileNets/mobileNetV3.png" width="40%"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>Detection </p>
+<ul>
+<li>use MobileNetV3 as replacement for the <strong>backbone feature extractor</strong> in SSDLite：改做backbone了</li>
+<li>reduce the channel counts of C4&amp;C5’s block：因为MobileNetV3原本是被用来输出1000类的，transfer到90类的coco数据集上有些redundant</li>
+</ul>
+</li>
+<li><p>Segmentation </p>
+<ul>
+<li><p>as network backbone</p>
+</li>
+<li><p>compare two segmentation heads</p>
+<ul>
+<li>R-ASPP：reduced design of the Atrous Spatial Pyramid Pooling module with only two branches </li>
+<li><p>Lite R-ASPP：类SE-block的设计，大卷积核，大步长</p>
+<p><img src="/2020/04/16/MobileNets/LR-ASPP.png" width="40%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="EfficientNet-lite"><a href="#EfficientNet-lite" class="headerlink" title="EfficientNet-lite"></a>EfficientNet-lite</h2><ol>
+<li><p>没有专门的paper</p>
+<ul>
+<li>基于efficientNet向移动端改进</li>
+<li><a href="https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite" target="_blank" rel="noopener">https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite</a></li>
+<li><a href="https://blog.tensorflow.org/2020/03/higher-accuracy-on-vision-models-with-efficientnet-lite.html" target="_blank" rel="noopener">https://blog.tensorflow.org/2020/03/higher-accuracy-on-vision-models-with-efficientnet-lite.html</a></li>
+</ul>
+</li>
+<li><p>model zoo</p>
+<p> | model              | width | depth | resolution | droprate |<br> | ————————— | ——- | ——- | ————— | ———— |<br> | efficientnet-lite0 | 1.    | 1.    | 224        | .2       |<br> | efficientnet-lite1 | 1.    | 1.1   | 240        | .2       |<br> | efficientnet-lite2 | 1.1   | 1.2   | 260        | .3       |<br> | efficientnet-lite3 | 1.2   | 1.4   | 280        | .3       |<br> | efficientnet-lite4 | 1.4   | 1.8   | 300        | .3       |<br> |                    |       |       |            |          |</p>
+<ul>
+<li><p>关键数据：</p>
+<ul>
+<li>lite4精度可以达到80.4%，同时保持在Pixel 4 CPU上real-time运行：30ms/image</li>
+<li>latency：10-30ms</li>
+<li>model size：5M-15M</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/lite-latency.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>&lt;img src=&quot;MobileNets/lite-size.png&quot; width=&quot;40%;&quot; /&gt;
+
+3. challenges
+
+    * Quantization量化：移动端设备支持的浮点精度有限——训练后量化，将浮点模型tf model转化成tfLite model（全整数int8/半浮点float16），
+    * Heterogeneous hardware移动端设备参差不齐：好多操作不支持，尽量替换成底层支持的op
+
+4. modifications
+
+    * Removed squeeze-and-excitation networks：去掉SE，not well supported
+
+    * swish替换成RELU6：有利于post-training quantization
+
+        * 一开始将浮点替换成整型的时候观察到huge acc drop：75 -&gt; 48
+        * 发现是因为浮点太wide-ranged了，直接映射到int8太多精度损失
+        * 所以替换成激活区间有限的relu6 [0,6]
+
+        &lt;img src=&quot;MobileNets/int8.png&quot; width=&quot;40%;&quot; /&gt;&lt;img src=&quot;MobileNets/quantization.png&quot; width=&quot;40%;&quot; /&gt;
+
+    * Fixed the stem and head while scaling models up：stem的resolution大，head的channel大，scaleup都对参数量/计算量影响比较大，只scaleup中间的stage
+</code></pre><h2 id="MobileOne-An-Improved-One-millisecond-Mobile-Backbone"><a href="#MobileOne-An-Improved-One-millisecond-Mobile-Backbone" class="headerlink" title="MobileOne: An Improved One millisecond Mobile Backbone"></a>MobileOne: An Improved One millisecond Mobile Backbone</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>FLOPs &amp; 参数量等指标并不直接和移动端latency相关</li>
+<li><p>this paper</p>
+<ul>
+<li>调研了各种mobileNets的优化瓶颈：architectural and optimization bottlenecks</li>
+<li>提出了MobileOne</li>
+</ul>
+</li>
+<li><p>精度</p>
+<ul>
+<li>低于1ms/image的速度，top 1 acc 75.9%</li>
+<li>上面的eff-lite0要10ms，top 1 acc 74.+%，涨点2.3%</li>
+<li><p>Mobile- Former精度近似，速度要快38x</p>
+<p><img src="/2020/04/16/MobileNets/mobileOne.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>previous methods<ul>
+<li>大部分foucs on 优化FLOPs</li>
+<li>而且会引入new architecture designs &amp; custom layers，如hard-swish，这在移动端通常不原生支持</li>
+</ul>
+</li>
+<li>existing metric &amp; latency<ul>
+<li>FLOPs does not account for memory cost and degree of parallelism</li>
+<li>sharing parameters leads to higher FLOPS but smaller model size</li>
+<li>skip-connections / branching incur memory costs</li>
+</ul>
+</li>
+<li>结构优化<ul>
+<li>要找到真正限制on-device latency的要素</li>
+</ul>
+</li>
+<li>训练优化<ul>
+<li>直接训练小模型精度肯定差，通常是decoupling train-time &amp; test-time architecture</li>
+<li>进一步地还做了relaxing regularization</li>
+</ul>
+</li>
+<li>the proposed MobileOne<ul>
+<li>use basic operators</li>
+<li>introduces linear branches which get re-parameterized at inference-time：与之前方法的区别是引入了over-parameterization branches【repVGG是把常规的resblock搞成一个线形op了，本文的branch有k个，是把好多个branch合并一起，所以起名叫over？】</li>
+<li>inference time model has only feed-forward structure</li>
+<li>generalizes well to other tasks：在分类、检测、分割上都outperforming</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Metric Correlations</p>
+<ul>
+<li><p>parameter count and FLOPs</p>
+<p><img src="/2020/04/16/MobileNets/Metric Correlations.png" width="60%;"></p>
+</li>
+<li><p>很多模型参数量很大，但是latency更小——只要右边的点纵坐标比左边的低都是这种case，如3(efficientnet-b0)&amp;2(shufflenet-v2)</p>
+</li>
+<li><p>FLOPs和参数量近似的情况下，卷积模型通常比他们的transformer counterpart latency更小——可以看到transformer模型都在右下角</p>
+</li>
+<li><p>CPU correlation</p>
+<p>  <img src="/2020/04/16/MobileNets/CPU correlation.png" width="60%;"></p>
+<ul>
+<li>mobile device与FLOPs适度相关，与参数量基本无关</li>
+<li>CPU的latency更无关</li>
+<li>结构的影响更大，SE-block和skip都影响挺大的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Key Bottlenecks</p>
+<ul>
+<li><p>Activation Functions</p>
+<ul>
+<li><p>搞了同样的网络架构，用不同的激活函数</p>
+<p><img src="/2020/04/16/MobileNets/activation.png" width="30%;"></p>
+</li>
+<li><p>激活函数越花，latency越大，归因于synchronization cost，个别激活函数有通过特殊硬件加速的实现</p>
+</li>
+<li>从通用角度，本文选用ReLU</li>
+</ul>
+</li>
+<li><p>Architectural Blocks</p>
+<ul>
+<li>根本因素是memory access cost &amp; degree of parallelism</li>
+<li>分支越多，memory access cost越大，因为存在多节点交互更多</li>
+<li>而像global pooling这种force synchronization需要同步计算的，也影响overall run-time</li>
+<li>上面截图有这个</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MobileOne Architecture</p>
+<ul>
+<li><p>MobileOne Block</p>
+<ul>
+<li>training &amp; test time 不一样</li>
+<li>training time<ul>
+<li>basic block还是类似mobileV1的depth-wise + point-wise</li>
+<li>每个3x3 donv 和 1x1 pconv都变成了一个多分枝的block</li>
+<li>block有k个 re-parameterizable branch，k是个超参，1-5</li>
+<li>除此之外还有两个常规的branch：1x1 dconv &amp; BN</li>
+</ul>
+</li>
+<li><p>inference time</p>
+<ul>
+<li>只有一条data steam</li>
+<li>合并思路类似repvgg：所有的线形计算都可以合并</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/MobileOne block.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model Scaling</p>
+<ul>
+<li><p>提供了5个尺寸的模型，主要变化在channel，深度是没变的</p>
+<p><img src="/2020/04/16/MobileNets/MobileOne family.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training</p>
+<ul>
+<li>小模型训练，need less regularization，但是weight decay对训练初期又很重要</li>
+<li>cosine schedule for both LR &amp; weight decay</li>
+<li>还用了efficientNetV2里面提到的progressive learning：从简单任务开始训练，逐渐增加难度（resolution &amp; dataaug） &amp; 超参（regularization）</li>
+<li><p>还有EMA：model ensemble</p>
+<p><img src="/2020/04/16/MobileNets/MobileOne training.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/15/verseg/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2979,2385 +4520,6 @@ P_6^{out} = Conv(\frac{w_1P_6^{in}+w_2P_6^{td}+w_3Resize(P_5^{out})}{\epsilon+w_
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/01/08/RCNN系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/08/RCNN系列/" itemprop="url">RCNN系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-08T16:03:10+08:00">
-                2020-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/01/08/RCNN系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/01/08/RCNN系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li><p>papers</p>
-<p> [R-CNN] R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation </p>
-<p> [SPP] SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</p>
-<p> [Fast R-CNN] Fast R-CNN: Fast Region-based Convolutional Network</p>
-<p> [Faster R-CNN] Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</p>
-<p> [Mask R-CNN] Mask R-CNN  </p>
-<p> [FPN] FPN: Feature Pyramid Networks for Object Detection</p>
-<p> [Cascade R-CNN] Cascade R-CNN: Delving into High Quality Object Detection</p>
-</li>
-</ol>
-<h2 id="R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation"><a href="#R-CNN-Rich-feature-hierarchies-for-accurate-object-detection-and-semantic-segmentation" class="headerlink" title="R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation"></a>R-CNN: Rich feature hierarchies for accurate object detection and semantic segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>localizing objects with a deep network and training a high-capacity model with only a small quantity of annotated detection data<ul>
-<li>apply CNN to region proposals: R-CNN represents ‘Regions with CNN features’</li>
-<li>supervised pre-training </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>model as a regression problem: not fare well in practice  </li>
-<li>build a sliding-window detector: have to maintain high spatial resolution</li>
-<li><strong>what we do: </strong>our method gener- ates around 2000 category-independent region proposals for the input image, extracts a fixed-length feature vector from each proposal using a CNN, and then classifies each region with category-specific linear SVMs </li>
-<li>conventional solution to training a large CNN is ‘using unsupervised pre-training, followed by supervised fine-tuning’</li>
-<li><strong>what we do: </strong>‘supervised pre-training on a large auxiliary dataset (ILSVRC), followed by domain specific fine-tuning on a small dataset (PASCAL)’</li>
-<li><strong>we also demonstrate: </strong>a simple bounding box regression method significantly reduces mislocalizations</li>
-<li><strong>R-CNN operates on regions:</strong> it is natural to extend it to the task of semantic segmentation </li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>category-independent region proposals </li>
-<li>a large convolutional neural network that extracts a fixed-length feature vector from each region </li>
-<li><p>a set of class-specific linear SVMs</p>
-<p><img src="/2020/01/08/RCNN系列/R-CNN.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Region proposals: we use selective search</p>
-</li>
-<li><p>Feature extraction: we use Krizhevsky CNN, 227*227 RGB input, 5 convs, 2 fcs, 4096 output</p>
-<ul>
-<li>we first dilate the tight bounding box (padding=16)</li>
-<li><p>then warp the bounding box to the required size (各向异性缩放)</p>
-<p><img src="/2020/01/08/RCNN系列/warp.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Test-time detection:</p>
-<ul>
-<li>we score each extracted feature vector using the SVM trained for each class</li>
-<li>we apply a greedy non-maximum suppression (for each class independently)  </li>
-<li>对留下的这些框进行canny边缘检测，就可以得到bounding-box</li>
-<li>(then B-BoxRegression)</li>
-</ul>
-</li>
-<li><p>Supervised pre-training: pre-trained the CNN on a large auxiliary dataset (ILSVRC 2012) with <strong>image-level annotations</strong></p>
-</li>
-<li><p>Domain-specific fine-tuning: </p>
-<ul>
-<li>continue SGD training of the CNN using only warped region proposals from VOC </li>
-<li>replace the 1000-way classification layer with a randomly initialized 21-way layer (20 VOC classes plus background)</li>
-<li><strong>class label: all region proposals with ≥ 0.5 IoU overlap with a ground-truth box as positives, else negatives </strong></li>
-<li>1/10th of the initial pre-training rate</li>
-<li>uniformly sample 32 positive windows (over all classes) and 96 background windows to construct a mini-batch of size 128 </li>
-</ul>
-</li>
-<li><p>Object category classifiers:</p>
-<ul>
-<li>considering a binary classifier for a specific class</li>
-<li><strong>class label: take IoU overlap threshold &lt;0.3 as negatives, take only regions tightly enclosing the object as positives </strong> </li>
-<li>take the ground-truth bounding boxes for each class as positives</li>
-</ul>
-</li>
-<li><p><strong>unexplained:</strong></p>
-<ul>
-<li><p>the positive and negative examples are defined differently in CNN fine-tuning versus SVM training</p>
-<p>  CNN容易过拟合，需要大量的训练数据，所以在CNN训练阶段我们对Bounding box的位置限制条件限制的比较松(IOU只要大于0.5都被标注为正样本)，svm适用于少样本训练，所以对于训练样本数据的IOU要求比较严格，我们只有当bounding box把整个物体都包含进去了，我们才把它标注为物体类别。</p>
-</li>
-<li><p>it’s necessary to train detection classifiers rather than simply use outputs of the fine-tuned CNN</p>
-<p>  上一个回答其实同时也解释了CNN的head已经是一个分类器了，还要用SVM分类：按照上述正负样本定义，CNN softmax的输出比采用svm精度低。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分析</p>
-<ul>
-<li><p>learned features:</p>
-<ul>
-<li>compute the units’ activations on a large set of held-out region proposals  </li>
-<li>sort from the highest to low</li>
-<li>perform non-maximum suppression</li>
-<li><p>display the top-scoring regions</p>
-<p><img src="/2020/01/08/RCNN系列/activations.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Ablation studies:</p>
-<ul>
-<li><strong>without fine-tuning:</strong> features from fc7 generalize worse than features from fc6, indicating that most of the CNN’s representational power comes from its convolutional layers</li>
-<li><strong>with fine-tuning: </strong>The boost from fine-tuning is much larger for fc6 and fc7 than for pool5, suggests that pool features learned from ImageNet are <strong>general</strong> and that most of the improvement is gained from learning <strong>domain-specific</strong> non-linear classifiers on top of them</li>
-</ul>
-</li>
-<li><p>Detection error analysis:</p>
-<ul>
-<li>more of our errors result from poor localization rather than confusion </li>
-<li>CNN features are much more discriminative than HOG </li>
-<li>Loose localization likely results from our use of bottom-up region proposals and the positional invariance learned from pre-training the CNN for whole-image classification(粗暴的IOU判定前背景，二值化label，无法体现定位好坏差异)</li>
-</ul>
-</li>
-<li><p>Bounding box regression：</p>
-<ul>
-<li>a linear regression model use the pool5 features for a selective search region proposal as input</li>
-<li>输出为xy方向的缩放和平移</li>
-<li>训练样本：判定为本类的候选框中和真值重叠面积大于0.6的候选框</li>
-</ul>
-</li>
-<li><p>Semantic segmentation：</p>
-<ul>
-<li>three strategies for computing features:<ul>
-<li>‘<em>full</em> ‘ ignores the region’s shape, two regions with different shape might have very similar bounding boxes(信息不充分)</li>
-<li>‘<em>fg</em> ‘ slightly outperforms <em>full</em>, indicating that the masked region shape provides a stronger signal</li>
-<li>‘<em>full+fg</em> ‘ achieves the best, indicating that the context provided by the <em>full</em> features is highly informative even given the <em>fg</em> features(形状和context信息都重要)</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="SPP-net-Spatial-Pyramid-Pooling-in-Deep-Convolutional-Networks-for-Visual-Recognition"><a href="#SPP-net-Spatial-Pyramid-Pooling-in-Deep-Convolutional-Networks-for-Visual-Recognition" class="headerlink" title="SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition"></a>SPP-net: Spatial Pyramid Pooling in Deep Convolutional Networks for Visual Recognition</h2><ol>
-<li><p>动机：</p>
-<ul>
-<li>propose a new pooling strategy, “spatial pyramid pooling”</li>
-<li>can generate a fixed-length representation regardless of image size/scale</li>
-<li>also robust to object deformations </li>
-</ul>
-</li>
-<li><p>论点：</p>
-<ul>
-<li>existing CNNs require a fixed-size input<ul>
-<li>reduce accuracy for sub-images of an arbitrary size/scale (need cropping/warping)</li>
-<li>cropped region lost content, while warped content generates unwanted distortion</li>
-<li>overlooks the issues involving scales </li>
-</ul>
-</li>
-<li>convolutional layers do not require a fixed image size, whle the fully-connected layers need to have fixed- size/length input by their definition</li>
-<li>by introducing the SPP layer<ul>
-<li>between the last convolutional layer and the first fully-connected layer</li>
-<li>pools the features and generates fixed- length outputs</li>
-</ul>
-</li>
-<li>Spatial pyramid pooling <ul>
-<li>partitions the image into divisions from finer to coarser levels, and aggregates local features in them</li>
-<li>generates fixed- length output </li>
-<li>uses multi-level spatial bins(robust to object deformations )</li>
-<li>can run at variable scales </li>
-<li>also allows varying sizes or scales <strong>during training</strong>: <ul>
-<li>train the network with different input size at different epoch</li>
-<li>increases scale-invariance </li>
-<li>reduces over-fitting </li>
-</ul>
-</li>
-<li>in object detection <ul>
-<li>run the convolutional layers only <em>once</em> on the entire image </li>
-<li>then extract features by SPP-net on the feature maps </li>
-<li>speedup </li>
-<li>accuracy </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>方法：</p>
-<ul>
-<li><p>Convolutional Layers and Feature Maps</p>
-<ul>
-<li>the outputs of the convolutional layers are known as feature maps</li>
-<li><p>feature maps involve not only the strength of the responses(the strength of activation), but also their spatial positions(the reception field)</p>
-<p><img src="/2020/01/08/RCNN系列/feature maps.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>The Spatial Pyramid Pooling Layer</p>
-<ul>
-<li>it can maintain spatial information by pooling in local spatial bins</li>
-<li>the spatial bins have sizes proportional to the image size(k-level: 1*1, 2*2, …, k*k)</li>
-<li>we can resize the input image to any scale, which is important for the accuracy  </li>
-<li><p>the coarsest pyramid level has a single bin that covers the entire image, which is in fact a “global pooling” operation </p>
-<p><img src="/2020/01/08/RCNN系列/spp.png" width="40%;"></p>
-</li>
-<li><p>for a feature map of $a×a$, with a pyramid level of $n×n$ bins:</p>
-<script type="math/tex; mode=display">
-  the\ window\ size:\ win = ceiling(a/n)\\
-  the\ stride:\ str = floor(a/n)</script></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>Training the Network</p>
-<ul>
-<li>Single-size training: fixed-size input (224×224) cropped from images, cropping for data augmentation<ul>
-<li>Multi-size training: rather than cropping, we resize the aforementioned 224×224 region to 180×180, then we train two fixed-size networks that share parameters by altenate epoch</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分析</p>
-<ul>
-<li><strong>50 bins vs. 30 bins: </strong>the gain of multi-level pooling is not simply due to more parameters, it is because the multi-level pooling is robust to the variance in object deformations and spatial layout<ul>
-<li><strong>multi-size vs. single-size:  </strong>multi results are more or less better than the single-size version</li>
-<li><strong>full vs. crop: </strong>shows the importance of maintaining the complete content</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><strong>SPP-NET FOR OBJECT DETECTION</strong></p>
-<ul>
-<li><p>We extract the feature maps from the entire image only once </p>
-</li>
-<li><p>we apply the spatial pyramid pooling on each candidate window of the feature maps  </p>
-</li>
-<li><p>These representations are provided to the fully-connected layers of the network </p>
-</li>
-<li><p>SVM samples: We use the ground-truth windows to generate the positive samples, use the samples with IOU&lt;30% as the negative samples </p>
-</li>
-<li><p>multi-scale feature extraction: </p>
-<ul>
-<li>We resize the image at {480, 576, 688, 864, 1200}, and compute the feature maps of conv5 for each scale. <ul>
-<li>we choose a single scale s ∈ S such that the scaled candidate window has a number of pixels closest to 224×224. </li>
-<li>And we use the corresponding feature map to compute the feature for this window</li>
-<li>this is roughly equivalent to resizing the window to 224×224 </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>fine-tuning:</p>
-<ul>
-<li>Since our features are pooled from the conv5 feature maps from windows of any sizes<ul>
-<li>for simplicity we only fine-tune the fully-connected layers </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Mapping a Window to Feature Maps**</p>
-<ul>
-<li><p>we project the corner point of a window onto a pixel in the feature maps, such that this corner point in the image domain is closest to the center of the receptive field of that feature map pixel.  </p>
-<p><img src="/2020/01/08/RCNN系列/mapping.png" width="50%;"></p>
-<p>​    确定原图上的两个角点（左上角和右下角），映射到 feature map上的两个对应点，使得映射点$(x^{‘}, y^{‘})$在原始图上<strong>感受野（上图绿色框）的中心点</strong>与$(x,y)$尽可能接近。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Fast-R-CNN-Fast-Region-based-Convolutional-Network"><a href="#Fast-R-CNN-Fast-Region-based-Convolutional-Network" class="headerlink" title="Fast R-CNN: Fast Region-based Convolutional Network"></a>Fast R-CNN: Fast Region-based Convolutional Network</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>improve training and testing speed</li>
-<li>increase detection accuracy</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>current approaches train models in multi-stage pipelines that are slow and inelegant<ul>
-<li>R-CNN &amp; SPPnet: CNN+SVM+bounding-box regression</li>
-<li>disk storage: features are written to disk </li>
-<li>SPPnet: can only fine-tuning the fc layers, limits the accuracy of very deep networks</li>
-</ul>
-</li>
-<li>task complexity:<ul>
-<li>numerous candidate proposals</li>
-<li>rough localization proposals must be refined </li>
-</ul>
-</li>
-<li>We propose:<ul>
-<li>a single-stage training algorithm </li>
-<li>multi-task: jointly learns to classify object proposals and refine their spatial locations </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>input: an entire image and a set of object proposals </li>
-<li>convs</li>
-<li>a region of interest (RoI) pooling layer: extracts a fixed-length feature vector from the feature map</li>
-<li>fcs that finally branch into two sibling output layers</li>
-<li><p>multi-outputs:</p>
-<ul>
-<li>one produces softmax probability over K+1 classes</li>
-<li>one outputs four bounding-box regression offsets per class</li>
-</ul>
-<p><img src="/2020/01/08/RCNN系列/fastRCNN.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>RoI pooling</p>
-<ul>
-<li>an RoI is a rectangular window inside a conv feature map, which can be defined by (r, c, h, w)  </li>
-<li>the RoI pooling layer converts the features inside any valid RoI into a small feature map with a fixed size H × W </li>
-<li>it is a special case of SPPnet when there is only one pyramid level (pooling window size = h/H * w/W)</li>
-</ul>
-</li>
-<li><p>Initializing from pre-trained networks</p>
-<ul>
-<li>the last max pooling layer is replaced by a RoI pooling layer </li>
-<li>the last fully connected layer and softmax is replaced by the wo sibling layers + respective head (softmax &amp; regressor)</li>
-<li>modified to take two inputs</li>
-</ul>
-</li>
-<li><p>Fine-tuning for detection</p>
-<ul>
-<li><p>why SPPnet is unable to update weights below the spatial pyramid pooling layer: </p>
-<ul>
-<li><p>原文提到feature vector来源于不同尺寸的图像——不是主要原因</p>
-</li>
-<li><p>feature vector在原图上的感受野通常很大（接近全图）——forward pass的计算量就很大</p>
-</li>
-<li><p>不同的图片forward pass的计算结果不能复用（when each training sample (<em>i.e</em>. RoI) comes from a different image, which is exactly how R-CNN and SPPnet networks are trained）</p>
-</li>
-</ul>
-</li>
-<li><p>We propose:</p>
-<ul>
-<li><p>takes advantage of feature sharing </p>
-</li>
-<li><p>mini-batches are sampled hierarchically: N images and R/N RoIs from each image</p>
-</li>
-<li><p>RoIs from the same image share computation and memory in the forward and backward passes </p>
-</li>
-<li><p>jointly optimize the two tasks</p>
-<p>  each RoI is labeled with a ground-truth class $u$ and a ground-truth bounding-box regression target $v$ </p>
-<p>  the network outputs are K+1 probability $p=(p_0,…p_k)$ and K b-box regression offsets $t^k=(t_x^k, t_y^k, t_w^k,t_h^k)$</p>
-<script type="math/tex; mode=display">
-  L(p, u, t^u, v) = L_{cls}(p,u) + \lambda[u>0]L_{loc}(t^u,v)\\</script><p>  $L_{cls}$:</p>
-<script type="math/tex; mode=display">
-  L_{cls}(p,u) = -log p_u\\</script><p>  $L_{loc}$:</p>
-<script type="math/tex; mode=display">
-  L_{loc}(t^u, v) = \sum_{i \in \{x,y,w,h\}}smooth_{L_1}(t^u_i - v_i)\\
-  smooth_{L_1}(x) = 
-  \begin{cases}
-  0.5x^2\ \ \ \ \ \ \ \ \ \ \ if |x|<1\\
-  |x| - 0.5\ \ \ \ \ \ otherwise
-  \end{cases}</script><p>  作者表示这种形式可以增强模型对异常数据的鲁棒性</p>
-<p>  <img src="/2020/01/08/RCNN系列/smoothL1.png" width="30%;"></p>
-</li>
-<li><p>class label: take $IoU\geq0.5$ as a foreground object, take negatives with $IoU \in [0.1,0.5)$</p>
-<p>  The lower threshold of 0.1 appears to act as a heuristic for hard example mining </p>
-</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Truncated SVD for faster detection</p>
-<ul>
-<li>Large fully connected layers are easily accelerated by compressing them with truncated SVD <script type="math/tex; mode=display">
-  W \approx U \Sigma_t V^T</script></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>the single fully connected layer corresponding to W is replaced by two fully connected layers, <strong>without non-linearity</strong></p>
-</li>
-<li><p>The first layers uses the weight matrix $\Sigma_t V^T$(and no biases)</p>
-</li>
-<li><p>the second uses U (with the original biases)</p>
-</li>
-</ul>
-<ol>
-<li><p>分析</p>
-<ul>
-<li>Fast R-CNN vs. SPPnet: even though Fast R-CNN uses single-scale training and testing, <strong>fine-tuning the conv layers</strong> provides a large improvement in mAP </li>
-<li>Truncated SVD can reduce detection time by more than 30% with only a small (0.3 percent- age point) drop in mAP </li>
-<li>deep vs. small networks: <ul>
-<li>for very deep networks fine-tuning the conv layers is important </li>
-<li>in the smaller networks (S and M) we find that conv1 is generic and task independent </li>
-<li>all Fast R-CNN results in this paper using models L fine-tune layers conv3_1 and up</li>
-<li>all experiments with models S and M fine-tune layers conv2 and up </li>
-</ul>
-</li>
-<li>multi-task training vs. stage-wise: it has the potential to improve results because the tasks influence each other through a shared representation (the ConvNet) </li>
-<li>single-scale vs. multi-scale: <ul>
-<li>single-scale detection performs almost as well as multi-scale detection </li>
-<li>deep ConvNets are adept at directly learning scale invariance </li>
-<li>single-scale processing offers the best tradeoff be- tween speed and accuracy thus we choose single-scale</li>
-</ul>
-</li>
-<li>softmax vs. SVM:<ul>
-<li>“one-shot” fine-tuning is sufficient compared to previous multi-stage training approaches</li>
-<li>softmax introduces competition, while SVMs are one-vs-rest </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Faster-R-CNN-Towards-Real-Time-Object-Detection-with-Region-Proposal-Networks"><a href="#Faster-R-CNN-Towards-Real-Time-Object-Detection-with-Region-Proposal-Networks" class="headerlink" title="Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks"></a>Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>shares the convolutional features</li>
-<li>merge the system using the concept of “attention” mechanisms </li>
-<li>sharing convolutions across proposals —-&gt; across tasks</li>
-<li>translation-Invariant &amp; scale/ratio-Invariant</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>proposals are now the test-time computational bottleneck in state-of-the-art detection systems</li>
-<li>the region proposal methods are generally implemented on the CPU</li>
-<li>we observe that the convolutional feature maps used by region-based detectors, like Fast R- CNN, can also be used for generating region proposals</li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>RPN: On top of the convolutional features, we construct an RPN by adding a few additional convolutional layers that simultaneously regress region bounds and objectness scores at each location <strong>on a regular grid</strong></li>
-<li>anchor: serves as references at multiple scales and aspect ratios </li>
-<li><p>unify RPN and Fast R-CNN detector: we propose a training scheme that alternately fine-tuning the region proposal task and the object detection task</p>
-<p><img src="/2020/01/08/RCNN系列/fasterRCNN.png" width="35%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> 4.1 Region Proposal Networks</p>
-<p> <img src="/2020/01/08/RCNN系列/RPN.png" width="65%;"></p>
-<ul>
-<li><p>This architecture is naturally implemented with an n×n convolutional layer followed by two sibling 1 × 1 convolutional layers (for <em>reg</em> and <em>cls</em>, respectively)</p>
-</li>
-<li><p>conv: an n × n sliding window </p>
-</li>
-<li><p>feature: 256-d for ZF(5 convs backbone) and 512-d for VGG(13 convs backbone)</p>
-</li>
-<li><p>two sibling fully-connected layers + respective output layer</p>
-</li>
-<li><p>anchors</p>
-<ul>
-<li>predict multiple region proposals: denoted as k</li>
-<li>the reg head has 4k outputs, the cls head has 2k outputs</li>
-<li>the k proposals are parameterized relative to <strong>k reference boxes</strong>————the anchors</li>
-<li>an anchor box is centered at the sliding window in question, and is associated with a scale and aspect ratio </li>
-<li>for a convolutional feature map of a size W × H , that is WHk anchors in total</li>
-</ul>
-</li>
-<li><p>class label</p>
-<ul>
-<li>positives1: the anchors with the highest IoU with a ground-truth box </li>
-<li>positives2: the anchors that has an IoU higher than 0.7 with any ground-truth box </li>
-<li>negatives: non-positive anchors if their IoU is lower than 0.3 <strong>for all</strong> ground-truth boxes</li>
-<li>the left: do not contribute </li>
-<li>ignored: all cross-boundary anchors </li>
-</ul>
-</li>
-<li><p>Loss function</p>
-<ul>
-<li><p>similar multi-task loss as fast-RCNN, with a normalization term</p>
-</li>
-<li><p>with $x,y,w,h$ denoting the box’s <strong>center coordinates</strong> and its width and height, the regression branch outputs $t_i$:</p>
-<script type="math/tex; mode=display">
-  t_x = (x - x_a) / w_a\\
-  t_y = (y - y_a) / h_a\\
-  t_w = log(w/ w_a)\\
-  t_h = log(h/ h_a)</script></li>
-</ul>
-</li>
-<li><p>mini-batch: sampled the positive and negative anchors from a single image with the ratio of 1:1 </p>
-<p>4.2 the unified network </p>
-</li>
-<li><p>Alternating training</p>
-<ul>
-<li>ImageNet-pre-trained model, fine-tuning end-to-end for the region proposal task </li>
-<li>ImageNet-pre-trained model, using the RPN proposals, fine-tuning end-to-end for the detection task </li>
-<li>fixed detection network convs, fine-tuning the unique layers for region proposal </li>
-<li>fixed detection network convs, fine-tuning the unique layers for detection</li>
-</ul>
-</li>
-<li><p>Approximate joint training</p>
-<ul>
-<li>multi-task loss</li>
-<li>approximate </li>
-</ul>
-<p>4.3 at training time</p>
-</li>
-<li><p>the total stride is 16 (input size / feature map size)</p>
-</li>
-<li>for a typical 1000 × 600 image, there will be roughly 20000 (60*40*9) anchors in total </li>
-<li><p>we ignore all cross-boundary anchors, there will be about 6000 anchors per image left for training</p>
-<p>4.4 at testing time</p>
-</li>
-<li><p>we use NMS(iou_thresh=0.7), that leaves 2000 proposals per image</p>
-</li>
-<li>then we use the top-N ranked proposal regions for detection</li>
-</ul>
-</li>
-<li><p>分析</p>
-</li>
-</ol>
-<h2 id="Mask-R-CNN"><a href="#Mask-R-CNN" class="headerlink" title="Mask R-CNN"></a>Mask R-CNN</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><strong>instance segmentation: </strong><ul>
-<li>detects objects while simultaneously generating instance mask</li>
-<li>注意不仅仅是目标检测了</li>
-</ul>
-</li>
-<li>easy to generalize to other tasks: <ul>
-<li>instance segmentation</li>
-<li>bounding-box object detection</li>
-<li>person keypoint detection</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>challenging:<ul>
-<li>requires the correct detection of objects</li>
-<li>requires precisely segmentation of instances</li>
-</ul>
-</li>
-<li><strong>a simple, flexible, and fast system can surpass all</strong><ul>
-<li>adding a branch for predicting segmentation on Faster-RCNN</li>
-<li>in parallel with the existing branch for classification and regression </li>
-<li>the mask branch is a small FCN applied to each RoI</li>
-</ul>
-</li>
-<li>Faster R- CNN was not designed for pixel-to-pixel alignment  </li>
-<li><strong>we propose RoIAlign to preserve exact spatial locations</strong></li>
-<li>FCNs usually perform per-pixel multi-class categorization, which couples segmentation and classification</li>
-<li><p><strong>we predict a binary mask for each class independently, decouple mask(mask branch) and class(cls branch)</strong></p>
-</li>
-<li><p>other combining methods are multi-stage</p>
-</li>
-<li><strong>our method is based on parallel prediction</strong>  </li>
-<li>FCIS also run the system in parallel but exhibits systematic errors on overlapping instances and creates spurious edges </li>
-<li>segmentation-first strategies attempt to cut the pixels of the same category into different instances </li>
-<li><strong>Mask R-CNN is based on an instance-first strategy</strong></li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>a mask branch with $Km^2$-dims outputs for each RoI, m denotes the resolution, K denotes the number of classes</li>
-<li>bce is key for good instance segmentation results:  $L_{mask} = [y&gt;0]\frac{1}{m^2}\sum bce_loss$</li>
-<li>RoI features that are well aligned to the per-pixel input </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>RoIAlign</p>
-<ul>
-<li>Quantizations in RoIPool: (1) RoI to feature map $[x/16]$; (2) feature map to spatial bins $[a/b]$; $[]$ denotes roundings</li>
-<li>These quantizations introduce misalignments </li>
-<li><p>We use bilinear interpolation to avoid quantization</p>
-<ul>
-<li>sample several points in the spatial bins</li>
-<li>computes the value of each sampling point by bilinear interpolation from the nearby grid points on the feature map</li>
-<li>aggregate the results of sampling points (using max or average) </li>
-</ul>
-<p><img src="/2020/01/08/RCNN系列/RoIAlign.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Architecture </p>
-<ul>
-<li>backbone: using a ResNet-FPN backbone for feature extraction gives excellent gains in both accuracy and speed </li>
-<li><p>head: use previous heads in ResNet/FPN(res5 contained in head/backbone)</p>
-<p><img src="/2020/01/08/RCNN系列/mrcnnheads.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Implementation Details </p>
-<ul>
-<li>positives: RoIs with IoU at least 0.5, otherwise negative</li>
-<li>loss: dice loss defined only on positive RoIs</li>
-<li>mini-batch: 2 images, N RoIs</li>
-<li>at training time: parallel computation  for 3 branches</li>
-<li>at test time: <ul>
-<li>serial computation</li>
-<li>proposals -&gt; box prediction -&gt; NMS -&gt; run mask branch on the highest scoring 100 detection boxes  </li>
-<li>it speeds up inference and improves accuracy </li>
-<li>the $28*28$ floating-number mask output is resized to the RoI size, and binarized at a threshold of 0.5</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分析</p>
-<ul>
-<li>on overlapping instances: FCIS+++ exhibits systematic artifacts </li>
-<li>architecture: it benefits from deeper networks (50 vs. 101) and advanced designs including FPN and ResNeXt</li>
-<li>FCN vs. MLP for mask branch</li>
-<li><strong>Human Pose Estimation</strong><ul>
-<li>We model a keypoint’s location as a <strong>one-hot mask</strong>, and adopt Mask R-CNN to predict K masks, one for each of K keypoint types </li>
-<li>the training target is a one-hot $m<em>m$ binary mask where only a </em>single* pixel is labeled as foreground </li>
-<li>use the cross-entropy loss </li>
-<li>We found that a relatively high resolution output ($56*56$ compared to masks) is required for keypoint-level localization accuracy</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="FPN-Feature-Pyramid-Networks-for-Object-Detection"><a href="#FPN-Feature-Pyramid-Networks-for-Object-Detection" class="headerlink" title="FPN: Feature Pyramid Networks for Object Detection"></a>FPN: Feature Pyramid Networks for Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>for object detection in multi-scale</li>
-<li>struct feature pyramids with marginal extra cost</li>
-<li>practical and accurate</li>
-<li>leverage the pyramidal shape of a ConvNet’s feature hierarchy while creating a feature pyramid that has strong semantics at all scales</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>single scale offers a good trade-off between accuracy and speed while multi-scale still performs better, especially for small objects</li>
-<li>featurized image pyramids form the basis solution for multi-scale</li>
-<li>ConvNets are proved robust to variance in scale and thus facilitate recognition from features computed on a single input scale </li>
-<li>SSD uses the naturely feature hierarchy generated by ConvNet which introduces large semantic gaps caused by different depths<ul>
-<li>high-level features are low-resolution but <strong>semantically strong</strong></li>
-<li>low-level features are of lower-level semantics, but their activations are more <strong>accurately localized</strong> as subsampled fewer times</li>
-</ul>
-</li>
-<li><p>thus we propose FPN:</p>
-<ul>
-<li>combines low-resolution, semantically strong features with high-resolution, semantically weak features via a top-down pathway and lateral connections </li>
-<li>has rich semantics at all levels </li>
-<li>built from a single scale</li>
-<li>can be easily extended to mask proposals</li>
-<li>can be trained end-to- end with all scales </li>
-</ul>
-<p><img src="/2020/01/08/RCNN系列/pyramids.png" width="40%;"></p>
-</li>
-<li><p>similar architectures make predictions only on a fine resolution  </p>
-<p><img src="/2020/01/08/RCNN系列/similar structs.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>要素</p>
-<ul>
-<li>takes a single-scale image of an arbitrary size as input </li>
-<li>outputs proportionally sized feature maps at multiple levels</li>
-<li>structure <ul>
-<li>a bottom-up pathway:  the feed-forward computation of the backbone ConvNet</li>
-<li>a top-down pathway and lateral connection: <ul>
-<li>upsampling the spatially coarser, but semantically stronger, feature maps from higher pyramid levels</li>
-<li>then enhance with features from the bottom-up pathway via lateral connections</li>
-<li>a $3<em>3$ conv is appended on each merged map <em>*to reduce the aliasing effect of upsampling</em></em></li>
-<li>shared classifiers/regressors among all levels, thus using fixed 256 channels convs</li>
-<li>upsamling uses nearest neighbor interpolation</li>
-<li>low-level features undergoes a $1*1$ conv to reduce channel dimensions </li>
-<li>merge operation is a <strong>by element-wise addition</strong></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>adopt the method in RPN &amp; Fast-RCNN for demonstration</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>RPN</p>
-<ul>
-<li>original design: <ul>
-<li>backbone Convs -&gt; single-scale feature map -&gt; dense 3×3 sliding windows -&gt; head($3<em>3$ convs + 2 sibling $1</em>1$ conv branches)</li>
-<li>for regressor: multi-scale anchors(e.g. 3 scales 3 ratios -&gt; 9 anchors)</li>
-</ul>
-</li>
-<li>new design: <ul>
-<li>adapt FPN -&gt; multi-scale feature map -&gt; sharing heads</li>
-<li>for regressor: set single-scale anchor for each level respectively (e.g. 5 level 3 ratios -&gt; 15 anchors)</li>
-</ul>
-</li>
-<li>sharing heads:<ul>
-<li>vs. not sharing: similar accuracy </li>
-<li>indicates all levels of FPN share similar semantic levels (contrasted with naturally feature hierarchy of CNNs)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Fast  R-CNN</p>
-<ul>
-<li><p>original design: take the ROI feature map from the output of last conv layer</p>
-</li>
-<li><p>new design: take the specific level of ROI feature map based on ROI area</p>
-<ul>
-<li><p>with a $w*h$ ROI on the input image, $k_0$ refers to the target level on which an RoI with $w×h=224^2$ should be mapped into </p>
-<script type="math/tex; mode=display">
-k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
-<li><p>the smaller the ROI area, the lower the level k, the finer the resolution of the feature map</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分析</p>
-<ul>
-<li>RPN<ul>
-<li>use or not FPN: boost on small objects</li>
-<li>use or not top-down pathway: semantic gaps</li>
-<li>use or not lateral connection: locations </li>
-<li>use or not multi-levels feature maps: <ul>
-<li>using P2 alone leads to more anchors </li>
-<li>more anchors are not sufficient to improve accuracy</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Fast  R-CNN<ul>
-<li>using P2 alone is <strong>marginally worse</strong> than that of using all pyramid levels </li>
-<li>we argue that this is because <strong>RoI pooling is a warping-like operation</strong>, which is less sensitive to the region’s scales</li>
-</ul>
-</li>
-<li><p>Faster R-CNN</p>
-<ul>
-<li>sharing features improves accuracy by a small margin</li>
-<li>but reduces the testing time</li>
-</ul>
-</li>
-<li><p><strong>Segmentation Proposals</strong></p>
-<ul>
-<li>use a fully convolutional setup for both training and inference </li>
-<li><p>apply a small 5×5 MLP to predict 14×14 masks </p>
-<p><img src="/2020/01/08/RCNN系列/FPNseg.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="衍生应用："><a href="#衍生应用：" class="headerlink" title="衍生应用："></a>衍生应用：<lung nodules="" detection="" and="" segmentation="" using="" 3d="" mask-rcnn=""></lung></h2><ol>
-<li>动机<ul>
-<li>3D volume detection and segmentation </li>
-<li>ROI ／ full scan</li>
-<li>LUNA16：lung nodules size evaluation </li>
-</ul>
-</li>
-<li>论点<ul>
-<li>variety among nodules &amp; similarity among non-nodules</li>
-</ul>
-</li>
-<li>方法<ul>
-<li>use overlapping sliding windows </li>
-<li>use focal loss improve class result</li>
-<li>use IOU loss improve mask result</li>
-<li>use heavy augmentation</li>
-</ul>
-</li>
-</ol>
-<h2 id="Cascade-R-CNN-Delving-into-High-Quality-Object-Detection"><a href="#Cascade-R-CNN-Delving-into-High-Quality-Object-Detection" class="headerlink" title="Cascade R-CNN: Delving into High Quality Object Detection"></a>Cascade R-CNN: Delving into High Quality Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>an detector trained with low IoU threshold usually produces noisy detections：低质量框issue</li>
-<li>但是又不能简单地提高IoU threshold<ul>
-<li>正样本会急剧减少，导致过拟合</li>
-<li>inference-time mismatch，训练阶段只有高质量框，但是测试阶段啥质量框都有</li>
-</ul>
-</li>
-<li>we propose Cascade R-CNN<ul>
-<li>multi-stage object detection architecture</li>
-<li>consists of a sequence of detectors trained with increasing IoU thresholds</li>
-<li>trained stage by stage</li>
-</ul>
-</li>
-<li>surpass all single-model on COCO</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>object detections two main tasks<ul>
-<li>recognition problem：foreground/backgroud &amp; object class</li>
-<li>localization problem：bounding box</li>
-<li>loose requirement for positives<ul>
-<li>an low IoU thresh(0.5) is required to define positives/negatives：looss</li>
-<li>noisy bounding boxes：close false positives</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>quality<ul>
-<li>将一个框和gt的IoU定义为它的quality</li>
-<li>将一个detector训练用的IoU thresh定义为它的quality</li>
-<li>detector的quality和input proposals的quality是相关的：a single detector work on a specific quality level of hypotheses</li>
-</ul>
-</li>
-<li>Cascade R-CNN<ul>
-<li>multi-stage extension of R-CNN</li>
-<li>sequentially more selective against close false positives</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<p> <img src="/2020/01/08/RCNN系列/formulation.png" width="80%;"></p>
-<ul>
-<li>first stage：<ul>
-<li>proposal network H0</li>
-<li>applied to entire image</li>
-</ul>
-</li>
-<li>second stage<ul>
-<li>region-of-interest detection sub-network H1 (detection head)</li>
-<li>run on proposals</li>
-</ul>
-</li>
-<li>C和B是classification score &amp; bounding box regression</li>
-<li>we focus on modeling the second stage</li>
-</ul>
-</li>
-<li><p>bounding box regression 针对回归质量</p>
-<ul>
-<li>an image patch $x$</li>
-<li>a bounding box $b = (b_x, b_y, b_w, b_h)$</li>
-<li>use a regressor $f(x,b)$ to fit the target $g$<ul>
-<li>use L1 loss $L_{loc}(f(x_i,b_i), g_i)$</li>
-<li>compute on 相对量 &amp; std normalization</li>
-<li>invariant to scale and location</li>
-<li>results in minor adjustments on $b$：所以regression loss通常比cls loss小得多</li>
-</ul>
-</li>
-<li>Iterative BBox<ul>
-<li>a single regression step is not sufficient for accurate localization</li>
-<li>所以就搞了N个一样的regression heads串联</li>
-<li>但还是那个问题：一个regressor只针对某一个quality level的proposals是performance optimal的，但是每个iteration以后框的distribution是剧烈变化的</li>
-<li>所以迭代两次以上基本没有gain了</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>detection quality 针对分类质量</p>
-<ul>
-<li>an image patch x</li>
-<li>M foreground classes and 1 background</li>
-<li>use a classifier $h(x)$ to learn the target class label among M+1<ul>
-<li>use CE $L_{cls}(h(x_i),y_i)$</li>
-<li>the class label is determined by IoU thresh：如果image patch和gt box的IoU大于阈值，那么这个image patch的class label就是gt box的label，否则是背景</li>
-<li>the IoU thresh defines the quality of a detector</li>
-</ul>
-</li>
-<li>challenging<ul>
-<li>如果阈值调高了，positives里面包含更少的背景（高质量前景），但是样本量少</li>
-<li>如果阈值低了，前景样本多了，但是内容更加diversified，更难reject close false positives</li>
-<li>所以一个分类器在不同的IoU阈值下，要面临不同的问题，在inference阶段，it is very difficult to perform uniformly well over all IoU levels</li>
-</ul>
-</li>
-<li>Integral loss<ul>
-<li>训练好几个分类器，针对不同的IoU level，然后inference阶段ensemble</li>
-<li>还是没有解决高IoU阈值的那个分类器会因为样本量少过拟合的问题，而且高质量分类器在infernce阶段还是要处理所有的低质量框</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Cascade R-CNN</p>
-<ul>
-<li>Cascaded Bounding Box Regression<ul>
-<li>cascade specialized regressors</li>
-<li>differs from Iterative BBox<ul>
-<li>Iterative BBox是个后处理手段，一个regressor在0.5level的boxes上面优化，然后在inference proposals上面反复迭代</li>
-<li>Cascade R-CNN是个resampling method，多个不同的regressor级连，训练测试同操作同分布</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Cascaded Detection</p>
-<ul>
-<li>resamping manner<ul>
-<li>keep上一阶段的positives</li>
-<li>同时丢掉一些outliers</li>
-</ul>
-</li>
-<li>实现就是每个stage的IoU threshold逐渐提高</li>
-<li><p>loss还是所有proposals的cls loss + 定义为前景proposals的reg loss</p>
-</li>
-<li><p>outliers</p>
-<p> <img src="/2020/01/08/RCNN系列/outlier.png" width="40%;"></p>
-</li>
-<li><p>proposal quality</p>
-<p> <img src="/2020/01/08/RCNN系列/quality.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/01/03/CNN-Visualization系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/03/CNN-Visualization系列/" itemprop="url">CNN Visualization系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-03T17:03:05+08:00">
-                2020-01-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/01/03/CNN-Visualization系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/01/03/CNN-Visualization系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-Visualizing-and-Understanding-Convolutional-Networks"><a href="#1-Visualizing-and-Understanding-Convolutional-Networks" class="headerlink" title="1. Visualizing and Understanding Convolutional Networks"></a>1. Visualizing and Understanding Convolutional Networks</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>give insight into the internal operation and behavior of the complex models</li>
-<li>then one can design better models</li>
-<li>reveal which parts of the scene in image are important for classification</li>
-<li>explore the generalization ability of the model to other datasets </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>most visualizing methods limited to the 1st layer where projections to pixel space are possible </p>
-</li>
-<li><p>Our approach propose a method that could projects high level feature maps to the pixel space</p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>* some methods give some insight into invariances basing on a simple quadratic approximation 
-* Our approach, by contrast, provides a non-parametric view of invariance 
-
-
-
-* some methods associate patches that responsible for strong activations at higher layers
-* In our approach they are not just crops of input images, but rather top-down projections that reveal structures  
-</code></pre><ol>
-<li><p>方法</p>
-<p> 3.1 Deconvnet: use deconvnet to project the feature activations back to the input pixel space </p>
-<ul>
-<li>To examine a given convnet activation, we <strong>set all other activations in the layer to zero</strong> and pass the feature maps as input to the attached deconvnet layer</li>
-<li>Then successively (i) unpool, (ii) rectify and (iii) filter to reconstruct the activity of the layer beneath until the input pixel space is reached</li>
-<li>【Unpooling】using switches</li>
-<li>【Rectification】the convnet uses relu to ensure always positive, same for back projection</li>
-<li>【Filtering】transposed conv</li>
-<li><p>Due to unpooling, the reconstruction obtained from a single activation resembles a small piece of the original input image</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/deconv.png" width="55%;"></p>
-<p>3.2 CNN model</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/CNN.png" width="70%;"></p>
-<p>3.3 visualization among layers</p>
-</li>
-<li><p>for each layer, we take the top9 strongest activation across the validation data</p>
-</li>
-<li>calculate the back projection separately</li>
-<li><p>alongside we provide the corresponding image patches</p>
-<p>3.4 visualization during training</p>
-</li>
-<li><p>randomly choose several strongest activation of a given feature map</p>
-</li>
-<li><p>lower layers converge fast, higher layers conversely</p>
-<p>3.5 visualizing the Feature Invariance</p>
-</li>
-<li><p>5 sample images being translated, rotated and scaled by varying degrees</p>
-</li>
-<li>Small transformations have a dramatic effect in the first layer of the model(c2 &amp; c3对比)</li>
-<li><p>the network is stable to translations and scalings, but not invariant to rotation </p>
-<p>3.6 architecture selection</p>
-</li>
-<li><p>old architecture(stride4, filterSize11)：The first layer filters are a mix of extremely high and low frequency information, with little coverage of the mid frequencies.  The 2nd layer visualization shows aliasing artifacts caused by the large stride 4 used in the 1st layer convolutions. (这点可以参考之前vnet中提到的，deconv导致的棋盘格伪影，大stride会更明显)</p>
-</li>
-<li><p>smaller stride &amp; smaller filter(stride2, filterSize7)：more coverage of mid frequencies, no aliasing, no dead feature</p>
-<p>3.7</p>
-</li>
-<li><p>对于物体的关键部分遮挡之后会极大的影响分类结果</p>
-</li>
-<li>第二个和第三个例子中分别是文字和人脸的响应更高，但是却不是关键部分。</li>
-</ul>
-</li>
-<li><p>理解</p>
-<p> 4.1 总的来说，网络学习到的特征，是具有辨别性的特征，通过可视化就可以看到我们提取到的特征忽视了背景，而是把关键的信息给提取出来了。从layer 1、layer 2学习到的特征基本上是颜色、边缘等低层特征；layer 3则开始稍微变得复杂，学习到的是纹理特征，比如上面的一些网格纹理；layer 4学习到的则是较多的类别信息，比如狗头；layer 5对应着更强的不变性，可以包含物体的整体信息。。</p>
-<p> 4.2 在网络迭代的过程中，特征图出现了sudden jumps。低层在训练的过程中基本没啥变化，比较容易收敛，高层的特征学习则变化很大。这解释了低层网络的从训练开始，基本上没有太大的变化，因为梯度弥散。高层网络刚开始几次的迭代，变化不是很大，但是到了40~50的迭代的时候，变化很大，因此我们以后在训练网络的时候，不要着急看结果，看结果需要保证网络收敛。</p>
-<p> 4.3 图像的平移、缩放、旋转，可以看出第一层中对于图像变化非常敏感，第7层就接近于线性变化。</p>
-</li>
-</ol>
-<h3 id="2-Striving-for-Simplicity-The-All-Convolutional-Net"><a href="#2-Striving-for-Simplicity-The-All-Convolutional-Net" class="headerlink" title="2. Striving for Simplicity: The All Convolutional Net"></a>2. Striving for Simplicity: The All Convolutional Net</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>traditional pipeline: alternating <strong>convolution</strong> and <strong>max-pooling</strong> layers followed by a small number of <strong>fully connected layers</strong></li>
-<li>questioning the necessity of different components in the pipeline, <strong>max-pooling</strong> layer to be specified</li>
-<li>to analyze the network we introduce a new variant of the “deconvolution approach” for visualizing features</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>two major improving directions based on traditional pipeline<ul>
-<li>using more complex activation functions</li>
-<li>building multiple conv modules</li>
-</ul>
-</li>
-<li>we study the most simple architecture we could conceive<ul>
-<li>a homogeneous network solely consisting of convolutional layers </li>
-<li>without the need for complicated activation functions, any response normalization or max-pooling</li>
-<li>reaches state of the art performance </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>replace the pooling layers with standard convolutional layers with stride two</p>
-<ul>
-<li>the spatial dimensionality reduction performed by pooling makes covering larger parts of the input in higher layers possible </li>
-<li>which is crucial for achieving good performance with CNNs </li>
-</ul>
-</li>
-<li><p>make use of small convolutional layers </p>
-<ul>
-<li>greatly reduce the number of parameters in a network and thus serve as a form of regularization</li>
-<li>if the topmost convolutional layer covers a portion of the image large enough to recognize its content then fully connected layers can also be replaced by simple 1-by-1 convolutions</li>
-</ul>
-</li>
-<li><p>the overall architecture consists only of convolutional layers with rectified linear non-linearities and an averaging + softmax layer to produce predictions  </p>
-<p>  <img src="/2020/01/03/CNN-Visualization系列/basemodel.png" width="60%;"></p>
-<p>  <img src="/2020/01/03/CNN-Visualization系列/modifiedmodel.png" width="60%;"></p>
-<ul>
-<li>Strided-CNN-C: pooling is removed and the preceded conv stride is increase</li>
-<li>ConvPool-CNN-C: a dense conv is placed, to show the effect of increasing parameters</li>
-<li>All-CNN-C: max-pooling is replaced by conv</li>
-<li>when pooling is replaced by an additional convolution layer with stride 2, performance stabilizes and even improves  </li>
-<li>small 3 × 3 convolutions stacked after each other seem to be enough to achieve the best performance </li>
-</ul>
-</li>
-<li><p>guided backpropagation</p>
-<ul>
-<li>the paper above proposed ‘deconvnet’, which we observe that it does not always work well without max-pooling layers </li>
-<li><strong>For higher layers</strong> of our network the method of Zeiler and Fergus fails to produce <strong>sharp, recognizable image structure</strong></li>
-<li>Our architecture does not include max-pooling, thus we can ’deconvolve’ <strong>without switches</strong>, i.e. not conditioning on an input image</li>
-<li><p>In order to obtain a reconstruction conditioned on an input image from our network without pooling layers we to combine the simple backward pass and the deconvnet</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/backwardpass.png" width="70%;"></p>
-</li>
-<li><p>Interestingly, the very first layer of the network does not learn the usual Gabor filters, but higher layers do</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/gabor.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h3 id="3-Cam-Learning-Deep-Features-for-Discriminative-Localization"><a href="#3-Cam-Learning-Deep-Features-for-Discriminative-Localization" class="headerlink" title="3. Cam: Learning Deep Features for Discriminative Localization"></a>3. Cam: Learning Deep Features for Discriminative Localization</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>we found that CNNs actually behave as object detectors despite no supervision on the location </li>
-<li>this ability is lost when fully-connected layers are used for classification </li>
-<li>we found that the advantages of global average pooling layers are beyond simply acting as a regularizer</li>
-<li>it makes it easily to localize the discriminative image regions despite not being trained for them</li>
-</ul>
-</li>
-<li><p>论点</p>
-<p> 2.1 Weakly-supervised object localization</p>
-<ul>
-<li>previous methods are not trained end-to-end and require multiple forward passes</li>
-<li><p>Our approach is trained end-to-end and can localize objects in a single forward pass</p>
-<p>2.2 Visualizing CNNs </p>
-</li>
-<li><p>previous methods only analyze the convolutional layers, ignoring the fully connected thereby painting an incomplete picture of the full story</p>
-</li>
-<li>we are able to understand our network from the beginning to the end</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> 3.1 Class Activation Mapping</p>
-<ul>
-<li>A class activation map for a particular category indicates the discriminative image regions used by the network to identify that category  </li>
-<li>the network architecture: convs—-gap—-fc+softmax</li>
-<li>we can identify the importance of the image regions by projecting back the weights of the output layer on to the convolutional feature maps </li>
-<li><p>by simply upsampling the class activation map to the size of the input image we can identify the image regions most relevant to the particular category</p>
-<p><img src="/2020/01/03/CNN-Visualization系列/cam.png" width="55%;"></p>
-<p>3.2 Weakly-supervised Object Localization </p>
-</li>
-<li><p>our technique does not adversely impact the classification performance when learning to localize  </p>
-</li>
-<li>we found that the localization ability of the networks improved when the last convolutional layer before GAP had a higher spatial resolution, thus we removed several convolutional layers from the origin networks</li>
-<li>overall we find that the classification performance is largely preserved for our GAP networks compared with the origin fc structure</li>
-<li>our CAM approach significantly outperforms the backpropagation approach on generating bounding box </li>
-<li><p>low mapping resolution prevents the network from obtaining accurate localizations</p>
-<p>3.3 Visualizing Class-Specific Units </p>
-</li>
-<li><p>the convolutional units of various layers of CNNs act as visual concept detec- tors, identifying low-level concepts like textures or mate- rials, to high-level concepts like objects or scenes </p>
-</li>
-<li>Deeper into the network, the units become increasingly discriminative</li>
-<li>given the fully-connected layers in many networks, it can be difficult to identify the importance of different units for identifying different categories </li>
-</ul>
-</li>
-</ol>
-<h3 id="4-Grad-CAM-Visual-Explanations-from-Deep-Networks-via-Gradient-based-Localization"><a href="#4-Grad-CAM-Visual-Explanations-from-Deep-Networks-via-Gradient-based-Localization" class="headerlink" title="4. Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization"></a>4. Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization</h3><h3 id="5-Grad-CAM-Improved-Visual-Explanations-for-Deep-Convolutional-Networks"><a href="#5-Grad-CAM-Improved-Visual-Explanations-for-Deep-Convolutional-Networks" class="headerlink" title="5. Grad-CAM++: Improved Visual Explanations for Deep Convolutional Networks"></a>5. Grad-CAM++: Improved Visual Explanations for Deep Convolutional Networks</h3><h2 id="6-综述"><a href="#6-综述" class="headerlink" title="6. 综述"></a>6. 综述</h2><ol>
-<li><p>GAP</p>
-<p> 首先回顾一下GAP，NiN中提出了GAP，主要为了解决全连接层参数过多，不易训练且容易过拟合等问题。</p>
-<p> 对大多数分类任务来说不会因为做了gap让特征变少而让模型性能下降。因为GAP层是一个非线性操作层，这C个特征相当于是从kxkxC经过非线性变化选择出来的强特征。</p>
-</li>
-<li><p>heatmap</p>
-<p> step1. 图像经过卷积网络后最后得到的特征图，在全连接层分类的权重（$w_{k,n}$）肯定不同，</p>
-<p> step2. 利用反向传播求出每张特征图的权重，</p>
-<p> step3. 用每张特征图乘以权重得到带权重的特征图，在第三维求均值，<strong>relu激活</strong>，归一化处理</p>
-<ul>
-<li>relu只保留wx大于0的值——我们正响应是对当前类别有用的特征，负响应会拉低$\sum wx$，即会降低当前类别的置信度</li>
-<li><p>如果没有relu，定位图谱显示的不仅仅是某一类的特征。而是所有类别的特征。</p>
-<p>step4. 将特征图resize到原图尺寸，便于叠加显示</p>
-</li>
-</ul>
-</li>
-<li><p>CAM</p>
-<p> CAM要求必须使用GAP层，</p>
-<p> CAM选择softmax层值最大的节点反向传播，<strong>求GAP层的梯度</strong>作为特征图的权重，每个GAP的节点对应一张特征图。</p>
-</li>
-<li><p>Grad-CAM</p>
-<p> Grad-CAM不需要限制模型结构，</p>
-<p> Grad-CAM选择softmax层值最大的节点反向传播，对<strong>最后一层卷积层</strong>求梯度，用每张特征图的梯度的均值作为该特征图的权重。</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/25/NiN-network-in-network/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/25/NiN-network-in-network/" itemprop="url">NiN: network in network</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T17:08:30+08:00">
-                2019-12-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/12/25/NiN-network-in-network/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/25/NiN-network-in-network/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="Network-In-Network"><a href="#Network-In-Network" class="headerlink" title="Network In Network"></a>Network In Network</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>enhance model discriminability(获得更好的特征描述)：propose mlpconv</li>
-<li>less prone to overfitting：propose global average pooling</li>
-</ul>
-</li>
-<li><p>论点</p>
-<p> <strong>comparison 1:</strong></p>
-<ul>
-<li>conventional CNN uses linear filter, which implicitly makes the assumption that the latent concepts are linearly separable. </li>
-<li>traditional CNN is stacking [linear filters+nonlinear activation/linear+maxpooling+nonlinear]：这里引出了一个激活函数和池化层先后顺序的问题，对于avg_poolling，两种操作得到的结果是不一样的，先接激活函数会丢失部分信息，所以应该先池化再激活，对于MAX_pooling，两种操作结果一样，但是先池化下采样，可以减少激活函数的计算量，<strong>总结就是先池化再激活</strong>。但是好多网络实际实现上都是relu紧跟着conv，后面接pooling，这样比较interpretable——cross feature map pooling </li>
-<li><p>mlpconv layer can be regarded as a highly nonlinear function(filter-fc-activation-fc-activation-fc-activation…)</p>
-<p><img src="/2019/12/25/NiN-network-in-network/mlpconv.png" width="50%;"></p>
-<p><strong>comparison 2:</strong></p>
-</li>
-<li><p>maxout network imposes the prior that instances of a latent concept lie within a convex set in the input space【QUESTION HERE】</p>
-</li>
-<li><p>mlpconv layer is a universal function approximator instead of a convex function approximator  </p>
-<p><strong>comparison 3:</strong></p>
-</li>
-<li><p>fully connected layers are prone to overfitting and heavily depend on dropout regularization </p>
-</li>
-<li>global average pooling is more meaningful and interpretable, moreover it itself is a structural regularizer【QUESTION HERE】</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>use <strong>mlpconv layer</strong> to replace conventional GLM(linear filters)</li>
-<li>use <strong>global average pooling</strong> to replace traditional fully connected layers</li>
-<li>the overall structure is a stack of mlpconv layers, on top of which lie the global average pooling and the objective cost layer</li>
-<li>Sub-sampling layers can be added in between the mlpconv as in CNN</li>
-<li>dropout is applied on the outputs of all but the last mlpconv layers for regularization</li>
-<li>another regularizer applied is weight decay </li>
-</ul>
-<p><img src="/2019/12/25/NiN-network-in-network/NIN.png" width="70%;"></p>
-</li>
-<li><p>细节</p>
-<ul>
-<li><p>preprocessing：global contrast normalization and ZCA whitening </p>
-</li>
-<li><p>augmentation：translation and horizontal flipping</p>
-</li>
-<li><p>GAP for conventional CNN：CNN+FC+DROPOUT &lt; CNN+GAP &lt; CNN+FC</p>
-<ul>
-<li>gap is effective as a regularizer</li>
-<li>slightly worse than the dropout regularizer result for some reason</li>
-</ul>
-</li>
-<li><p>confidence maps </p>
-<ul>
-<li>explicitly enforce feature maps in the last mlpconv layer of NIN to be confidence maps of the categories by means of global average pooling：NiN将GAP的输出直接作为output layer，因此每一个类别对应的feature map可以近似认为是 confidence map。</li>
-<li>the strongest activations appear roughly at the same region of the object in the original image：特征图上高响应区域基本与原图上目标区域对应。</li>
-<li>this motivates the possibility of performing object detection via NIN</li>
-</ul>
-</li>
-<li><p>architecture：实际中多层感知器使用1x1conv来实现，增加的多层感知器相当于是一个含参的池化层，通过对多个特征图进行含参池化，再传递到下一层继续含参池化，这种级联的<strong>跨通道的含参池化</strong>让网络有了更复杂的表征能力。</p>
-<p>  <img src="/2019/12/25/NiN-network-in-network/architecture.png" width="55%;"></p>
-</li>
-</ul>
-</li>
-<li><p>总结</p>
-<ol>
-<li>mlpconv：stronger local reception unit</li>
-<li>gap：regularizer &amp; bring confidence maps</li>
-</ol>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/05/unet-vnet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/05/unet-vnet/" itemprop="url">unet & vnet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-05T09:38:21+08:00">
-                2019-12-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/12/05/unet-vnet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/05/unet-vnet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation"><a href="#U-NET-Convolutional-Networks-for-Biomedical-Image-Segmentation" class="headerlink" title="U-NET: Convolutional Networks for Biomedical Image Segmentation"></a>U-NET: Convolutional Networks for Biomedical Image Segmentation</h2><ol>
-<li><p>动机：</p>
-<ul>
-<li>train from very few images </li>
-<li>outperforms more precisely on segmentation tasks</li>
-<li>fast</li>
-</ul>
-</li>
-<li><p>要素：</p>
-<ul>
-<li>编码：a contracting path to capture context</li>
-<li>解码：a symmetric expanding path that enables precise localization</li>
-<li>实现：pooling operators &amp; upsampling operators</li>
-</ul>
-</li>
-<li><p>论点：</p>
-<ul>
-<li><p>when we talk about deep convolutional networks：</p>
-<ul>
-<li>larger and deeper</li>
-<li>millions of parameters </li>
-<li>millions of training samples </li>
-</ul>
-</li>
-<li><p>representative method：run a sliding-window and predict a pixel label based on its‘ patch</p>
-</li>
-<li>drawbacks：<ul>
-<li>calculating redundancy of overlapping patches</li>
-<li>big patch：more max-pooling layers that reduce the localization accuracy</li>
-<li>small patch：less involvement of context</li>
-</ul>
-</li>
-<li>metioned but not further explained：cascade structure</li>
-</ul>
-</li>
-<li><p>方法：</p>
-<ol>
-<li><p>In order to localize, high resolution features from the contracting path are combined with the upsampled output. A successive convolution layer can then learn to assemble a more precise output based on this information. </p>
-<p> 理解：深层特征层感受野较大，带有全局信息，将其上采样用于提供localization information，而横向add过来特征层带有局部特征信息。两个3*3的conv block用于将两类信息整合，输出更精确的表达。</p>
-</li>
-<li><p>In the upsampling part we have also a large number of feature channels, which allow the network to propagate context information to higher resolution layers.  </p>
-<p> 理解：应该是字面意思吧，为上采样的卷积层保留更多的特征通道，就相当于保留了更多的上下文信息。</p>
-</li>
-<li><p>we use excessive data augmentation.</p>
-</li>
-</ol>
-</li>
-<li><p>细节：</p>
-<ol>
-<li><p>contracting path：</p>
-<ul>
-<li>typical CNN：blocks of [2 3*3 unpadded convs+ReLU+2*2 stride2 maxpooling]</li>
-<li>At each downsampling step we double the number of feature channels</li>
-</ul>
-</li>
-<li><p>expansive path：</p>
-<ul>
-<li>upsampling：<ul>
-<li>2*2 up-conv that half the channels</li>
-<li>concatenation the corresponding cropped feature map from the contracting path</li>
-<li>2 [3x3 conv+ReLU]</li>
-</ul>
-</li>
-<li>final layer：use a 1*1 conv to map the feature vectors to class vectors</li>
-</ul>
-<p><img src="/2019/12/05/unet-vnet/unet.png" width="60%"></p>
-</li>
-<li><p>train：</p>
-<ul>
-<li>prefer larger input size to larger batch size</li>
-<li>sgd with 0.99 momentum so that the previously seen samples dominate the optimization</li>
-</ul>
-</li>
-<li><p>loss：softmax &amp; cross entropy </p>
-</li>
-<li><p>unbalanced weight：</p>
-<ul>
-<li>pre-compute the weight map base on the frequency of pixels for a certain class </li>
-<li>add the weight for a certain element to force the learning emphasis：e.g. the small separation borders </li>
-<li>initialization：Gaussian distribution </li>
-</ul>
-</li>
-<li><p>data augmentation：</p>
-<ul>
-<li>deformations </li>
-<li>“Drop-out layers at the end of the contracting path perform further implicit data augmentation”</li>
-</ul>
-</li>
-<li><p>metrics：“warping error”, the “Rand error” and the “pixel error”  for EM segmentation challenge  and average IOU for ISBI cell tracking challenge </p>
-</li>
-<li><p>prediction：</p>
-<p>按照论文的模型结构，<strong>输入和输出的维度是不一样的</strong>——在valid padding的过程中有边缘信息损失。</p>
-<p>那么如果我们想要预测黄框内的分割结果，需要输入一张更大的图（蓝框）作为输入，在图片边缘的时候，我们通过镜像的方式补全。</p>
-<p><img src="/2019/12/05/unet-vnet/predict.png" width="60%;"></p>
-<p><strong>因果关系：</strong></p>
-<ul>
-<li>首先因为内存限制，输入的不是整张图，是图片patch，</li>
-<li>为了保留上下文信息，使得预测更准确，我们给图片patch添加一圈border的上下文信息（实际感兴趣的是黄框区域）</li>
-<li>在训练时，为了避免重叠引入的计算，卷积层使用了valid padding</li>
-<li>因此在网络的输出层，输出尺寸才是我们真正关注的部分</li>
-<li>如果训练样本尺寸不那么huge，完全可以全图输入，然后使用same padding，直接预测全图mask</li>
-</ul>
-</li>
-</ol>
-</li>
-<li><p>总结：</p>
-<ul>
-<li>train from very few images —-&gt; data augmentation</li>
-<li>fast —-&gt; full convolution layers</li>
-<li>precise —-&gt; global?</li>
-</ul>
-</li>
-</ol>
-<h2 id="V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation"><a href="#V-Net-Fully-Convolutional-Neural-Networks-for-Volumetric-Medical-Image-Segmentation" class="headerlink" title="V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation"></a>V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>entire 3D volume</li>
-<li>imbalance between the number of foreground and background voxels：dice coefficient</li>
-<li>limited data：apply random non-linear transformations and histogram matching</li>
-<li>fast and accurate</li>
-</ul>
-</li>
-<li><p>论点：</p>
-<ul>
-<li>early approaches based on patches<ul>
-<li>local context</li>
-<li>challenging modailities</li>
-<li>efficiency issues</li>
-</ul>
-</li>
-<li>fully convolutional networks<ul>
-<li>2D so far</li>
-</ul>
-</li>
-<li>imbalance issue：the anatomy of interest occupies only a very small region of the scan thus predictions are strongly biased towards the background.<ul>
-<li>re-weighting</li>
-<li>dice coefficient claims to be better that above</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>要素：</p>
-<ul>
-<li>a compression path</li>
-<li><p>a decompression path</p>
-<p><img src="/2019/12/05/unet-vnet/vnet.png" width="55%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法：</p>
-<ul>
-<li><p>compression：</p>
-<ul>
-<li>add residual能够加速收敛</li>
-<li>resolution is reduced by [2*2*2 conv with stride 2]相比于maxpooling节省了bp所需switch map的memory消耗</li>
-<li>double the number of feature maps as we reduce their resolution</li>
-<li>PReLU</li>
-</ul>
-</li>
-<li><p>decompression：</p>
-<ul>
-<li>horizontal connections：1) gather fine grained detail that would be otherwise lost in the compression path  2) improve the convergence time </li>
-<li><p>residual conv：blocks of [5*5*5 conv with stride 1] 提取特征继续增大感受野</p>
-<p><img src="/2019/12/05/unet-vnet/receptive.png" width="50%"></p>
-</li>
-<li><p>up-conv：expands the spatial support of the lower resolution feature maps </p>
-<p><img src="/2019/12/05/unet-vnet/deconv.png" width="60%"></p>
-</li>
-<li><p>last layer：run [1*1*1conv with 2 channel+softmax] to obtain the voxelwise probabilistic segmentations of the foreground and background </p>
-</li>
-</ul>
-</li>
-<li><p>dice coefficient： [0,1] which we aim to maximise，assume $p_i$、$g_i$ belong to two <strong>binary volumes</strong></p>
-<script type="math/tex; mode=display">
-  D = \frac{2\sum_i^N p_i g_i}{\sum_i^N p_i^2 + \sum_i^N g_i^2}</script></li>
-<li><p>train：</p>
-<ul>
-<li>input fix size 128 × 128 × 64 voxels and a spatial resolution of 1 × 1 × 1.5 millimeters</li>
-<li>each mini-batch contains 2 volumes</li>
-<li>online augmentation：<ul>
-<li>randomly deformation</li>
-<li>vary the intensity distribution：随机选取样本的灰度分布作为当前训练样本的灰度分布</li>
-</ul>
-</li>
-<li>used a momentum of 0.99 and a initial learning rate of 0.0001 which decreases by one order of magnitude every 25K iterations</li>
-</ul>
-</li>
-<li><p>metrics：</p>
-<ul>
-<li>Dice coefficient</li>
-<li>Hausdorff distance of the predicted delineation to the ground truth annotation</li>
-<li>the score obtained on the challenge </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="dice-loss-amp-focal-loss"><a href="#dice-loss-amp-focal-loss" class="headerlink" title="dice loss &amp; focal loss"></a>dice loss &amp; focal loss</h2><ol>
-<li><p>CE &amp; BCE</p>
-<ul>
-<li><p>CE：categorical_crossentropy，针对所有类别计算，类别间互斥</p>
-<script type="math/tex; mode=display">
-CE(x) = -\sum_{i=1}^{n\_class}y_i log f_i(x)</script><blockquote>
-<p>$x$是输入样本，$y_i$是第$i$个类别对应的真实标签，$f_i(x)$是对应的模型输出值。</p>
-<p>对分类问题，$y_i$是one-hot，$f_i(x)$是个一维向量。最终得到一个数值。</p>
-</blockquote>
-</li>
-<li><p>BCE：binary_crossentropy，针对每个类别计算</p>
-<script type="math/tex; mode=display">
-BCE(x)_i = - [y_i log f_i(x) + (1-y_i)log(1-f_i(x))]</script><blockquote>
-<p>$i$是类别编号，最终得到一个维度为$n_class$的向量。</p>
-<p>再求类均值得到一个数值作为单个样本的loss。</p>
-</blockquote>
-<script type="math/tex; mode=display">
-BCE(x) = \frac{\sum_{i=1}^{n\_class}BCE_i(x)}{n\_class}</script></li>
-<li><p>batch loss：对batch中所有样本的loss求均值。</p>
-</li>
-<li><p>从公式上看，CE的输出通常是经过了softmax，softmax的某一个输出增大，必然导致其它类别的输出减小，因此在计算loss的时候关注正确类别的预测值是否被拉高即可。使用BCE的场景通常是使用sigmoid，类别间不会互相压制，因此既要考虑所属类别的预测概率够高，也要考虑不所属类别的预测概率足够低（这一项在softmax中被实现了故CE不需要这一项）。</p>
-</li>
-<li>场景：<ul>
-<li>二分类：只有一个输出节点，$f(x) \in (0,1)$，应该使用sigmoid+BCE作为最后的输出层配置。</li>
-<li>单标签多分类：应该使用softmax+CE的方案，BCE也同样适用。</li>
-<li>多标签多分类：multi-label每个标签的输出是相互独立的，因此常用配置是sigmoid+BCE。</li>
-</ul>
-</li>
-<li>对分割场景来说，输出的每一个channel对应一个类别的预测map，可以看成是多个channel间的单标签多分类（softmax+CE），也可以看成是每个独立通道类别map的二分类（sigmoid+BCE）。unet论文用了weighted的softmax+CE。vnet论文用了dice_loss。</li>
-</ul>
-</li>
-<li><p>re-weighting(WCE)</p>
-<p> 基于CE&amp;BCE，给了样本不同的权重。</p>
-<p> unet论文中提到了基于pixel frequency为不同的类别创建了weight map。</p>
-<p> 一种实现：基于每个类别的weight map，在实现CE的时候改成加权平均即可。</p>
-<p> 另一种实现：基于每个样本的weight map，作为网络的附加输入，在实现CE的时候乘在loss map上。</p>
-</li>
-<li><p>focal loss</p>
-<p> 提出是在目标检测领域，用于解决正负样本比例严重失调的问题。</p>
-<p> 也是一种加权，但是相比较于re-weighting，<strong>困难样本的权重由网络自行推断出</strong>，通过添加$(\alpha)$和$(-)^\lambda$这一加权项：</p>
-<script type="math/tex; mode=display">
- focal\_loss(x)_i = -[\alpha y_i (1-p_i)^\lambda log (p_i)+(1-\alpha)(1-y_i)p_i^\lambda log(1-p_i)]</script><ul>
-<li><p>对于类别间不均衡的情况（通常负样本远远多于正样本），$(\alpha)$项用于平衡正负样本权重。</p>
-</li>
-<li><p>对于类内困难样本的挖掘，$(-)^\lambda$项用于调整简单样本和困难样本的权重，预测概率更接近真实label的样本（简单样本）的权重会衰减更快，预测概率比较不准确的样本（苦难样本）的权重则更高些。</p>
-<p>由于分割网络的输出的单通道／多通道的图片，直接使用focal loss会导致loss值很大。</p>
-<p>​    1. 通常与其他loss加权组合使用</p>
-<p>​    2. sum可以改成mean</p>
-<p>​    3.不建议在训练初期就加入，可在训练后期用于优化模型</p>
-<p>​    4. 公式中含log计算，可能导致nan，要对log中的元素clip</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    gamma = <span class="number">2.</span></span><br><span class="line">    alpha = <span class="number">0.25</span></span><br><span class="line">    <span class="comment"># score = alpha * y_true * K.pow(1 - y_pred, gamma) * K.log(y_pred) +            # this works when y_true==1</span></span><br><span class="line">    <span class="comment">#         (1 - alpha) * (1 - y_true) * K.pow(y_pred, gamma) * K.log(1 - y_pred)  # this works when y_true==0</span></span><br><span class="line">    pt_1 = tf.where(tf.equal(y_true, <span class="number">1</span>), y_pred, tf.ones_like(y_pred))</span><br><span class="line">    pt_0 = tf.where(tf.equal(y_true, <span class="number">0</span>), y_pred, tf.zeros_like(y_pred))</span><br><span class="line">    <span class="comment"># avoid nan</span></span><br><span class="line">    pt_1 = K.clip(pt_1, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    pt_0 = K.clip(pt_0, <span class="number">1e-3</span>, <span class="number">.999</span>)</span><br><span class="line">    score = -K.sum(alpha * K.pow(<span class="number">1.</span> - pt_1, gamma) * K.log(pt_1)) -  \</span><br><span class="line">            K.sum((<span class="number">1</span> - alpha) * K.pow(pt_0, gamma) * K.log(<span class="number">1.</span> - pt_0))</span><br><span class="line">    <span class="keyword">return</span> score</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>dice loss</p>
-<p>dice定义两个mask的相似程度：</p>
-<script type="math/tex; mode=display">
-dice = \frac{2 * A \bigcap B}{|A|+|B|} = \frac{2 * TP}{2*TP + FN + FP}</script><ul>
-<li>分子是TP——只关注前景</li>
-<li><p>分母可以是$|A|$（逐个元素相加），也可以是平方形式$|A|^2$</p>
-</li>
-<li><p><strong>梯度：</strong>“使用dice loss有时会不可信，原因是对于softmax或log loss其梯度简言之是p-t ，t为目标值，p为预测值。而dice loss 为 2t2 / (p+t)2</p>
-<p> 如果p，t过小会导致梯度变化剧烈，导致训练困难。”</p>
-<p> 【详细解释下】交叉熵loss：$L=-(1-|t-p|)log(1-|t-p|)$，求导得到$\frac{\partial L}{\partial p}=-log(1-|t-p|)$，其实就可以简化看作$t-p$，很显然这个梯度是有界的，因此使用交叉熵loss的优化过程比较稳定。而dice loss的两种形式（不平方&amp;平方）：$L=\frac{2pt}{p+t}\ or\  L=\frac{2pt}{p^2+t^2}$，求导以后分别是$\frac{\partial L}{\partial p} = \frac{t^2+2pt}{(p+t)^2} \ or\ \frac{3tp^2+t^3}{(p^2+t^2)^2}$计算结果比较复杂，pt都很小的情况下，梯度值可能很大，可能导致训练不稳定，loss曲线混乱。</p>
-</li>
-</ul>
-</li>
-</ol>
-<p>  vnet论文中的定义在分母上稍有不同（see below）。smoothing的好处：</p>
-<ul>
-<li>避免分子除0</li>
-<li><p>减少过拟合</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">  	smooth = <span class="number">1.</span></span><br><span class="line">    intersection = K.sum(y_true * y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    union = K.sum(y_true, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) + K.sum(y_pred, axis=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]) </span><br><span class="line">    <span class="keyword">return</span> K.mean( (<span class="number">2.</span> * intersection + smooth) / (union + smooth), axis=<span class="number">0</span>) </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_coef_loss</span><span class="params">(y_true, y_pred)</span>:</span> </span><br><span class="line">    <span class="number">1</span> - dice_coef(y_true, y_pred, smooth=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<ol>
-<li><p>iou loss</p>
-<p> dice loss衍生，intersection over union：</p>
-<script type="math/tex; mode=display">
- iou = \frac{A \bigcap B}{A \bigcup B}</script><p> 分母上比dice少了一个intersection。</p>
-<ul>
-<li>“IOU loss的缺点同DICE loss，训练曲线可能并不可信，训练的过程也可能并不稳定，有时不如使用softmax loss等的曲线有直观性，通常而言softmax loss得到的loss下降曲线较为平滑。”</li>
-</ul>
-</li>
-<li><p>boundary loss</p>
-<p> dice loss和iou loss是基于<strong>区域面积匹配度</strong>去学习，我们也可以使用<strong>边界匹配度</strong>去监督网络的学习。</p>
-<p> 只对边界上的像素进行评估，和GT的边界吻合则为0，不吻合的点，根据其距离边界的距离评估它的Loss。</p>
-</li>
-<li><p>Hausdorff distance</p>
-<p> 用于度量两个点集之间的相似程度，denote 点集$A\{a_1, a_2, …, a_p\}$，点集$B\{b_1, b_2, …, b_p\}$：</p>
-<script type="math/tex; mode=display">
- HD(A, B) = max\{hd(A,B), hd(B,A)\}\\
- hd(A,B) = max_{a \in A} min_{b in B} ||a-b||\\
- hd(B,A) = max_{b \in B} min_{a in A} ||b-a||</script><p> 其中HD(A,B)是Hausdorff distance的基本形式，称为双向距离</p>
-<p> hd(A,B)描述的是单向距离，首先找到点集A中每个点在点集B中距离最近的点作为匹配点，然后计算这些a-b-pair的距离的最大值。</p>
-<p> HD(A,B)取单向距离中的最大值，描述了两个点集合的最大不匹配程度。</p>
-</li>
-<li><p>mix loss</p>
-<ul>
-<li>BCE + dice loss：在数据较为平衡的情况下有改善作用，但是在数据极度不均衡的情况下，交叉熵损失会在几个训练之后远小于Dice 损失，效果会损失。</li>
-<li>focal loss + dice loss：数量级问题</li>
-</ul>
-</li>
-<li><p>MSE</p>
-<p> 关键点检测有时候也会采用分割框架，这时候ground truth是高斯map，dice是针对二值化mask的，这时候还可以用MSE。</p>
-</li>
-<li><p>ohnm</p>
-<p>online hard negative mining 困难样本挖掘</p>
-</li>
-<li><p>Tversky loss</p>
-<p>一种加权的dice loss，dice loss会平等的权衡FP（精度，假阳）和FN（召回，假阴），但是医学图像中病灶数目远少于背景数量，很可能导致训练结果偏向高精度但是低召回率，Tversky loss控制loss更偏向FN：</p>
-<script type="math/tex; mode=display">
-loss = 1-\frac{|PG|}{|PG|+\alpha|P\backslash G|+\beta|G\backslash P|}</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tversky_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    y_true_pos = K.flatten(y_true)</span><br><span class="line">    y_pred_pos = K.flatten(y_pred)</span><br><span class="line">    <span class="comment"># TP</span></span><br><span class="line">    true_pos = K.sum(y_true_pos * y_pred_pos)</span><br><span class="line">    <span class="comment"># FN</span></span><br><span class="line">    false_neg = K.sum(y_true_pos * (<span class="number">1</span>-y_pred_pos))</span><br><span class="line">    <span class="comment"># FP</span></span><br><span class="line">    false_pos = K.sum((<span class="number">1</span>-y_true_pos) * y_pred_pos)</span><br><span class="line">    alpha = <span class="number">0.7</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> - (true_pos + K.epsilon())/(true_pos + alpha * false_neg + (<span class="number">1</span>-alpha) * false_pos + K.epsilon())</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>Lovasz hinge &amp; Lovasz-Softmax loss</p>
-<p>IOU loss衍生，jaccard loss只适用于离散情况，而网络预测是连续值，如果不使用某个超参将神经元输出二值化，就不可导。blabla</p>
-<p>不是很懂直接用吧：<a href="https://github.com/bermanmaxim/LovaszSoftmax" target="_blank" rel="noopener">https://github.com/bermanmaxim/LovaszSoftmax</a></p>
-</li>
-</ol>
-<h2 id="一些补充"><a href="#一些补充" class="headerlink" title="一些补充"></a>一些补充</h2><ol>
-<li><p>改进：</p>
-<ol>
-<li>dropout、batch normalization：从论文上看，unet只在最深层卷积层后面添加了dropout layer，BN未表，而common sense用每一个conv层后面接BN层能够替换掉dropout并能获得性能提升的。</li>
-<li>UpSampling2D、Conv2DTranspose：unet使用了上采样，vnet使用了deconv，但是“DeConv will produce image with checkerboard effect, which can be revised by upsample and conv”(<a href="https://distill.pub/2016/deconv-checkerboard/" target="_blank" rel="noopener">Reference</a>)。</li>
-<li>valid padding、same padding：unet论文使用图像patch作为输入，特征提取时使用valid padding，损失边缘信息。</li>
-<li>network blocks：unet用的conv block是两个一组的3*3conv，vnet稍微不同一点，可以尝试的block有ResNet／ResNext、DenseNet、DeepLab等。</li>
-<li>pretrained encoder：feature extraction path使用一些现有的backbone，可以加载预训练权重(<a href="https://arxiv.org/abs/1801.05746" target="_blank" rel="noopener">Reference</a>)，加速训练，防止过拟合。</li>
-<li>加入SE模块(<a href="https://zhuanlan.zhihu.com/p/36890585" target="_blank" rel="noopener">Reference</a>)：对每个通道的特征加权</li>
-<li>attention mechanisms：</li>
-<li>引用nn-Unet主要<strong>结构改进</strong>合集：“Just to provide some prominent examples: variations of encoder-decoder style architectures with skip connections, first introduced by the U-Net [12], include the introduction of residual connections [9], dense connections [6], at- tention mechanisms [10], additional loss layers [5], feature recalibration [13], and others [11]. </li>
-</ol>
-</li>
-<li><p>衍生：</p>
-<ol>
-<li><p>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation </p>
-</li>
-<li><p>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</p>
-</li>
-</ol>
-</li>
-</ol>
-<h2 id="TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation"><a href="#TernausNet-U-Net-with-VGG11-Encoder-Pre-Trained-on-ImageNet-for-Image-Segmentation" class="headerlink" title="TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation"></a>TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation</h2><ol>
-<li><p>动机：</p>
-<ul>
-<li>neural network initialized with pre-trained weights usually shows better performance than those trained from scratch on a small dataset. </li>
-<li>保留encoder-decoder的结构，同时充分利用迁移学习的优势</li>
-</ul>
-</li>
-<li><p>论点：</p>
-<ul>
-<li>load pretrained weights</li>
-<li>用huge dataset做预训练</li>
-</ul>
-</li>
-<li><p>方法：</p>
-<ul>
-<li>用vgg11替换原始的encoder，并load pre-trained weights on ImageNet：</li>
-<li>最深层输入(maxpooling5)：use a single conv of 512 channels that <strong>serves as a bottleneck central part</strong> of the network</li>
-</ul>
-<p><img src="/2019/12/05/unet-vnet/TernausNet.png" width="50%;">                      <img src="/2019/12/05/unet-vnet/vgg11.png" width="30%;"></p>
-<ul>
-<li><p>upsampling换成了convTranspose</p>
-</li>
-<li><p>loss function：IOU + BCE：</p>
-<script type="math/tex; mode=display">
- L = BCE - log(IOU)</script></li>
-<li><p>inference：choose a <strong>threshold 0.3</strong>, all pixel values below which are set to be zero</p>
-</li>
-</ul>
-</li>
-<li><p>结论：</p>
-<ol>
-<li>converge faster</li>
-<li>better IOU</li>
-</ol>
-</li>
-</ol>
-<h2 id="nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation"><a href="#nnU-Net-Breaking-the-Spell-on-Successful-Medical-Image-Segmentation" class="headerlink" title="nnU-Net: Breaking the Spell on Successful Medical Image Segmentation"></a>nnU-Net: Breaking the Spell on Successful Medical Image Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>many proposed methods fail to generalize: 对于分割任务，从unet出来之后的几年里，在网络结构上已经没有多少的突破了，结构修改越多，反而越容易过拟合</li>
-<li>relies on just a simple U-Net architecture embedded in a robust training scheme</li>
-<li>automate necessary adaptations such as preprocessing, the exact patch size, batch size, and inference settings based on the properties of a given dataset: 更多的提升其实在于理解数据，针对数据采用适当的预处理和训练方法和技巧</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>the diversity and individual peculiarities of imaging datasets make it difficult to generalize </li>
-<li>prominent modifications focus on architectural modifications, merely brushing over all the other hyperparameters</li>
-<li>we propose: 使用基础版unet：nnUNet（no-new-Net）<ul>
-<li>a formalism for automatic adaptation to new datasets</li>
-<li>automatically designs and executes a network training pipeline </li>
-<li>without any manual fine-tuning</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>要素</p>
-<p>a segmentation task: $f_{\theta}(X) = \hat Y$,  in this paper we seek for a $g(X,Y)=\theta$.</p>
-<p>First we distinguish two type of hyperparameters:</p>
-<ul>
-<li>static params：in this case the network architecture and a robust training scheme </li>
-<li>dynamic params：those that need to be changed in dependence of $X$ and $Y$</li>
-</ul>
-<p>Second we define g——a set of heuristics rules covering the entire process of the task:</p>
-<ul>
-<li>预处理：resampling和normalization</li>
-<li>训练：loss，optimizer设置、数据增广</li>
-<li>推理：patch-based策略、test-time-augmentations集成和模型集成等</li>
-<li>后处理：增强单连通域等</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ol>
-<li><p>Preprocessing</p>
-<ul>
-<li>Image Normalization：<ul>
-<li>CT：$normed_intensity = (intensity  - fg_mean) / fg_standard_deviation$,   $fg$ for $[0.05,0.95]$ foreground intensity</li>
-<li>not CT：$normed_intensity = (intensity  - mean) / standard_deviation $</li>
-</ul>
-</li>
-<li>Voxel Spacing：<ul>
-<li>for each axis chooses the median as the target spacing</li>
-<li>image resampled with third order spline interpolation</li>
-<li>z-axis using nearest neighbor interpolation if ‘anisotropic spacing’ occurs</li>
-<li>mask resampled with third order spline interpolation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Training Procedure </p>
-<ul>
-<li><p>Network Architecture：</p>
-<ul>
-<li><p>3 <strong>independent</strong> model：a 2D U-Net, a 3D U-Net and a cascade of two 3D U-Net  </p>
-<p>  <img src="/2019/12/05/unet-vnet/nnUnet.jpg" width="80%;"></p>
-</li>
-<li><p>padded convolutions：to achieve identical output and input shapes </p>
-</li>
-<li><p><strong>instance normalization</strong>：“BN适用于判别模型，比如图片分类模型。因为BN注重对每个batch进行归一化，从而保证数据分布的一致性，而判别模型的结果正是取决于数据整体分布。但是BN对batchsize的大小比较敏感，由于每次计算均值和方差是在一个batch上，所以如果batchsize太小，则计算的均值、方差不足以代表整个数据分布；IN适用于生成模型，比如图片风格迁移。因为图片生成的结果主要依赖于某个图像实例，所以对整个batch归一化不适合图像风格化，在风格迁移中使用Instance Normalization不仅可以加速模型收敛，并且可以保持每个图像实例之间的独立。”</p>
-</li>
-<li><p>Leaky ReLUs</p>
-</li>
-</ul>
-</li>
-<li><p>Network Hyperparameters：</p>
-<ul>
-<li>sets the batch size, patch size and number of pooling operations for each axis based on the memory consumption </li>
-<li>large patch sizes are favored over large batch sizes </li>
-<li>pooling along each axis is done until the voxel size=4</li>
-<li>start num of filters=30, double after each pooling</li>
-<li>If the selected patch size covers less than 25% of the voxels, train the 3D U-Net cascade on a downsampled version of the training data  to keep sufficient context </li>
-</ul>
-</li>
-<li><p>Network Training:</p>
-<ul>
-<li>five-fold cross-validation </li>
-<li>One epoch is defined as processing 250 batches </li>
-<li>loss = dice loss + cross-entropy loss </li>
-<li>Adam(lr=3e-4, decay=3e-5)</li>
-<li>lrReduce: EMA(train_loss), 30 epoch, factor=0.2</li>
-<li>earlyStop: earning rate drops below 10 6 or 1000 epochs are exceeded</li>
-<li>data augmentation: elastic deformations, random scaling and random rotations as well as <strong>gamma augmentation</strong>($g(x,y)=f(x,y)^{gamma}$)</li>
-<li>keep transformations in 2D-plane if ‘anisotropic spacing’ occurs</li>
-</ul>
-</li>
-<li><p>Inference </p>
-<ul>
-<li>sliding window with half the patch size: this increases the weight of the predictions close to the center relative to the borders</li>
-<li>ensemble:<ul>
-<li>U-Net configurations (2D, 3D and cascade)</li>
-<li>furthermore uses the five models (five-fold cross-validation)</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-</li>
-<li><p>Ablation studies</p>
-<p><img src="/2019/12/05/unet-vnet/nn-Unet Ablation studies.png" width="70%;"></p>
-</li>
-</ol>
-<h2 id="3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation"><a href="#3D-U-Net-Learning-Dense-Volumetric-Segmentation-from-Sparse-Annotation" class="headerlink" title="3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation"></a>3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>learns from sparsely/full annotated volumetric images (user annotates some slices)</li>
-<li>provides a dense 3D segmentation </li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>要素</p>
-<ul>
-<li>3D operations </li>
-<li>avoid bottlenecks and use batch normalization for faster convergence</li>
-<li>on-the-fly elastic deformation</li>
-<li>train from scratch</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>neighboring slices show almost the same information </li>
-<li>many biomedical applications generalizes reasonably well because medical images comprises repetitive structures  </li>
-<li>thus we suggest dense-volume-segmentation-network that only requires some annotated 2D slices for training</li>
-<li><p>scenarios</p>
-<ul>
-<li>manual annotated 一部分slice，然后训练网络实现dense seg</li>
-<li>用一部分 sparsely annotated的dataset作为training set，然后训练的网络实现在新的数据集上dense seg</li>
-</ul>
-<p><img src="/2019/12/05/unet-vnet/scenarios.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Network Architecture </p>
-<ul>
-<li><p>compression：2*3x3x3 convs(+BN)+relu+2x2x2 maxpooling</p>
-</li>
-<li><p>decompression：2x2x2 upconv+2*3x3x3 convs+relu</p>
-</li>
-<li><p>head：1x1x1 conv</p>
-</li>
-<li><p>concat shortcut connections</p>
-</li>
-<li><p>【QUESTION】avoid bottlenecks by doubling the number of channels already before max pooling</p>
-<p>  个人理解这个double channel是在跟原始的unet结构对比，原始unet每个stage的两个conv的filter num是一样的，然后进行max pooling会损失部分信息，但是分割任务本身是个dense prediction，所以增大channel来减少信息损失</p>
-<p>  但是不理解什么叫“avoid bottlenecks”</p>
-<p>  原文说是参考了《Rethinking the inception architecture for computer vision》大名鼎鼎的inception V3</p>
-<p>  可能对应的是“1. Avoid representational bottlenecks, especially early in the network.”，从输入到输出，要逐渐减少feature map的尺寸，同时要逐渐增加feature map的数量。</p>
-</li>
-</ul>
-<p><img src="/2019/12/05/unet-vnet/3Dunet.png" width="50%;"></p>
-<ul>
-<li>input：132x132x116 voxel tile </li>
-<li>output：44x44x28</li>
-<li>BN：before each ReLU</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p><strong>weighted softmax loss function</strong>：setting the weights of unlabeled pixels to zero makes it possible to learn from only the labelled ones and, hence, to generalize to the whole volume（是不是random set the loss zeros of some samples总能让网络更好的generalize？）</p>
-<ul>
-<li><p>Data</p>
-<ul>
-<li>manually annotated some orthogonal xy, xz, and yz slices </li>
-<li>annotation slices were sampled uniformly</li>
-</ul>
-</li>
-<li><p>ran on down-sampled versions of the original resolution by factor of two </p>
-</li>
-<li><p>labels：0: “inside the tubule”; 1: “tubule”; 2: “background”, and 3: “unlabeled”.  </p>
-</li>
-<li><p>Training</p>
-<ul>
-<li>rotation, scaling and gray value augmentation</li>
-</ul>
-</li>
-<li>a smooth dense deformation：random vector, normal distribution, B-spline interpolation <ul>
-<li>weighted cross-entropy loss：increase weights  “inside the tubule”, reduce weights “background”, set zero “unlabeled”</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss"><a href="#2-5D-UNet-Automatic-Segmentation-of-Vestibular-Schwannoma-from-T2-Weighted-MRI-by-Deep-Spatial-Attention-with-Hardness-Weighted-Loss" class="headerlink" title="2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss"></a>2.5D-UNet: Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss</h2><ol>
-<li><p>专业术语</p>
-<ul>
-<li>Vestibular Schwannoma(VS) tumors：前庭神经鞘瘤</li>
-<li>through-plane resolution：层厚</li>
-<li>isotropic resolution：各向同性</li>
-<li>anisotropic resolutions：各向异性</li>
-</ul>
-</li>
-<li><p>动机</p>
-<ul>
-<li><p>tumor的精确自动分割</p>
-</li>
-<li><p>challenge</p>
-<ul>
-<li>low contrast：hardness-weighted Dice loss functio </li>
-<li>small target region：attention module </li>
-<li>low through-plane resolution：2.5D</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>segment small structures from large image contexts<ul>
-<li>coarse-to-fine </li>
-<li>attention map </li>
-<li>Dice loss </li>
-<li>our method<ul>
-<li>end-to-end supervision on the learning of attention map </li>
-<li>voxel-level hardness- weighted Dice loss function </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>CNN<ul>
-<li>2D CNNs ignore inter-slice correlation </li>
-<li>3D CNNs most applied to images with isotropic resolution requiring upsampling</li>
-<li>to balance the physical receptive field (in terms of mm rather than voxels)：memory rise</li>
-<li>our method<ul>
-<li>high in-plane resolution &amp; low through-plane resolution </li>
-<li>2.5D CNN combining 2D and 3D convolutions </li>
-<li>use inter-slice features </li>
-<li>more efficient than 3D CNNs</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>数据<ul>
-<li>T2-weighted MR images of 245 patients with VS tumor</li>
-<li>high in-plane resolution around 0.4 mm×0.4 mm，512x512</li>
-<li>slice thickness and inter-slice spacing 1.5 mm，slice number 19 to 118</li>
-<li>cropped cube size：100 mm×50 mm×50 mm </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architecture</p>
-<ul>
-<li>five levels：L1、L2 use 2D，L3、L4、L5 use 3D</li>
-<li>After the first two max-pooling layers that downsample the feature maps only in 2D, the feature maps in L3 and the followings have a near- isotropic 3D resolution.  </li>
-<li>start channels：16</li>
-<li>conv block：conv-BN-pReLU</li>
-<li><p>add a spatial attention module to each level of the decoder </p>
-<p><img src="/2019/12/05/unet-vnet/2.5D UNet.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>spatial attention module </p>
-<ul>
-<li>A spatial attention map can be seen as a single-channel image of attention coefficient </li>
-<li>input：feature map with channel $N_l$</li>
-<li>conv1+ReLU： channel $N_l/2$</li>
-<li>conv2+Sigmoid：channel 1，outputs the attention map</li>
-<li>multiplied the feature map with the attention map</li>
-<li>a residual connection</li>
-<li>explicit supervision <ul>
-<li>multi-scale attention loss </li>
-<li>$L_{attention} = \frac{1}{L} \sum_{L} l(A_l, G_l^f)$</li>
-<li>$A_l$是每一层的attention map，$G_l^f$是每一层是前景ground truth average-pool到当前resolution的mask</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Voxel-Level Hardness-Weighted Dice Loss</p>
-<ul>
-<li><p>automatic hard voxel weighting：$w_i = \lambda * abs(p_i - g_i) + (1-\lambda)$</p>
-</li>
-<li><p>$\lambda \in [0,1]$，controls the degree of hard voxel weighting</p>
-</li>
-<li><p>hardness-weighted Dice loss (HDL) ：</p>
-<script type="math/tex; mode=display">
-  l(P,G) = 1.0 - \frac{1}{C}\sum_{C} \frac{2\sum_i w_i p_i g_i + \epsilon}{\sum_i w_i (p_i + g_i) + \epsilon}</script></li>
-<li><p>total loss：</p>
-<script type="math/tex; mode=display">
-  L = \frac{1}{L} \sum_{L} l(A_l, G_l^f) + l(P,G)</script></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning"><a href="#Combining-analysis-of-multi-parametric-MR-images-into-a-convolutional-neural-network-Precise-target-delineation-for-vestibular-schwannoma-treatment-planning" class="headerlink" title="Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning"></a>Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning</h2><p>只有摘要和一幅图</p>
-<p><img src="/2019/12/05/unet-vnet/two-pathway-unet.jpg" width="80%;"></p>
-<ul>
-<li>multi-parametric MR images：T1W、T2W、T1C</li>
-<li>two-pathway U-Net model<ul>
-<li>kernel 3 × 3 × 1 and 1 × 1 × 3 respectively</li>
-<li>to extract the in-plane and through-plane features of the anisotropic MR images</li>
-</ul>
-</li>
-<li>结论<ul>
-<li>The proposed two-pathway U-Net model outperformed the single-pathway U-Net model when segmenting VS using anisotropic MR images.</li>
-<li>multi-inputs（T1、T2）outperforms single-inputs</li>
-</ul>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -5412,7 +4574,7 @@ loss = 1-\frac{|PG|}{|PG|+\alpha|P\backslash G|+\beta|G\backslash P|}</script><f
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -5425,7 +4587,7 @@ loss = 1-\frac{|PG|}{|PG|+\alpha|P\backslash G|+\beta|G\backslash P|}</script><f
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

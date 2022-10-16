@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2020/08/03/IoU/IoU.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/08/03/IoU/GIoU.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/08/03/IoU/DIoU.png">
-<meta property="og:updated_time" content="2020-08-04T09:18:04.000Z">
+<meta property="og:updated_time" content="2022-06-16T08:19:43.646Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IoU">
 <meta name="twitter:description" content="reference: https://bbs.cvmart.net/articles/1396  IoU  IoU = Intersection / Union  $Loss_{IoU} = 1 - IoU$  [0,1] 无法直接优化没有重叠的部分：如果两个框没有交集，IoU=0，没有梯度回传，无法进行学习训练 尺度不敏感 无法精确的反映两者的重合质量     GIoU(Generalized">
@@ -378,8 +378,8 @@
 <p> <img src="/2020/08/03/IoU/GIoU.png" width="40%;"></p>
 <ul>
 <li>GIoU倾向于先增大bbox的大小来增大与GT的交集，然后通过IoU项引导最大化bbox的重叠区域</li>
-<li>[-1,1]</li>
-<li>能够关注到非重合区域</li>
+<li>[-1,1]：对称区间</li>
+<li>能够关注到非重合区域：引入了外接框C</li>
 <li>尺度不敏感</li>
 <li>两个框为包含关系时，退化为IoU</li>
 <li>如果之间用来替换mse，前期收敛会比较慢</li>
@@ -392,17 +392,16 @@
 <p> <img src="/2020/08/03/IoU/DIoU.png" width="30%;"></p>
 </li>
 </ol>
-<pre><code>* 直接最小化两个目标框的距离，收敛快得多
+<pre><code>* 直接最小化两个目标框的距离，收敛快得多，而且稳定
 
-* 能够关注到非重合区域
+* 也能够关注到非重合区域：引入外接对角线
 
-* 对于包含关系的两个框，仍旧有距离损失，不会退化为IoU
+* 对于包含关系的两个框，仍旧有距离损失，不会退化为IoU：因为中心点距离
 
 * 可以替换NMS中的IoU：原始的IoU仅考虑了重叠区域，对包含的情况没有很好的处理
     $$
     score = score\text{ if }IoU - dis(box_{max}, box)&gt;\epsilon \text{, else } 0
     $$
-
 
 * 没有考虑形状（长宽比）
 </code></pre><ol>
@@ -541,7 +540,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -554,7 +553,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -102,7 +102,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/segformer.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/erf.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/11/18/seg-transformers/all-mlp%20decoder.png">
-<meta property="og:updated_time" content="2022-06-09T07:28:41.216Z">
+<meta property="og:updated_time" content="2022-06-13T03:53:50.748Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="seg-transformers">
 <meta name="twitter:description" content="之前那篇《transformers》太长了，新开一个分割方向的专题，papers： ——————————previous—————————-  [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transforme">
@@ -929,13 +929,22 @@
 <li><p>4 main steps</p>
 <ul>
 <li>unify：multi-level的feature maps各自通过MLP layer to unify the channel dimension</li>
-<li>upsample：所有的features上采样到x4</li>
+<li>upsample：所有的features上采样到x4，biliear interp</li>
 <li>fuse：concat + MLP(实际代码里用了1x1conv-bn-relu)</li>
 <li><p>seg head：MLP，预测mask仍在x4尺度上</p>
 <p><img src="/2021/11/18/seg-transformers/all-mlp decoder.png" width="80%;"></p>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>training settings<ul>
+<li>AdamW：lr=2e-4，weight decay=1e-4</li>
+<li>poly LR：power=0.9，by iteration</li>
 </ul>
 </li>
 </ul>
@@ -1067,7 +1076,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1080,7 +1089,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

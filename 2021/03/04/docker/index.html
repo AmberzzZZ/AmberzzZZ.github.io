@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/old.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/vm.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/03/04/docker/docker.png">
-<meta property="og:updated_time" content="2021-07-29T07:07:11.687Z">
+<meta property="og:updated_time" content="2022-06-17T03:42:30.067Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker">
 <meta name="twitter:description" content="shartup  部署方案  古早年代     虚拟机     docker       image镜像 &amp;amp; container容器 &amp;amp; registry仓库  镜像：相当于是一个 root 文件系统，提供容器运行时所需的程序、库、资源、配置等 容器：镜像运行时的实体，可以被创建、启动、停止、删除、暂停等 仓库：用来保存镜像 官方仓库：docker hub：https://hub">
@@ -457,7 +457,8 @@
 <ul>
 <li>FROM image_name，指定依赖的镜像</li>
 <li>RUN command，在 shell 或者 exec 的环境下执行的命令</li>
-<li>ADD srcfile_path_inhost dstfile_incontainer，将本机文件复制到容器中</li>
+<li>COPY srcfile_path_inhost dstfile_incontainer，将本机文件复制到容器中</li>
+<li>ADD srcfile_path dstfile_incontainer，将本机文件复制到容器中，src文件不仅可以是local host，也可以是网络地址</li>
 <li>CMD [“executable”,”param1”,”param2”]，指定容器启动默认执行的命令</li>
 <li>WORKDIR path_incontainer，指定 RUN、CMD 与 ENTRYPOINT 命令的工作目录</li>
 <li>VOLUME [“/data”]，授权访问从容器内到主机上的目录</li>
@@ -472,9 +473,6 @@
 <li><p>然后编辑dockerfile</p>
   <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04</span><br><span class="line">MAINTAINER amber &lt;amber.zhang@tum.de&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install basic dependencies</span></span><br><span class="line">RUN apt-get update </span><br><span class="line">RUN apt-get install -y wget vim cmake</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install Anaconda3</span></span><br><span class="line">RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ~/anaconda3.sh</span><br><span class="line">RUN bash ~/anaconda3.sh -b -p /home/anaconda3 &amp;&amp; rm ~/anaconda3.sh </span><br><span class="line">ENV PATH /home/anaconda3/bin:$PATH</span><br><span class="line"><span class="meta">#</span><span class="bash"> RUN <span class="built_in">echo</span> <span class="string">"export PATH=/home/anaconda3/bin:<span class="variable">$PATH</span>"</span> &gt;&gt; ~/.bashrc &amp;&amp; /bin/bash -c <span class="string">"source /root/.bashrc"</span> </span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> change mirror</span></span><br><span class="line">RUN mkdir ~/.pip \</span><br><span class="line">    &amp;&amp; cd ~/.pip    </span><br><span class="line">RUN echo '[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple/' &gt;&gt; ~/.pip/pip.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install tensorflow</span></span><br><span class="line">RUN /home/anaconda3/bin/pip install tensorflow-gpu==1.8.0</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>然后build dockerfile</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t &lt;docker_name&gt; .</span><br></pre></td></tr></table></figure>
-</li>
 </ul>
 </li>
 </ul>
@@ -482,7 +480,10 @@
 </ol>
 </li>
 </ol>
+<pre><code>      * 然后build dockerfile
 
+          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t &lt;docker_name&gt; .</span><br></pre></td></tr></table></figure>
+</code></pre>
       
     </div>
     
@@ -599,7 +600,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -612,7 +613,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

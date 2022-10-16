@@ -276,6 +276,1067 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/02/pseudo-3d/" itemprop="url">pseudo-3d</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-02T15:55:00+08:00">
+                2020-09-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/02/pseudo-3d/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/02/pseudo-3d/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类</p>
+<p>[C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for comparison，分类</p>
+<p>[Pseudo-3D resnet] Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks：伪3d，resblock，S和T花式连接，分类</p>
+<p>[2.5d Unet] Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss：patch输入，先2d后3d，针对各向异性，分割</p>
+<p>[two-pathway U-Net] Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning：patch输入，3d网络，xy和z平面分别conv &amp; concat，分割</p>
+<p>[Projection-Based 2.5D U-net] Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation：mip，2d网络，分割，重建</p>
+<p>[New 2.5D Representation] A New 2.5D Representation for Lymph Node Detection using Random Sets of Deep Convolutional Neural Network Observations：横冠矢三个平面作为三个channel输入，2d网络，检测</p>
+<h2 id="Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks"><a href="#Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks" class="headerlink" title="Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks"></a>Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>spatio-temporal video</li>
+<li>the development of a very deep 3D CNN from scratch results in expensive computational cost and memory demand</li>
+<li>new framework<ul>
+<li>1x3x3 &amp; 3x1x1</li>
+<li>Pseudo-3D Residual Net which exploits all the variants of blocks</li>
+</ul>
+</li>
+<li>outperforms 3D CNN and frame-based 2D CNN</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3d CNN的model size：making it extremely difficult to train a very deep model</li>
+<li>fine-tuning 2d 好于 train from scrach 3d</li>
+<li>RNN builds only the temporal connections on the high-level features，leaving the correlations in the low-level forms not fully exploited</li>
+<li>we propose<ul>
+<li>1x3x3 &amp; 3x1x1 in parallel or cascaded </li>
+<li>其中的3x3 conv可以用2d conv来初始化</li>
+<li>a family of bottleneck building blocks：enhance the structural diversity  </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>P3D Blocks  </p>
+<ul>
+<li>direct／indirect influence：S和T之间是串联还是并联</li>
+<li><p>direct／indirect connected to the final output：S和T的输出是否直接与identity path相加</p>
+<p><img src="/2020/09/02/pseudo-3d/P3D Blocks.png" width="40%"></p>
+</li>
+<li><p>bottleneck：</p>
+<ul>
+<li>头尾各接一个1x1x1的conv</li>
+<li>头用来narrow channel，尾用来widen back</li>
+<li><p>头有relu，尾没有relu</p>
+<p><img src="/2020/09/02/pseudo-3d/bottlenecks.png" width="80%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pseudo-3D ResNet </p>
+<ul>
+<li>mixing blocks：循环ABC</li>
+<li><p>better performance &amp; small increase in model size</p>
+<p><img src="/2020/09/02/pseudo-3d/cmp.png" width="45%"></p>
+</li>
+<li><p>fine-tuning resnet50：</p>
+<ul>
+<li>randomly cropped 224x224</li>
+<li>freeze all BN except for the first one</li>
+<li>add an extra dropout layer with 0.9 dropout rate </li>
+</ul>
+</li>
+<li>further fine-tuning P3D resnet：<ul>
+<li>initialize with r50 in last step</li>
+<li>randomly cropped 16x160x160</li>
+<li>horizontally flipped </li>
+<li>mini-batch as 128 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>future work</p>
+<ul>
+<li>attention mechanism will be incorporated </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation"><a href="#Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation" class="headerlink" title="Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation"></a>Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>MIP：2D images containing information of the full 3D image </p>
+</li>
+<li><p>faster, less memory, accurate</p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>2d unet</p>
+<ul>
+<li>MIP：$\alpha=36$</li>
+<li>3x3 conv, s2 pooling, transpose conv, concat, BN, relu, </li>
+<li>filters：begin with 32, end with 512</li>
+<li><p>dropout：0.5 in the deepest convolutional block and 0.2 in the second deepest blocks</p>
+<p><img src="/2020/09/02/pseudo-3d/mra.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>3d unet</p>
+<ul>
+<li>overfitting &amp; memory space</li>
+<li>filters：begin with 4, end with 16</li>
+<li>dropout：0.5 in the deepest convolutional block and 0.4 in the second deepest blocks</li>
+</ul>
+</li>
+<li><p>Projection-Based 2.5D U-net </p>
+<ul>
+<li><p>2d slice：loss of connection </p>
+</li>
+<li><p>2d mip：disappointing results </p>
+</li>
+<li><p>2d volume：long training time</p>
+</li>
+<li><p>the proposed 2.5D U-net：</p>
+<script type="math/tex; mode=display">
+  N(x) = T R_p F_p 
+  \left[
+   \begin{matrix}
+     U M_{\alpha_1}(x) \\
+     ... \\
+     U M_{\alpha_p}(x)
+    \end{matrix}
+    \right]</script><ul>
+<li><p>$M_{i}$：MIP，p=12</p>
+</li>
+<li><p>$U$：2d-Unet like above</p>
+</li>
+<li><p>$F_p$：learnable filtration，1x3 conv，for each projection，抑制重建伪影</p>
+</li>
+<li><p>$R_p$：reconstruction operator</p>
+<p>  <img src="/2020/09/02/pseudo-3d/recon.png" width="40%"></p>
+</li>
+<li><p>$T$：fine-tuning operator，shift &amp; scale back to 0-1 mask</p>
+</li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/cmp2.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition"><a href="#Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition" class="headerlink" title="Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition"></a>Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>3D kernels tend to overfit</li>
+<li>3D CNNs is relatively shallow</li>
+<li>propose a 3D CNNs based on ResNets<ul>
+<li>better performance</li>
+<li>not overfit</li>
+<li>deeper than C3D</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>two-stream architecture：consists of RGB and optical flow streams is often used to represent spatio-temporal information </li>
+<li>3D CNNs：trained on relatively small video datasets performs worse than 2D CNNs pretrained on large datasets </li>
+<li>Very deep 3D CNNs：not explored yet due to training difficulty  </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Network Architecture</p>
+<ul>
+<li>main difference：kernel dimensions</li>
+<li>stem：stride2 for S，stride1 for T</li>
+<li>resblock：conv_bn_relu&amp;conv + id</li>
+<li>identity shortcuts：use zero-padding for increasing dimensions，to avoid increasing the number of parameters</li>
+<li>stride2 conv：conv3_1、 conv4_1、 conv5_1</li>
+<li>input clips：3x16x112x112</li>
+<li><strong>large learning rate</strong> and batch size was important </li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/3d res.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>在小数据集上3d-r18不如C3D，overfit了：shallow architecture of the C3D and pretraining on the Sports-1M dataset prevent the C3D from overfitting </li>
+<li>在大数据集上3d-r34好于C3D，同时C3D的val acc明显高于train acc——太shallow欠拟合了，r34则表现更好，而且不需要预训练</li>
+<li>RGB-I3D achieved the best performance <ul>
+<li>3d-r34是更deeper的</li>
+<li>RGB-I3D用了更大的batch size：Large batch size is important to train good models with batch normalization </li>
+<li>High resolutions：3x64x224x224</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks"><a href="#Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks" class="headerlink" title="Learning Spatiotemporal Features with 3D Convolutional Networks"></a>Learning Spatiotemporal Features with 3D Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>generic </li>
+<li>efficient </li>
+<li>simple </li>
+<li>3d ConvNet with 3x3x3 conv &amp; a simple linear classifier</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3D ConvNets are more suitable for spatiotemporal feature learning compared to 2D ConvNets</li>
+<li>2D ConvNets lose temporal information of the input signal right after every convolution operation </li>
+<li><p>2d conv在channel维度上权重都是一样的，相当于temporal dims上没有重要性特征提取</p>
+<p><img src="/2020/09/02/pseudo-3d/2d3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>basic network settings</p>
+<ul>
+<li>5 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>filters：[64，128，256，256，256]</li>
+<li>fc dims：[2048，2048]</li>
+<li>conv kernel：dx3x3</li>
+<li>pooling kernel：2x2x2，s2 except for the first layer <ul>
+<li>with the intention of not to merge the temporal signal too early </li>
+<li>also to satisfy the clip length of 16 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>varing settings</p>
+<ul>
+<li>temporal kernel depth<ul>
+<li>homogeneous：depth-1/3/5/7 throughout</li>
+<li>varying：increasing-3-3-5-5-7 &amp; decreasing-7- 5-5-3-3  </li>
+</ul>
+</li>
+<li><p>depth-3 throughout performs the best</p>
+<p><img src="/2020/09/02/pseudo-3d/depth.png" width="60%"></p>
+</li>
+<li><p>depth-1 is significantly worse  </p>
+</li>
+<li>We also verify that 3D ConvNet consistently performs better than 2D ConvNet <strong>on a large-scale internal dataset</strong></li>
+</ul>
+</li>
+<li><p>C3D</p>
+<ul>
+<li>8 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>homogeneous：3x3x3 s1 conv thtoughout</li>
+<li>pool1：1x2x2 kernel size &amp; stride，rest 2x2x2</li>
+<li><p>fc dims：4096</p>
+<p><img src="/2020/09/02/pseudo-3d/c3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>C3D video descriptor：fc6 activations + L2-norm</p>
+</li>
+<li><p>deconvolution visualizing：</p>
+<ul>
+<li>conv5b feature maps</li>
+<li>starts by focusing on appearance in the first few frames </li>
+<li>tracks the salient motion in the subsequent frames </li>
+</ul>
+</li>
+<li><p>compactness </p>
+<ul>
+<li>PCA</li>
+<li>压缩到50-100dim不太损失acc</li>
+<li><p>压缩到10dim仍旧是最高acc</p>
+<p><img src="/2020/09/02/pseudo-3d/PCA.png" width="60%"></p>
+</li>
+<li><p>projected to 2-dimensional space using t-SNE </p>
+<ul>
+<li>C3D features are semantically separable compared to Imagenet  </li>
+<li><p>quantitatively observe that C3D is better than Imagenet</p>
+<p><img src="/2020/09/02/pseudo-3d/2dvec.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Action Similarity Labeling </p>
+<ul>
+<li>predicting action similarity  </li>
+<li>extract C3D features: prob, fc7, fc6, pool5 for each clip </li>
+<li>L2 normalization</li>
+<li>compute the 12 different distances for each feature：48 in total</li>
+<li>linear SVM is trained on these 48-dim feature vectors </li>
+<li><p>C3D significantly outperforms the others</p>
+<p><img src="/2020/09/02/pseudo-3d/similarity.png" width="50%"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/13/SSD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/13/SSD/" itemprop="url">SSD</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-13T17:27:30+08:00">
+                2020-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/08/13/SSD/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/13/SSD/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="SSD-Single-Shot-MultiBox-Detector"><a href="#SSD-Single-Shot-MultiBox-Detector" class="headerlink" title="SSD: Single Shot MultiBox Detector"></a>SSD: Single Shot MultiBox Detector</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>single network</li>
+<li>speed &amp; accuracy </li>
+<li>59 FPS / 74.3% mAP</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>prev methods</p>
+<ul>
+<li>two-stage：生成稀疏的候选框，然后对候选框进行分类与回归</li>
+<li>one-stage：均匀地在图片的不同位置，采用不同尺度和长宽比，进行密集抽样，然后利用CNN提取特征后直接进行分类与回归</li>
+</ul>
+</li>
+<li><p>fundamental speed improvement </p>
+<ul>
+<li>eliminating bounding box proposals </li>
+<li>eliminating feature resampling  </li>
+</ul>
+</li>
+<li>other improvements <ul>
+<li>small convolutional filter for bbox categories and offsets（针对yolov1的全连接层说）</li>
+<li>separate predictors by aspect ratio</li>
+<li>multiple scales</li>
+<li>这些操作都不是原创</li>
+</ul>
+</li>
+<li>The core of SSD is predicting category scores and box offsets for a fixed set of default bounding boxes using small convolutional filters applied to feature maps. </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Model</p>
+<ul>
+<li><p>Multi-scale feature maps for detection：采用了多尺度的特征图，逐渐用s2降维，大尺度特征图上有更多的单元，用来回归小物体</p>
+</li>
+<li><p>Convolutional predictors for detection：针对yolov1里面的fc层</p>
+</li>
+<li><p>Default boxes and aspect ratios：一个单元4种size的先验框，对每个先验框都预测一组4+(c+1)，其中的1可以看作背景类，也可以看做是有无目标的置信度，各用一个conv3x3的head</p>
+</li>
+<li><p>backbone</p>
+<ul>
+<li>参考：<a href="https://www.cnblogs.com/sddai/p/10206929.html" target="_blank" rel="noopener">https://www.cnblogs.com/sddai/p/10206929.html</a></li>
+</ul>
+</li>
+<li>VGG16前四个conv block保留<ul>
+<li>无dropout和fc</li>
+<li>conv5的池化由2x2-s2变成3x3-s1</li>
+<li>conv6和conv7是3x3x1024和1x1x1024的空洞卷积，输出19x19x1024</li>
+<li>conv8是1x1x256和3x3x512 s2的conv，输出10x10x512</li>
+<li>conv9都是1x1x128和3x3x256 s2的conv，输出5x5x256</li>
+<li>conv10、conv11都是1x1x128和3x3x256 s1 p0的conv，输出3x3x256、1x1x256</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Training <ul>
+<li>Matching strategy：match default box和gt box<ul>
+<li>首先为每一个gt box找到一个overlap最大的default box</li>
+<li>然后找到所有与gt box的overlap大于0.5的default box</li>
+<li>一个gt box可能对应多个default box</li>
+<li>一个default box只能对应一个gt box（overlap最大的）</li>
+</ul>
+</li>
+<li>Objective loss <ul>
+<li>loc loss：smooth L1，offsets like Faster R-CNN</li>
+<li>cls loss：softmax loss  </li>
+<li>weighted sum：$L = \frac{1}{N} (L_{cls} + \alpha L_{loc})$，<ul>
+<li>N is the number of matched default boxes</li>
+<li>loss=0 when N=0</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Choosing scales and aspect ratios for default boxes <ul>
+<li>每个level的feature map感受野不同，default box的尺寸也不同</li>
+<li>数量也不同，conv4、conv10和conv11是4个，conv7、conv8、conv9是6个</li>
+<li>ratio：{1,2,3,1/2,1/3}，4个的没有3和1/3</li>
+<li>L2 normalization for conv4：<ul>
+<li>$y_i = \frac{x_i}{\sqrt{\sum_{k=1}^n x_k^2}}$</li>
+<li>作用是将不同尺度的特征都归一化成模为1的向量</li>
+<li>scale：可以是固定值，也可以是可学习参数</li>
+<li>为啥只针对conv4？<a href="https://zhuanlan.zhihu.com/p/39399799" target="_blank" rel="noopener">作者的另一篇paper(ParseNet)中发现conv4和其他层特征的scale是不一样的</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>predictions<ul>
+<li>all default boxes with different scales and aspect ratio from all locations of many feature maps</li>
+<li>significant imbalance for positive/negative</li>
+<li>Hard negative mining<ul>
+<li>sort using the highest confidence loss</li>
+<li>pick the top ones with n/p at most 3:1</li>
+<li>faster optimization and a more stable training</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Data augmentation <ul>
+<li>sample a patch with specific IoU</li>
+<li>resize</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>性质<ul>
+<li>much worse performance on smaller objects, increasing the input size can help improve</li>
+<li>Data augmentation is crucial, resulting in a 8.8% mAP improvement</li>
+<li>Atrous is faster, 保留pool5不变的话，the result is about the same while the speed is about 20% slower</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/04/python多线程-多进程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/04/python多线程-多进程/" itemprop="url">python多线程&多进程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-04T17:23:05+08:00">
+                2020-08-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/08/04/python多线程-多进程/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/04/python多线程-多进程/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Reference：</p>
+<p><a href="https://www.cnblogs.com/kaituorensheng/p/4465768.html" target="_blank" rel="noopener">https://www.cnblogs.com/kaituorensheng/p/4465768.html</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/46368084" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/46368084</a></p>
+<p><a href="https://www.runoob.com/python3/python3-multithreading.html" target="_blank" rel="noopener">https://www.runoob.com/python3/python3-multithreading.html</a></p>
+<ol>
+<li><p>名词</p>
+<ul>
+<li><p>进程(process)和线程(thread)</p>
+<ul>
+<li>cpu在处理任务时，把时间分成若干个小时间段，这些时间段很小的，系统中有很多进程，每个进程中又包含很多线程，在同一时间段 内，电脑CPU只能处理一个线程，下一个时间段，可能又去执行别的线程了（时间片轮转，从而实现伪多任务），具体顺序取决于其调度逻辑</li>
+<li>多核cpu可以实现真正的并行，同一个时刻每个cpu上都可以跑一个任务</li>
+<li><p>多进程：每个进程分别执行指定任务，进程间互相独立，每个时刻并行的实际进程数取决于cpu数量</p>
+</li>
+<li><p>多线程：单个cpu同一时刻只能处理一个线程，一个任务可能由多个工人来完成，工人们相互协同，这则是多线程</p>
+</li>
+</ul>
+</li>
+<li><p>python的多进程：multiprocess模块</p>
+</li>
+<li><p>python的多线程：threading模块</p>
+</li>
+<li><p>每个进程在执行过程中拥有独立的内存单元，而一个进程的多个线程在执行过程中共享内存。</p>
+</li>
+</ul>
+</li>
+<li><p>多进程multiprocess</p>
+<ul>
+<li>母进程：当我们执行一个python脚本，if main下面实际运行的主体就是母进程</li>
+<li>子进程：我们使用multiprocess显式创建的进程，都是子进程</li>
+<li>join()方法：用来让母进程阻塞，等待所有子进程执行完成再结束</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>使用multiprocess的多进程，可以通过process方法和pool方法<ul>
+<li>process方法：适用进程较少时候，无法批量开启/关闭</li>
+<li>pool方法：批量管理</li>
+<li>参数：输入参数都差不多，第一个是要执行的函数方法target/func，第二个是输入参数args</li>
+</ul>
+</li>
+</ul>
+<p>  🌰Process方法：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    print(<span class="string">'子进程: &#123;&#125; - 任务&#123;&#125;'</span>.format(os.getpid(), i))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">'当前母进程: &#123;&#125;'</span>.format(os.getpid()))</span><br><span class="line">    start = time.time()</span><br><span class="line">    p1 = Process(target=long_time_task, args=(<span class="number">1</span>,))</span><br><span class="line">    p2 = Process(target=long_time_task, args=(<span class="number">2</span>,))</span><br><span class="line">    print(<span class="string">'等待所有子进程完成。'</span>)</span><br><span class="line">    p1.start()</span><br><span class="line">    p2.start()</span><br><span class="line">    p1.join()</span><br><span class="line">    p2.join()</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>process方法使用Process实例化一个进程对象，然后调用它的start方法开启进程</p>
+<p>🌰Pool方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Pool, cpu_count</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    print(<span class="string">'子进程: &#123;&#125; - 任务&#123;&#125;'</span>.format(os.getpid(), i))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">True</span>     <span class="comment"># 用于演示pool适用于有返回值</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    print(<span class="string">"CPU内核数:&#123;&#125;"</span>.format(cpu_count()))        <span class="comment"># 4</span></span><br><span class="line">    print(<span class="string">'当前母进程: &#123;&#125;'</span>.format(os.getpid()))</span><br><span class="line">    start = time.time()</span><br><span class="line">    p = Pool(<span class="number">4</span>)</span><br><span class="line">    results = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        <span class="comment"># p.apply_async(long_time_task, args=(i,))</span></span><br><span class="line">        results.append(p.apply_async(long_time_task, args=(i,)))</span><br><span class="line">    print(<span class="string">'等待所有子进程完成。'</span>)</span><br><span class="line">    p.close()</span><br><span class="line">    p.join()</span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((send - start)))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 查看返回值</span></span><br><span class="line">    <span class="keyword">for</span> res <span class="keyword">in</span> results:</span><br><span class="line">      print(res.get())</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>apply_async(func, args=(), kwds={}, callback=None)：向进程池提交需要执行的函数及参数，各个进程采用非阻塞（异步）的调用方式，即每个子进程只管运行自己的，不管其它进程是否已经完成。</p>
+</li>
+<li>close()：关闭进程池（pool），不再接受新的任务。</li>
+<li>join()：主进程阻塞等待子进程的退出， 调用join()之前必须先调用close()或terminate()方法，使其不再接受新的Process。</li>
+</ul>
+<ol>
+<li><p>多线程threading</p>
+<ul>
+<li>python的多线程是伪多线程，因为主进程只有一个，所以只用了单核，只是通过碎片化进程、调度、全局锁等操作，cpu利用率提升了</li>
+<li>所以我想并行处理百万量级的数据入库操作时，多进程的效率明显高于多线程</li>
+<li><p>【问题】从我观察上看多线程基本就是串行？？</p>
+<p>🌰threading</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'当子线程: &#123;&#125;'</span>.format(threading.current_thread().name))</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(<span class="string">"结果: &#123;&#125;"</span>.format(<span class="number">8</span> ** <span class="number">20</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    start = time.time()</span><br><span class="line">    print(<span class="string">'这是主线程：&#123;&#125;'</span>.format(threading.current_thread().name))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        t = threading.Thread(target=long_time_task, args=())</span><br><span class="line">        t.setDaemon(<span class="keyword">True</span>)</span><br><span class="line">        t.start()</span><br><span class="line">        t.join()</span><br><span class="line"></span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line"><span class="comment"># 继承&amp;有返回值的写法</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">long_time_task</span><span class="params">(i)</span>:</span></span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">8</span>**<span class="number">20</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyThread</span><span class="params">(threading.Thread)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func, args , name=<span class="string">''</span>, )</span>:</span></span><br><span class="line">        threading.Thread.__init__(self)</span><br><span class="line">        self.func = func</span><br><span class="line">        self.args = args</span><br><span class="line">        self.name = name</span><br><span class="line">        self.result = <span class="keyword">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">'开始子进程&#123;&#125;'</span>.format(self.name))</span><br><span class="line">        self.result = self.func(self.args[<span class="number">0</span>],)</span><br><span class="line">        print(<span class="string">"结果: &#123;&#125;"</span>.format(self.result))</span><br><span class="line">        print(<span class="string">'结束子进程&#123;&#125;'</span>.format(self.name))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_result</span><span class="params">(self)</span>:</span></span><br><span class="line">        threading.Thread.join(self)  <span class="comment"># 等待线程执行完毕</span></span><br><span class="line">        <span class="keyword">return</span> self.result</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    start = time.time()</span><br><span class="line">    threads = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, <span class="number">3</span>):</span><br><span class="line">        t = MyThread(long_time_task, (i,), str(i))</span><br><span class="line">        threads.append(t)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">        t.start()</span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> threads:</span><br><span class="line">        t.join()</span><br><span class="line"></span><br><span class="line">    end = time.time()</span><br><span class="line">    print(<span class="string">"总共用时&#123;&#125;秒"</span>.format((end - start)))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>join方法：等待所有进程执行完，主进程再执行完</p>
+</li>
+<li>setDaemon(True)：主线程执行完就退出</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/03/IoU/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/08/03/IoU/" itemprop="url">IoU</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-03T15:41:03+08:00">
+                2020-08-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/08/03/IoU/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/08/03/IoU/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>reference: <a href="https://bbs.cvmart.net/articles/1396" target="_blank" rel="noopener">https://bbs.cvmart.net/articles/1396</a></p>
+<ol>
+<li><p>IoU</p>
+<p> IoU = Intersection / Union</p>
+<p> $Loss_{IoU} = 1 - IoU$</p>
+<ul>
+<li>[0,1]</li>
+<li>无法直接优化没有重叠的部分：如果两个框没有交集，IoU=0，没有梯度回传，无法进行学习训练</li>
+<li>尺度不敏感</li>
+<li><p>无法精确的反映两者的重合质量</p>
+<p><img src="/2020/08/03/IoU/IoU.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GIoU(Generalized Intersection over Union)</p>
+<p> $GIoU = IoU - \frac{|A_c - U|}{|A_c|}$，$A_c$是包含两个框的最小外接框</p>
+<p> $Loss_{GIoU} = 1 - GIoU$</p>
+<p> <img src="/2020/08/03/IoU/GIoU.png" width="40%;"></p>
+<ul>
+<li>GIoU倾向于先增大bbox的大小来增大与GT的交集，然后通过IoU项引导最大化bbox的重叠区域</li>
+<li>[-1,1]：对称区间</li>
+<li>能够关注到非重合区域：引入了外接框C</li>
+<li>尺度不敏感</li>
+<li>两个框为包含关系时，退化为IoU</li>
+<li>如果之间用来替换mse，前期收敛会比较慢</li>
+<li><strong>一般地，GIoU loss不能很好地收敛SOTA算法，反而造成不好的结果</strong></li>
+</ul>
+</li>
+<li><p>DIoU (Distance-IoU)</p>
+<p> $DIoU = IoU - \frac{d^2}{c^2}$，d是两个中心点间的欧式距离，c是两个框的最小外接框的对角线距离</p>
+<p> $Loss_{DIoU} = 1 - DIoU$</p>
+<p> <img src="/2020/08/03/IoU/DIoU.png" width="30%;"></p>
+</li>
+</ol>
+<pre><code>* 直接最小化两个目标框的距离，收敛快得多，而且稳定
+
+* 也能够关注到非重合区域：引入外接对角线
+
+* 对于包含关系的两个框，仍旧有距离损失，不会退化为IoU：因为中心点距离
+
+* 可以替换NMS中的IoU：原始的IoU仅考虑了重叠区域，对包含的情况没有很好的处理
+    $$
+    score = score\text{ if }IoU - dis(box_{max}, box)&gt;\epsilon \text{, else } 0
+    $$
+
+* 没有考虑形状（长宽比）
+</code></pre><ol>
+<li><p>CIoU (Complete-IoU)</p>
+<p> $CIoU = IoU - \frac{d^2}{c^2}-av$，在DIoU的基础上新增了惩罚项av，a是权重系数，v用来评价长宽比：</p>
+<script type="math/tex; mode=display">
+ v = \frac{4}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})^2\\
+ a = \frac{v}{1-IoU+v}</script><p> $Loss_{CIoU} = 1 - CIoU$</p>
+<ul>
+<li><p>v的梯度中有$\frac{1}{w^2+h^2}$，长宽在[0,1]之间，可能很小，会导致梯度爆炸，用的时候</p>
+<ul>
+<li>clamp一下上下限</li>
+<li><p>分母中的$w^2+h^2$替换成1</p>
+<script type="math/tex; mode=display">
+\frac{\partial v }{\partial w} = \frac{8}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})\frac{h}{w^2+h^2}\\
+\frac{\partial v }{\partial w} = \frac{8}{\pi ^ 2}(arctan\frac{w^{gt}}{h^{gt}}-arctan\frac{w}{h})\frac{w}{w^2+h^2}</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/YOLOACT/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2320,1371 +3381,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/11/天池脊柱MRI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/11/天池脊柱MRI/" itemprop="url">天池脊柱MRI</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-11T22:26:59+08:00">
-                2020-06-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/11/天池脊柱MRI/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/11/天池脊柱MRI/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>MRI</p>
-<p> T1加权相上面密度高的骨头会比较亮(就是高信号)，还有脂肪和甲状腺也是高信号，水份一般都是无信号，<br> T2加权相里水是高信号所以水比较亮，因为很多的病变有水肿，所以T2加权相通俗可以说是看病变(毕竟比较明显)，</p>
-<p> 视觉直观上来看，T1看解剖，T2看病变</p>
-<p> ——怎么fusion一个case（标注只有一张）</p>
-</li>
-<li><p>数据集</p>
-<p> T1、T2矢状位，T2轴状位，</p>
-<p> 关键点：基于T2矢状位的中间帧，</p>
-<p> 标注范围：从胸12（T12）腰1（L1）间的椎间盘开始，到腰5（L5）骶1（S1）间的椎间盘结束</p>
-<p> 类别：椎块有编号（T12到L5），间盘通过上下椎块的编号表示（T12-L1到L5-S1）</p>
-<p> 病灶：</p>
-<pre><code> * 椎块有两类：正常V1和退行性病变V2，
- * 椎间盘有7类：正常V1，退行性改变V2，弥漫性膨出，非对称性膨出，突出，脱出，疝出V7
-</code></pre><p> json结构：</p>
-<ul>
-<li>uid，dim，spacing等一些header info</li>
-<li>annotation：<ul>
-<li>slice：难道不是T2矢状位的中间帧吗？</li>
-<li>point：关键点坐标，病灶类别，关键点类别</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>评估指标</p>
-<ul>
-<li><p>distance&lt;8mm</p>
-</li>
-<li><p>TP：多个命中取最近的，其余忽略</p>
-</li>
-<li>FP：假阳性，distance超出所有gt的8mm圈圈／落进圈圈但是类别错了</li>
-<li>FN：假阴性，gt点没有被TP</li>
-<li>precision：TP/(TP+FP)</li>
-<li>recall：TP/(TP+FN)</li>
-<li>AP</li>
-<li>MAP</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/08/group-normalization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/08/group-normalization/" itemprop="url">group normalization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-08T17:49:45+08:00">
-                2020-06-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/08/group-normalization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/08/group-normalization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Group-Normalization"><a href="#Group-Normalization" class="headerlink" title="Group Normalization"></a>Group Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>for small batch size</li>
-<li>do normalization in channel groups</li>
-<li>batch-independent</li>
-<li>behaves stably over different batch sizes</li>
-<li>approach BN’s accuracy </li>
-</ul>
-<p><img src="/2020/06/08/group-normalization/error.png" width="40%;"></p>
-</li>
-<li><p>论点</p>
-<ul>
-<li>BN<ul>
-<li>requires sufficiently large batch size (e.g. 32)</li>
-<li>Mask R-CNN frameworks use a batch size of 1 or 2 images because of higher resolution, where BN is “frozen” by transforming to a linear layer </li>
-<li>synchronized BN 、BR</li>
-</ul>
-</li>
-<li>LN &amp; IN<ul>
-<li>effective for training sequential models or generative models </li>
-<li>but have limited success in visual recognition </li>
-<li>GN能转换成LN／IN</li>
-</ul>
-</li>
-<li>WN<ul>
-<li>normalize the filter weights, instead of operating on features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>group</p>
-<ul>
-<li>it is not necessary to think of deep neural network features as unstructured vectors <ul>
-<li>第一层卷积核通常存在一组对称的filter，这样就能捕获到相似特征</li>
-<li>这些特征对应的channel can be normalized together</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>normalization</p>
-<ul>
-<li><p>transform the feature x：$\hat x_i = \frac{1}{\sigma}(x_i-\mu_i)$</p>
-</li>
-<li><p>the mean and the standard deviation：</p>
-<script type="math/tex; mode=display">
-  \mu_i=\frac{1}{m}\sum_{k\in S_i}x_k\\
-  \sigma_i=\sqrt {\frac{1}{m}\sum_{k\in S_i}(x_k-\mu_i)^2+\epsilon}</script></li>
-<li><p>the set $S_i$</p>
-<ul>
-<li>BN：<ul>
-<li>$S_i=\{k|k_C = i_C\}$</li>
-<li>pixels sharing the same channel index are normalized together </li>
-<li>for each channel, BN computes μ and σ along the (N, H, W) axes </li>
-</ul>
-</li>
-<li>LN<ul>
-<li>$S_i=\{k|k_N = i_N\}$</li>
-<li>pixels sharing the same batch index (per sample) are normalized together </li>
-<li>LN computes μ and σ along the (C,H,W) axes for each sample </li>
-</ul>
-</li>
-<li>IN<ul>
-<li>$S_i=\{k|k_N = i_N, k_C=i_C\}$</li>
-<li>pixels sharing the same batch index and the same channel index are normalized together </li>
-<li>LN computes μ and σ along the (H,W) axes for each sample </li>
-</ul>
-</li>
-<li>GN<ul>
-<li>$S_i=\{k|k_N = i_N, [\frac{k_C}{C/G}]=[\frac{i_C}{C/G}]\}$</li>
-<li>computes μ and σ along the (H, W ) axes and along a group of C/G channels </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>linear transform  </p>
-<ul>
-<li>to keep representational ability </li>
-<li><strong>per channel</strong></li>
-<li>scale and shift：$y_i = \gamma \hat x_i + \beta$</li>
-</ul>
-<p><img src="/2020/06/08/group-normalization/gn.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>relation</p>
-<ul>
-<li>to LN<ul>
-<li>LN assumes <em>all</em> channels in a layer make “similar contributions” </li>
-<li>which is less valid with the presence of convolutions </li>
-<li>GN improved representational power over LN</li>
-</ul>
-</li>
-<li>to IN<ul>
-<li>IN can only rely on the spatial dimension for computing the mean and variance </li>
-<li>it misses the opportunity of exploiting the channel dependence</li>
-<li>【QUESTION】BN也没考虑通道间的联系啊，但是计算mean和variance时跨了sample</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>implementation</p>
-<ul>
-<li>reshape</li>
-<li>learnable $\gamma \&amp; \beta$</li>
-<li>computable mean &amp; var</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/06/08/group-normalization/code.png" width="50%;"></p>
-</li>
-<li><p>实验</p>
-<ul>
-<li>GN相比于BN，training error更低，但是val error略高于BN<ul>
-<li>GN is effective for easing optimization</li>
-<li>loses some regularization ability </li>
-<li>it is possible that GN combined with a suitable regularizer will improve results </li>
-</ul>
-</li>
-<li>选取不同的group数，所有的group&gt;1均好于group=1（LN）</li>
-<li>选取不同的channel数（C／G），所有的channel&gt;1均好于channel=1（IN）</li>
-<li>Object Detection  <ul>
-<li>frozen：因为higher resolution，batch size通常设置为2/GPU，这时的BN frozen成一个线性层$y=\gamma(x-\mu)/\sigma+beta$，其中的$\mu$和$sigma$是load了pre-trained model中保存的值，并且frozen掉，不再更新</li>
-<li>denote as BN*</li>
-<li>replace BN* with GN during fine-tuning </li>
-<li>use a weight decay of 0 for the γ and β parameters </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/02/regularization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/02/regularization/" itemprop="url">正则化</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-02T16:01:20+08:00">
-                2020-06-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/02/regularization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/02/regularization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li><p>正则</p>
-<ul>
-<li><p>正则化是用来解决神经网络过拟合的问题，通过降低模型的复杂性和约束权值，迫使神经网络学习可泛化的特征</p>
-<ul>
-<li>正则化可以定义为我们为了减少泛化误差而不是减少训练误差而对训练算法所做的任何改变<ul>
-<li>对权重进行约束</li>
-<li>对目标函数添加额外项（间接约束权值）：L1 &amp; L2正则</li>
-<li>数据增强</li>
-<li>降低网络复杂度：dropout，stochastic depth</li>
-<li>early stopping</li>
-</ul>
-</li>
-<li>我们在对网络进行正则化时不考虑网络的bias：正则表达式只是权值的表达式，不包含bias<ul>
-<li>bias比weight具有更少的参数量</li>
-<li>对bias进行正则化可能引入太多的方差，引入大量的欠拟合</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>L1 &amp; L2：</p>
-<ul>
-<li><p>要惩罚的是神经网络中每个神经元的权重大小</p>
-</li>
-<li><p>L2关注的是权重的平方和，是要网络中的权重接近0但不等于0，“权重衰减”</p>
-<script type="math/tex; mode=display">
-  \frac{d}{dW}(\frac{\lambda}{2m}W^2) = \frac{\lambda}{m} W</script></li>
-<li><p>L1关注的是权重的绝对值，权重可能被压缩成0，权重更新时每次减去的是一个常量</p>
-<script type="math/tex; mode=display">
-  \frac{d}{dW}(\frac{\lambda}{m}W) = \frac{\lambda}{m} sgn(W)</script></li>
-<li><p>L1会趋向于产生少量的特征，而其他的特征都是0，而L2会选择更多的特征，这些特征都会接近于0</p>
-</li>
-</ul>
-</li>
-<li><p>dropout</p>
-<ul>
-<li>每个epoch训练的模型都是随机的</li>
-<li>在test的时候相当于ensemble多个模型</li>
-</ul>
-</li>
-<li><p>权重共享</p>
-</li>
-<li><p>数据增强</p>
-</li>
-<li><p>隐式正则化：其出现的目的不是为了正则化，而正则化的效果是其副产品，包括early stopping，BN，随机梯度下降</p>
-</li>
-</ul>
-</li>
-<li><p>dropout &amp; drop connect（[Reference][<a href="https://zhuanlan.zhihu.com/p/108024434]）" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/108024434]）</a></p>
-<ul>
-<li><p>dropout：</p>
-<ul>
-<li>2012年Hinton提出，在模型训练时以概率p随机让隐层节点的输出变成0，暂时认为这些节点不是网络结构的一部分，但是会把它们的权重保留下来（不更新）。</li>
-<li><p>标准dropout相当于在一层神经元之后再添加一个额外的层，这些神经元在训练期间以一定的概率将值设置为零，并在测试期间将它们乘以p。 </p>
-<p><img src="/2020/06/02/regularization/dropout.jpg" width="70%"></p>
-</li>
-</ul>
-</li>
-<li><p>drop connect：</p>
-<ul>
-<li>不是随机的将隐层节点的输出变成0，而是将节点中的每个与其相连的输入权值以1-p的概率变成0。（一个是输出一个是输入）</li>
-<li>训练阶段，对每个example／mini-batch, 每个epoch都随机sample一个mask矩阵</li>
-<li><p>Dropconnect在测试期间采用了与标准dropout不同的方法。作者提出了dropconnect在每个神经元处的高斯近似，然后从这个高斯函数中抽取一个样本并传递给神经元激活函数。这使得dropconnect在测试时和训练时都是一种随机方法。</p>
-<p><img src="/2020/06/02/regularization/dropconnect.png" width="40%"></p>
-<p><img src="/2020/06/02/regularization/dropCinfer.jpg" width="80%"></p>
-</li>
-<li><p>伯努利分布：0-1分布</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>dropout &amp; drop connect 通常只作用于全连接层上：这俩是用来防止过多参数导致过拟合</p>
-<ul>
-<li><p>卷积层参数贼少，所以没必要，</p>
-</li>
-<li><p>针对卷积通道有spacial dropout：按照channel随机扔</p>
-</li>
-</ul>
-</li>
-<li><p>dropblock：是针对卷积层的正则化方法，相比较于dropout的random mute，能够更有效地remove掉部分语义信息，block size=1的时候退化成dropout</p>
-<p><img src="/2020/06/02/regularization/dropblock.png" width="60%"></p>
-</li>
-<li><p>papers</p>
-<p>[dropout] Improving neural networks by preventing co-adaptation of feature detectors，丢节点</p>
-<p>[drop connect] Regularization of neural networks using dropconnect，丢weight path</p>
-<p>[Stochastic Depth] Deep Networks with Stochastic Depth，丢layer</p>
-<p>[DropBlock] A regularization method for convolutional networks</p>
-</li>
-<li><p>drop大法一句话汇总</p>
-<ul>
-<li>dropout：各维度完全随机扔</li>
-<li>spacial dropout：按照channel随机扔</li>
-<li>stochastic depth：按照res block随机扔</li>
-<li>dropblock：在feature map上按照spacial块随机扔</li>
-<li>cutout：在input map上按照spacial块随机扔</li>
-<li>dropconnect：扔连接不扔神经元</li>
-</ul>
-</li>
-</ol>
-<h2 id="Deep-Networks-with-Stochastic-Depth"><a href="#Deep-Networks-with-Stochastic-Depth" class="headerlink" title="Deep Networks with Stochastic Depth"></a>Deep Networks with Stochastic Depth</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>propose a training procedure：stochastic depth，train short and test deep</li>
-<li>for each mini-batch<ul>
-<li>randomly drop a subset of layers  </li>
-<li>and bypass them with the identity function</li>
-</ul>
-</li>
-<li>short：reduces training time </li>
-<li>reg：improves the test error </li>
-<li>can increase the network depth </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>deeper</p>
-<ul>
-<li>expressiveness </li>
-<li>vanishing gradients </li>
-<li>diminishing feature reuse  </li>
-</ul>
-</li>
-<li><p>resnet </p>
-<ul>
-<li>skip connection</li>
-<li><p>when输入输出channel数不match：redefine id(·) as a linear projection to reduce the dimensions </p>
-<p><img src="/2020/06/02/regularization/resnet.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>dropout</p>
-<ul>
-<li>Dropout reduces the effect known as “co- adaptation” of hidden nodes </li>
-<li>Dropout loses effectiveness when used in combination with Batch Normalization </li>
-</ul>
-</li>
-<li><p>our approach</p>
-<ul>
-<li>higher diversity </li>
-<li>shorter instead of thinner </li>
-<li>work with Batch Normalization</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>stochastic depth</p>
-<ul>
-<li>randomly dropping entire ResBlocks </li>
-<li>$H_l = ReLU(b_l Res_l(H_{l-1}) + id(H_{l-1}))$</li>
-</ul>
-</li>
-<li><p>survival probabilities </p>
-<ul>
-<li><p>$p_l = Pr(b_l=1)$</p>
-</li>
-<li><p>set uniformly / set following a linear decay rule </p>
-</li>
-<li><p>set $p_0=1, p_L=0.5$：</p>
-<script type="math/tex; mode=display">
-  p_l = 1 - \frac{l}{L}(1-p_L)</script></li>
-<li><p>intuition：the earlier layers extract low-level features that will be used by later layers and should therefore be more reliably present </p>
-<p><img src="/2020/06/02/regularization/stochastic.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>Expected network depth </p>
-<ul>
-<li>$E(L) \approx 3L/4$</li>
-<li>approximately 25% of training time could be saved </li>
-</ul>
-</li>
-<li><p>during testing</p>
-<ul>
-<li>all res path are active  </li>
-<li>each res path is weighted by its survival probability</li>
-<li>$H_l^{Test} = ReLU(b_l Res_l(H_{l-1}, W_l) + id(H_{l-1}))$</li>
-<li>跟dropout一样</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/30/RetinaNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/30/RetinaNet/" itemprop="url">RetinaNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-30T11:17:04+08:00">
-                2020-05-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/30/RetinaNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/30/RetinaNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li>[det] RetinaNet: Focal Loss for Dense Object Detection</li>
-<li>[det+instance seg] RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free </li>
-<li>[det+semantic seg] Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection </li>
-</ol>
-<h2 id="Focal-Loss-for-Dense-Object-Detection"><a href="#Focal-Loss-for-Dense-Object-Detection" class="headerlink" title="Focal Loss for Dense Object Detection"></a>Focal Loss for Dense Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>dense prediction(one-stage detector)</li>
-<li>focal loss：address the class imbalance problem</li>
-<li>RetinaNet：design and train a simple dense detector </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>accuracy trailed<ul>
-<li>two-stage：classifier is applied to a sparse set of candidate</li>
-<li>one-stage：dense sampling of possible object locations</li>
-<li>the <strong>extreme foreground-background class imbalance</strong> encountered during training of dense detectors is the central cause</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>standard cross entropy loss：down-weights the loss assigned to well-classified examples</li>
-<li>proposed focal loss：focuses training on a sparse set of hard examples</li>
-</ul>
-</li>
-<li>R-CNN系列two-stage framework <ul>
-<li>proposal-driven </li>
-<li>the first stage generates a sparse set of candidate object locations</li>
-<li>the second stage classifies each candidate location as one of the foreground classes or as background</li>
-<li>class imbalance：在stage1大部分背景被filter out了，stage2训练的时候强制固定前背景样本比例，再加上困难样本挖掘OHEM </li>
-<li>faster：reducing input image resolution and the number of proposals </li>
-<li>ever faster：one-stage</li>
-</ul>
-</li>
-<li>one-stage detectors <ul>
-<li>One stage detectors are applied over a regular, dense sampling of object locations, scales, and aspect ratios</li>
-<li>dense：regularly sampling(contrast to selection)，基于grid以及anchor以及多尺度</li>
-<li>the training procedure is still dominated by easily classified background examples</li>
-<li>class imbalance：通常引入bootstrapping和hard example mining来优化</li>
-</ul>
-</li>
-<li>Object Detectors<ul>
-<li>Classic：sliding-window+classifier based on HOG，dense predict</li>
-<li>Two-stage：selective Search+classifier based on CNN，shared network RPN</li>
-<li>One-stage：‘anchors’ introduced by RPN，FPN</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>Huber loss：down-weighting the loss of outliers (hard examples)</li>
-<li>focal loss：down-weighting inliers (easy examples)  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>focal loss</p>
-<ul>
-<li>CE：$CE(p_t)=-log(p_t)$<ul>
-<li>even examples that are easily classified ($p_t&gt;0.5$) incur a loss with non-trivial magnitude</li>
-<li>summed CE loss over a large number of easy examples can overwhelm the rare class</li>
-</ul>
-</li>
-<li>WCE：$WCE(p_t)=-\alpha_t log(p_t)$<ul>
-<li>balances the importance of positive/negative examples</li>
-<li>does not differentiate between easy/hard examples </li>
-</ul>
-</li>
-<li><p>FL：$FL(p_t)=-\alpha_t(1-p_t)^\gamma log(p_t)$</p>
-<ul>
-<li>as $\gamma$ increases the modulating factor is likewise increased </li>
-<li>$\gamma=2$ works best in our experiments </li>
-</ul>
-<p><img src="/2020/05/30/RetinaNet/loss.png" width="40%;"></p>
-<p>​    </p>
-</li>
-<li><p>two-stage detectors通常不会使用WCE或FL</p>
-<ul>
-<li>cascade stage会过滤掉大部分easy negatives </li>
-<li>第二阶段训练会做biased minibatch sampling </li>
-<li>Online Hard Example Mining (OHEM)<ul>
-<li>construct minibatches using high-loss examples</li>
-<li>scored by loss + nms</li>
-<li>completely discards easy examples</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>RetinaNet</p>
-<ul>
-<li>compose：backbone network + two task-specific subnetworks</li>
-<li>backbone：convolutional feature map over the entire input image </li>
-<li>subnet1：object classification </li>
-<li><p>subnet2：bounding box regression </p>
-<p><img src="/2020/05/30/RetinaNet/retinanet.png" width="60%;"></p>
-</li>
-<li><p>ResNet-FPN backbone</p>
-<ul>
-<li>rich, multi-scale feature pyramid，二阶段的RPN也用了FPN</li>
-<li>each level can be used for detecting objects at a different scale</li>
-<li>P3 - P7：8x - 128x downsamp</li>
-<li>FPN channels：256</li>
-</ul>
-</li>
-<li><p>anchors</p>
-<ul>
-<li>anchor ratios：{1:2, 1:1, 2:1}，长宽比</li>
-<li>anchor scales：{$2^0$, $2^\frac{1}{3}$, $2^\frac{2}{3}$}，大小，同一个scale的anchor，面积相同，都是size*size，长宽通过ratio求得</li>
-<li>anchor size per level：[32, 64, 128, 256, 512]，基本的正方形anchor的边长</li>
-<li>total anchors per level：A=9</li>
-<li>KA：each anchor is assigned a length K one-hot vector of classification targets </li>
-<li>4A：and a 4-vector of box regression targets </li>
-<li>anchors are assigned to ground-truth object boxes using an intersection-over-union (IoU) threshold of 0.5 </li>
-<li>anchors are <strong>assigned background</strong> if their IoU is in [0, 0.4)</li>
-<li>anchor is unassigned between [0.4, 0.5), which is ignored during training</li>
-<li>each anchor is assigned to at most one object box </li>
-<li><p>for each anchor</p>
-<ul>
-<li><p>classification targets：one-hot vector </p>
-</li>
-<li><p>box regression targets：each anchor和其对应的gt box的offset</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>rpn offset：中心点、宽、高</p>
-<pre><code>  $$
-</code></pre><p>  t_x = (x - x_a) / w_a\\</p>
-<pre><code>    t_y = (y - y_a) / h_a\\
-</code></pre><p>  t_w = log(w/ w_a)\\</p>
-<pre><code>    t_h = log(h/ h_a)
-</code></pre><p>  $$</p>
-</li>
-<li><p>or omitted if there is no assignment</p>
-</li>
-<li><p>【QUESTION】所谓的anchor state {-1:ignore, 0:negative, 1:positive} 是针对cls loss来说的，相当于人为丢弃了一部分偏向中立的样本，这对分类效果有提升吗？？</p>
-</li>
-<li><p>classification subnet</p>
-<ul>
-<li><p>for each spatial position，for each anchor，predict one among K classes，one-hot</p>
-</li>
-<li><p>input：C channels feature map from FPN</p>
-</li>
-<li><p>structure：four 3x3 conv + ReLU，each with C filters </p>
-</li>
-<li><p>head：3x3 conv + sigmoid，with KA filters</p>
-</li>
-<li><p>share across levels</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>not share with box regression subnet </p>
-</li>
-<li><p>focal loss：</p>
-<ul>
-<li>sum over all ～100k anchors<pre><code>  * and normalized by the number of anchors assigned to a ground-truth box
-  * 因为是sum，所以要normailize，norm项用的是number of assigned anchors（这是包括了前背景？）
-  * vast majority of anchors are **easy negatives** and receive negligible loss values under the focal loss（确实包含背景框）
-  * $\alpha$：In general $alpha$ should be decreased slightly as $\gamma$ is increased 
-</code></pre></li>
-<li><p>strong effect on negatives：FL can effectively discount the effect of easy negatives, focusing all attention on the hard negative examples </p>
-<p><img src="/2020/05/30/RetinaNet/bg.png" width="80%;"></p>
-</li>
-<li><p>box regression subnet </p>
-<ul>
-<li>class-agnostic bounding box regressor  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>same structure：four 3x3 conv + ReLU，each with C filters <pre><code>  * head：4A linear outputs 
-  * L1 loss
-</code></pre></li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>inference</p>
-<ul>
-<li><p>keep top 1k predictions per FPN level </p>
-<pre><code>  * all levels are merged and non-maximum suppression with a threshold of 0.5 
-</code></pre><ul>
-<li><p>train</p>
-<ul>
-<li>initialization：<ul>
-<li>cls head bias initialization，encourage more foreground prediction at the start of training </li>
-<li>prevents the large number of background anchors from generating a large, destabilizing loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>network design</p>
-<ul>
-<li><p>anchors</p>
-<pre><code>      * one-stage detecors use fixed sampling grid to generate position
-      * use multiple ‘anchors’ at each spatial position to cover boxes of various scales and aspect ratios 
-      * beyond 6-9 anchors did not shown further gains in AP
-  * speed/accuracy trade-off  
-      * outperforms all previous methods
-      * bigger resolution bigger AP
-      * Retina-101-600与ResNet101-FRCNN的AP持平，但是比他快
-</code></pre><ul>
-<li><p>gradient：</p>
-<ul>
-<li>梯度有界</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>the derivative is small as soon as $x_t &gt; 0$</p>
-<pre><code>      &lt;img src=&quot;RetinaNet/gradient.png&quot; width=&quot;70%;&quot; /&gt;
-</code></pre></li>
-</ul>
-<pre><code>​        
-</code></pre><h2 id="RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free"><a href="#RetinaMask-Learning-to-predict-masks-improves-state-of-the-art-single-shot-detection-for-free" class="headerlink" title="RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free"></a>RetinaMask: Learning to predict masks improves state-of-the-art single-shot detection for free</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>improve single-shot detectors to the same level as current two-stage techniques</li>
-<li>improve on RetinaNet<ul>
-<li>integrating instance mask prediction</li>
-<li>adaptive loss </li>
-<li>additional hard examples</li>
-<li>Group Normalization</li>
-</ul>
-</li>
-<li><p>same computational cost as the original RetinaNet but more accurate：同样的参数量级比orgin RetinaNet准，整体的参数量级大于yolov3，acc快要接近二阶段的mask RCNN了</p>
-<p><img src="/2020/05/30/RetinaNet/acc:time.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>论点</p>
-<ul>
-<li>part of improvements of two-stage detectors is due to architectures like Mask R-CNN that involves multiple prediction heads</li>
-<li>additional segmentation task had only been added to two-stage detectors in the past</li>
-<li>two-stage detectors have the cost of resampling(ROI-Align) issue：RPN之后要特征对齐</li>
-<li>add addtional heads in training keeps the structure of the detector at test time unchanged </li>
-<li>potential improvement directions<ul>
-<li>data：OHEM</li>
-<li>context：FPN</li>
-<li>additional task：segmentation branch</li>
-</ul>
-</li>
-<li>this paper’s contribution<ul>
-<li>add a mask prediction branch</li>
-<li>propose a new self-adjusting loss function</li>
-<li>include more of positive samples—&gt;those with low overlap</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>best matching policy</p>
-<ul>
-<li>speical case：outlier gt box，跟所有的anchor iou都不大于0.5，永远不会被当作正样本</li>
-<li>use best matching anchor with any nonzero overlap to replace the threshold</li>
-</ul>
-</li>
-<li><p>self-adjusting Smooth L1 loss</p>
-<ul>
-<li><p>bbox regression</p>
-</li>
-<li><p>smooth L1：</p>
-<ul>
-<li>L1 loss is used beyond $\beta$ to <strong>avoid over-penalizing outliers</strong></li>
-<li><p>the choice of control point is heuristic and is usually done by hyper parameter search </p>
-<script type="math/tex; mode=display">
-f(x) = \begin{cases}
-0.5 \frac{x^2}{\beta} \text{,  if  } |x| < \beta \\
-|x| - 0.5\beta \text{,  otherwise  }
-\end{cases}</script></li>
-</ul>
-</li>
-<li><p>self-adjusting control point</p>
-<ul>
-<li><p>running mean &amp; variance</p>
-<script type="math/tex; mode=display">
-  \mu_B = \frac{1}{n}\sum_{i=1}^n |x_i|\\
-  \sigma_B^2 = \frac{1}{n}\sum_{i=1}^n(|x_i|-\mu_B)^2</script></li>
-<li><p>minibatch update：m=0.9</p>
-<script type="math/tex; mode=display">
-  \mu_R = \mu_R * m + \mu_B*(1-m)\\
-  \sigma_R^2 = \sigma_R^2*m+\sigma_B^2*(1-m)</script></li>
-<li><p>control point：$[0, \hat \beta]$ clip to avoid unstable </p>
-<script type="math/tex; mode=display">
-  \beta = max(0, min(\hat \beta, \mu_R-\sigma_R^2))</script></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>mask module</p>
-<ul>
-<li><p>detection predictions are treated as mask proposals </p>
-</li>
-<li><p>extract the top N scored predictions </p>
-</li>
-<li><p>distribute the mask proposals to sample features from the appropriate layers </p>
-<script type="math/tex; mode=display">
-  k = [k_0 + log_2 \sqrt{wh}/224]</script><ul>
-<li>$k_0=4$，如果size小于224*224，proposal会被分配给P3，如果大于448*448，proposal会被分配给P5</li>
-<li>using more feature layers shows no performance boost</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>architecture </p>
-<ul>
-<li>r50&amp;r101 back：freezing all of the Batch Nor- malization layers </li>
-<li>fpn feature channel：256</li>
-<li>classification branch<ul>
-<li>4 conv layers：conv3x3+relu，channel256</li>
-<li>head：conv3x3+sigmoid，channel n_anchors*n_classes</li>
-</ul>
-</li>
-<li>regression branch<ul>
-<li>4 conv layers：conv3x3+relu，channel256</li>
-<li>head：conv3x3，channel n_anchors*4</li>
-</ul>
-</li>
-<li>aggregate the boxes to the FPN layers </li>
-<li>ROI-Align yielding 14x14 resolution features </li>
-<li><p>mask head</p>
-<ul>
-<li>4 conv layers：conv3x3</li>
-<li>a single transposed convolutional layer：convtranspose2d 2x2，to 28*28 resolution</li>
-<li>prediction head：conv1x1</li>
-</ul>
-<p><img src="/2020/05/30/RetinaNet/retinaMask.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>min side &amp; max side：800&amp;1333</li>
-<li>limited GPU：reduce the batch size，increasing the number of training iterations and reducing the learning rate accordingly</li>
-<li>positive/ignore/negative：0.5，0.4</li>
-<li><p>focal loss for classification</p>
-<ul>
-<li><p>gaussian initialization</p>
-</li>
-<li><p>$\alpha=0.25, \lambda=2.0$</p>
-</li>
-<li><p>$FL=-\alpha_t(1-p_t)^\lambda log(p_t)$</p>
-<script type="math/tex; mode=display">
- FL = 
- \left\{
- \begin{array}{lr}
-
- -\alpha (1-p)^{\gamma}log(p),  \  \ y=1\\
- -(1-\alpha) p^{\gamma}log(1-p),  \  \ y=0\\
-
- \end{array}
- \right.</script></li>
-<li><p>gamma项控制的是简单样本的衰减速度，alpha项控制的是正负样本比例，可以默认值下正样本的权重是0.25，负样本的权重是0.75，和想象中的给正样本更多权重不一样，因为alpha和gamma是耦合起来作用的，（可能检测场景下困难的负样本相比于正样本更少？背景就是比前景好学？不确定不确定。。。）</p>
-</li>
-</ul>
-</li>
-<li>self-adjusting L1 loss for box regression<ul>
-<li>limit running params：[0, 0.11]</li>
-</ul>
-</li>
-<li>mask loss<ul>
-<li>top-100 predicted boxes + ground truth boxes</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>inference</p>
-<ul>
-<li>box confidence threshold 0.05</li>
-<li>nms threshold 0.4</li>
-<li>use top-50 boxes for mask prediction</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection"><a href="#Retina-U-Net-Embarrassingly-Simple-Exploitation-of-Segmentation-Supervision-for-Medical-Object-Detection" class="headerlink" title="Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection"></a>Retina U-Net: Embarrassingly Simple Exploitation of Segmentation Supervision for Medical Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>localization<ul>
-<li>pixel-level predict</li>
-<li>ad-hoc heuristics when mapping back to object-level scores</li>
-</ul>
-</li>
-<li>semantic segmentation<ul>
-<li>auxiliary task</li>
-<li>overall one-stage </li>
-<li>leveraging available supervision signals</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>monitoring pixel-wise predictions are clinically required </li>
-<li>medical annotations is commonly performed in pixel- wise  </li>
-<li>full semantic supervision <ul>
-<li>fully exploiting the available semantic segmentation signal results in significant performance gains  </li>
-</ul>
-</li>
-<li>one-stage<ul>
-<li>explicit scale variance enforced by the resampling operation in two-stage detectors is not helpful in the medical domain </li>
-</ul>
-</li>
-<li>two-stage methods<ul>
-<li>predict proposal-based segmentations </li>
-<li>mask loss is only evaluated on cropped proposal：no context gradients</li>
-<li>ROI-Align：not suggested in medical image</li>
-<li>depends on the results of region proposal：serial vs parallel</li>
-<li>gradients of the mask loss do not flow through the entire model</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>model</p>
-<ul>
-<li>back：<ul>
-<li>ResNet50 </li>
-</ul>
-</li>
-<li>fpn：<ul>
-<li>shift p3-p6 to p2-p5</li>
-<li>change sigmoid to softmax</li>
-<li>3d head channels：64</li>
-<li>anchor size：$\{P_2: 4^2, P_3: 8^2,, P_4: 16^2,, P_5: 32^2\}$</li>
-<li>3d z-scale：{1，2，4，8}，考虑到z方向的low resolution</li>
-</ul>
-</li>
-<li>segmentation supervision<ul>
-<li>p0 &amp; p1</li>
-<li>with skip connections </li>
-<li>without detection heads</li>
-<li>segmentation loss calculates on p0 logits</li>
-<li>dice + ce</li>
-</ul>
-</li>
-<li><p>h</p>
-<p><img src="/2020/05/30/RetinaNet/retinaUnet.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>weighted box clustering</p>
-<ul>
-<li><p>patch crop</p>
-</li>
-<li><p>tiling strategies &amp; model ensembling causes multi predictions per location </p>
-</li>
-<li><p>nms选了一类中score最大的box，然后抑制所有与它同类的IoU大于一定阈值的box</p>
-</li>
-<li><p>weighted box作用于这一类所有的box，计算一个融合的结果</p>
-<ul>
-<li>coordinates confidence：$o_c = \frac{\sum c_i s_i w_i}{\sum s_i w_i}$</li>
-<li><p>score confidence：$o_s = \frac{\sum s_i w_i}{\sum w_i + n_{missing * \overline w}}$</p>
-</li>
-<li><p>$w_i$：$w=f a p$</p>
-<ul>
-<li>overlap factor f：与highest scoring box的overlap</li>
-<li>area factor a：higher weights to larger boxes，经验</li>
-<li>patch center factor p：相对于patch center的正态分布</li>
-</ul>
-</li>
-<li>score confidence的分母上有一个down-weight项$n_{missing}$：基于prior knowledge预期prediction的总数得到</li>
-</ul>
-</li>
-<li><p>论文给的例子让我感觉好比nms的点</p>
-<ul>
-<li>一个cluster里面一类最终就留下一个框：解决nms一类大框包小框的情况</li>
-<li>这个location上prediction明显少于prior knowledge的类别confidence会被显著拉低：解决一个位置出现大概率假阳框的情况</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3739,7 +3435,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3752,7 +3448,7 @@ f(x) = \begin{cases}
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

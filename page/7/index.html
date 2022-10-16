@@ -276,6 +276,1093 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/CPNDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/05/CPNDet/" itemprop="url">CPNDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T14:14:30+08:00">
+                2021-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/05/CPNDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/CPNDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection"><a href="#Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection" class="headerlink" title="Corner Proposal Network for Anchor-free, Two-stage Object Detection"></a>Corner Proposal Network for Anchor-free, Two-stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>anchor-free</li>
+<li>two-stage<ul>
+<li>先找potential corner keypoints</li>
+<li>classify each proposal</li>
+</ul>
+</li>
+<li>corner-based方法：对于objects of various scales有效，在训练中避免产生过多的冗余false-positive proposals，但是在结果上会出现更多的fp</li>
+<li>得到的是competitive results</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>anchor-based methods对形状奇怪的目标容易漏检</li>
+<li><p>anchor-free methods容易引入假阳caused by mistakely grouping</p>
+<ul>
+<li>thus an individual classifier is strongly required  </li>
+</ul>
+</li>
+<li><p>Corner Proposal Network (CPN) </p>
+<ul>
+<li>use key-point detection in CornerNet</li>
+<li>但是group阶段不再用embedding distance衡量，而是用a binary classifier </li>
+<li>然后是multi-class classifier，operate on the survived objects</li>
+<li>最后soft-NMS</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/refineNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/05/refineNet/" itemprop="url">refineNet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T11:08:15+08:00">
+                2021-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/05/refineNet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/refineNet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="RefineNet-Multi-Path-Refinement-Networks-for-High-Resolution-Semantic-Segmentation"><a href="#RefineNet-Multi-Path-Refinement-Networks-for-High-Resolution-Semantic-Segmentation" class="headerlink" title="RefineNet: Multi-Path Refinement Networks for High-Resolution Semantic Segmentation"></a>RefineNet: Multi-Path Refinement Networks for High-Resolution Semantic Segmentation</h2><p>引用量1452，但是没有几篇技术博客？？</p>
+<ol>
+<li><p>动机</p>
+<ul>
+<li>语义分割<ul>
+<li>dense classification on every single pixel</li>
+</ul>
+</li>
+<li>refineNet<ul>
+<li>long-range residual connections</li>
+<li>chained residual pooling</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>pooling/conv stride：<ul>
+<li>losing finer image structure</li>
+<li>deconv is not able to recover the lost info</li>
+</ul>
+</li>
+<li>atrous<ul>
+<li>high reso：large computation</li>
+<li>dilated conv：coarse sub-sampling of feature</li>
+</ul>
+</li>
+<li>FCN<ul>
+<li>fuse features from all levels </li>
+<li>stage-wise rather than end-to-end???存疑</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li>main idea：effectively exploit middle layer features </li>
+<li>RefineNet<ul>
+<li>fuse all level feature</li>
+<li>residual connections with identity skip</li>
+<li>chained residual pooling to capture background context：看描述感觉像inception downsamp</li>
+<li>end-to-end</li>
+<li>是整个分割网络中的一个component</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2021/01/05/refineNet/dense.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<p> <img src="/2021/01/05/refineNet/refineNet.png" width="70%;"></p>
+<ul>
+<li>backbone<ul>
+<li>pretrained resnet</li>
+<li>4 blocks：x4 - x32，each block：pool-residual</li>
+<li>connection：每个输出连接一个RefineNet unit</li>
+</ul>
+</li>
+<li>4-cascaded architecture<ul>
+<li>final ouput：<ul>
+<li>high-resolution feature maps</li>
+<li>dense soft-max </li>
+<li>bilinear interpolation to origin resolution</li>
+</ul>
+</li>
+<li>cascade inputs<ul>
+<li>output from backbone block</li>
+<li>ouput from previous refineNet block</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>refineNet block<ul>
+<li>adapt conv：<ul>
+<li>to adapt the dimensionality and refine special task</li>
+<li>BN layers are removed</li>
+<li>channel 512 for R4，channel 256 for the rest</li>
+</ul>
+</li>
+<li>fusion：<ul>
+<li>先用conv to adapt dimension and recale the paths</li>
+<li>然后upsamp</li>
+<li>summation </li>
+<li>如果single input：walk through and stay unchanged</li>
+</ul>
+</li>
+<li>chained residual pooling：<ul>
+<li>aims to capture background context from a large image region </li>
+<li>chained：efficiently pool features with multiple window sizes  </li>
+<li>pooling blocks：s1 maxpooling+conv</li>
+<li>in practice用了两个pooling blocks</li>
+<li>use one ReLU in the chained residual pooling block</li>
+</ul>
+</li>
+<li>output conv：<ul>
+<li>一个residual：to employ non-linearity</li>
+<li>dimension remains unchanged</li>
+<li>final level：two additional RCUs before the final softmax prediction </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>residual identity mappings <ul>
+<li>a clean information path not block by any non-linearity：所有relu都在residual path里面</li>
+<li>只有chained residual pooling模块起始时候有个ReLU：one single ReLU in each RefineNet block does not noticeably reduce the effectiveness of gradient flow </li>
+<li>linear operations：<ul>
+<li>within the fusion block </li>
+<li>dimension reduction operations</li>
+<li>upsamp operations</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>其他结构</p>
+<p> <img src="/2021/01/05/refineNet/vari.png" width="70%;"></p>
+<ul>
+<li>级联的就叫cascaded</li>
+<li>一个block就叫single</li>
+<li>多个input resolution就叫mult-scale</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>4-cascaded works better than 1-cas &amp; 2-cas</li>
+<li>2-scale works better than 1-scale</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/29/centerNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/29/centerNet/" itemprop="url">centerNet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-29T10:45:15+08:00">
+                2020-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/29/centerNet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/29/centerNet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[papers]</p>
+<ul>
+<li><p>[centerNet] 真centerNet: Objects as Points，utexas，这个是真的centerNet，基于分割架构，预测中心点的heatmap，以及2-N个channel其他相关参数的回归</p>
+</li>
+<li><p>[cornet-centerNet] centerNet: Keypoint Triplets for Object Detection，这个抢先叫了centerNet，但是我觉得叫corner-centerNet更合适，它是基于cornerNet衍生的，在cornerNet的基础上再加一刀判定，基于角点pair的中心点是否是前景来决定是否保留这个框</p>
+</li>
+<li><p>[centerNet2] Probabilistic two-stage detection，utexas，</p>
+</li>
+</ul>
+<h2 id="centerNet-Objects-as-Points"><a href="#centerNet-Objects-as-Points" class="headerlink" title="centerNet: Objects as Points"></a>centerNet: Objects as Points</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>anchor-based</p>
+<ul>
+<li>exhaustive list of potential locations</li>
+<li>wasteful, inefficient, requires additional post-processing</li>
+</ul>
+</li>
+<li><p>our detector</p>
+<ul>
+<li>center：use keypoint estimation to find center points</li>
+<li>other properties：regress</li>
+</ul>
+</li>
+<li><p>tasks</p>
+<ul>
+<li>object detection</li>
+<li>3d object detection</li>
+<li><p>multi-person human pose estimation </p>
+<p><img src="/2020/12/29/centerNet/tasks.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>相比较于传统一阶段、二阶段检测<ul>
+<li>anchor：<ul>
+<li>box &amp; kp：一个是框，一个是击中格子</li>
+<li>nms：take local peaks，no need of nms</li>
+<li>larger resolution：hourglass架构，输出x4的heatmap，eliminates the need for multiple anchors </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>相比较于key point estimantion network<ul>
+<li>them：require grouping stage</li>
+<li>our：只定位一个center point，no need for group or post-processing</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>loss</p>
+<ul>
+<li><p>关键点loss</p>
+<ul>
+<li><p>center point关键点定义：每个目标的gt point只有一个，以它为中心，做object size-adaptive的高斯penalty reduction，overlap的地方取max</p>
+</li>
+<li><p>focal loss：基本与cornetNet一致</p>
+<script type="math/tex; mode=display">
+  L_k = \frac{-1}{N}\sum_{x,y,c}
+  \begin{cases}
+  (1-\hat Y)^\alpha log(\hat Y), if Y=1\\
+  (1-Y)^\beta \hat Y^\alpha log(1-\hat Y), otherwise
+  \end{cases}</script><ul>
+<li>$\alpha=2, \beta=4$</li>
+<li>background points有penalty，根据gt的高斯衰减来的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>offset loss</p>
+<ul>
+<li>只有两个通道(x_offset &amp; y_offset)：shared among categories</li>
+<li>gt的offset是原始resolution/output stride向下取整得到</li>
+<li>L1 loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>centerNet</p>
+<ul>
+<li><p>output</p>
+<ul>
+<li>第一个部分：中心点，[h,w,c]，binary mask for each category</li>
+<li>第二个部分：offset，[h,w,2]，shared among</li>
+<li>第三个部分：size，[h,w,2]，shared among<ul>
+<li>L1 loss，use raw pixel coordinates</li>
+</ul>
+</li>
+<li>overall<ul>
+<li>C+4 channels，跟传统检测的formulation是一致的，只不过传统检测gt是基于anchor计算的相对值，本文直接回归绝对值</li>
+<li>$L_{det} = L_k + \lambda_{size} L_{size} + \lambda_{off} L_{off}$</li>
+<li>其他task的formulation看第一张图</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference workflow</p>
+<ul>
+<li>local peaks：<ul>
+<li>for each category channel</li>
+<li>all responses greater or equal to its 8-connected neighbors：3x3 max pooling</li>
+<li>keep the top100</li>
+</ul>
+</li>
+<li>generate bounding boxes<ul>
+<li>组合offset &amp; size predictions</li>
+<li>？？？？没有后处理了？？？假阳？？？？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>encoder-decoder backbone：x4</p>
+<ul>
+<li>hourglass104<ul>
+<li>stem：x4</li>
+<li>modules：两个</li>
+</ul>
+</li>
+<li>resnet18/101+deformable conv upsampling<ul>
+<li>3x3 deformable conv, 256/128/64</li>
+<li>bilinear interpolation</li>
+</ul>
+</li>
+<li><p>DLA34+deformable conv upsampling</p>
+<p><img src="/2020/12/29/centerNet/backs.jpg" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>heads</p>
+<ul>
+<li>independent heads</li>
+<li>one 3x3 conv，256</li>
+<li>1x1 conv for prediction</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>总结</p>
+<p> 个人感觉，centerNet和anchor-based的formulation其实是一样的，</p>
+<ul>
+<li>center的回归对标confidence的回归，区别在于高斯/[0,1]/[0,-1,1]</li>
+<li>size的回归变成了raw pixel，不再基于anchor</li>
+<li>hourglass结构就是fpn，级联的hourglass可以对标bi-fpn</li>
+<li>多尺度变成了单一大resolution特征图，也可以用多尺度预测，需要加NMS</li>
+</ul>
+</li>
+</ol>
+<h2 id="centerNet2-Probabilistic-two-stage-detection"><a href="#centerNet2-Probabilistic-two-stage-detection" class="headerlink" title="centerNet2: Probabilistic two-stage detection"></a>centerNet2: Probabilistic two-stage detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>two-stage</li>
+<li>probabilistic interpretation</li>
+<li>the suggested pipeline<ul>
+<li>stage1：infer proper object-backgroud likelihood，专注前背景分离</li>
+<li>stage2：inform the overall score</li>
+</ul>
+</li>
+<li>verified on COCO<ul>
+<li>faster and more accurate than both one and two stage detectors</li>
+<li>outperform yolov4</li>
+<li>extreme large model：56.4 mAP</li>
+<li>standard ResNeXt- 32x8d-101-DCN back：50.2 mAP</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>one-stage detectors<ul>
+<li>dense predict</li>
+<li>jointly predict class &amp; location</li>
+<li>anchor-based：RetinaNet用focal loss来deal with 前背景imbalance</li>
+<li>anchor-free：FCOS &amp; CenterNet不基于anchor基于grid，缓解imbalance</li>
+<li>deformable conv：AlignDet在output前面加一层deformable conv to get richer features</li>
+<li>sound probablilistic interpretation</li>
+<li>heavier separate classification and regression branches than two-stage models：如果类别特别多的情况，头会非常重，严重影响性能</li>
+<li>misaligned issue：一阶段预测是基于local feature，感受野、anchor settings都会影响与目标的对齐程度</li>
+</ul>
+</li>
+<li>two-stage detectors<ul>
+<li>first RPN generates coarse object proposals</li>
+<li>then per-region head to classify and refine</li>
+<li>ROI heads：Faster-RCNN用了两个fc层作为ROI heads</li>
+<li>cascaded：CascadeRCNN用了三个连续的Faster-RCNN，with a different positive threshold</li>
+<li>semantic branch：HTC用了额外的分割分支enhance the inter-stage feature flow</li>
+<li>decouple：TSD将cls&amp;pos两个ROI heads解耦</li>
+<li>weak RPN：因为尽可能提升召回率，proposal score也不准，丧失了一个clear的probabilistic interpretation</li>
+<li>independent probabilistic interpretation：两个阶段各训各的，最后的cls score仅用第二阶段的</li>
+<li>slow：proposals太多了所以slow down</li>
+</ul>
+</li>
+<li>other detectors<ul>
+<li>point-based：cornetNet预测&amp;组合两个角点，centerNet预测中心点并基于它回归长宽</li>
+<li>transformer：DETR直接预测a set of bounding boxes，而不是传统的结构化的dense output</li>
+</ul>
+</li>
+<li><p>网络结构</p>
+<ul>
+<li>one/two-stage detectors：image classification network + lightweight upsampling layers + heads</li>
+<li>point-based：FCN，有symmetric downsampling and upsampling layer，预测一个小stride的heatmap</li>
+<li>DETR：feature extraction + transformer decoder</li>
+</ul>
+</li>
+<li><p>our method</p>
+<p>  <img src="/2020/12/29/centerNet/centerNet2.png" width="40%;"></p>
+<ul>
+<li>第一个阶段<ul>
+<li>做二分类的one-stage detector，提前景，</li>
+<li>实现上就用region-level feature+classifier（FCN-based）</li>
+</ul>
+</li>
+<li>第二阶段<ul>
+<li>做position-based类别预测</li>
+<li>实现上既可以用一个Faster-RCNN，也可以用classifier</li>
+</ul>
+</li>
+<li>最终的loss由两个阶段合并得到，而不是分阶段训练</li>
+<li>跟former two-stage framework的主要不同是<ul>
+<li>加了joint probabilistic objective over both stages</li>
+<li>以前的二阶段RPN的用途主要是最大化recall，does not produce accurate likelihoods</li>
+</ul>
+</li>
+<li>faster and more accurate<ul>
+<li>首先是第一个阶段的proposal更少更准</li>
+<li>其次是第二个阶段makes full use of years of progress in two-stage detection，二阶段的设计站在伟人的肩膀上</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>joint class distribution：先介绍怎么将一二阶段联动<ul>
+<li>【第一阶段的前背景score】 乘上 【第二阶段的class score】</li>
+<li>$P(C_k) = \sum_o P(C_k|O_k=o)P(O_k=o)$</li>
+<li>maximum likelihood estimation<ul>
+<li>for annotated objects<ul>
+<li>退阶成independent maximum-likelihood</li>
+<li>$log P(C_k) = log P(C_k|O_k=1) + log P(O_k=1)$</li>
+</ul>
+</li>
+<li>for background class<ul>
+<li>不分解</li>
+<li>$log P(bg) = log( P(bg|O_k=1) * P(O_k=1) + P(O_k=0))$</li>
+<li>lower bounds，基于jensen不等式得到两个不等式</li>
+<li>$log P(bg) \ge P(O_k=1) * log( P(bg|O_k=1))$：如果一阶段前景率贼大，那么就</li>
+<li>$log P(bg) \ge P(O_k=0)$：</li>
+<li>optimize both bounds jointly works better</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>network design：介绍怎么在one-stage detector的基础上改造出一个two-stage probabilistic detector</p>
+<ul>
+<li>experiment with 4 different designs for first-stage RPN</li>
+<li>RetinaNet<ul>
+<li>RetinaNet其实和two-stage的RPN高度相似核心区别在于：<ul>
+<li>a heavier head design：4-conv vs 1-conv<ul>
+<li>RetinaNet是backbone+fpn+individual heads</li>
+<li>RPN是backbone+fpn+shared convs+individual heads</li>
+</ul>
+</li>
+<li>a stricter positive and negative anchor definition：都是IoU-based anchor selection，thresh不一样</li>
+<li>focal loss</li>
+</ul>
+</li>
+<li>first-stage design<ul>
+<li>以上三点都在probabilistic model里面保留</li>
+<li>然后将separated heads改成shared heads</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>centerNet<ul>
+<li>模型升级<ul>
+<li>升级成multi-scale：use ResNet-FPN back，P3-P7</li>
+<li>头是FCOS那种头：individual heads，不share conv，然后cls branch预测centerness+cls，reg branch预测regress params</li>
+<li>正样本也是按照FCOS策略：position &amp; scale-based</li>
+</ul>
+</li>
+<li>升级模型进行one-stage &amp; two-stage实验：centerNet*</li>
+</ul>
+</li>
+<li>ATSS<ul>
+<li>是一个adaptive IoU thresh的方法，centerness来表示一个格子的score</li>
+<li>我们将centerness*classification score定义为这个模型的proposal score</li>
+<li>另外就是two-stage下还是将RPN的cls &amp; reg heads合并</li>
+</ul>
+</li>
+<li>GFL：还没看过，先跳过吧</li>
+<li>second-stage designs：FasterRCNN &amp; CascadeR- CNN</li>
+<li>deformable conv：这个在centerNetv1的ResNet和DLA back里面都用了，在v2里面，主要是用ResNeXt-32x8d-101-DCN，</li>
+</ul>
+</li>
+<li><p>hyperparameters for two-stage probabilistic model</p>
+<ul>
+<li>两阶段模型通常是用P2-P6，一阶段通常用P3-P7：我们用P3-P7</li>
+<li>increase the positive IoU threshold：0.5 to [0.6,0.7,0.8]</li>
+<li>maximum of 256 proposals （对比origin的1k）</li>
+<li>increase nms threshold from 0.5 to 0.7</li>
+<li>SGD，90K iterations</li>
+<li>base learning rate：0.02 for two-stage &amp; 0.01 for one-stage，0.1 decay</li>
+<li>multi-scale training：短边[640,800]，长边不超过1333</li>
+<li>fix-scale testing：短边用800，长边不超过1333</li>
+<li>first stage loss weight：0.5，因为one-stage detector通常用0.01 lr开始训练</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>4种design的对比</p>
+<ul>
+<li>所有的probabilistic model都比one-stage model强，甚至还快（因为简化了脑袋）</li>
+<li>所有的probabilistic FasterRCNN都比原始的RPN-based FasterRCNN强，也快（因为P3-P7比P2-P6的计算量小一半，而且第二阶段fewer proposals）</li>
+<li><p>CascadeRCNN-CenterNet design performs the best：所以以后就把它叫CenterNet2</p>
+<p><img src="/2020/12/29/centerNet/designs.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>和其他real-time models对比</p>
+<ul>
+<li>大多是real-time models都是一阶段模型</li>
+<li><p>可以看到二阶段不仅能够比一阶段模型还快，精度还更高</p>
+<p><img src="/2020/12/29/centerNet/real-time.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SOTA对比</p>
+<ul>
+<li>报了一个56.4%的sota，但是大家口碑上好像效果很差</li>
+<li>不放图了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="corner-centerNet-Keypoint-Triplets-for-Object-Detection"><a href="#corner-centerNet-Keypoint-Triplets-for-Object-Detection" class="headerlink" title="corner-centerNet: Keypoint Triplets for Object Detection"></a>corner-centerNet: Keypoint Triplets for Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>based on cornerNet</p>
+</li>
+<li><p>triplet</p>
+<ul>
+<li>corner keypoints：weak grouping ability cause false positives</li>
+<li><p>correct predictions can be determined by checking the central parts</p>
+<p><img src="/2020/12/29/centerNet/center.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>cascade corner pooling and center poolling</p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>whats new in CenterNet<ul>
+<li>triplet inference workflow<ul>
+<li>after a proposal is generated as a pair of corner keypoints</li>
+<li>checking if there is a center keypoint of the same class </li>
+</ul>
+</li>
+<li>center pooling<ul>
+<li>for predicting center keypoints </li>
+<li>by making the center keypoints on feature map having the max sum Hori+Verti responses</li>
+</ul>
+</li>
+<li>cascade corner pooling<ul>
+<li>equips the original corner pooling module with the ability of perceiving internal information </li>
+<li>not only consider the boundary but also the internal directions </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CornetNet痛点<ul>
+<li>fp rate高</li>
+<li>small object的fp rate尤其高</li>
+<li>一个idea：cornerNet based RPN<ul>
+<li>但是原生RPN都是复用的</li>
+<li>计算效率？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>center pooling</p>
+<ul>
+<li>geometric centers &amp; semantic centers</li>
+<li><p>center pooling能够有效地将语义信息最丰富的点（semantic centers）传达到物理中心点（geometric centers），也就是central region</p>
+<p><img src="/2020/12/29/centerNet/central.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/21/equlization-loss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/12/21/equlization-loss/" itemprop="url">equlization loss</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-21T17:28:34+08:00">
+                2020-12-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/21/equlization-loss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/21/equlization-loss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/18/megDet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1813,1700 +2900,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/09/metrics/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/10/09/metrics/" itemprop="url">metrics</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-09T15:45:31+08:00">
-                2020-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/10/09/metrics/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/metrics/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="分类指标"><a href="#分类指标" class="headerlink" title="分类指标"></a>分类指标</h2><ul>
-<li>recall：召回率</li>
-<li>precision：准确率</li>
-<li>accuracy：正确率</li>
-<li>F-Measure</li>
-<li>sensitivity：灵敏度</li>
-<li>specificity：特异度</li>
-<li>TPR</li>
-<li>FPR</li>
-<li>ROC</li>
-<li>AUC</li>
-</ul>
-<ol>
-<li><p>混淆矩阵</p>
-<p> |           |  gt is p   |   gt is n    |<br> | :———-: | :————: | :—————: |<br> | pred is p |     tp     | fp（假阳性） |<br> | pred is n | fn（漏检） |      tn      |</p>
-<ul>
-<li>注意区分fp和fn</li>
-<li>fp：被错误地划分为正例的个数，即实际为负例但被分类器划分为正例的实例数</li>
-<li>fn：被错误地划分为负例的个数，即实际为正例但被分类器划分为负例的实例数</li>
-</ul>
-</li>
-<li><p>recall</p>
-<ul>
-<li>衡量查全率</li>
-<li>对gt is p做统计</li>
-<li>$recall = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>precision</p>
-<ul>
-<li>衡量查准率</li>
-<li>对pred is p做统计</li>
-<li>$precision = \frac{tp}{tp+fp}$</li>
-</ul>
-</li>
-<li><p>accuracy</p>
-<ul>
-<li>对的除以所有</li>
-<li>$accuracy = \frac{tp+tn}{p+n}$</li>
-</ul>
-</li>
-<li><p>sensitivity</p>
-<ul>
-<li>衡量分类器对正例的识别能力</li>
-<li>对gt is p做统计</li>
-<li>$sensitivity = \frac{tp}{p}=\frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>specificity</p>
-<ul>
-<li>衡量分类器对负例的识别能力</li>
-<li>对gt is n做统计</li>
-<li>$specificity =\frac{tn}{n}= \frac{tn}{fp+tn}$</li>
-</ul>
-</li>
-<li><p>F-measure</p>
-<ul>
-<li>综合考虑P和R，是Precision和Recall加权调和平均</li>
-<li>$F = \frac{(a^2+1)<em>P</em>R}{a^2*P+R}$</li>
-<li>$F_1 = \frac{2PR}{P+R}$</li>
-</ul>
-</li>
-<li><p>TPR</p>
-<ul>
-<li>将正例分对的概率</li>
-<li>对gt is t做统计</li>
-<li>$TPR = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>FPR</p>
-<ul>
-<li>将负例错分为正例的概率</li>
-<li>对gt is n做统计</li>
-<li>$FPR = \frac{fp}{fp+tn}$</li>
-<li>FPR = 1 - 特异度</li>
-</ul>
-</li>
-<li><p>ROC</p>
-<ul>
-<li>每个点的横坐标是FPR，纵坐标是TPR</li>
-<li>描绘了分类器在TP（真正的正例）和FP（错误的正例）间的trade-off</li>
-<li>通过变化阈值，得到不同的分类统计结果，连接这些点就形成ROC curve</li>
-<li>曲线在对角线左上方，离得越远说明分类效果好</li>
-<li>P/R和ROC是两个不同的评价指标和计算方式，一般情况下，检索用前者，分类、识别等用后者</li>
-</ul>
-</li>
-<li><p>AUC</p>
-<ul>
-<li>AUC的值就是处于ROC curve下方的那部分面积的大小</li>
-<li>通常，AUC的值介于0.5到1.0之间</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/25/metric-learning系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/25/metric-learning系列/" itemprop="url">metric learning系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-25T12:05:22+08:00">
-                2020-09-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/25/metric-learning系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/25/metric-learning系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>参考：<a href="https://gombru.github.io/2019/04/03/ranking_loss/，博主实验下来觉得Triplet" target="_blank" rel="noopener">https://gombru.github.io/2019/04/03/ranking_loss/，博主实验下来觉得Triplet</a> Loss outperforms Cross-Entropy Loss</p>
-<h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li><p>metric learning</p>
-<ul>
-<li>常规的cls loss系列(CE、BCE、MSE)的目标是predict a label</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>metric loss系列的目标则是predict relative distances between inputs<ul>
-<li>常用场景：人脸 &amp; fine-grained</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>relation between samples</p>
-<ul>
-<li>first get the embedded representation</li>
-<li>then compute the similarity score<ul>
-<li>binary (similar / dissimilar)</li>
-<li>regression (euclidian distance)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>大类：不管叫啥，主体上就两类，二元组和三元组</p>
-<ul>
-<li><p>common target：拉近类内距离，拉大类间距离</p>
-</li>
-<li><p>pairs</p>
-<ul>
-<li>anchor + sample<ul>
-<li>positive pairs：distance —&gt; 0</li>
-<li>negative pairs：disctance &gt; a margin</li>
-</ul>
-</li>
-<li><img src="/2020/09/25/metric-learning系列/pairs.png" width="50%;"></li>
-</ul>
-</li>
-<li>triplets<ul>
-<li>anchor + pos sample + neg sample</li>
-<li>target：(dissimilar distance - similar distance) —&gt; a margin</li>
-</ul>
-</li>
-<li><img src="/2020/09/25/metric-learning系列/triplet.png" width="50%;"></li>
-</ul>
-</li>
-<li><p>papers</p>
-<p>[siamese network] Signature Verification using a ‘Siamese’ Time Delay Neural Network：1993，lecun，孪生网络始祖，俩个子网络sharing weights，距离用的是cosine distance，loss直接优化距离，优化target是个定值cosine=1.0/-1.0</p>
-<p>[contrastive loss] Dimensionality Reduction by Learning an Invariant Mapping：2006，lecun，contrastive loss始祖，研究的是高维特征向量向低维映射的非线性层，距离用的是euclidean distance，loss优化的是squared distance，优化target是0和m，similar pairs仍旧会被推向一个定点，没有解决论文声称的uniform distribution</p>
-<p>[triplet-loss] Learning Fine-grained Image Similarity with Deep Ranking：2014，Google，用了三元组，提出了triplet-loss</p>
-<p>[facenet] FaceNet: A Unified Embedding for Face Recognition and Clustering：2015，Google，用来识别人脸，用了三元组和triplet-loss，squared euclidean distance，优化目标是同类和异类pair之间的相对距离，困难样本（semi-hard &amp; hard）对收敛起作用（加速／local minima），triplet-loss考虑了类间的离散性，但没有考虑类内的紧凑性</p>
-<p>[center-loss] A Discriminative Feature Learning Approach for Deep Face Recognition：2016，也是用在人脸任务上，优化目标是类内的绝对距离，而不是建模相对关系，center-loss直接优化的是类间的间凑性，类间的离散性靠的是softmax loss</p>
-<p>[triplet-center-loss] Triplet-Center Loss for Multi-View 3D Object Retrieval：2018，东拼西凑水论文</p>
-<p>[Hinge-loss] SVM margin</p>
-<p>[circle-loss] Circle Loss: A Unified Perspective of Pair Similarity Optimization：2020CVPR，旷视，提出了cls loss和metric loss的统一形式$minimize(s_n - s_p+m)$，在此基础上提出circle loss作为优化目标$(\alpha_n s_n - \alpha_p s_p) = m$，在toy scenario下展示了分类边界和梯度的改善。</p>
-<p>～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～～</p>
-<p>[Hierarchical Similarity] Learning Hierarchical Similarity Metrics：2012CVPR，</p>
-<p>[Hierarchical Triplet Loss] Deep Metric Learning with Hierarchical Triplet Loss：2018ECCV，</p>
-<ul>
-<li>Hierarchical classicification应该单独做一个系列，tobeadded</li>
-</ul>
-</li>
-<li><p>一些待明确的问题</p>
-<ul>
-<li>anchor怎么选：facenet中说明，每个mini-batch中每个类别必须都有</li>
-<li>pairs怎么实现（困难的定义）：facenet中说明，hard distance sample in mini-batch</li>
-<li>hingeloss &amp; SVM推导</li>
-<li>常规使用？结合cls loss和metric loss还是只用metric loss：cls loss和metric loss本质上是一样的，都是希望同类样本输出一样，不同类样本输出不一样，只不过前者具有概率意义，后者具有距离意义。上面列出来的只有center loss是要跟cls loss结合起来用的，因为他只针对类内，不足以推动整个模型。</li>
-</ul>
-</li>
-</ol>
-<h2 id="Signature-Verification-using-a-‘Siamese’-Time-Delay-Neural-Network"><a href="#Signature-Verification-using-a-‘Siamese’-Time-Delay-Neural-Network" class="headerlink" title="Signature Verification using a ‘Siamese’ Time Delay Neural Network"></a>Signature Verification using a ‘Siamese’ Time Delay Neural Network</h2><ol>
-<li>动机<ul>
-<li>verification of written signatures </li>
-<li>propose Siamese <ul>
-<li>two identical sub-networks </li>
-<li>joined at their outputs </li>
-<li>measure the distance</li>
-</ul>
-</li>
-<li>verification process<ul>
-<li>a stored feature vector </li>
-<li>a chosen threshold</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>方法<ul>
-<li>network<ul>
-<li>two inputs：extracting features</li>
-<li>two sub-networks：share the same weights</li>
-<li>one output：cosine of the angle between two feature vectors </li>
-<li>target<ul>
-<li>two real signatures：cosine=1.0</li>
-<li>with one forgery：cosine=-0.9 and cosine=-1.0</li>
-</ul>
-</li>
-<li>dataset<ul>
-<li>50% genuine:genuine pairs</li>
-<li>40% genuine:forgery pairs</li>
-<li>10% genuine:zero-effort pairs</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p><img src="/2020/09/25/metric-learning系列/siamese.png" width="40%;"></p>
-<h2 id="Dimensionality-Reduction-by-Learning-an-Invariant-Mapping"><a href="#Dimensionality-Reduction-by-Learning-an-Invariant-Mapping" class="headerlink" title="Dimensionality Reduction by Learning an Invariant Mapping"></a>Dimensionality Reduction by Learning an Invariant Mapping</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>dimensionality reduction</li>
-<li>propose Dimensionality Reduction by Learning an Invariant Mapping (DrLIM)<ul>
-<li>globally co- herent non-linear function</li>
-<li>relies solely on neighbor- hood relationships</li>
-<li>invariant to certain transformations of the inputs</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>most existing dimensionality reduction techniques <ul>
-<li>they do not produce a function (or a mapping) from input to manifold </li>
-<li>new points with unknown relationships with training samples cannot be processed </li>
-<li>they tend to cluster points in output space </li>
-<li>a uniform distribution in the outer manifolds is desirable </li>
-</ul>
-</li>
-<li>proposed DrLIM <ul>
-<li>globally coherent non-linear function </li>
-<li>neighborhood relationships that are independent from any distance metric</li>
-<li>invariant to complicated non-linear trnasformations <ul>
-<li>lighting changes</li>
-<li>geometric distortions</li>
-</ul>
-</li>
-<li>can be used to map new samples </li>
-</ul>
-</li>
-<li>empoly contrastive loss <ul>
-<li>neighbors are pulled together </li>
-<li>non-neighbors are pushed apart</li>
-</ul>
-</li>
-<li>energy based model <ul>
-<li>euclidean distance  </li>
-<li>approximates the “semantic similarity”of the inputs in input space</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>contrastive loss </p>
-<ul>
-<li><p>conventional loss sum over samples</p>
-</li>
-<li><p>contrastive loss sum over pairs $(X_1, X_2, Y)$</p>
-<ul>
-<li>similar pairs：$Y=0$</li>
-<li>dissimilar：$Y=1$</li>
-</ul>
-</li>
-<li><p>euclidean distance </p>
-<ul>
-<li><p>$L = (1-Y)\sum L_s ||G_w(X_1)-G_w(X_2)||_2 + Y\sum L_d ||G_w(X_1)-G_w(X_2)||_2$</p>
-</li>
-<li><p>$L_s$ should results in low values for similar pairs </p>
-</li>
-<li>$L_d$ should results in high values for dissimilar pairs</li>
-<li>exact form：$L(W,Y,X_1,X_2) = (1-Y)\frac{1}{2}(D^2) + (Y)\frac{1}{2} \{max(0,m-D)\}^2$</li>
-</ul>
-<p><img src="/2020/09/25/metric-learning系列/contrastive loss.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>spring model analogy</p>
-<ul>
-<li>similar partial loss相当于给弹簧施加了一个恒定的力，向中心点挤压</li>
-<li><p>dissimilar partial loss只对圈内的点施力，推出圈外就不管了</p>
-<p><img src="/2020/09/25/metric-learning系列/spring.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="FaceNet-A-Unified-Embedding-for-Face-Recognition-and-Clustering"><a href="#FaceNet-A-Unified-Embedding-for-Face-Recognition-and-Clustering" class="headerlink" title="FaceNet: A Unified Embedding for Face Recognition and Clustering"></a>FaceNet: A Unified Embedding for Face Recognition and Clustering</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>face tasks</p>
-<ul>
-<li>face verification: is this the same person</li>
-<li>face recognition: who is the person</li>
-<li>clustering: find common people among the faces</li>
-</ul>
-</li>
-<li><p>learn a mapping</p>
-<ul>
-<li>compact Euclidean space</li>
-<li><p>where the Euclidean distance directly correspond to face similarity</p>
-<p><img src="/2020/09/25/metric-learning系列/face similarity.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>traditionally training classification layer</p>
-<ul>
-<li><p>generalizes well to new faces？                      <strong>indirectness</strong></p>
-</li>
-<li><p>large dimension feature representation         <strong>inefficiency</strong></p>
-</li>
-<li><p>use siamese pairs</p>
-<ul>
-<li>the loss encourages all faces of one identity to project onto a single point</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>this paper</p>
-<ul>
-<li>employ triplet loss<ul>
-<li>target：separate the positive pair from the negative by a distance margin </li>
-<li>allows the faces of one identity to live on a manifold</li>
-</ul>
-</li>
-<li>obtain face embedding<ul>
-<li>l2 norm</li>
-<li>a fixed d-dims hypersphere </li>
-</ul>
-</li>
-<li>large dataset  <ul>
-<li>to attain the appropriate invariances to pose, illumination, and other variational conditions</li>
-</ul>
-</li>
-<li><p>architecture</p>
-<ul>
-<li>explore two different deep network</li>
-</ul>
-<p><img src="/2020/09/25/metric-learning系列/facenet.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>input：三元组，consist of two matching face thumbnails and a non-matching one </p>
-</li>
-<li><p>ouput：特征描述，a compact 128-D embedding <strong>living on the fixed hypersphere $||f(x)||_2=1$</strong></p>
-</li>
-<li><p>triple-loss</p>
-<ul>
-<li>target：all anchor-pos distances are smaller than any anchor-neg distances with a least margin $\alpha$</li>
-<li>$L = \sum_i^N [||f(x_i^a) - f(x_i^p)||_2^2 - ||f(x_i^a) - f(x_i^n)||_2^2 + \alpha]$</li>
-<li>hard triplets </li>
-</ul>
-</li>
-<li><p>hard samples</p>
-<ul>
-<li>$argmax_{x_i^p}||f(x_i^a) - f(x_i^p)||_2^2$</li>
-<li>$argmin_{x_i^n}||f(x_i^a) - f(x_i^n)||_2^2$</li>
-<li>infeasible to compute over the whole set：mislabelled and poorly imaged faces would dominate the hard positives and negatives </li>
-<li>off-line：use recent checkpoint to compute on a subset</li>
-<li>online：select in mini-batch</li>
-</ul>
-</li>
-<li><p>mini-batch：</p>
-<ul>
-<li>每个类别都必须有正样本</li>
-<li>负样本是randomly sampled </li>
-</ul>
-</li>
-<li><p>hard sample</p>
-<ul>
-<li>use all anchor-positive pairs  </li>
-<li>selecting the hard negatives <ul>
-<li>hardest negatives can lead to bad local minima in early stage</li>
-<li>先pick semi-hard：$||f(x_i^a) - f(x_i^p)||_2^2 &lt; ||f(x_i^a) - f(x_i^n)||_2^2$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>network</p>
-<ul>
-<li>一种straight的网络，引入了1x1 conv先压缩通道</li>
-<li>Inception models：20x fewer params，5x fewer FLOPS</li>
-</ul>
-</li>
-<li><p>metric</p>
-<ul>
-<li>same／different是由a squared L2 distance决定</li>
-<li>因此测试结果是d的函数</li>
-<li>定义true accepts：圈内对的，$TA(d)=\{(i,j)\in P_{same}, with D(x_i,x_j)\leq d\}$</li>
-<li><p>定义false accepts：圈内错的，$FA(d)=\{(i,j)\in P_{diff}, with D(x_i,x_j)\leq d\}$</p>
-</li>
-<li><p>定义validation rate：$VAL(d) = \frac{|TA(d)|}{|P_{same}|}$</p>
-</li>
-<li>定义false accept rate：$FAR(d) = \frac{|FA(d)|}{|P_{diff}|}$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="A-Discriminative-Feature-Learning-Approach-for-Deep-Face-Recognition"><a href="#A-Discriminative-Feature-Learning-Approach-for-Deep-Face-Recognition" class="headerlink" title="A Discriminative Feature Learning Approach for Deep Face Recognition"></a>A Discriminative Feature Learning Approach for Deep Face Recognition</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>enhance the discriminationative power of the deeply learned features</li>
-<li>joint supervision <ul>
-<li>softmax loss</li>
-<li>center loss</li>
-</ul>
-</li>
-<li>two key learning objectives<ul>
-<li>inter-class dispension </li>
-<li>intra-class compactness </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>face recognition task requirement<ul>
-<li>the learned features need to be not only separable but also discriminative</li>
-<li>generalized enough for the new unseen samples</li>
-</ul>
-</li>
-<li>the softmax loss only encourage the separability of features <ul>
-<li>对分类边界、类内类间分布没有直接约束</li>
-</ul>
-</li>
-<li>contrastive loss &amp; triplet loss <ul>
-<li>training pairs or triplets dramatically grows </li>
-<li>slow convergence and instability </li>
-</ul>
-</li>
-<li>we propose<ul>
-<li>learn a center </li>
-<li>simultaneously update the center and optimize the distances </li>
-<li>joint supervision<ul>
-<li>softmax loss forces the deep features of different classes staying apart </li>
-<li>center loss efficiently pulls the deep features of the same class to their centers </li>
-<li>to be more discriminationative</li>
-</ul>
-</li>
-<li>the inter-class features differences are enlarged </li>
-<li>the intra-class features variations are reduced</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>softmax vis</p>
-<ul>
-<li>最后一层hidden layer使用两个神经元</li>
-<li>so that we can directly plot</li>
-<li><p>separable but still show significant intra-class variations</p>
-<p><img src="/2020/09/25/metric-learning系列/softmax.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>center loss</p>
-<ul>
-<li><p>$L_c = \frac{1}{2} \sum_1^m ||x_i - c_{y_i}||_2^2$</p>
-</li>
-<li><p>update class center on mini-batch：</p>
-<script type="math/tex; mode=display">
-  \frac{\partial L_c}{\partial x_i} = x_i - c_{y_i}\\
-  \Delta c_j = \frac{\sum_i^m \delta (y_i=j) * (c_j - x_i)}{1+\sum_i^m \delta (y_i=j)}</script></li>
-<li><p>joint supervision：</p>
-<script type="math/tex; mode=display">
-  L = L_{CE} + \lambda L_c</script><p><img src="/2020/09/25/metric-learning系列/joint supervision.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>discussion</p>
-<ul>
-<li>necessity of joint supervision <ul>
-<li>solely softmax loss —-&gt; large intra-class variations </li>
-<li>solely center loss —-&gt; features and centers will degraded to zeros </li>
-</ul>
-</li>
-<li>compared to contrastive loss and triplet loss<ul>
-<li>using pairs：suffer from dramatic data expansion </li>
-<li>hard mining：complex recombination </li>
-<li>optimizing target：<ul>
-<li>center loss直接针对intra-class compactness，类内用距离来约束，类间用softmax来约束</li>
-<li>contrastive loss也是直接优化绝对距离，类内&amp;类间都用距离来约束</li>
-<li>triplet loss是建模相对关系，类内&amp;类间都用距离来约束</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>architecture </p>
-<ul>
-<li>local convolution layer：当数据集在不同的区域有不同的特征分布时，适合用local-Conv，典型的例子就是人脸识别，一般人的面部都集中在图像的中央，因此我们希望当conv窗口滑过这块区域的时候，权重和其他边缘区域是不同的</li>
-<li><p>参数量暴增：kernel_size <em> kernel_size </em> output_size <em> output_size </em> input_channel * output_channel</p>
-<p><img src="/2020/09/25/metric-learning系列/centerlossnet.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>hyperparam：$\lambda$ and $\alpha$</p>
-<ul>
-<li>fix $\alpha=0.5$ and vary $\lambda$ from 0-0.1</li>
-<li>fix $\lambda=0.003$ and vary $\alpha$ from 0.01-1</li>
-<li><p>结论是remains stable across a large range，没有给出最佳／建议</p>
-<p><img src="/2020/09/25/metric-learning系列/hyper.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>我的实验</p>
-<ul>
-<li>加比不加训练慢得多</li>
-<li>在Mnist上测试同样的epoch加比不加准确率低</li>
-<li>之所以Center Loss是针对人脸识别的Loss是有原因的，个人认为<strong>人脸的中心性更强一些</strong>，也就是说一个人的所有脸取平均值之后的人脸我们还是可以辨识是不是这个人，所以Center Loss才能发挥作用</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Circle-Loss-A-Unified-Perspective-of-Pair-Similarity-Optimization"><a href="#Circle-Loss-A-Unified-Perspective-of-Pair-Similarity-Optimization" class="headerlink" title="Circle Loss: A Unified Perspective of Pair Similarity Optimization"></a>Circle Loss: A Unified Perspective of Pair Similarity Optimization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>pair similarity</li>
-<li>circular decision boundary</li>
-<li>unify cls-based &amp; metric-based data<ul>
-<li>class-level labels  </li>
-<li>pair-wise labels </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>there is no intrinsic difference between softmax loss &amp; metric loss</p>
-<ul>
-<li>minimize between-class similarity $s_n$</li>
-<li>maximize within- class similarity $s_p$</li>
-<li>reduce $s_n - s_p$</li>
-</ul>
-</li>
-<li><p>short-commings</p>
-<ul>
-<li>lack of flexibility：$s_p$和$s_n$的优化速度可能不同，一个快收敛了一个还很差，这时候用同样的梯度去更新就非常inefficient and irrational，就左图来说，下面的点相对上面的点，$s_n$更小（更接近op），$s_p$更小（更远离op），vice versa，但是决策平面对三个点相对于$s_n$和$s_p$的梯度都是一样的（1和-1）。</li>
-<li><p>ambiguous convergence status：用一个hard distance margin来描述decision boundary还不够discriminative，hard decision boundary上各点其实还是有差别的，假设存在一个optimum（$s_p=1 \ \&amp; \ s_n=0$），那么左图决策平面上两个点，相对optimum的意义明显不一样，决策平面应该是个围绕optimum的圆圈。</p>
-<p><img src="/2020/09/25/metric-learning系列/circle loss.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>propose circle loss</p>
-<ul>
-<li>independent weighting factors：离optimum越远的penalty strength越大，这一项直接以距离为优化目标的loss都是满足的</li>
-<li>different penalty strength：$s_p$和$s_n$ learn at different paces，类内加权，加权系数是learnable params</li>
-<li>$(\alpha_n s_n - \alpha_p s_p) = m$：yielding a circle shape </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>核心：$(\alpha_n s_n - \alpha_p s_p) = m$</p>
-</li>
-<li><p>self-paced weighting</p>
-<ul>
-<li><p>given optimum $O_p$ and $O_n$，for each similarity score：</p>
-<script type="math/tex; mode=display">
-  \begin{cases}
-  a_p^i = [O_p - s_p^i]_+ \\
-  a_n^j = [s_n^j - O_n]_+
-  \end{cases}</script></li>
-<li><p>cut-off at zero </p>
-</li>
-<li><p>对于远离optimum的点梯度放大，接近optimum的点（快收敛）梯度缩小</p>
-</li>
-<li><p>softmax里面通常不会对同类样本间做这种rescaling的，因为它希望所有样本value都达到贼大</p>
-</li>
-<li><p>Circle loss abandons the interpretation of classifying a sample to its target class with a large probability </p>
-</li>
-</ul>
-</li>
-<li><p>margin</p>
-<ul>
-<li>adding a margin m reinforces the optimization </li>
-<li>take toy scenario <ul>
-<li>最终整理成：$(s_n-0)^2 + (s_p-1)^2 = 2m^2$</li>
-<li>op target：$s_p &gt; 1-m$，$s_n &lt; m$</li>
-<li>relaxation factor $m$：controls the radius of the decision boundary </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>unified perspective </p>
-<ul>
-<li>tranverse all the similarity pairs：$\{s_p^i\}^K$和$\{s_n^j\}^N$</li>
-<li>to reduce $(s_n^j - s_p^i)$：$L_{uni}=log[1+\sum^K_i \sum^N_j exp(\lambda (s_n^j - s_p^i + m))]$</li>
-<li>解耦（不会同时是$s_p$和$s_n$）：$L_{uni}=log[1+\sum^N_j exp(\lambda (s_n^j + m))\sum^K_i exp(\lambda (-s_p^i))]$</li>
-<li>given class labels：<ul>
-<li>we get $(N-1)$ between-class similarity scores and $(1)$ within-class similarity score </li>
-<li>分母翻上去：$L = -log \frac{exp(\lambda (s_p-m))}{exp(\lambda (s_p-m)) + \sum^{N-1}_j exp(\lambda (s_n^j))}$</li>
-<li>就是softmax</li>
-</ul>
-</li>
-<li>given pair-wise labels：<ul>
-<li>triplet loss with hard mining：find pairs with large $s_n$ and low $s_p$</li>
-<li>use infinite：$L=lim_{\lambda \to \inf} \frac{1}{\lambda} L_{uni}$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>Face recognition <ul>
-<li>noisy and long-tailed data：去噪并且去掉稀疏样本</li>
-<li>resnet &amp; 512-d feature embeddings &amp; cosine distance </li>
-<li>$\lambda=256$，$m=0.25$</li>
-</ul>
-</li>
-<li>Person re-identification <ul>
-<li>$\lambda=128$，$m=0.25$</li>
-</ul>
-</li>
-<li>Fine-grained image retrieval <ul>
-<li>车集和鸟集</li>
-<li>bn-inception &amp; 512-d embeddings</li>
-<li>P-K sampling</li>
-<li>$\lambda=80$，$m=0.4$</li>
-</ul>
-</li>
-<li>hyper-params<ul>
-<li>the scale factor $\lambda$：<ul>
-<li>determines the largest scale of each similarity score </li>
-<li>Circle loss exhibits high robustness on $\lambda$</li>
-<li>the other two becomes unstable with larger  $\lambda$</li>
-<li>owing to the decay factor</li>
-</ul>
-</li>
-<li>the relaxation factor m：<ul>
-<li>determines the radius of the circular decision boundary </li>
-<li>surpasses the best performance of the other two in full range</li>
-<li>robustness </li>
-</ul>
-</li>
-<li><img src="/2020/09/25/metric-learning系列/circle hyper.png" width="50%;"></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>inference</p>
-<ul>
-<li>对人脸类任务，通常用训练好的模型生成一个人脸标准底库，然后每次推理的时候得到测试数据的特征向量，并在标准底库中搜索相似度最高的特征，完成人脸识别过程。</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/23/efficient周边/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/23/efficient周边/" itemprop="url">efficient周边</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-23T14:09:06+08:00">
-                2020-09-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/23/efficient周边/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/23/efficient周边/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>因为不是googlenet家族官方出品，所以放在外面</p>
-<p>[EfficientFCN] EfficientFCN: Holistically-guided Decoding for Semantic Segmentation：商汤，主要针对upsampling是局部感受野，重建失真多，分割精度差的问题，提出了Holistically-guided Decoder (HGD) ，用来recover the high-resolution (OS=8) feature maps，想法上接近SCSE-block，数学表达上接近bilinear-CNN，性能提升主要归因于eff back吧。</p>
-<h2 id="EfficientFCN-Holistically-guided-Decoding-for-Semantic-Segmentation"><a href="#EfficientFCN-Holistically-guided-Decoding-for-Semantic-Segmentation" class="headerlink" title="EfficientFCN: Holistically-guided Decoding for Semantic Segmentation"></a>EfficientFCN: Holistically-guided Decoding for Semantic Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Semantic Segmentation <ul>
-<li>dilatedFCN：computational complexity </li>
-<li>encoder-decoder：performance</li>
-</ul>
-</li>
-<li>proposed EfficientFCN <ul>
-<li>common back without dilated convolution </li>
-<li>holistically-guided decoder </li>
-</ul>
-</li>
-<li>balance performance and efficiency</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>key elements for semantic segmentation<ul>
-<li>high-resolution feature maps </li>
-<li>pre-trained weights</li>
-</ul>
-</li>
-<li>OS32 feature map：the fine-grained structural information is discarded </li>
-<li>dilated convolution：no extra parameters introduced but equire high computational complexity and memory consumption </li>
-<li>encoder-decoder based methods<ul>
-<li>repeated upsampling + skip connection procedure<ul>
-<li>upsampling</li>
-<li>concat／add</li>
-<li>successive convs</li>
-</ul>
-</li>
-<li>Even with the skip connections, lower-level high-resolution feature maps cannot provide abstractive enough features for achieving high- performance segmentation </li>
-<li>The  bilinear upsampling or deconvolution operations are conducted in a local manner(from a limited receptive filed)</li>
-<li>improvements<ul>
-<li>reweight：SE-block</li>
-<li>scales each feature channel but maintains the original spatial size and structures：【scse block对spacial有加权啊】</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>propose EfficientFCN</p>
-<ul>
-<li>widely used classification model </li>
-<li>Holistically-guided Decoder (HGD) <ul>
-<li>take OS8, OS16, OS32 feature maps from backbone</li>
-<li>OS8和OS16用来spatially guiding the feature upsampling process </li>
-<li>OS32用来encode the global context然后基于guidance进行上采样</li>
-<li>linear assembly at each high-resolution spatial location：感觉就是对上采样特征图做了加权</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/09/23/efficient周边/FCN.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Holistically-guided Decoder </p>
-<ul>
-<li>multi-scale feature fusion </li>
-<li>holistic codebook generation<ul>
-<li>from high-level feature maps </li>
-<li>holistic codewords：without any spatial order </li>
-</ul>
-</li>
-<li><p>codeword assembly </p>
-<p><img src="/2020/09/23/efficient周边/hgd.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>multi-scale feature fusion </p>
-<ul>
-<li>we observe the fusion of multi-scale feature maps generally result in better performance </li>
-<li>compress：separate 1x1 convs</li>
-<li>bilinear downsamp／upsamp</li>
-<li>concatenate</li>
-<li>fused OS32 $m_{32}$ &amp; fused OS8 $m_8$</li>
-</ul>
-</li>
-<li><p>holistic codebook generation</p>
-<ul>
-<li>from $m_{32}$</li>
-<li>two separate 1x1 conv<ul>
-<li>a codeword based map $B \in R^{1024<em>(H/32)</em>(W/32)}$：每个位置用一个1024-dim的vector来描述</li>
-<li>n spatial weighting map $A\in R^{n<em>(H/32)</em>(W/32)}$：highlight 特征图上不同区域<ul>
-<li>softmax norm in spatial-dim</li>
-<li>$\widetilde A_i(x,y)=\frac{exp(A_i(x,y))}{\sum_{p,q} exp(A_i(p,q))}, i\in [0,n)$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>codeword $c_i \in R^{1024}$<ul>
-<li>global description for each weighting map </li>
-<li>weighted average of B on all locations</li>
-<li>$c_i = \sum_{p,q} \widetilde A_i(p,q) B(p,q)$</li>
-<li>each codeword captures certain aspect of the global context </li>
-</ul>
-</li>
-<li>orderless high-level global features $C \in R^{1024*n}$<ul>
-<li>$C = [c_1, …, c_n]$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>codeword assembly </p>
-<ul>
-<li>raw guidance map $G \in R^{1024<em>(H/8)</em>(W/8)}$：1x1 conv on $m_8$</li>
-<li>fuse semantic-rich feature map $\overline B \in R^{1024}$：global average vector </li>
-<li>novel guidance feature map $\overline G = G \oplus \overline B $：location-wise addition【？？？？】</li>
-<li>linear assembly weights of the n codewords $W \in R^{n<em>(H/8)</em>(W/8)}$：1x1 conv on $\overline G$</li>
-<li>holistically-guided upsampled feature $\tilde f_8 = W^T C$：reshape &amp; dot</li>
-<li>final feature map $f_8$：concat $\tilde f_8$ and $G$</li>
-</ul>
-</li>
-<li><p>final segmentation</p>
-<ul>
-<li>1x1 conv</li>
-<li>further upsampling </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>numer of holistic codewords</p>
-<ul>
-<li>32-512：increase</li>
-<li>512-1024：slight drop</li>
-<li><p>we observe the number of codewords needed is approximately 4 times than the number of classes </p>
-<p><img src="/2020/09/23/efficient周边/n.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/18/data-aug/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/18/data-aug/" itemprop="url">data aug</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-18T13:46:07+08:00">
-                2020-09-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/18/data-aug/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/data-aug/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[mixup] mixup: BEYOND EMPIRICAL RISK MINIMIZATION：对不同类别的样本，不仅可以作为数据增广手段，还可以用于semi-supervised learning（MixMatch）</p>
-<p>[mixmatch] MixMatch: A Holistic Approach to Semi-Supervised Learning：针对半监督数据的数据增广</p>
-<p>[mosaic] from YOLOv4</p>
-<p>[AutoAugment] AutoAugment: Learning Augmentation Policies from Data：google</p>
-<p>[RandAugment] RandAugment: Practical automated data augmentation with a reduced search space：google</p>
-<h2 id="RandAugment-Practical-automated-data-augmentation-with-a-reduced-search-space"><a href="#RandAugment-Practical-automated-data-augmentation-with-a-reduced-search-space" class="headerlink" title="RandAugment: Practical automated data augmentation with a reduced search space"></a>RandAugment: Practical automated data augmentation with a reduced search space</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>AutoAugment<ul>
-<li>separate search phase</li>
-<li>run on a subset of a huge dataset</li>
-<li>unable to adjust the regularization strength based on model or dataset size</li>
-</ul>
-</li>
-<li><p>RandAugment</p>
-<ul>
-<li>significantly reduced search space</li>
-<li>can be used uniformly across tasks and datasets</li>
-<li>match or exceeds the previous val acc</li>
-</ul>
-<p><img src="/2020/09/18/data-aug/acc.png" width="50%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li><p>always select a transformation with uniform prob $\frac{1}{K}$</p>
-</li>
-<li><p>given N transformations for an image：there are $K^N$ potential policies</p>
-</li>
-<li><p>fixied magnitude schedule M：we choose Constant，因为只要一个hyper</p>
-<p>  <img src="/2020/09/18/data-aug/magnitude.png" width="50%"></p>
-</li>
-<li><p>run naive grid search</p>
-</li>
-</ul>
-</li>
-<li><p>疑问：这样每个op等概率，就不再data-specific了，也看不出自然图像更prefer color transformation这种结论了</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="AutoAugment-Learning-Augmentation-Policies-from-Data"><a href="#AutoAugment-Learning-Augmentation-Policies-from-Data" class="headerlink" title="AutoAugment: Learning Augmentation Policies from Data"></a>AutoAugment: Learning Augmentation Policies from Data</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>search for data augmentation policies</p>
-</li>
-<li><p>propose AutoAugment</p>
-<ul>
-<li>create a search space composed of augmentation sub-policies<ul>
-<li>one sub-policy is randomly choosed per image per mini-batch</li>
-<li>a sub-policy consists of two base operations </li>
-</ul>
-</li>
-<li><p>find the best policy：yields the highest val acc on the target dataset</p>
-</li>
-<li><p>the learned policy can transfer</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>data augmentation<ul>
-<li>to teach a model about invariance</li>
-<li>in data domain is easier than hardcoding it into model architecture</li>
-<li>currently dataset-specific and often do not transfer：<ul>
-<li>MNIST：elastic distortions, scale, translation, and rotation </li>
-<li>CIFAR &amp; ImageNet：random cropping, image mirroring and color shifting / whitening </li>
-<li>GAN：直接生成图像，没有归纳policy</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>we aim to automate the process of finding an effective data augmentation policy for a target dataset<ul>
-<li>each policy：<ul>
-<li>operations in certain order</li>
-<li>probabilities after applying</li>
-<li>magnitudes </li>
-</ul>
-</li>
-<li>use reinforcement learning as the search algorithm</li>
-</ul>
-</li>
-<li>contributions<ul>
-<li>SOTA on CIFAR &amp; ImageNet &amp; SVHN </li>
-<li>new insight on transfer learning：使用预训练权重没有显著提升的dataset上，使用同样的aug policies则会涨点</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li><p>search space of policies</p>
-<ul>
-<li>policy：a policy consists of 5 sub-policies </li>
-<li>sub-policy：each sub-policy consisting of two image operations</li>
-<li>operation：each operation is also associated with two hyperparameters<ul>
-<li>probability：of applying the operation，uniformly discrete into 11 values</li>
-<li>magnitude：of the operation，uniformly discrete into 10 values</li>
-</ul>
-</li>
-<li>a mini-batch share the same chosen sub-policy</li>
-</ul>
-</li>
-<li><p>operations：16 in total，mainly use PIL</p>
-<p>  <img src="/2020/09/18/data-aug/operations.png" width="80%"></p>
-<ul>
-<li><a href="https://blog.csdn.net/u011583927/article/details/104724419有各种operation的可视化效果" target="_blank" rel="noopener">https://blog.csdn.net/u011583927/article/details/104724419有各种operation的可视化效果</a></li>
-<li>shear是砍掉图像一个角的畸变</li>
-<li>equalize是直方图均衡化</li>
-<li>solarize是基于一定阈值的invert，高于阈值invert，低于阈值不变</li>
-<li>posterize也是一种像素值截断操作</li>
-<li>color是调整饱和度，mag&lt;1趋近灰度图</li>
-<li>sharpness决定图像模糊/锐化</li>
-<li>sample pairing：两张图加权求和，但是不改变标签</li>
-</ul>
-</li>
-<li><p>searching goal</p>
-<ul>
-<li>with $(16<em>10</em>11)^2$ choices of sub-policies</li>
-<li>we want 5</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>example</p>
-<ul>
-<li>一个sub-policy包含两个operation</li>
-<li>每个operation有一定的possibility做/不做</li>
-<li><p>每个operation有一定的magnitude决定做后的效果</p>
-<p><img src="/2020/09/18/data-aug/example.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>结论</p>
-<ul>
-<li><p>On CIFAR-10, AutoAugment picks mostly color-based transformations </p>
-</li>
-<li><p>on ImageNet, AutoAugment focus on color-based transformations as well, besides geometric transformation and rotate is commonly used </p>
-<ul>
-<li><p>one of the best policy</p>
-<p>  <img src="/2020/09/18/data-aug/imagenet.png" width="80%"></p>
-</li>
-<li><p>overall results</p>
-<p>  <img src="/2020/09/18/data-aug/imagenet2.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="mixup-BEYOND-EMPIRICAL-RISK-MINIMIZATION"><a href="#mixup-BEYOND-EMPIRICAL-RISK-MINIMIZATION" class="headerlink" title="mixup: BEYOND EMPIRICAL RISK MINIMIZATION"></a>mixup: BEYOND EMPIRICAL RISK MINIMIZATION</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>classification task</li>
-<li>memorization and sensitivity issue<ul>
-<li>reduces the memorization of corrupt labels</li>
-<li>increases the robustness to adversarial examples</li>
-<li>improves the generalization </li>
-<li>can be used to stabilize the training of GANs  </li>
-</ul>
-</li>
-<li>propose convex combinations of pairs of examples and their labels</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>ERM(Empirical Risk Minimization)：issue of generalization</p>
-<ul>
-<li>allows large neural networks to <em>memorize</em> (instead of generalize from) the training data even in the presence of strong regularization </li>
-<li>neural networks change their predictions drastically when evaluated on examples just outside the training distribution </li>
-</ul>
-</li>
-<li><p>VRM(Vicinal Risk Minimization)：introduce data augmentation</p>
-<ul>
-<li>e.g. define the vicinity of one image as the set of its horizontal reflections, slight rotations, and mild scalings </li>
-<li>vicinity share the same class </li>
-<li>does not model the vicinity relation across examples of different classes </li>
-</ul>
-</li>
-<li>ERM中的training set并不是数据的真实分布，只是用有限数据来近似真实分布，memorization也会最小化training error，但是对training seg以外的sample就leads to undesirable behaviour </li>
-<li>mixup就是VRM的一种，propose a generic vicinal distribution，补充vicinity relation across examples of different classes </li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>mixup</p>
-<ul>
-<li><p>constructs virtual training examples </p>
-<script type="math/tex; mode=display">
-  x = \lambda x_i + (1-\lambda)x_j  \\
-  y = \lambda y_i + (1-\lambda)y_j</script></li>
-<li><p>use two examples drawn at random：raw inputs &amp; raw one-hot labels</p>
-</li>
-<li><p>理论基础：linear interpolations of feature vectors should lead to linear interpolations of the associated targets </p>
-</li>
-<li><p>hyper-parameter $\alpha$</p>
-<ul>
-<li>$\lambda = np.random.beta(\alpha, \alpha)$</li>
-</ul>
-</li>
-<li>controls the strength of interpolation  </li>
-</ul>
-</li>
-<li><p>初步结论</p>
-</li>
-<li><p>three or more examples mixup does not provide further gain but more computation </p>
-</li>
-<li><p>interpolating only between inputs with equal label did not lead to the performance gains </p>
-</li>
-<li><p><strong>key elemets——two inputs with different label</strong></p>
-</li>
-<li><p>vis</p>
-<ul>
-<li><p>decision boundaries有了一个线性过渡</p>
-<p>  <img src="/2020/09/18/data-aug/boundary.png" width="30%"></p>
-</li>
-<li><p>更准确 &amp; 梯度更小：error少所以loss小所以梯度小？？</p>
-<p>  <img src="/2020/09/18/data-aug/gradient.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>初步分类实验</p>
-<ul>
-<li>$\alpha \in [0.1, 0.4]$ leads to improved performance，largers leads to underfitting</li>
-<li>models with higher capacities and/or longer training runs are the ones to benefit the most from mixup</li>
-</ul>
-</li>
-<li><p>memorization of corrupted labels</p>
-<ul>
-<li>将数据集中一部分label换成random noise </li>
-<li>ERM直接过拟合，在corrupted sample上面training error最小，测试集上test error最大</li>
-<li>dropout有效防止过拟合，但是mixup outperforms它</li>
-<li><p>corrupted label多的情况下，dropout+mixup performs the best</p>
-<p><img src="/2020/09/18/data-aug/memorization.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>robustness to adversarial examples</p>
-<ul>
-<li>Adversarial examples are obtained by adding tiny (visually imperceptible) perturbations  </li>
-<li>常规操作data augmentation：produce and train on adversarial examples </li>
-<li>add significant computational：样本数量增多，梯度变化大</li>
-<li>mixup results in a smaller loss and gradient norm：因为mixup生成的假样本“更合理一点”，梯度变化更小</li>
-</ul>
-</li>
-<li><p>ablation study</p>
-<ul>
-<li><p>mixup is the best：绝对领先第二mix input + label smoothing</p>
-</li>
-<li><p>the effect of regularization </p>
-<ul>
-<li>ERM需要大weight decay，mixup需要小的——说明mixup本身的regularization effects更强</li>
-<li>高层特征mixup需要更大的weight decay——随着层数加深regularization effects减弱</li>
-<li><p>AC+RP最强</p>
-</li>
-<li><p>label smoothing和add Gaussian noise to inputs 相对比较弱</p>
-</li>
-<li>mix inputs only(SMOTE) shows no gain</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/09/18/data-aug/ablation.png" width="60%"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="MixMatch-A-Holistic-Approach-to-Semi-Supervised-Learning"><a href="#MixMatch-A-Holistic-Approach-to-Semi-Supervised-Learning" class="headerlink" title="MixMatch: A Holistic Approach to Semi-Supervised Learning"></a>MixMatch: A Holistic Approach to Semi-Supervised Learning</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>semi-supervised learning</li>
-<li>unify previous methods</li>
-<li>proposed mixmatch<ul>
-<li>guessing low-entropy labels </li>
-<li>mixup labeled and unlabeled data </li>
-</ul>
-</li>
-<li>useful for differentially private learning</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>semi-supervised learning add a loss term computed on unlabeled data and encourages the model to generalize better to unseen data </li>
-<li>the loss term<ul>
-<li>entropy minimization：decision boundary应该尽可能远离数据簇，因此prediction on unlabeled data也应该是high confidence</li>
-<li>consistency regularization：增强前后的unlabeled data输出分布一致</li>
-<li>generic regularization：weight decay &amp; mixup</li>
-</ul>
-</li>
-<li>MixMatch unified all above<ul>
-<li>introduces a unified loss term for unlabeled data  </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>given：a batch of labeled examples $X$ and a batch of labeled examples $U$</li>
-<li>augment+label guess：a batch of augmented labeled examples $X^{‘}$ and a batch of augmented labeled examples $U^{‘}$</li>
-<li>compute：separate labeled and unlabeled loss terms $L_X$ and $L_U$</li>
-<li><p>combine：weighted sum</p>
-<p><img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/overview.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>MixMatch</p>
-<ul>
-<li><p>data augmentation</p>
-<ul>
-<li>常规augmentation</li>
-<li>作用于每一个$x_b$和$u_b$</li>
-<li>$u_b$做$K$次增强</li>
-</ul>
-</li>
-<li><p>label guessing</p>
-<ul>
-<li>对增强的$K$个$u_b$分别预测，然后取平均</li>
-<li>average class prediction </li>
-</ul>
-</li>
-<li><p>sharpening</p>
-<ul>
-<li>reduce the entropy of the label distribution </li>
-<li>拉高最大prediction，拉小其他的</li>
-<li>$Sharpen (p, T)_i =\frac{p_i^{\frac{1}{T}}}{\sum^{N}_j p_j^{\frac{1}{T}}} $</li>
-<li>$T$趋近于0的时候，processed label就接近one-hot了</li>
-</ul>
-</li>
-<li><p>mixup</p>
-<ul>
-<li><p>slightly modified form of mixup to make the generated sample being more closer to the original</p>
-<p><img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/mixup.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>loss function</p>
-<ul>
-<li>labeled loss：typical cross-entropy loss  </li>
-</ul>
-</li>
-<li><p>unlabeled loss：<strong>squared L2，bounded and less sensitive to completely incorrect predictions</strong></p>
-</li>
-</ul>
-</li>
-<li><p>hyperparameters</p>
-<ul>
-<li><p>sharpening temperature $T$：fixed 0.5</p>
-<ul>
-<li>number of unlabeled augmentations $K$：fixed 2</li>
-<li>MixUp Beta parameter $\alpha$：0.75 for start</li>
-<li>unsupervised loss weight $\lambda_U$：100 for start</li>
-</ul>
-</li>
-<li><p>Algorithm </p>
-<p>  <img src="/2020/09/18/data-aug/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/data-aug/mixmatch.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<p>[mosaic] from YOLOv4</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3561,7 +2954,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3574,7 +2967,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

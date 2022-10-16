@@ -276,6 +276,756 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/10/VMware扩容/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/10/VMware扩容/" itemprop="url">VMware扩容</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-10T16:41:18+08:00">
+                2018-10-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/10/VMware扩容/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/10/VMware扩容/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前创建虚拟机时不知道需要多大空间，给了20G，装了ROS相关套件之后磁盘使用率到了90%。</p>
+<p>然后在硬盘设置里面调整到了60G，我以为这样就可以了。。。。</p>
+<p><img src="/2018/10/10/VMware扩容/硬盘.png" alt=""></p>
+<p>too naive。。。还是要手动配置一下，需要安装工具Gparted：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install gparted</span><br></pre></td></tr></table></figure>
+<p>然后先抹掉extended和swap两个分区，然后就可以resize主分区了，然后在重新创建那两个分区就好了。</p>
+<p><img src="/2018/10/10/VMware扩容/gparted.png" alt=""></p>
+<p><strong>Attention：</strong>磁盘只能扩展，不能变小，因此建议逐渐扩展。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/08/CSM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/08/CSM/" itemprop="url">CSM, Correlative Scan Matching</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-08T15:22:43+08:00">
+                2018-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/08/CSM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/08/CSM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>SLAM前端主要解决两个问题，一是从不同时刻的传感器输入中识别出同一个地图特征，二是计算每个当前时刻机器人相对该特征的位姿。</p>
+<p>vSLAM能够轻松解决前者，LidarSLAM解决后者无压力。本文讨论激光SLAM前端问题1——特征点匹配。目前两大常用思路：scan2scan——ICP，scan2map——CSM。</p>
+<p>basic的CSM算法思路如下：从前一帧机器人位姿开始，寻找最优刚性变换，使雷达点在栅格地图中的位置尽量对应于占据度为1的栅格。</p>
+<p>为了保持定位信息原有的数位精度，使用双线性插值方法来获取雷达点的地图值(占据度)，而不是使用其所在栅格的地图值来直接对应：</p>
+<p><img src="/2018/10/08/CSM/插值.png" alt="插值"></p>
+<p>$Pm$是雷达点，$P_{00}, P_{01}, P_{10}, P_{11}$是雷达点邻近的四个<strong>栅格中心</strong>点。于是得到地图值：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+M(P_m)&  \approx \frac{y-y_0}{y_1-y_0}M(I_0) +\frac{y_1-y}{y_1-y_0}M(I_1)\\
+& =\frac{y-y_0}{y_1-y_0} \left ( \frac{x-x_0}{x_1-x_0}M(P_{11}) + \frac{x_1-x}{x_1-x_0}M(P_{01})\right)\\
+& +\frac{y_1-y}{y_1-y_0}\left ( \frac{x-x_0}{x_1-x_0}M(P_{10}) + \frac{x_1-x}{x_1-x_0}M(P_{00})\right)
+\end{align}</script><p>雷达点所在位置的地图值变化梯度：</p>
+<script type="math/tex; mode=display">
+\triangledown M(P_m) = \left [\frac{\delta M(P_m)}{\delta x}, \frac{\delta M(P_m)}{\delta y} \right]\\
+\frac{\delta M(P_m)}{\delta x} =\frac{y-y_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{01}))  +\frac{y_1-y}{(y_1-y_0)(x_1-x_0)}(M(P_{10})- M(P_{00}))\\
+\frac{\delta M(P_m)}{\delta y} =\frac{x-x_0}{(y_1-y_0)(x_1-x_0)}(M(P_{11})- M(P_{10}))  +\frac{x_1-x}{(y_1-y_0)(x_1-x_0)}(M(P_{01})- M(P_{00}))\\</script><p>记当前时刻的已有地图$M$，当前帧共输入$n$个雷达点$S_1, …, S_n$，其对应位置的占据度为$M(S_k)$，最优变换定义为$\xi = (\Delta x, \Delta y, \psi)^T$，则最优问题的最小二乘描述为：</p>
+<script type="math/tex; mode=display">
+\xi = argmin_{\xi} \sum_{k=1}^n[1-M(S_k(\xi))]^2</script><p>scan2map的鲁棒性更强，但是实时性上打了折扣。对此主要有两个改进措施：一是局部搜索，二是分辨率金字塔。</p>
+<p>一、局部搜索</p>
+<p>实际计算中会<strong>选定一个搜索区间</strong>，通常只在上一时刻地图位置的附近，对其中包含的全部可能位姿进行评分。</p>
+<p>上式（最小二乘表达式）只包含了雷达端点，考虑到传感器的噪点影响，<strong>局部极值</strong>影响大。</p>
+<ul>
+<li>基于模版的匹配：雷达端点及射线所在栅格构成的多边形区域，以此作为局部地图，进行map2map匹配。减少局部极值的影响，提高计算代价，同时考虑到动态目标，会引入新的局部极值。</li>
+</ul>
+<p><img src="/2018/10/08/CSM/模版.png" alt="模版"></p>
+<ul>
+<li><p>LM算法：迭代的方式求解最小二乘的最优解。</p>
+</li>
+<li><p>分支界定算法：基于广度优先搜索的算法，通过对解空间搜索树的分支进行扩展和剪枝，不断调整搜索方向，加快找到全局最优解的速度。界定核心：若当前分支的下界$C_{branch}$小于解空间上界$C_{HB}$，则进行拓展，否则进行裁剪，直至到达叶子结点，即找到最小代价解。</p>
+</li>
+</ul>
+<p>二、多分辨率金字塔</p>
+<p>两帧雷达点云的相似区域并不会影响匹配的最终结果，但会参与计算，导致搜索效率降低，需要更多的迭代次数达到收敛。</p>
+<p>当地图分辨率较低时，部分地图信息会被忽略，这种高、低分辨率下的差异，有助于对地图中的相似场景进行区分。实际使用中，首先将初始位姿对应的雷达点云与最上层（粗分辨率）的地图进行匹配，计算出当前分辨率下的位姿，并作为初始值进入次一级地图进行匹配，以此类推。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/30/状态估计/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/30/状态估计/" itemprop="url">状态估计</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-30T16:14:04+08:00">
+                2018-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/30/状态估计/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/30/状态估计/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h4><ul>
+<li>经典的SLAM模型由一个运动方程和一个观测方程构成：<script type="math/tex; mode=display">
+\left\{
+\begin{split}
+& x_k = f(x_{k-1}, u_k) + w_k\\
+& z_{k,j} = h(y_i, x_k) + v_{kj}
+\end{split}
+\right.</script>其中，$x_k$表示相机的位姿，可以用变换矩阵或李代数来表示，$y_i$表示路标，也就是图像中的特征点，$w_k$和$v_{kj}$表示噪声项，假设满足零均值的高斯分布。</li>
+</ul>
+<ul>
+<li>我们希望通过带噪声的观测数据$z$和输入数据$u$推断位姿$x$和地图$y$的概率分布。主要采用两大类方法，一类是滤波方法：基于当前状态来估计下一状态，忽略历史；一类是非线性优化方法，使用所有时刻的数据估计新状态的最优分布。 <ul>
+<li>滤波方法主要分为扩展卡尔曼滤波和粒子滤波两大类。</li>
+<li>非线性优化根据实现细节的不同主要分为滑动窗口法和Pose Graph法。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-非线性优化"><a href="#2-非线性优化" class="headerlink" title="2. 非线性优化"></a>2. 非线性优化</h4><ul>
+<li><p>非线性优化基于历史，同时也作用于历史，因此把所有待估计的变量放在一个状态变量中：</p>
+<script type="math/tex; mode=display">
+x = \{x_1, ..., x_N, y_1, ..., y_M\}</script><p>在已知观测数据$z$和输入数据$u$的条件下，对机器人的状态估计：</p>
+<script type="math/tex; mode=display">
+P(x | z,u)</script><p>先忽略测量运动的传感器，仅考虑测量方程，根据<strong>贝叶斯法则</strong>：</p>
+<script type="math/tex; mode=display">
+P(x|z) = \frac{P(z|x)P(x)}{P(z)} \varpropto P(z|x)P(x)</script><ul>
+<li>先验概率$P(x)$：先验的概念最好理解，就是一个事件的概率分布。</li>
+<li>似然概率$P(z|x)$：已知事件的概率分布，事件中某状态的概率。</li>
+<li>后验概率$P(x|z)$：在给定数据条件下，不确定性的条件分布。</li>
+<li>$Posterior  \varpropto Likelihood * Prior$</li>
+</ul>
+<p>求解后验分布比较困难，但是求一个状态最优估计（使得后验概率最大化）是可行的：</p>
+<script type="math/tex; mode=display">
+x^*_{MAP} = argmaxP(x|z) = argmaxP(z|x)P(x) = argmaxP(z|x)</script><p>因为先验概率不知道，所以问题直接转成为求解极大似然估计，问题中的未知数是$x$，直观意义就是：寻找一个最优的状态分布，使其最可能产生当前观测到的数据。</p>
+</li>
+<li><p>假设了噪声项$v_{kj} \thicksim N(0, Q_{k,j})$，所以极大似然概率也服从一个高斯分布：</p>
+<script type="math/tex; mode=display">
+P(z_{kj}|x_k, y_j) = N(h (y_j, x_i), Q)</script><p>求高斯分布的最值通常取负对数处理，最大化变成求最小化：</p>
+<script type="math/tex; mode=display">
+P(x) = \frac{1}{\sqrt{(2\pi)^Ndet(\Sigma)}} exp\bigg(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\bigg)\\
+-ln(P(x) ) = \frac{1}{2}ln\big((2\pi)^Ndet(\Sigma)\big) + \frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)</script><p>对数第一项与$x$无关，第二项等价于噪声的平方项。因此可以得到优化问题的目标函数：</p>
+<script type="math/tex; mode=display">
+e_{k} = x_k - f(x_{k-1}, u_k)\\
+e_{kj} = z_{kj} - h(x_k, y_j)\\
+J(x) = \Sigma e_k^TR^{-1}_ke_{k} + \Sigma e_{kj}^TQ^{-1}_ke_{kj}\\
+x* = argmin_x J(x)</script><p>以上的最小二乘问题可以采用各种各样的梯度下降法求解最优解（参考<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>）。</p>
+</li>
+<li><p>Bundle Ajustment</p>
+<p>优化问题最终可以表示成$H\Delta x = g$的形式，其对角线上的两个矩阵为稀疏矩阵，且右下角的矩阵维度往往远大于左上角（因为特征点的数目远大于位姿节点）：</p>
+<script type="math/tex; mode=display">
+H = 
+\begin{bmatrix}
+B &E\\
+E^T & C
+\end{bmatrix}</script><p>一个有效的求解方式称为<strong>Schur消元</strong>，也叫<strong>边缘化Marginalization</strong>，主要思路如下：首先求解$C$矩阵的逆矩阵，然后对$H$矩阵进行消元，目标是消去其右上角的$E$矩阵，这样就能够先独立求解相机参数$\Delta x_c$，再利用求得的解来求landmarks参数$\Delta x_p$：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+I &-EC^{-1}\\
+0 & I
+\end{bmatrix}
+\begin{bmatrix}
+B &E\\
+E^T & C
+\end{bmatrix}
+\begin{bmatrix}
+\Delta x_c \\
+\Delta x_p
+\end{bmatrix} = 
+\begin{bmatrix}
+I &-EC^{-1}\\
+0 & I
+\end{bmatrix}
+\begin{bmatrix}
+v \\
+w
+\end{bmatrix} \\
+\begin{bmatrix}
+B - EC^{-1}E^T & 0\\
+E^T & C
+\end{bmatrix}\begin{bmatrix}
+\Delta x_c \\
+\Delta x_p
+\end{bmatrix} = 
+\begin{bmatrix}
+v  - EC^{-1}w\\
+w
+\end{bmatrix}</script><p>因此可以解得$\Delta x_c$：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+B - EC^{-1}E^T
+\end{bmatrix} \Delta x_c = v - EC^{-1}w</script><ul>
+<li>这个矩阵称为消元之后的$S$矩阵，它的维度与相机参数的维度一致</li>
+<li>$S$矩阵的意义是两个相机变量之间是否存在着共同观测点</li>
+<li>$S$矩阵的稀疏性由实际数据情况决定，因此只能通过普通的矩阵分解的方式来求解</li>
+</ul>
+</li>
+<li><p>核函数</p>
+<p>当误差很大时，二范数增长的很快，为了防止其过大掩盖掉其他的边，可以将其替换成增长没那么快的函数，使得整个优化结果更为稳健，因此又叫鲁棒核函数，常用的核有Huber核、Cauchy核、Tukey核等，Huber核的定义如下：</p>
+<script type="math/tex; mode=display">
+H(e) = 
+\left\{
+\begin{split}
+   & \frac{1}{2} e ^2, \ \ \ |e| \leq \delta\\
+  &  \delta(|e| -  \frac{1}{2}\delta), \ \ else
+\end{split}   
+\right.</script></li>
+</ul>
+<h4 id="3-卡尔曼滤波"><a href="#3-卡尔曼滤波" class="headerlink" title="3. 卡尔曼滤波"></a>3. 卡尔曼滤波</h4><p>滤波思路基于一个重要的<strong>假设：一阶马尔可夫性——k时刻状态只与k-1时刻状态有关</strong>，整理成两个要素如下：</p>
+<ul>
+<li>$x_{k-1}$ contains the whole history</li>
+<li>$x_k = f(x_{k-1}, u_k, z_k)$</li>
+</ul>
+<p>在这里我们只需要维护一个状态量$x_k$，并对它不断进行迭代更新，<strong>moreover，如果状态量服从高斯分布，我们只需要维护状态量的均值和方差即可（进一步简化）</strong>。</p>
+<p>首先考虑一个<strong>线性系统</strong>：</p>
+<script type="math/tex; mode=display">
+\left\{
+\begin{split}
+& x_k = A_k x_{k-1}+u_k + w_k\\
+& z_k = C_k x_k + v_k
+\end{split}
+\right.\\
+w_k \thicksim N(0, R), v_k \thicksim N(0, Q)</script><p>卡尔曼滤波器的第一步<strong>预测</strong>，通过运动方程确定$x_k$的先验分布，注意用不同的上标区分不同的概率分布：尖帽子$\hat x_k$表示后验，平帽子$\bar x_k$表示先验：</p>
+<script type="math/tex; mode=display">
+P(\bar x_k) =  N(\bar x_k, \bar P_k)\\
+\bar x_k = A_k \hat x_{k-1} + u_k\\
+\bar P_k = A_k\hat P_{k-1}A_k^T+R</script><p>第二步为<strong>观测</strong>，通过分析实际观测值，计算<strong>在某状态下应该产生怎样的分布</strong>：</p>
+<script type="math/tex; mode=display">
+P(z_k|x_k) = N(C_kx_k, Q)</script><p>第三步为<strong>更新</strong>，根据第一节中的<strong>贝叶斯法则</strong>，得到$x_k$的后验分布：</p>
+<script type="math/tex; mode=display">
+(\hat x_k, \hat P_k) = N(C_kx_k, Q)N(\bar x_k, \bar P_k)\\
+K = \bar P_k C_k^T(C_k\bar P_k C_k^T + Q_k)^{-1}\\
+\hat x_k = \bar x_k + K(z_k-C_k\bar x_k)\\
+\hat P_k = (I - KC_k)\bar P_k</script><p>整体的流程图如下：</p>
+<p><img src="/2018/06/30/状态估计/KF.jpeg" alt=""></p>
+<p>具体过程本节中不做展开，详情可以参考<a href="">卡尔曼滤波</a>。高斯分布经过线性变换仍然服从高斯分布，因此整个过程没有发生任何的近似，因此可以说卡尔曼滤波器构成了线性系统的最优无偏估计。</p>
+<p>下面考虑<strong>非线性系统</strong>：</p>
+<p>SLAM中不管是三维还是平面刚体运动，因为都引入了旋转，因此其运动方程和观测方程都是非线性函数。一个高斯分布，经过非线性变换，通常就不再服从高斯分布，因此<strong>对于非线性系统，必须采取一定的近似，将一个非高斯分布近似成高斯分布</strong>。</p>
+<p>通常的做法是，将k时刻的运动方程和观测方程在$\hat x_{k-1}$，$\hat P_{k-1}$处做一阶泰勒展开，得到两个雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+F = \frac{\partial f}{\partial x_{k-1}}\bigg|_{\hat x_{k-1}}\\
+H = \frac{\partial h}{\partial x_k}\bigg|_{\hat x_k}</script><p>中间量卡尔曼增益$K_k$：</p>
+<script type="math/tex; mode=display">
+\bar P_k = F\hat P_{k-1}F^T + R_k\\
+K_k = \bar P_k H^T(H \bar P_k H^T + Q_k)^{-1}</script><p>后验概率：</p>
+<script type="math/tex; mode=display">
+\hat x_k = \bar x_k + K_k(z_k - h(\bar x_k))\\
+\hat P_k = (I - K_k H)\bar P_k</script><p> 对于SLAM这种非线性的情况，EKF给出的是单次线性近似下的最大后验估计（MAP）。</p>
+<h4 id="4-EKF-VS-Graph-Optimization"><a href="#4-EKF-VS-Graph-Optimization" class="headerlink" title="4. EKF VS Graph-Optimization"></a>4. EKF VS Graph-Optimization</h4><ol>
+<li>马尔可夫性抛弃了更久之前的状态，优化方法则运用了更多的信息。</li>
+<li>非线性误差：两种方法都使用了线性化近似，EKF只在$x_{k-1}$处做了一次线性化，图优化法则在每一次迭代更新时都对新的状态点做泰勒展开，其线性化的模型更接近原始非线性模型。</li>
+<li>存储：EKF维护的是状态的均值和方差，存储量与状态维度成平方增长，图优化存储的是每个状态点的位姿，存储线性增长。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/28/优化库：g2o-Ceres/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/28/优化库：g2o-Ceres/" itemprop="url">优化库：Ceres & g2o</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-28T14:53:05+08:00">
+                2018-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/28/优化库：g2o-Ceres/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/28/优化库：g2o-Ceres/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="Ceres"><a href="#Ceres" class="headerlink" title="Ceres"></a>Ceres</h3><p>使用Ceres求解非线性优化问题，主要分为三个部分：</p>
+<ul>
+<li><p>第一部分：构建代价函数<code>Cost_Functor</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义一个实例化时才知道的类型T</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运算符()的重载，用来得到残差fi</span></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T* <span class="keyword">const</span> x, T* residual)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">     residual[<span class="number">0</span>] = T(<span class="number">10.0</span>) - x[<span class="number">0</span>];</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二部分：构建最小二乘问题<code>problem</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Problem problem;</span><br><span class="line"><span class="comment">// 使用自动求导，第一个1是输出维度（残差项），第二个1是输入维度（优化项）</span></span><br><span class="line">CostFunction* cost_function = <span class="keyword">new</span> AutoDiffCostFunction&lt;CostFunctor, <span class="number">1</span>, <span class="number">1</span>&gt;(<span class="keyword">new</span> CostFunctor);</span><br><span class="line"><span class="comment">// 添加误差项，NULL表示不使用核函数，x是优化项</span></span><br><span class="line">problem.AddResidualBlock(cost_function, <span class="literal">NULL</span>, &amp;x);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第三部分：求解器参数配置<code>Solver</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Solver::Options options;</span><br><span class="line">options.linear_solver_type = ceres::DENSE_QR; <span class="comment">//配置增量方程的解法，稠密的QR分解</span></span><br><span class="line">options.minimizer_progress_to_stdout = <span class="literal">true</span>;<span class="comment">//输出到cout</span></span><br><span class="line">Solver::Summary summary;<span class="comment">//优化信息</span></span><br><span class="line">Solve(options, &amp;problem, &amp;summary);<span class="comment">//求解</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; summary.BriefReport() &lt;&lt; <span class="string">"\n"</span>;<span class="comment">//输出优化的简要信息</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>使用核函数</strong>：数据中往往存在<strong>离群点</strong>，离群点会对寻优结果造成影响，这时可以使用一些损失核函数来对离群点的影响加以消除，Ceres库中提供的核函数主要有：TrivialLoss 、HuberLoss、 SoftLOneLoss 、 CauchyLoss。 </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用核函数</span></span><br><span class="line">problem.AddResidualBlock(cost_function, <span class="keyword">new</span> CauchyLoss(<span class="number">0.5</span>, &amp;x);</span><br></pre></td></tr></table></figure>
+<p><img src="/2018/06/28/优化库：g2o-Ceres/without kernel.png" alt="without kernel"></p>
+<p><img src="/2018/06/28/优化库：g2o-Ceres/with kernel.png" alt="with kernel"></p>
+<h3 id="g2o"><a href="#g2o" class="headerlink" title="g2o"></a>g2o</h3><p>用g2o优化库来进行优化的步骤如下：</p>
+<ol>
+<li><p>定义节点和边的类型，通常在默认的基础类型上做修改</p>
+<p>定义顶点，顶点的基类为<code>g2o::BaseVertex&lt;优化变量维度，数据类型&gt;</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingVertex</span>:</span> <span class="keyword">public</span> g2o::BaseVertex&lt;<span class="number">3</span>, Eigen::Vector3d&gt;</span><br></pre></td></tr></table></figure>
+<p>顶点的更新函数<code>oplusImpl</code>：定义增量加法，因为优化变量和增量之间并不一定是线性叠加的关系，如位姿变换。</p>
+<p>定义边， 本例中的边为一元边，基类为<code>g2o::BaseUnaryEdge&lt;观测值维度，数据类型，连接顶点类型&gt;</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingEdge</span>:</span> <span class="keyword">public</span>  g2o::BaseUnaryEdge&lt;<span class="number">1</span>, <span class="keyword">double</span> , CurveFittingVertex&gt;</span><br></pre></td></tr></table></figure>
+<p>误差项计算函数<code>computeError</code>：计算<strong>预测值</strong>和<strong>观测值</strong>的误差。估计值是基于当前对优化变量的estimate计算出的，观测值是直接获取的，如本例中的y值。</p>
+</li>
+</ol>
+<ol>
+<li><p>构建图模型</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vertex</span></span><br><span class="line">g2o::VertexSE3Expmap* pose = <span class="keyword">new</span> g2o::VertexSE3Expmap(); <span class="comment">// camera pose</span></span><br><span class="line">pose-&gt;setId( index );</span><br><span class="line">pose-&gt;setEstimate( expression );</span><br><span class="line">optimizer.addVertex ( pose );</span><br><span class="line"></span><br><span class="line"><span class="comment">// edge</span></span><br><span class="line">g2o::EdgeProjectXYZ2UV* edge = <span class="keyword">new</span> g2o::EdgeProjectXYZ2UV();</span><br><span class="line">edge-&gt;setId ( index );</span><br><span class="line">edge-&gt;setVertex ( <span class="number">0</span>, point );</span><br><span class="line">edge-&gt;setVertex ( <span class="number">1</span>, pose );</span><br><span class="line">edge-&gt;setMeasurement ( Eigen::Vector2d ( p.x, p.y ) );     <span class="comment">// 导入观测值</span></span><br><span class="line">edge-&gt;setParameterId ( <span class="number">0</span>,<span class="number">0</span> );</span><br><span class="line">edge-&gt;setInformation ( Eigen::Matrix2d::Identity() );      <span class="comment">// 设置信息矩阵</span></span><br><span class="line">optimizer.addEdge ( edge );</span><br></pre></td></tr></table></figure>
+<p>信息矩阵<code>edge-&gt;setInformation(信息矩阵)</code>：因为最终的优化函数是$\sum e_i^T \Sigma^{-1}e_i$，是误差项和信息矩阵乘积的形式。</p>
+</li>
+<li><p>优化器配置</p>
+<ul>
+<li>矩阵块Block</li>
+<li>优化算法solver</li>
+<li>图模型optimizer</li>
+</ul>
+</li>
+<li><p>执行优化</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/16/直接法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1435,1196 +2185,6 @@ cos\theta = \frac{A\cdot B}{||A||\ ||B||}</script><ul>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/" itemprop="url">Real-Time loop Loop Closure in 2D Lidar SLAM 论文笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-27T16:08:55+08:00">
-                2018-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/27/Real-Time-loop-Loop-Closure-in-2D-Lidar-SLAM/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>文章的核心思想在于解决loop closure问题。</p>
-<p>全局地图由一系列的submap构成，每个submap则由一系列的位姿节点及对应的scan数据构成。</p>
-<p>文章的重点在第四部分和第五部分：</p>
-<ul>
-<li>第四部分：local 2d slam，将scan与<strong>当前submap</strong>的匹配问题转化成一个最小二乘优化问题，由ceres来求解。参考文献《Many-to-Many Multi-Resolution Scan Matching 》</li>
-<li>第五部分：closing loop，采用SPA进行后端loop closure，提出一种并行的scan与<strong>finished submaps</strong>匹配的方法BBS，大幅提高精度和速度。参考文献《Efficient Sparse Pose Adjustment for 2D Mapping(SPA)》、《Real-Time Correlative Scan Matching(BBS)》</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/12/三维刚体运动-李代数/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/12/三维刚体运动-李代数/" itemprop="url">三维刚体运动 & 李代数</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-12T15:02:30+08:00">
-                2018-05-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/12/三维刚体运动-李代数/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/12/三维刚体运动-李代数/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="0-向量"><a href="#0-向量" class="headerlink" title="0. 向量"></a>0. 向量</h4><ul>
-<li><p>坐标：首先确定一个坐标系，也就确定了一组基$(e_1, e_2, e_3)$，那么向量$a$的坐标为：</p>
-<script type="math/tex; mode=display">
-a = [e_1, e_2, e_3]
-\begin{bmatrix}
-a_1\\
-a_2\\
-a_3
-\end{bmatrix} = a_1e_1 + a_2e_2 + a_3e_3</script></li>
-<li><p>内积：对向量$a, b \in R^3$，其内积为：</p>
-<script type="math/tex; mode=display">
-a \cdot b = a^Tb = \Sigma a_ib_i = |a||b|cos<a,b></script><p>内积可以描述向量间的投影关系。</p>
-</li>
-<li><p>外积：</p>
-<script type="math/tex; mode=display">
-a \times b = 
-\begin{vmatrix}
-i & j & k\\
-a_1 & a_2 & a_3\\
-b_1 & b_2 & b_3
-\end{vmatrix}=
-\begin{bmatrix}
-0 & -a_3 & a_2\\
-a_3 & 0 & -a_1\\
--a_2 & a_1 & 0
-\end{bmatrix}b=a^{\wedge}b</script><p>外积的方向垂直与这两个向量，大小为$|a||b|sin<a,b>$。</a,b></p>
-<p>外积可以表示向量的旋转，向量$a$到$b$的<strong>旋转向量</strong>，外积的方向是旋转向量的方向，大小由夹角决定。</p>
-</li>
-</ul>
-<h4 id="1-旋转矩阵R与变换矩阵T"><a href="#1-旋转矩阵R与变换矩阵T" class="headerlink" title="1. 旋转矩阵R与变换矩阵T"></a>1. 旋转矩阵R与变换矩阵T</h4><ul>
-<li><p>通常设置固定的世界坐标系$O_w$和运动的相机坐标系$O_c$，相机运动是<strong>刚体运动</strong>，两个坐标系之间的变换称为<strong>欧式变换</strong>。</p>
-</li>
-<li><p>旋转矩阵$R$：可以描述相机的旋转</p>
-<p><strong>坐标系旋转</strong>前后同一个向量的坐标变换关系：</p>
-<script type="math/tex; mode=display">
-a =\begin{bmatrix}
-a_1\\
-a_2\\
-a_3
-\end{bmatrix}=
-\begin{bmatrix}
-e_1^T\\
-e_2^T\\
-e_3^T
-\end{bmatrix}
-\begin{bmatrix}
-e_1^{'} & e_2^{'}& e_3^{'}
-\end{bmatrix} 
-\begin{bmatrix}
-a_1^{'}\\
-a_2^{'}\\
-a_3^{'}
-\end{bmatrix}=
-Ra^{'}</script><p>不难验证<strong>旋转矩阵是行列式为1的正交矩阵</strong>，因此可以把旋转矩阵的集合<strong>特殊正交群</strong>定义如下：</p>
-<script type="math/tex; mode=display">
-SO(n) = \{R \in R^{n*n} | RR^T=I, det(R)=1\}</script><p>相反的旋转：</p>
-<script type="math/tex; mode=display">
-a = Ra^{'}\\
-a^{'} = R^{-1}a = R^Ta</script></li>
-<li><p>欧式变换：包括旋转和平移</p>
-<script type="math/tex; mode=display">
-a^{'} = Ra + t</script></li>
-<li><p>齐次坐标：射影几何的概念，每个分量同乘一个非零常数仍然表示同一个点：</p>
-<script type="math/tex; mode=display">
-\tilde{x} = [x,y,z,w]^T=[x/w, y/w, z/w, 1]^T</script></li>
-<li><p>齐次变换矩阵$T$：使得欧式变换仍旧保持线性关系：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-a^{'}\\
-1
-\end{bmatrix}=
-\begin{bmatrix}
-R & t\\
-0 &1
-\end{bmatrix}
-\begin{bmatrix}
-a\\
-1
-\end{bmatrix} =T
-\begin{bmatrix}
-a\\
-1
-\end{bmatrix}</script><p>变换矩阵的集合<strong>特殊欧式群</strong>：</p>
-<script type="math/tex; mode=display">
-SE(3) = \left\{T=
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix} \in R^{4*4} | R\in SO(3), t \in R^3
-\right\}</script></li>
-</ul>
-<h4 id="2-旋转向量-Axis-Angle"><a href="#2-旋转向量-Axis-Angle" class="headerlink" title="2. 旋转向量 Axis-Angle"></a>2. 旋转向量 Axis-Angle</h4><p>一个旋转只有3个自由度，旋转矩阵R要用9的参数来描述，显然是冗余的。一种紧凑的方式——任何旋转都可以用一个旋转轴$n$和一个旋转角$\theta$来刻画：</p>
-<script type="math/tex; mode=display">
-R = cos\theta I + (1-cos\theta)nn^T + sin\theta n^{\wedge}\\
-\theta = arccos(\frac{tr(R)-1}{2})\\</script><p>旋转轴上的向量在旋转后不发生改变，因此有：</p>
-<script type="math/tex; mode=display">
-Rn = n</script><p>转轴$n$是旋转矩阵$R$的特征值1对应的特征向量，可以由此来计算转轴$n$。</p>
-<h4 id="3-欧拉角-rpy"><a href="#3-欧拉角-rpy" class="headerlink" title="3. 欧拉角 rpy"></a>3. 欧拉角 rpy</h4><p>把旋转分解到3个轴上，rpy角的旋转顺序是ZYX：</p>
-<ul>
-<li>首先绕物体的Z轴旋转，得到偏航角yaw</li>
-<li>然后绕旋转之后的Y轴旋转，得到俯仰角pitch</li>
-<li>绕旋转之后的X轴旋转，得到滚转角roll</li>
-</ul>
-<p>万向锁问题：在俯仰角为$\pm 90^{\circ}$时，第一次和第三次旋转使用同一根轴，丢了自由度——<strong>奇异性问题</strong>。</p>
-<h4 id="4-四元数-q"><a href="#4-四元数-q" class="headerlink" title="4. 四元数 q"></a>4. 四元数 q</h4><p>四元数是一种扩展的负数，由一个实部和三个虚部组成，可以把三个虚部脑补成空间中的三根轴：</p>
-<script type="math/tex; mode=display">
-q = q_0 + q_1i + q_2j + q_3k\\
-\left\{
-\begin{split}
-& i^2 = j^2=k^2=-1\\
-& ij = k, ji = -k\\
-& jk = i, kj = -i\\
-& ki=j, ik=-j
-\end{split}
-\right.</script><ul>
-<li><p>乘以$i$对应着绕$i$轴旋转$180^{\circ}$</p>
-</li>
-<li><p>任意的旋转可以由两个互为相反数的四元数表示</p>
-</li>
-<li><p>与旋转向量$n = [n_x, n_y, n_z]^T, \theta$转换关系：</p>
-<script type="math/tex; mode=display">
-q = [cos\frac{\theta}{2}, n_xsin\frac{\theta}{2}, n_ysin\frac{\theta}{2}, n_zsin\frac{\theta}{2}]^T\\
-\left\{
-\begin{split}
-& \theta = 2arccos q_0\\
-& [n_x, n_y, n_z]^T = [q_1, q_2, q_3]^T/sin\frac{\theta}{2}
-\end{split}
-\right.</script></li>
-<li><p>与旋转矩阵$R$的关系：</p>
-<script type="math/tex; mode=display">
-R = 
-\begin{bmatrix}
-1-2q_2^2 - 2q_3^2 & 2q_1q_2-2q_0q_3 & 2q_1q_3+2q_0q_2\\
- 2q_1q_2+2q_0q_3  & 1-2q_1^2 - 2q_3^2 &  2q_2q_3-2q_0q_1\\
- 2q_1q_3-2q_0q_2 &  2q_2q_3+2q_0q_1 & 1-2q_1^2 - 2q_2^2 
-\end{bmatrix}\\
-q_0 = \frac{\sqrt{tr(R)+1}}{2}, q_1 = \frac{R_{23}-R_{32}}{4q_0}, q_2 = \frac{R_{31}-R_{13}}{4q_0}, q_3 = \frac{R_{12}-R_{21}}{4q_0}</script></li>
-<li><p>表示旋转：</p>
-<p>空间中点$p = [x, y,z]^T\in R^3$，已知旋转轴角$n,\theta$，旋转之后点坐标变为$p^{‘}$，如果用旋转矩阵描述：</p>
-<script type="math/tex; mode=display">
-p^{'} = Rp</script><p>四元数$q = [cos\frac{\theta}{2}, nsin\frac{\theta}{2}]$，那么旋转后的点$p^{‘}$可以表示为：</p>
-<script type="math/tex; mode=display">
-p^{'} = qpq^{-1}</script></li>
-</ul>
-<h4 id="5-李群"><a href="#5-李群" class="headerlink" title="5. 李群"></a>5. 李群</h4><p>上面提到了旋转矩阵构成的特殊正交群$SO(3)$和由变换矩阵构成的特殊欧式群$SE(3)$：</p>
-<script type="math/tex; mode=display">
-SO(n) = \left\{R \in R^{n*n} | RR^T=I, det(R)=1\right\}
-\\
-SE(3) = \left\{T=
-\begin{bmatrix}
-R & t\\
-0 & 1
-\end{bmatrix} \in R^{4*4} | R\in SO(3), t \in R^3
-\right\}</script><ul>
-<li>$SO(n)$和$SE(n)$对<strong>加法不封闭，对乘法是封闭</strong>的。</li>
-<li>群是一种集合$A$加上一种运算$\ \cdot \ $的代数结构，记作$G = (A, \ \cdot \ )$，群内元素满足封闭性、结合律、幺元、可逆四个条件。</li>
-<li>李群是指具有连续性质的群。刚体在空间中能够连续地运动，因此$SO(n)$和$SE(n)$是李群。</li>
-</ul>
-<h4 id="6-李代数"><a href="#6-李代数" class="headerlink" title="6. 李代数"></a>6. 李代数</h4><p><strong>6.1 引入</strong></p>
-<p>对任意旋转矩阵$R$，都满足$RR^T=I$。把它写成关于时间的函数$R(t)$有：</p>
-<script type="math/tex; mode=display">
-R(t)R(t)^T = I</script><p>对等式两边求导：</p>
-<script type="math/tex; mode=display">
-\dot R(t)R(t)^T + R(t)\dot R(t)^T=0\\
-\dot R(t)R(t)^T =-\big(\dot R(t)R(t)^T \big)^T</script><p>可以看出$\dot R(t)R(t)^T $是一个<strong>反对称阵</strong>，对任意一个反对称阵，都可以找到一个与之对应的<strong>向量</strong>：</p>
-<script type="math/tex; mode=display">
-a^{\wedge} = A, A^{\vee}=a</script><p>于是可以找到一个三维向量$\phi(t) \in R^3$与之对应：</p>
-<script type="math/tex; mode=display">
-\dot R(t)R(t)^T  = \phi(t)^{\wedge}\\
-\dot R(t) = \phi(t)^{\wedge}R(t)</script><p>可以看到，<strong>每对旋转矩阵求一次导数，只需左乘一个反对称阵$\phi(t)^{\wedge}$即可</strong>。</p>
-<p>求解上面的微分方程，可以得到$R(t) = exp(\phi^{\wedge}t)$。也就是说$\phi$描述了$R$在局部的导数关系。</p>
-<p><strong>6.2 李代数</strong></p>
-<ul>
-<li><p>每个李群都有与之对应的李代数。李代数描述了李群的局部性质。</p>
-</li>
-<li><p>李代数由一个集合$V$，一个数域$F$，和一个二元运算<strong>李括号</strong>$[,]$组成，记作$( V, F, [,])$。李代数的元素满足封闭性、双线性、自反性、雅可比等价四条性质。</p>
-</li>
-<li><p>上一节的$\phi$就是$SO(3)$对应的李代数$so(3)$，两者的关系由<strong>指数映射</strong>给定：</p>
-<script type="math/tex; mode=display">
-R = exp(\phi^{\wedge})\\
-so(3) = \left\{ \phi \in R^3, \Phi = \phi^{\wedge} \in R^{3*3}\right\}</script></li>
-<li><p>$SE(3)$对应的李代数$se(3)$位于$R^6$空间中：</p>
-<script type="math/tex; mode=display">
-se(3) = \left\{ \xi = 
-\begin{bmatrix}
-\rho\\
-\phi
-\end{bmatrix}
-\in R^6, \rho \in so(3), \xi^{\wedge} =
-\begin{bmatrix}
-\phi^{\wedge} & \rho\\
-0^T & 0
-\end{bmatrix} \in R^{4*4}
-\right\}</script></li>
-<li><p>指数映射</p>
-<p>由于$\phi$是一个三维向量，因此可以写作$\theta a$的形式，$a$是一个单位向量，因此具有以下性质：</p>
-<script type="math/tex; mode=display">
-a^{\wedge}a^{\wedge} = aa^T-I\\
-a^{\wedge}a^{\wedge}a^{\wedge} = -a^{\wedge}</script><p>对$so(3)$李代数的指数映射做泰勒展开，可以得到：</p>
-<script type="math/tex; mode=display">
-\begin{split}
-&R= exp(\phi^{\wedge}) = exp(\theta a^{\wedge})=\Sigma_{n=0}^{\infty}\frac{1}{n!} (\theta a^{\wedge})^n\\
-& =cos\theta I + (1-cos\theta)aa^T+sin\theta a^{\wedge}
-\end{split}</script><p>可以看到$so(3)$实际上就是旋转向量组成的空间，指数映射即是罗德里格斯公式。</p>
-<p>指数映射是一个<strong>满射</strong>，每个$SO(3)$中的元素，都可以找到至少一个$so(3)$元素与之对应（$\theta + 2k\pi$）。</p>
-<p>$se(3)$上的指数映射为：</p>
-<script type="math/tex; mode=display">
-T = exp(\xi^{\wedge}) = 
-\begin{bmatrix}
-R & J\rho\\
-0 &1
-\end{bmatrix}\\
-J = \frac{sin\theta}{\theta}I + (1-\frac{sin\theta}{\theta})aa^T + \frac{1-cos\theta}{\theta}a^{\wedge}</script></li>
-</ul>
-<p><strong>6.3 李代数求导 </strong></p>
-<ul>
-<li><p>两个李代数指数映射乘积的完整形式由BCH公式给出：</p>
-<script type="math/tex; mode=display">
-ln(exp(A)exp(B)) = A+B + \frac{1}{2}[A, B] + \frac{1}{12}[A,[A,B]] + ...</script></li>
-<li><p>对$ln(exp(\phi_1^{\wedge})exp(\phi_2^{\wedge}))^{\vee}$，当$\phi_1$或$\phi_2$为小量时，BCH公式给出了线性近似表达：</p>
-<script type="math/tex; mode=display">
-ln(exp(\phi_1^{\wedge})exp(\phi_2^{\wedge}))^{\vee} = 
-\left\{
-\begin{split}
-J_l(\phi_2)^{-1}\phi_1 + \phi_2\ \ \ \ \ \ \phi_1为小量\\
-J_r(\phi_1)^{-1}\phi_2 + \phi_1\ \ \ \ \ \ \phi_2为小量\\
-\end{split}
-\right.</script><p>BCH近似雅可比$J_l$就是上一节的$J$：</p>
-<script type="math/tex; mode=display">
-J_l = J = \frac{sin\theta}{\theta}I + (1-\frac{sin\theta}{\theta})aa^T + \frac{1-cos\theta}{\theta}a^{\wedge}\\
-J_l^{-1} = \frac{\theta}{2}cot\frac{\theta}{2}I + (1-\frac{\theta}{2}cot\frac{\theta}{2})aa^T - \frac{\theta}{2}a^{\wedge}\\
-J_r(\phi) = J_l(-\phi)</script><p>由以上公式说明了<strong>李群乘法</strong>和<strong>李代数加法</strong>的近似转换关系。</p>
-</li>
-<li><p>在$SO(3)、SE(3)$上没有良好定义的加法，而李代数由向量组成，有良好的加法运算。因此在计算位姿的导数时，通常使用李代数解决，李代数求导的两种思路：</p>
-<ul>
-<li>李代数求导$\delta \phi$：用李代数表示姿态，然后转化成对李代数求导$\phi + \delta \phi$</li>
-</ul>
-<script type="math/tex; mode=display">
-\begin{split}
-&\frac{\partial (Rp)}{\partial R} = \frac{\partial(exp(\phi^{\wedge})p)}{\partial \phi}\\
-&= lim \frac{exp((\phi+\delta\phi)^{\wedge})p-exp(\phi^{\wedge})p}{\partial \phi}\\
-&=-(Rp)^{\wedge}J_l
-\end{split}</script><ul>
-<li>扰动模型$\Delta R$：对$R$进行扰动，然后对扰动求导$\Delta R R$</li>
-</ul>
-<script type="math/tex; mode=display">
-\begin{split}
-&\frac{\partial (Rp)}{\partial R} = lim \frac{exp(\varphi^{\wedge})exp(\phi^{\wedge})p-exp(\phi^{\wedge})p}{\partial \varphi}= -(Rp)^{\wedge}\\
-& \frac{\partial Tp}{\partial \delta \xi} = 
-\begin{bmatrix}
-I & -(Rp+t)^{\wedge}\\
-0 & 0
-\end{bmatrix} = (Tp)^{\odot}
-\end{split}</script></li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/10/c-for-record/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/10/c-for-record/" itemprop="url">c++ for record</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T23:52:40+08:00">
-                2018-05-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/10/c-for-record/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/10/c-for-record/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近开始着手写slam代码，看一些常用库源码的时候发现各种力不从心，一些c++11的骚操作竟然没见过，是时候完整撸一发c++ primer祭天了。</p>
-<ol>
-<li><p>iostream</p>
-<ul>
-<li>标准输入：cin</li>
-<li>标准输出：cout、cerr、clog</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">int</span> v1=<span class="number">0</span>, v2=<span class="number">0</span>;</span><br><span class="line"><span class="built_in">cin</span> &gt;&gt; v1 &gt;&gt; v2;</span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; v1+v2 &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"><span class="built_in">cerr</span> &lt;&lt; <span class="string">"This is nonsense."</span> &lt;&lt; <span class="built_in">endl</span>;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>&lt;&lt; 和 &gt;&gt; 的方向表示了数据流的走向，也就是赋值的方向。cerr用来输出错误信息。</li>
-</ul>
-</li>
-<li><p>控制流</p>
-<ul>
-<li><p>while：每次执行循环之前先检查<strong>循环条件</strong></p>
-</li>
-<li><p>do while：先执行循环体后检查条件</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (condition)</span><br><span class="line">    statement</span><br><span class="line">   </span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">    statement</span><br><span class="line"><span class="keyword">while</span> (condition);</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>for：每次执行循环之前先检查<strong>循环条件</strong>，执行循环之后执行<strong>表达式</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (init-statement; condition; expression)</span><br><span class="line">&#123;</span><br><span class="line">    statemnt</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 范围for语句</span></span><br><span class="line"><span class="keyword">for</span> (declaration : expression)</span><br><span class="line">	statement</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>switch：</p>
-<ul>
-<li>case label：case标签必须是<strong>整形常量</strong>表达式</li>
-<li>如果某个case标签匹配成功，会<strong>往后顺序执行所有case分支</strong>，直到结尾或者遇到break</li>
-<li>default标签</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span>(ch)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'a'</span>: <span class="keyword">case</span> <span class="string">'b'</span>: <span class="keyword">case</span> <span class="string">'c'</span>:</span><br><span class="line">    	++cnt;</span><br><span class="line">    	<span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>break：负责终止离他最近的while、do while、for或switch语句。</p>
-</li>
-<li><p>continue：负责终止离他最近的while、do while、for循环的当前迭代。</p>
-</li>
-<li><p>goto：无条件跳转到同一函数内的某个<strong>带标签语句</strong>。</p>
-<blockquote>
-<p>labeled statement: <code>label: statement</code></p>
-</blockquote>
-</li>
-<li><p>异常</p>
-<ul>
-<li><p>throw：<strong>引发异常</strong>，后面紧随一个异常类型，终止当前函数，将控制权转移给能够处理该异常的代码。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdexcept&gt;</span></span></span><br><span class="line"><span class="comment">// runtime_error 标准库异常类型</span></span><br><span class="line"><span class="keyword">throw</span> runtime_error(<span class="string">"Data must refer to same name"</span>);</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>try：<strong>处理异常</strong>，后面紧随一套catch子句用来处理异常。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    program statements</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception-declaration) &#123;</span><br><span class="line">    handler-statements</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception-declaration) &#123;</span><br><span class="line">    handler-statements</span><br><span class="line">&#125; ...</span><br></pre></td></tr></table></figure>
-<p>try语句块内声明的变量在块外无法访问，即使是catch语句。</p>
-<p>catch一旦完成，程序跳转到最后一个catch子句之后的语句。</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>类</p>
-<p>类型 &amp; 对象（实例），变量 &amp; 行为（方法）。</p>
-<ul>
-<li><p>存在类内默认初始化</p>
-</li>
-<li><p>类通常被定义在头文件中，头文件名字应与类的名字保持一致</p>
-<blockquote>
-<p>头文件通常包含只能被定义一次的实体，如类、const等。</p>
-<p>头文件保护符#ifndef系列，创建<strong>预处理变量</strong>，防止多次包含。</p>
-</blockquote>
-</li>
-<li><p>构造函数初始值列表：冒号以及冒号和花括号之间的代码</p>
-<blockquote>
-<p>列表只说明用于初始化成员的值，而不限定初始化的具体顺序。</p>
-<p>成员的初始化顺序与它们在类定义中的出现顺序一致。</p>
-</blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为类成员初始化</span></span><br><span class="line">Sales_data(<span class="keyword">const</span> <span class="built_in">string</span> &amp;s, <span class="keyword">unsigned</span> n, <span class="keyword">double</span> p)</span><br><span class="line">		 : bookNo(s), units_sold(n), revenue(p*n) &#123;&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 区别于赋值</span></span><br><span class="line">Sales_data(<span class="keyword">const</span> <span class="built_in">string</span> &amp;s, <span class="keyword">unsigned</span> n, <span class="keyword">double</span> p)</span><br><span class="line">&#123;</span><br><span class="line">    bookNo = s;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>接口与封装：</p>
-<ul>
-<li>定义在private说明符之后的成员只能被类内成员函数访问，封装了类的实现细节。</li>
-<li>定义在public说明符之后的成员可以在整个程序内被访问，定义类的接口。</li>
-</ul>
-</li>
-<li><p>class和struct的区别：成员访问权限</p>
-<ul>
-<li>struct：定义在第一个说明符之前的成员是public</li>
-<li>class：定义在第一个说明符之前的成员是private</li>
-</ul>
-</li>
-<li><p>友元：允许其他类或函数访问它的非公有成员，在类内添加以friend关键字开始的友元声明。</p>
-<blockquote>
-<p>友元的声明仅仅指定了访问权限，而非一个通常意义上的函数声明。</p>
-</blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sales_data</span> &#123;</span></span><br><span class="line"><span class="comment">// 友元声明</span></span><br><span class="line"><span class="function"><span class="keyword">friend</span> Sales_data <span class="title">add</span><span class="params">(<span class="keyword">const</span> Sales_data&amp;, <span class="keyword">const</span> Sales_data&amp;)</span></span>;</span><br><span class="line"><span class="comment">// 非公有成员</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="built_in">string</span> bookNo;</span><br><span class="line">	<span class="keyword">double</span> revenue = <span class="number">0.0</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>静态成员static：与类本身相关联，不属于任何一个对象，因此不是在创建类对象的时候被定义的，因此通常在类的外部定义和初始化，在类内部添加以static关键字开始的静态成员声明。</p>
-</li>
-</ul>
-</li>
-<li><p>内置类型</p>
-<ul>
-<li>内存中的一个地址对应一个字节</li>
-<li>unsigned类型表示<strong>大于等于0</strong>的数（$[0, 2^{n}-1]$），被赋给一个超出表示范围的数时，<strong>自动取余</strong>，作为循环条件时当心进入<strong>无限循环</strong></li>
-<li>signed类型正负值范围平衡（$[-2^{n-1}, 2^{n-1}-1]$），被赋给一个超出表示范围的数时，<strong>结果未定义</strong></li>
-<li>字符型char，单引号，一个字节</li>
-<li>字符串型，双引号，常量字符数组，结尾隐含空字符 ‘\0’</li>
-<li>nullptr = 0（传统NULL包含在cstdlib头文件内）</li>
-</ul>
-</li>
-<li><p>变量</p>
-<ul>
-<li><p><strong>列表初始化</strong>，花括号</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 拷贝初始化</span></span><br><span class="line"><span class="keyword">int</span> x=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">int</span> x=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="comment">// 直接初始化</span></span><br><span class="line"><span class="keyword">int</span> x&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">x</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>变量声明extern，源于<strong>分离式编译</strong>机制，一个变量只能被定义一次，可以声明多次</p>
-</li>
-<li><p>作用域，嵌套作用域 &amp; 内部重定义</p>
-</li>
-</ul>
-</li>
-<li><p>复合类型</p>
-<ul>
-<li><p>引用，<code>typename &amp;declaration</code>，浅拷贝，绑定一个对象，<strong>引用不是对象</strong></p>
-</li>
-<li><p>指针，<code>typename *declaration</code>，存放对象地址</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a;</span><br><span class="line"><span class="keyword">int</span> *p, *q=a;</span><br><span class="line">p = &amp;a;</span><br><span class="line">p = q;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>取地址符&amp;</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> *p = a;</span><br><span class="line"><span class="keyword">int</span> *p = &amp;a;</span><br><span class="line"><span class="comment">// a---&gt;对象 &amp;a---&gt;地址</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>解引用符*</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a;</span><br><span class="line"><span class="keyword">int</span> *p;</span><br><span class="line">*p ---&gt; undefined</span><br><span class="line">p = &amp;a;</span><br><span class="line">*p = <span class="number">10</span>;</span><br><span class="line"><span class="comment">// p---&gt;指针 *p---&gt;对象</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>void* 指针，可以指向任意类型的对象，但是不能进行对象操作</p>
-</li>
-</ul>
-</li>
-<li><p>const限定符</p>
-<ul>
-<li><p>参与编译预处理</p>
-</li>
-<li><p>要实现多个文件共享，必须在const变量<strong>定义</strong>之前加上extern关键字</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// define</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> bufferSize = fcn();</span><br><span class="line"><span class="comment">// declare</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> bufferSize;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>允许任意表达式作为初始值（允许隐式类型转换）</p>
-</li>
-<li><p>常量引用，允许非常量赋值，实际引用一个内存中的“临时值”</p>
-</li>
-<li><p>指向常量的指针，允许非常量赋值，但是不能通过该指针修改对象</p>
-</li>
-<li><p>常量指针，指针始终指向同一个对象</p>
-</li>
-<li><p>常量表达式constexpr，表达式在编译过程中就能得到计算结果</p>
-</li>
-</ul>
-</li>
-<li><p>处理类型</p>
-<ul>
-<li><p>类型别名typedef &amp; using</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传统</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">double</span> base;</span><br><span class="line"><span class="keyword">typedef</span> base *p;    <span class="comment">// p是double指针</span></span><br><span class="line">base a;</span><br><span class="line">p p1=&amp;a;</span><br><span class="line"><span class="comment">// c++11</span></span><br><span class="line"><span class="keyword">using</span> base = <span class="keyword">double</span>;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>auto类型说明符，让编译器分析表达式所属类型并为变量赋值</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一条类型声明语句中所有变量的类型必须保持一致</span></span><br><span class="line"><span class="keyword">auto</span> i=<span class="number">0</span>, *p=&amp;i;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>decltype类型指示符，仅分析表达式返回类型，不做赋值（因此不做实际计算）</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">decltype</span>(f()) a=x;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>string</p>
-<ul>
-<li><p>读取，<code>&gt;&gt;</code>不读取空白，遇到空白符停止，<code>getline</code>保留空白符，遇到换行符停止。</p>
-</li>
-<li><p>字符串字面值不是string对象，而是<strong>C风格字符串</strong>，<code>c_str()</code>成员函数能够将string对象转化成C风格字符串</p>
-</li>
-<li><p>遍历，<strong>范围for语句</strong>，每次迭代declare的变量会被初始化为expression的下一个元素</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (declaration : expression)</span><br><span class="line">	statement</span><br><span class="line"><span class="function"><span class="built_in">string</span> <span class="title">str</span><span class="params">(<span class="string">"some string"</span>)</span></span>;</span><br><span class="line"><span class="comment">// 赋值</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> c: str)</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; c &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"><span class="comment">// 引用</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> &amp;c: str)</span><br><span class="line">    c = <span class="built_in">toupper</span>(c);</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>size()</code>返回的类型是<code>string::size_type</code>，通常用auto</p>
-</li>
-</ul>
-</li>
-<li><p>vector</p>
-<ul>
-<li>类模版，<strong>相同类型</strong>对象的集合，声明时必须提供元素类型<code>vector&lt;int&gt;</code></li>
-<li>添加元素<code>push_back()</code></li>
-</ul>
-</li>
-<li><p>迭代器</p>
-<ul>
-<li>所有标准库容器都支持迭代器，只有少数支持下标访问</li>
-<li><code>begin()</code>返回指向第一个元素的迭代器，<code>end()</code>返回<strong>尾后元素</strong>的迭代器</li>
-<li><code>cbegin()</code>和<code>cend()</code>操作类似，返回值是const_iterator，不能修改对象</li>
-<li>迭代器的类型是<code>container::iterator</code>和<code>container::const_iterator</code>，通常用auto</li>
-<li>解引用迭代器得到对象</li>
-<li>箭头运算符<code>-&gt;</code>，结合解引用+成员访问两个操作</li>
-<li>迭代器失效：容器改变容量</li>
-</ul>
-</li>
-<li><p>数组</p>
-<ul>
-<li>大小固定，编译的时候维度应该已知，因此必须是常量表达式</li>
-<li>不能用做拷贝和赋值</li>
-</ul>
-</li>
-<li><p>表达式</p>
-<ul>
-<li><p>左值和右值</p>
-<p>​    C语言中，<strong>左值</strong>指的是既能出现在等号左边也能出现在等号右边的变量或表达式，通常来说就是有名字的变量，而<strong>右值</strong>只能出现在等号右侧，通常就是一些没有名字也取不到地址的中间结果。</p>
-<p>继承到C++中归纳来讲就是：当一个对象被用作右值的时候，用的是对象的值（内容），当被用作左值的时候，用的是对象的身份（在内存中的位置）。</p>
-</li>
-<li><p>求值顺序</p>
-<blockquote>
-<p>有四种运算符明确规定了求值顺序，逻辑与（&amp;&amp;）、逻辑或（||）、条件（?:）、逗号（,）运算符。</p>
-</blockquote>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; i &lt;&lt; ++i &lt;&lt; <span class="built_in">endl</span>;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>前置版本和后置版本的递增递减</p>
-<p>用于复合运算中时，</p>
-<p>前置版本首先修改对象，然后将对象本身作为左值返回。</p>
-<p>后置版本将对象<strong>原始值的副本</strong>作为右值返回。</p>
-</li>
-<li><p>位运算</p>
-<ul>
-<li>整形提升，char8-&gt;int32</li>
-<li>添0，越界丢弃</li>
-</ul>
-</li>
-<li><p>逗号运算符：含有两个运算对象，首先对左表达式求值，然后将求值结果丢弃掉，最右边的表达式的值将作为整个逗号表达式的值。本质上，逗号的作用是导致一些列运算被顺序执行。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 分别对逗号表达式内对象赋值，然后返回最右cnt的值</span></span><br><span class="line">var = (count=<span class="number">19</span>, incr=<span class="number">10</span>, cnt++)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>函数</p>
-</li>
-</ol>
-<ul>
-<li><p>局部静态对象static：首次调用时被初始化，直到程序终止才被销毁。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 只初始化一次，函数调用结束以后这个值仍有效</span></span><br><span class="line">    <span class="keyword">static</span> cnt = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> ++cnt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>参数传递：如果形参被声明为引用类型，它将<strong>绑定</strong>到对应的实参上（传引用调用），否则将实参的值<strong>拷贝</strong>后赋给形参（传值调用）。</p>
-</li>
-<li><p>含有可变形参的函数</p>
-<ul>
-<li><p>所有实参类型相同，可以使用initializer_list模版类型的形参，列表中元素是const。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">initializer_list</span>&lt;T&gt; lst;</span><br><span class="line"><span class="built_in">initializer_list</span>&lt;T&gt; lst&#123;a, b, c, ...&#125;;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>编写可变参数<strong>模版</strong></p>
-</li>
-<li><p>省略符形参：对应的实参无需类型检查</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 带部分形参类型</span><br><span class="line">void foo(parm_list, ...);</span><br><span class="line"></span><br><span class="line">void foo(...);</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>内联函数incline：避免函数调用开销</p>
-</li>
-<li><p>调试帮助</p>
-<ul>
-<li>NDEBUG预处理变量：用于关闭调试状态，assert将跳过不执行。</li>
-<li>assert (expr) 预处理宏：如果表达式为假，assert输出信息并终止程序。</li>
-</ul>
-<blockquote>
-<p>预处理名字由预处理而非编译器管理，因此可以直接使用名字而无须提供using声明。</p>
-</blockquote>
-</li>
-</ul>
-<ol>
-<li>static_cast和dynamic_cast强制类型转换<ul>
-<li>static_cast \<type-id> (expression)：暴力类型转换，不运行类型检查。</type-id></li>
-<li>dynamic_cast\<type-id> (expression)：运行类型检查，下行转换安全。</type-id></li>
-</ul>
-</li>
-<li>new &amp; delete：new [] 要和 delete []对应上。</li>
-<li>c++的oop特性（private public…）只在编译时刻有意义。同一类的对象可以互相访问私有成员。</li>
-<li>firend：注意方向是give acess to，授权friend访问自己的private。编译时刻检查。</li>
-<li>composition：组合，用一系列对象构造对象。</li>
-<li>inheritance：继承，用一些类来构造新的类。</li>
-</ol>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> :</span> <span class="keyword">public</span> A&#123;</span><br><span class="line">    ....</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>构造：子类构造的时候要先构造父类，析构的时候反过来，先析构子类。</p>
-<p>重名：name hiding，special for c++。</p>
-<ol>
-<li>​    protected：designed for sub class。子类可以直接访问。其他类看不到。</li>
-<li>overload：参数表必须不同，否则编译器无法识别。</li>
-<li>default argument：defaults must be added from right to left。must be declared in .h files。发生在编译时刻。</li>
-<li>inline：不用真正调用函数，而是直接插入汇编代码段。tradeoff between space and time consuming。区别于宏，宏是没有类型检查的。</li>
-<li><p>const</p>
-<ul>
-<li>declare a variable：是变量，而不是常数</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/08/cmake/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/08/cmake/" itemprop="url">cmake for record</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-08T00:06:03+08:00">
-                2018-05-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/08/cmake/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/08/cmake/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="0-变量"><a href="#0-变量" class="headerlink" title="0. 变量"></a>0. 变量</h4><p>变量使用 ${ } 的方式取值，但是在if控制语句中直接使用变量名。</p>
-<h4 id="1-project"><a href="#1-project" class="headerlink" title="1. project"></a>1. project</h4><p>project ( project_name [CXX] [C] [Java] )</p>
-<p>用来指定工程名称和工程语言（可省略），指令隐式定义了projectname_BINARY_DIR和projectname_SOURCE_DIR两个变量（写在cmake_cache里面），指的是<strong>编译发生</strong>的当前目录。</p>
-<h4 id="2-set"><a href="#2-set" class="headerlink" title="2. set"></a>2. set</h4><p>set ( VAR  [VALUE] )</p>
-<p>用来显式定义变量，如set (SRC_LIST main.c t1.c t2.c) 。（竟然不用套括号？）</p>
-<h4 id="3-message"><a href="#3-message" class="headerlink" title="3. message"></a>3. message</h4><p>message ( [SEND_ERROR | STATUS | FATAL_ERROR]  “message to display”  VAR ) </p>
-<p>用来向终端输出用户定义的信息。</p>
-<h4 id="4-add-executable"><a href="#4-add-executable" class="headerlink" title="4. add_executable"></a>4. add_executable</h4><p>add_executable ( executable_filename  [source_filename] )</p>
-<p>生成名字为executable_filename的可执行文件，相关的源文件 [source_filename] 可以是一个源文件列表。</p>
-<h4 id="5-清理构建结果"><a href="#5-清理构建结果" class="headerlink" title="5. 清理构建结果"></a>5. 清理构建结果</h4><p>make clean</p>
-<p>对构建出的可执行文件进行清理。</p>
-<h4 id="6-外部构建"><a href="#6-外部构建" class="headerlink" title="6. 外部构建"></a>6. 外部构建</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
-<p>所有编译动作发生在编译目录，对原有工程没有任何影响。</p>
-<h4 id="7-add-subdirectory"><a href="#7-add-subdirectory" class="headerlink" title="7. add_subdirectory"></a>7. add_subdirectory</h4><p>add_subdirectory ( source_dir  [binary_dir]   [EXCLUDE_FROM_ALL] )</p>
-<p>向当前工程目录添加存放源文件的子目录source_dir，并指定存放中间二进制文件和目标二进制文件的位置binary_dir。指令隐式修改 EXECUTABLE_OUTPUT_PATH 和 LIBRARY_OUTPUT_PATH 两个变量。</p>
-<h4 id="8-更加像一个工程"><a href="#8-更加像一个工程" class="headerlink" title="8. 更加像一个工程"></a>8. 更加像一个工程</h4><ul>
-<li>创建工程根目录，创建CMakeLists.txt。</li>
-</ul>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定最低编译版本</span></span><br><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.7</span>)</span><br><span class="line"><span class="comment"># 指定工程名字</span></span><br><span class="line"><span class="keyword">PROJECT</span>(HELLO)</span><br><span class="line"><span class="comment"># 测试类打印信息</span></span><br><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"This is BINARY dir "</span> <span class="variable">$&#123;HELLO_BINARY_DIR&#125;</span>)</span><br><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"This is SOURCE dir "</span> <span class="variable">$&#123;HELLO_SOURCE_DIR&#125;</span>)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>添加子目录src，用来存放源文件，为子目录创建CMakeLists.txt。</li>
-</ul>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在根目录CMakeLists.txt中添加子目录声明</span></span><br><span class="line"><span class="keyword">add_subdirectory</span>(src bin)</span><br><span class="line"><span class="comment"># 编译产生的中间文件以及目标文件将保存在编译文件夹的bin子目录下</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编写当前子目录的CMakeLists.txt</span></span><br><span class="line"><span class="keyword">add_executable</span>(hello main.c)</span><br><span class="line"><span class="comment"># 修改最终生成的可执行文件以及库的路径，这两个指令要追随对应的add_executable()和add_library()指令</span></span><br><span class="line"><span class="keyword">set</span>(EXECUTABLE_OUTPUT_PATH <span class="variable">$&#123;PROJECT_BINARY_PATH&#125;</span>/bin)</span><br><span class="line"><span class="keyword">set</span>(LIBRARY_OUTPUT_PATH <span class="variable">$&#123;PROJECT_BINARY_DIR&#125;</span>/lib)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>添加子目录build，作为外部编译文件夹（ ${PROJECT_BINARY_DIR} ），存放编译的过程和目标文件。    </li>
-</ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
-<ul>
-<li>添加子目录doc，用来存放工程文档hello.txt。</li>
-<li>添加文本文件README，COPYRIGHT。</li>
-<li>添加runhello.sh脚本，用来调用可执行文件hello。</li>
-</ul>
-<h4 id="9-打包安装"><a href="#9-打包安装" class="headerlink" title="9. 打包安装"></a>9. 打包安装</h4><ul>
-<li>在根目录的CMakeList.txt中添加安装信息</li>
-</ul>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装COPYRIGHT/README到&lt;prefix&gt;/share/doc/cmake/t2</span></span><br><span class="line"><span class="keyword">INSTALL</span>(FILES COPYRIGHT README DESTINATION share/doc/cmake/t2)</span><br><span class="line"><span class="comment"># 安装runhello.sh到&lt;prefix&gt;/bin</span></span><br><span class="line"><span class="keyword">INSTALL</span>(PROGRAMS runhello.sh DESTINATION bin)</span><br><span class="line"><span class="comment"># 安装工程文档到&lt;prefix&gt;/share/doc/cmake/t2</span></span><br><span class="line"><span class="keyword">INSTALL</span>(DIRECTORY doc/ DESTINATION share/doc/cmake/t2)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>在子目录的CMakeList.txt中添加安装信息</li>
-</ul>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装脚本要调用的可执行文件hello到&lt;prefix&gt;/bin，</span></span><br><span class="line"><span class="comment"># 注意install(targets)指令也要追随对应add_executable()和add_library()指令的路径</span></span><br><span class="line"><span class="keyword">INSTALL</span>(TARGETS hello</span><br><span class="line">		RUNTIME DESTINATION bin)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>安装程序包</li>
-</ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cd build</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在cmake命令中指明安装目录的前缀&lt;prefix&gt;</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> CMAKE_INSTALL_PREFIX 默认是/usr/<span class="built_in">local</span></span></span><br><span class="line">cmake -DCMAKE_INSTALL_PREFIX=/Users/carrol/tmp ..</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看目标文件夹</span></span><br><span class="line">j tmp</span><br><span class="line">tree -a</span><br></pre></td></tr></table></figure>
-<h4 id="10-add-library"><a href="#10-add-library" class="headerlink" title="10. add_library"></a>10. add_library</h4><p>add_library ( name  [SHARED | STATIC | MODULE]  [source_filename] )</p>
-<p>生成名字为<strong>libname.X</strong>的库文件。</p>
-<ul>
-<li>SHARED，动态库，libname.dylib</li>
-<li>STATIC，静态库，libname.a</li>
-</ul>
-<p><strong>设置目标动态库和静态库同名 set_target_properties</strong></p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置目标动静态库同名</span></span><br><span class="line"><span class="keyword">add_library</span>(hello SHARED hello.c)</span><br><span class="line"><span class="keyword">add_library</span>(hello_static hello.c)</span><br><span class="line"><span class="keyword">set_target_properties</span>(hello_static</span><br><span class="line">                      PROPERTIES OUTPUT_NAME hello)</span><br></pre></td></tr></table></figure>
-<p><strong>防止构建中清理同名文件 set_target_properties</strong></p>
-<p>cmake在构建一个target时，会尝试清理掉其他使用这个名字的库——在构建libhello.a时会清理掉libhello.dylib。</p>
-<blockquote>
-<p>我实际操作时候会保留两个库文件，但是在作为第三方被引用的时候会报错：</p>
-<p>dyld: Library not loaded: libhello.dylib</p>
-<p>Reason: image not found</p>
-</blockquote>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET_TARGET_PROPERTIES</span>(hello </span><br><span class="line">                      PROPERTIES CLEAN_DIRECT_OUTPUT <span class="number">1</span>)</span><br><span class="line"><span class="keyword">SET_TARGET_PROPERTIES</span>(hello_static </span><br><span class="line">                      PROPERTIES CLEAN_DIRECT_OUTPUT <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p><strong>设置动态版本号 set_target_properties</strong></p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置动态库版本号</span></span><br><span class="line"><span class="keyword">set_target_properties</span>(hello</span><br><span class="line">                      PROPERTIES VERSION <span class="number">1.2</span></span><br><span class="line">                      SOVERSION <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<p>编译文件夹下生成了libhello.1.2.dylib、libhello.1.dylib、libhello.dylib三个动态库文件，只有一个是真的，另外两个是替身。</p>
-<p><strong>安装共享库和头文件</strong></p>
-<p>修改库的源文件夹下的CMakeLIsts.txt</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 库文件</span></span><br><span class="line"><span class="keyword">install</span>(TARGETS hello hello_static</span><br><span class="line">        ARCHIVE DESTINATION lib   //静态库</span><br><span class="line">        LIBRARY DESTINATION lib)  //动态库</span><br><span class="line"><span class="comment"># 头文件</span></span><br><span class="line"><span class="keyword">install</span>(FILES hello.h DESTINATION <span class="keyword">include</span>/hello)</span><br></pre></td></tr></table></figure>
-<h4 id="11-include-directories"><a href="#11-include-directories" class="headerlink" title="11. include_directories"></a>11. include_directories</h4><p>include_directories( dir1 dir2 … )</p>
-<p>用来向工程添加多个特定的<strong>头文件搜索路径</strong></p>
-<h4 id="12-link-directories-amp-target-link-libraries"><a href="#12-link-directories-amp-target-link-libraries" class="headerlink" title="12. link_directories &amp; target_link_libraries"></a>12. link_directories &amp; target_link_libraries</h4><p>link_directories( dir1 dir2 … )</p>
-<p>添加非标准的<strong>共享库搜索路径</strong></p>
-<p>target_link_libraries( target lib1 lib2 … )</p>
-<p>用来为目标target添加需要链接的共享库，target可以是一个可执行文件，也可以是一个库文件。</p>
-<p><strong>查看生成目标的库依赖情况</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 生成的目标可执行文件为main</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> OSX</span></span><br><span class="line">otool -L main</span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> linux</span></span><br><span class="line">ldd main</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>只能列出动态库。</p>
-</blockquote>
-<h4 id="13-常用变量"><a href="#13-常用变量" class="headerlink" title="13. 常用变量"></a>13. 常用变量</h4><p><strong>PROJECT_BINARY_DIR</strong>：编译发生的目录</p>
-<p><strong>PROJECT_SOURCE_DIR</strong>：工程顶层目录</p>
-<p><strong>CMAKE_CURRENT_SOURCE_DIR</strong>：当前CMakeLists.txt所在目录</p>
-<p><strong>CMAKE_MODULE_PATH</strong>：自定义的<strong>cmake模块</strong>所在路径</p>
-<p><strong>LIBRARY_OUTPUT_PATH</strong>：重定义目标库文件存放目录</p>
-<p><strong>EXECUTABLE_OUTPUT_PATH</strong>：重定义目标可执行文件存放目录</p>
-<h4 id="14-findNAME-cmake模块"><a href="#14-findNAME-cmake模块" class="headerlink" title="14. findNAME.cmake模块"></a>14. findNAME.cmake模块</h4><ol>
-<li>在工程目录中创建cmake文件夹，并创建FindHELLO.cmake模块：</li>
-</ol>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例</span></span><br><span class="line"><span class="keyword">FIND_PATH</span>(HELLO_INCLUDE_DIR hello.h /usr/local/<span class="keyword">include</span>/hello)</span><br><span class="line"><span class="keyword">FIND_LIBRARY</span>(HELLO_LIBRARY hello /usr/local/lib)</span><br><span class="line"><span class="keyword">IF</span> (HELLO_INCLUDE_DIR <span class="keyword">AND</span> HELLO_LIBRARY)</span><br><span class="line">	<span class="keyword">SET</span>(HELLO_FOUND <span class="keyword">TRUE</span>)</span><br><span class="line"><span class="keyword">ENDIF</span> (HELLO_INCLUDE_DIR <span class="keyword">AND</span> HELLO_LIBRARY)</span><br><span class="line"><span class="keyword">IF</span> (HELLO_FOUND)</span><br><span class="line">	<span class="keyword">IF</span> (NOT HELLO_FIND_QUIETLY)</span><br><span class="line">		<span class="keyword">MESSAGE</span>(STATUS <span class="string">"Found Hello: $&#123;HELLO_LIBRARY&#125;"</span>)</span><br><span class="line">	<span class="keyword">ENDIF</span> (NOT HELLO_FIND_QUIETLY)</span><br><span class="line"><span class="keyword">ELSE</span> (HELLO_FOUND)</span><br><span class="line">	<span class="keyword">IF</span> (HELLO_FIND_REQUIRED)</span><br><span class="line">		<span class="keyword">MESSAGE</span>(FATAL_ERROR <span class="string">"Could not find hello library"</span>)</span><br><span class="line">	<span class="keyword">ENDIF</span> (HELLO_FIND_REQUIRED)</span><br><span class="line"><span class="keyword">ENDIF</span> (HELLO_FOUND)</span><br></pre></td></tr></table></figure>
-<ol>
-<li>在主目录CMakeLists.txt中添加cmake模块所在路径：</li>
-</ol>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为find_package()指令成功执行</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_MODULE_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/cmake)</span><br></pre></td></tr></table></figure>
-<ol>
-<li>然后就可以在源文件CMakeLists.txt中调用 find_package：</li>
-</ol>
-<p>find_package ( name  [QUIET]  [REQUIRED] )</p>
-<p>用来调用预定义在<strong>CMAKE_MODULE_PATH</strong>下的Find\<name>.cmake模块。</name></p>
-<p>每一个模块都会定义以下几个变量：</p>
-<ul>
-<li>NAME_FOUND</li>
-<li>NAME_INCLUDE_DIR or NAME_INCLUDES </li>
-<li>NAME_LIBRARY or NAME_LIBRARIES </li>
-</ul>
-<p>根据指令后面的参数还会有以下变量：</p>
-<ul>
-<li><p>NAME_FIND_QUIETLY，如果指定了QUIET参数，就不会执行如下语句：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">MESSAGE</span>(STATUS <span class="string">"Found Hello: $&#123;NAME_LIBRARY&#125;"</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>NAME_FIND_REQUIRED，如果指定了REQUIRED参数，就是指这个共享库是工程必须的，如果找不到，工程就不能编译，对应地会执行如下语句：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">MESSAGE</span>(FATAL_ERROR <span class="string">"Could not find NAME library"</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>可以通过\<name>_FOUND判断模块是否被找到，并执行不同的操作（如添加非标准路径、输出错误信息等）。</name></p>
-<h4 id="15-find-指令"><a href="#15-find-指令" class="headerlink" title="15. find_指令"></a>15. find_指令</h4><ul>
-<li><p><strong>find_path</strong></p>
-<p>find_path ( VAR name1 path1 path2 … )</p>
-<p>VAR变量代表<strong>包含</strong>name1文件的<strong>路径</strong>——路径。</p>
-</li>
-<li><p><strong>find_library</strong></p>
-<p>find_library ( VAR name1 path1 path2 …)    </p>
-<p>VAR变量包含找到的库的<strong>全路径</strong>，<strong>包括库文件名</strong>——路径下的所有文件。</p>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2679,7 +2239,7 @@ I & -(Rp+t)^{\wedge}\\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2692,7 +2252,7 @@ I & -(Rp+t)^{\wedge}\\
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="常用库函数 1.1 torch.flatten(input, start_dim=0, end_dim=-1)：展开start_dim到end_dim之间的dim成一维 1.2 [einops][https://ggcgarciae.github.io/einops/2-einops-for-deep-learning/].rearrange(element, pattern)：贼强，用高级pa">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2021-12-07T09:07:52.568Z">
+<meta property="og:updated_time" content="2022-07-21T02:48:50.178Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="torch-note">
 <meta name="twitter:description" content="常用库函数 1.1 torch.flatten(input, start_dim=0, end_dim=-1)：展开start_dim到end_dim之间的dim成一维 1.2 [einops][https://ggcgarciae.github.io/einops/2-einops-for-deep-learning/].rearrange(element, pattern)：贼强，用高级pa">
@@ -383,31 +383,54 @@
 </li>
 <li><p>DP使用</p>
 <ul>
-<li><p>主需要给single model做一个封装</p>
+<li>简单的单机多卡，forward pass在多卡上做，然后汇总的主卡，模型更新只在主卡上做，然后再分发到各子GPU</li>
+<li>GPU利用率低</li>
+<li>只需要给single model做一个封装</li>
+</ul>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net = torch.nn.DataParallel(model,device_ids=[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>栗子</p>
-</li>
-</ul>
-</li>
-<li><p>[DDP使用][<a href="https://zhuanlan.zhihu.com/p/358974461" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/358974461</a>]</p>
+<li><p>[DDP使用][<a href="https://zhuanlan.zhihu.com/p/107139605" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/107139605</a>]</p>
 <ul>
-<li>相对复杂，核心配置参数：<ul>
+<li><p>每个batch以后，分发模型权重，太麻烦了，可以考虑同步梯度，把所有卡的loss同步，然后各自梯度更新（需要设置同样的seed）就好了——【重复计算好多遍】 要快过 【io通信分发】</p>
+</li>
+<li><p>相对复杂，核心配置参数：</p>
+<ul>
 <li>group：进程组，默认情况下，只有一个组</li>
 <li>world size：全局进程个数，如果是多机多卡就表示机器数量，如果是单机多卡就表示 GPU 数量</li>
 <li>rank：进程号，多机多卡表示机器编号，单机多卡表示 GPU编号</li>
 <li>local_rank：进程内GPU 编号</li>
 </ul>
 </li>
-<li>两种代码封装方式<ul>
+<li><p>两种代码封装方式</p>
+<ul>
 <li>spawn</li>
-<li>launch</li>
+<li>launch：一般看到的都是torch.distributed.launch</li>
 </ul>
+</li>
+<li><p>torch.distributed.launch</p>
+<ul>
+<li><p>用法：python3 -m torch.distributed.launch [—usage] single_training_script.py [—training_script_args]</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[-h] [--nnodes NNODES] [--node_rank NODE_RANK]</span><br><span class="line">[--nproc_per_node NPROC_PER_NODE] [--master_addr MASTER_ADDR]</span><br><span class="line">[--master_port MASTER_PORT] [--use_env] [-m] [--no_python]</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+</ol>
+<pre><code>      * -h/--help：查看帮助
+      * --nnodes NNODES：节点数
+      * --node_rank NODE_RANK：当前节点的rank
+      * --nproc_per_node NPROC_PER_NODE：每个节点的GPU数量
+      * --master_addr MASTER_ADDR：node 0的IP/host name，单机多卡时候就是127.0.0.1
+      * --master_port MASTER_PORT：node 0的free port，用来节点间通信
+      * --use_env：读取环境变量的LOCAL_RANK，然后用来传递local rank
+      * -m：类似python -m，如果single_training_script.py被打包成python module了，可以-m调用
+      * --no_python：用不上
+
+    * 查看帮助：python -m torch.distributed.launch --help
+</code></pre><ol>
 <li><p>指定GPU</p>
 <ul>
 <li><p>在代码里面指定</p>
@@ -554,13 +577,16 @@
 <li><p>nn.Xxx &amp; nn.functional.xxx：如nn.Conv2d和nn.functional.conv2d，这就类似keras.Layer.Conv2d和tf.nn.conv2d，一个是封装的层，需要实例化使用，一个是函数借口，直接使用但是要传入参数</p>
 </li>
 <li><p>模型参数量：torch.numel</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum_parameters = sum(torch.numel(parameter) <span class="keyword">for</span> parameter <span class="keyword">in</span> model.parameters())</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">total_parameters = sum(torch.numel(p) <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters())</span><br><span class="line">trained_parameters = sum(torch.numel(p) <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> p.requires_grad)</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>模型参数：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">model.parameters()     <span class="comment"># 生成器</span></span><br><span class="line">model.state_dict()     <span class="comment"># dict</span></span><br><span class="line"></span><br><span class="line">model.load_state_dict(torch.load(<span class="string">'model.pth'</span>), strict=<span class="keyword">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型参数量：torch.numel</span></span><br><span class="line">sum_parameters = sum(torch.numel(parameter) <span class="keyword">for</span> parameter <span class="keyword">in</span> model.parameters())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 浮点运算次数：GFLOPs</span></span><br><span class="line">model.layers[<span class="number">0</span>].flops() / <span class="number">1e9</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>1个special case：BN层，在调用.parameters()方法的时候，可以看到BN层只有两个参数，但是实际上还有running mean &amp; running std，这两个变量严格来说不算网络参数，而是一个数值统计，所以在state_dict()里面可以看到</li>
+</ul>
 </li>
 <li><p>以较大学习率微调全连接层，较小学习率微调卷积层</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = torchvision.models.resnet18(pretrained=<span class="keyword">True</span>)</span><br><span class="line">finetuned_parameters = list(map(id, model.fc.parameters()))</span><br><span class="line">conv_parameters = (p <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> id(p) <span class="keyword">not</span> <span class="keyword">in</span> finetuned_parameters)</span><br><span class="line">parameters = [&#123;<span class="string">'params'</span>: conv_parameters, <span class="string">'lr'</span>: <span class="number">1e-3</span>&#125;, </span><br><span class="line">              &#123;<span class="string">'params'</span>: model.fc.parameters()&#125;]</span><br><span class="line">optimizer = torch.optim.SGD(parameters, lr=<span class="number">1e-2</span>, momentum=<span class="number">0.9</span>, weight_decay=<span class="number">1e-4</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = torchvision.models.resnet18(pretrained=<span class="keyword">True</span>)</span><br><span class="line">finetuned_parameters = list(map(id, model.fc.parameters()))</span><br><span class="line">conv_parameters = (p <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> id(p) <span class="keyword">not</span> <span class="keyword">in</span> finetuned_parameters)</span><br><span class="line">parameters = [&#123;<span class="string">'params'</span>: conv_parameters, <span class="string">'lr'</span>: <span class="number">1e-3</span>&#125;, </span><br><span class="line">              &#123;<span class="string">'params'</span>: model.fc.parameters()&#125;]</span><br><span class="line">optimizer = torch.optim.SGD(parameters, lr=<span class="number">1e-2</span>, momentum=<span class="number">0.9</span>, weight_decay=<span class="number">1e-4</span>)</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 </li>
@@ -684,7 +710,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -697,7 +723,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

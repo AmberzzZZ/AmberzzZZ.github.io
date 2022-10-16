@@ -113,7 +113,13 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/tiny.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/large.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/offset_v5.png">
-<meta property="og:updated_time" content="2022-06-08T02:39:04.469Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/yolov7.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/E-ELAN.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/scaleup.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/RepConv.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/RepConvN.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2019/11/28/yolo系列/auxiliary%20head.png">
+<meta property="og:updated_time" content="2022-07-28T04:22:33.368Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="yolo系列">
 <meta name="twitter:description" content="综述 [yolov1] Yolov1: You Only Look Once: Unified, Real-Time Object Detection [yolov2] Yolov2: YOLO9000: Better, Faster, Stronger [yolov3] Yolov3: An Incremental Improvement  [yolov4] YOLOv4: Optimal Sp">
@@ -388,6 +394,7 @@
 <li>[yolov4] YOLOv4: Optimal Speed and Accuracy of Object Detection </li>
 <li>[poly-yolo] POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3 </li>
 <li>[scaled-yolov4] Scaled-YOLOv4: Scaling Cross Stage Partial Network </li>
+<li>[yolov7] YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors</li>
 </ol>
 <h2 id="0-review"><a href="#0-review" class="headerlink" title="0. review"></a>0. review</h2><ol>
 <li><p>review0121：关于yolo loss</p>
@@ -1162,6 +1169,186 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
 </ul>
 </li>
 </ol>
+<h2 id="YOLOv7-Trainable-bag-of-freebies-sets-new-state-of-the-art-for-real-time-object-detectors"><a href="#YOLOv7-Trainable-bag-of-freebies-sets-new-state-of-the-art-for-real-time-object-detectors" class="headerlink" title="YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors"></a>YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors</h2><ol>
+<li><p>精度</p>
+<ul>
+<li>YOLOv7打败了所有real-time detectors：GPU V100上30以上FPS的模型，56.8% AP</li>
+<li>YOLOv7-E6打败了transformer-based (SWIN- L Cascade-Mask R-CNN)/conv-based (ConvNeXt-XL Cascade-Mask R-CNN)的两阶段模型</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/yolov7.png" width="45%;"></p>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>结构上</p>
+<ul>
+<li><p>CPU real-time detectors基本是基于MobileNet、ShuffleNet、GhostNet</p>
+</li>
+<li><p>GPU real-time detectors则大多数用ResNet、DarkNet、CSPNet strategy</p>
+</li>
+</ul>
+</li>
+<li><p>Real-time object detectors</p>
+<ul>
+<li>大多数基于YOLO / FCOS</li>
+<li><ol>
+<li>faster and stronger back</li>
+</ol>
+</li>
+<li><ol>
+<li>effective feature integration</li>
+</ol>
+</li>
+<li><ol>
+<li>accurate detection head</li>
+</ol>
+</li>
+<li><ol>
+<li>robust loss</li>
+</ol>
+</li>
+<li><ol>
+<li>a more efficient label assignment method </li>
+</ol>
+</li>
+<li><ol>
+<li>a more efficient training method</li>
+</ol>
+</li>
+<li>本文关注4/5/6要素</li>
+</ul>
+</li>
+<li><p>Model re-parameterization</p>
+<ul>
+<li>merge multiple computational modules into one at inference stage</li>
+<li>其实是一种模型/module层面的ensemble</li>
+<li>模型层面<ul>
+<li>ema</li>
+<li>k-fold ensemble</li>
+</ul>
+</li>
+<li>module层面<ul>
+<li>线形层的合并</li>
+<li>需要设计可合并的module（如非线性操作放在branch外面）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Model scaling</p>
+<ul>
+<li>大多数NAS方法不会考虑各种factor的correlation</li>
+<li>darknet之类的网络实际上是compound scaling的，网络加深的同时内部block的branch就进行了同步的加宽，效果上来讲并不是孤立的增加了depth</li>
+</ul>
+</li>
+<li><p>main contribution</p>
+<ul>
+<li>主要focus在training method上<ul>
+<li>优化训练进程</li>
+<li>增加了training cost，但是不影响inference性能</li>
+<li>所以叫trainable bag-of-freebies</li>
+</ul>
+</li>
+<li>two issues &amp; solutions<ul>
+<li>model re-parameterization</li>
+<li>dynamic label assignment</li>
+</ul>
+</li>
+<li>propose extent &amp; compound scaling<ul>
+<li>降低40%参数量 &amp; 50%计算量</li>
+<li>faster &amp; higher acc</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Architecture</p>
+<ul>
+<li><p>Extended efficient layer aggregation networks</p>
+<ul>
+<li>考虑要素<ul>
+<li>number of parameters</li>
+<li>the amount of computation</li>
+<li>the computational density</li>
+</ul>
+</li>
+<li><p>提出了Extended-ELAN</p>
+<ul>
+<li>group conv：相同计算量下，可以扩大channel（expand cardinality）</li>
+<li>shuffle &amp; merge：combine the features of different groups，持续增强学习能力同时不伤害original gradient path【不太理解为啥有这个作用】</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/E-ELAN.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model scaling for concatenation-based models</p>
+<ul>
+<li>大多数讨论scaleup的网络结构，在加深时，网络内部的block的输入/输出维度不会变化，但是本文这种concatenation-based architecture，在加深时因为分支变多了，宽度也变了，因此并不能孤立探讨一个scaleup factor</li>
+<li><p>compound scaling</p>
+<ul>
+<li>在加深computation block的深度的同时，它的宽度也变了</li>
+<li>因此也要同步调整其他部分的宽度</li>
+<li>从而maintain the optimal structure</li>
+</ul>
+<p><img src="/2019/11/28/yolo系列/scaleup.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Trainable bag-of-freebies</p>
+<ul>
+<li><p>Planned re-parameterized convolution：RepConvN</p>
+<ul>
+<li><p>受RepConv的启发，RepVGG的效果是好的，但是直接复用在resnet/densenet结构上会显著掉点</p>
+</li>
+<li><p>recall RepConv：inference阶段的一个3x3conv在训练阶段其实是2/3个分支（identity+1x1+3x3）</p>
+<p>  <img src="/2019/11/28/yolo系列/RepConv.png" width="40%;"></p>
+</li>
+<li><p>本文实验发现直接复用RepConv，它的id path会destroy the residual in ResNet/DenseNet，所以本文改良的RepConv去掉了id path（RepConvN）</p>
+<p>  <img src="/2019/11/28/yolo系列/RepConvN.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Coarse for auxiliary and fine for lead loss：label assigner</p>
+<ul>
+<li><p>deep supervision：对中间层添加辅助分支进行loss guidance</p>
+<ul>
+<li>保留作为最终输出的branch叫做lead head</li>
+<li><p>只在训练阶段做辅助的branch叫auxiliary head</p>
+<p><img src="/2019/11/28/yolo系列/auxiliary head.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>label assignment</p>
+<ul>
+<li>soft label：如用pred box和gt box的IoU作为objectness的标签，是随着网络预测结果调节标签的</li>
+<li>one issue：如何给每个预测头分配label，计算loss？<ul>
+<li>各算各的</li>
+<li>用lead prediction来assign both：因为lead head的学习能力更强，生成的标签更representative一些</li>
+</ul>
+</li>
+<li>this paper one step further<ul>
+<li>用lead prediction来assign both</li>
+<li>同时生成的是coarse-to-fine的hierarchical label，to fit不同的feature level</li>
+<li>fine label还是上面那个lead head计算的soft label</li>
+<li>coarse label则allow more grids as positives，constraints放的更低了，因为让学习能力不够强的层提前学习过于精准的label，会导致后面的层学习能力恶化，但是如果前期encourage more，后期只需过滤掉低质量框就好了</li>
+<li>具体实现是通过put restrictions in the decoder so that the extra coarse positive grids cannot produce soft label properly，这个fine-coarse的assign机制是在训练过程中online实现的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Other trainable bag-of-freebies</p>
+<ul>
+<li>BN：conv-bn-activation，测试阶段合并线形计算单元</li>
+<li>Implicit knowledge in YOLOR：测试阶段也能合并</li>
+<li>EMA：老ensemble了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 
       
     </div>
@@ -1288,7 +1475,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1301,7 +1488,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1344,7 +1531,7 @@ Pr(object)*IOU(b,object) = \sigma(t_o)</script><ul>
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0-review"><span class="nav-number">2.</span> <span class="nav-text">0. review</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection"><span class="nav-number">3.</span> <span class="nav-text">1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Yolov2-YOLO9000-Better-Faster-Stronger"><span class="nav-number">4.</span> <span class="nav-text">2. Yolov2: YOLO9000: Better, Faster, Stronger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Yolov3-An-Incremental-Improvement"><span class="nav-number">5.</span> <span class="nav-text">3. Yolov3: An Incremental Improvement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-一些补充"><span class="nav-number">6.</span> <span class="nav-text">4. 一些补充</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection"><span class="nav-number">7.</span> <span class="nav-text">4. YOLOv4: Optimal Speed and Accuracy of Object Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3"><span class="nav-number">8.</span> <span class="nav-text">POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network"><span class="nav-number">9.</span> <span class="nav-text">Scaled-YOLOv4: Scaling Cross Stage Partial Network</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">1.</span> <span class="nav-text">综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0-review"><span class="nav-number">2.</span> <span class="nav-text">0. review</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Yolov1-You-Only-Look-Once-Unified-Real-Time-Object-Detection"><span class="nav-number">3.</span> <span class="nav-text">1. Yolov1: You Only Look Once: Unified, Real-Time Object Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Yolov2-YOLO9000-Better-Faster-Stronger"><span class="nav-number">4.</span> <span class="nav-text">2. Yolov2: YOLO9000: Better, Faster, Stronger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Yolov3-An-Incremental-Improvement"><span class="nav-number">5.</span> <span class="nav-text">3. Yolov3: An Incremental Improvement</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-一些补充"><span class="nav-number">6.</span> <span class="nav-text">4. 一些补充</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-YOLOv4-Optimal-Speed-and-Accuracy-of-Object-Detection"><span class="nav-number">7.</span> <span class="nav-text">4. YOLOv4: Optimal Speed and Accuracy of Object Detection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#POLY-YOLO-HIGHER-SPEED-MORE-PRECISE-DETECTION-AND-INSTANCE-SEGMENTATION-FOR-YOLOV3"><span class="nav-number">8.</span> <span class="nav-text">POLY-YOLO: HIGHER SPEED, MORE PRECISE DETECTION AND INSTANCE SEGMENTATION FOR YOLOV3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scaled-YOLOv4-Scaling-Cross-Stage-Partial-Network"><span class="nav-number">9.</span> <span class="nav-text">Scaled-YOLOv4: Scaling Cross Stage Partial Network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#YOLOv7-Trainable-bag-of-freebies-sets-new-state-of-the-art-for-real-time-object-detectors"><span class="nav-number">10.</span> <span class="nav-text">YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors</span></a></li></ol></div>
             
 
           </div>

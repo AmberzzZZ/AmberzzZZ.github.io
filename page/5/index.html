@@ -276,6 +276,1702 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/21/LV-ViT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/21/LV-ViT/" itemprop="url">LV-ViT</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-21T16:42:11+08:00">
+                2021-05-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/21/LV-ViT/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/21/LV-ViT/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[LV-ViT 2021] Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet，新加坡国立&amp;字节，主体结构还是ViT，deeper+narrower+multi-layer-cnn-patch-projection+auxiliary label&amp;loss</p>
+<p>同等参数量下，能够达到与CNN相当的分类精度</p>
+<ul>
+<li>26M——84.4% ImageNet top1 acc</li>
+<li>56M——85.4% ImageNet top1 acc</li>
+<li>150M——86.2% ImageNet top1 acc</li>
+</ul>
+<p><img src="/2021/05/21/LV-ViT/recent.png" width="70%;"></p>
+<p>ImageNet &amp; ImageNet-1k：The ImageNet dataset consists of more than 14M images, divided into approximately 22k different labels/classes. However the <strong>ImageNet challenge is conducted on just 1k high-level categories</strong> (probably because 22k is just too much)</p>
+<h2 id="Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet"><a href="#Token-Labeling-Training-an-85-4-Top-1-Accuracy-Vision-Transformer-with-56M-Parameters-on-ImageNet" class="headerlink" title="Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet"></a>Token Labeling: Training an 85.4% Top-1 Accuracy Vision Transformer with 56M Parameters on ImageNet</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>develop a bag of training techniques on vision transformers</li>
+<li>slightly tune the structure</li>
+<li>introduce token labeling——a new training objective</li>
+<li>ImageNet classificaiton task</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>former ViTs<ul>
+<li>主要问题就是需要大数据集pretrain，不然精度上不去</li>
+<li>然后模型也比较大，need huge computation resources</li>
+<li>DeiT和T2T-ViT探索了data augmentation/引入additional token，能够在有限的数据集上拉精度</li>
+</ul>
+</li>
+<li>our work<ul>
+<li>rely on purely ImageNet-1k data</li>
+<li>rethink the way of performing patch embedding</li>
+<li>introduce inductive bias</li>
+<li>we add a token labeling objective loss beside cls token predition</li>
+<li>provide practical advice on adjusting vision transformer structures</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview &amp; comparison</p>
+<ul>
+<li>主体结构不变，就是增加了两项</li>
+<li>a MixToken method</li>
+<li><p>a token labeling objective</p>
+<p><img src="/2021/05/21/LV-ViT/cmp.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>review the vision transformer</p>
+<ul>
+<li>patch embedding<ul>
+<li>将固定尺寸的图片转换成patch sequence，例如224x224的图片，patch size=16，那就是14x14个small patches</li>
+<li>将每个patch(16x16x3=768-dim) linear project成一个token(embedding-dim)</li>
+<li>concat a class token，构成全部的input tokens</li>
+</ul>
+</li>
+<li>position encoding<ul>
+<li>added to input tokens</li>
+<li>fixed sinusoidal / learnable</li>
+</ul>
+</li>
+<li>multi-head self-attention<ul>
+<li>用来建立long-range dependency</li>
+<li>multi-heads：所有attention heads的输出在channel-dim上concat，然后linear project回单个head的channel-dim</li>
+</ul>
+</li>
+<li>feed-forward layers<ul>
+<li>fc1-activation-fc2</li>
+</ul>
+</li>
+<li>score predition layer<ul>
+<li>只用了cls token对应的输出embedding，其他的discard</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training techniques</p>
+<ul>
+<li><p>network depth</p>
+<ul>
+<li>add more transformer blocks</li>
+<li>同时decrease the hidden dim of FFN</li>
+</ul>
+</li>
+<li><p>explicit inductive bias</p>
+<ul>
+<li>CNN逐步扩大感受野，擅长提取局部特征，具有天然的平移不变性等</li>
+<li>transformer被发现failed to capture the low-level and local structures</li>
+<li>we use convolutions with a smaller stride to provide an overlapped information for each nearby tokens</li>
+<li>在patch embedding的时候不是independent crop，而是有overlap</li>
+<li>然后用多层conv，逐步扩大感受野，smaller kernel size同时降低了计算量</li>
+</ul>
+</li>
+<li><p>rethinking residual connection</p>
+<ul>
+<li><p>给残差分支add a smaller ratio $\alpha$</p>
+<p>  <img src="/2021/05/21/LV-ViT/residual.png" width="40%;"></p>
+</li>
+<li><p>enhance the residual connection since less information will go to the residual branch</p>
+</li>
+<li><p>improve the generalization ability</p>
+</li>
+</ul>
+</li>
+<li><p>re-labeling</p>
+<ul>
+<li>label is not always accurate after cropping</li>
+<li><p>situations are worse on smaller images</p>
+</li>
+<li><p>re-assign each image with a K-dim score map，在1k类数据集上K=1000</p>
+</li>
+<li>cheap operation compared to teacher-student</li>
+<li>这个label是针对whole image的label，是通过另一个预训练模型获取</li>
+</ul>
+</li>
+<li><p>token-labeling</p>
+<ul>
+<li>based on the dense score map provided by re-labeling，we can assign each patch an individual label</li>
+<li>auxiliary token labeling loss<ul>
+<li>每个token都对应了一个K-dim score map</li>
+<li>可以计算一个ce</li>
+</ul>
+</li>
+<li>given<ul>
+<li>outputs of the transformer $[X^{cls}, X^1, …, X^N]$</li>
+<li>K-dim score map $[y^1, y^2, …, y^N]$ </li>
+<li>whole image label $y^{cls}$</li>
+</ul>
+</li>
+<li>loss<ul>
+<li>auxiliary token labeling loss：$L_{aux} = \frac{1}{N} \sum_1^N CE(X^i, y^i)$</li>
+<li>cls loss：$L_{cls} = CE(X^{cls}, y^{cls})$</li>
+<li>total loss：$L_{total} = L_{cls}+\beta L_{aux}$，$\beta=0.5$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MixToken</p>
+<ul>
+<li>从Mixup&amp;CutMix启发来的</li>
+<li>为了确保each token have clear content，我们基于token embedding进行mixup</li>
+<li>given<ul>
+<li>token sequence $T_1=[t^1_1, t^2_1, …, t^N_1]$ &amp; $T_2=[t^1_2, t^2_2, …, t^N_2]$</li>
+<li>token labels $y_1=[y^1_1, y^2_1, …, y^N_1]$ &amp; $Y_2=[y^1_2, y^2_2, …, y^N_2]$</li>
+<li>binary mask M</li>
+</ul>
+</li>
+<li>MixToken<ul>
+<li>mixed token sequence：$\hat T = T_1 \odot M + T_2 \odot (1-M)$</li>
+<li>mixed labels：$\hat Y = Y_1 \odot M + Y_2 \odot (1-M)$</li>
+<li>mixed cls label：$\hat {Y^{cls}} = \overline M y_1^{cls} + (1-\overline M) y_2^{cls}$，$\overline M$ is the average of $M$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>training details</p>
+<ul>
+<li>AdamW</li>
+<li>linear lr scaling：larger when use token labeling</li>
+<li>weight decay</li>
+<li><p>dropout：hurts small models，use Stochastic Depth instead</p>
+<p><img src="/2021/05/21/LV-ViT/hyper.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Training Technique Analysis</p>
+<ul>
+<li><p>more convs in patch embedding</p>
+<p>  <img src="/2021/05/21/LV-ViT/convs.png" width="50%;"></p>
+</li>
+<li><p>enhanced residual</p>
+<ul>
+<li><p>smaller scaling factor</p>
+<ul>
+<li>the weight get larger gradients in residual branch</li>
+<li>more information can be preserved in main branch</li>
+<li>better performance</li>
+<li>faster convergence</li>
+</ul>
+<p><img src="/2021/05/21/LV-ViT/enhanced residual.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>re-labeling</p>
+<ul>
+<li>use NFNet-F6 to re-label the ImageNet dataset and obtain the 1000-dimensional score map for each image</li>
+<li>NFNet-F6 is trained from scratch</li>
+<li>given input 576x576，获得的score map是18x18x1000（s32）</li>
+<li>store the top5 probs for each position to save storage</li>
+</ul>
+</li>
+<li><p>MixToken</p>
+<ul>
+<li>比baseline的CutMix method要好</li>
+<li><p>同时看到token labeling比relabeling要好</p>
+<p><img src="/2021/05/21/LV-ViT/MixToken.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>token labeling</p>
+<ul>
+<li>relabeling是在whole image上</li>
+<li>token labeling是进一步地，在token level添加label和loss</li>
+</ul>
+</li>
+<li><p>augmentation techniques</p>
+<ul>
+<li><p>发现MixUp会hurt</p>
+<p><img src="/2021/05/21/LV-ViT/aug.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model Scaling</p>
+<ul>
+<li><p>越大越好</p>
+<p><img src="/2021/05/21/LV-ViT/scaling.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/19/memory-bank/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/05/19/memory-bank/" itemprop="url">memory bank</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-19T11:10:01+08:00">
+                2021-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/19/memory-bank/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/19/memory-bank/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>2018年的paper</li>
+<li>official code：<a href="https://github.com/zhirongw/lemniscate.pytorch" target="_blank" rel="noopener">https://github.com/zhirongw/lemniscate.pytorch</a></li>
+<li>memory bank</li>
+<li>NCE</li>
+</ul>
+<h2 id="Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination"><a href="#Unsupervised-Feature-Learning-via-Non-Parametric-Instance-Discrimination" class="headerlink" title="Unsupervised Feature Learning via Non-Parametric Instance Discrimination"></a>Unsupervised Feature Learning via Non-Parametric Instance Discrimination</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unsupervised learning<ul>
+<li>can we learn good feature representation that captures apparent similarity among instances instead of classes</li>
+<li>formulate a non-parametric classification problem at instance-level</li>
+<li>use noise contrastive estimation</li>
+</ul>
+</li>
+<li>our non-parametric model<ul>
+<li>highly compact：128-d feature per image，only 600MB storage in total</li>
+<li>enable fast nearest neighbour retrieval</li>
+</ul>
+</li>
+<li>【QUESTION】无类别标签，单靠similarity，最终的分类模型是如何建立的？</li>
+<li>verified on<ul>
+<li>ImageNet 1K classification</li>
+<li>semi-supervised learning</li>
+<li>object detection tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>observations<ul>
+<li>ImageNet top-5 err远比top-1 err小</li>
+<li>second highest responding class is more likely to be visually related</li>
+<li>说明模型隐式地学到了similarity</li>
+<li>apparent similarity is learned not from se- mantic annotations, but from the visual data themselves</li>
+</ul>
+</li>
+<li>将class-wise supervision推到一个极限<ul>
+<li>就变成了instance-level</li>
+<li>类别数变成了the whole training set：softmax to many more classes becomes infeasible<ul>
+<li>approximate the full softmax distribution with noise-contrastive estimation(NCE)</li>
+<li>use a proximal regularization to stablize the learning process</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>train &amp; test<ul>
+<li>通常的做法是learned representations加一个线性分类器</li>
+<li>e.g. SVM：但是train和test的feature space是不一致的</li>
+<li>我们用了KNN：same metric space </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>to learn a embedding function $f_{\theta}$</li>
+<li>distance metric $d_{\theta}(x,y)  = ||f_{\theta}(x)-f_{\theta}(y)||$</li>
+<li>to map visually similar images closer</li>
+<li><p>instance-level：to distinct between instances</p>
+<p><img src="/2021/05/19/memory-bank/pipeline.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Non-Parametric Softmax Classifier</p>
+<ul>
+<li><p>common parametric classifier</p>
+<ul>
+<li>given网络预测的N-dim representation $v=f_{\theta}(x)$</li>
+<li>要预测C-classes的概率，需要一个$W^{NC}$的projection：$P(i|v) = \frac{exp (W^T_iv)}{\sum exp (W^T_jv)}$</li>
+</ul>
+</li>
+<li><p>Non-Parametric version</p>
+<ul>
+<li>enforce $||v||=1$ via L2 norm</li>
+<li>replace $W^T$ with $v^T$</li>
+<li>then the probability：$P(i|v) = \frac{exp (v^T_iv/\tau)}{\sum exp (v^T_jv / \tau)}$</li>
+<li>temperature param $\tau$：controls the concentration level of the distribution </li>
+<li><p>the goal is to minimize the negative log-likelihood</p>
+</li>
+<li><p>意义：L2 norm将所有的representation映射到了一个128-d unit sphere上面，$v_i^T v_j$度量了两个projection vec的similarity，我们希望同类的vec尽可能重合，不同类的vec尽可能正交</p>
+<ul>
+<li>class weights $W$ are not generalized to new classes</li>
+<li>but feature representations $V$ does</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>memory bank</p>
+<ul>
+<li>因为是instance level，C-classes对应整个training set，也就是说${v_i}$ for all the images are needed for loss</li>
+<li>Let $V={v_i}$ 表示memory bank，初始为unit random vectors</li>
+<li>every learning iterations<ul>
+<li>$f_\theta$ is optimized by SGD</li>
+<li>输入$x_i$所对应的$f_i$更新到$v_i$上</li>
+<li>也就是只有mini-batch中包含的样本，在这一个step，更新projection vec</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Noise-Contrastive Estimation</p>
+<ul>
+<li><p>non-parametric softmax的计算量随着样本量线性增长，millions level样本量的情况下，计算太heavy了</p>
+</li>
+<li><p>we use NCE to approximate the full softmax</p>
+</li>
+<li><p>assume</p>
+<ul>
+<li>noise samples的uniform distribution：$P_n =\frac{1}{n}$</li>
+<li>noise samples are $m$ times frequent than data samples</li>
+</ul>
+</li>
+<li><p>那么sample $i$ matches vec $v$的后验概率是：$h(i,v)=\frac{P(i|v)}{P(i|v)+mP_n}$</p>
+<ul>
+<li>approximated training object is to minimize the negative log-likelihood of $h(i,v)$</li>
+<li><img src="/2021/05/19/memory-bank/NCE.png" width="40%;"></li>
+</ul>
+</li>
+<li><p>normalizing constant $Z$的近似</p>
+<ul>
+<li><p><img src="/2021/05/19/memory-bank/norm.png" width="40%;"></p>
+</li>
+<li><p>主要就是分母这个$Z_i$的计算比较heavy，我们用Monte Carlo采样来近似：</p>
+<p>  <img src="/2021/05/19/memory-bank/monte.png" width="40%;"></p>
+</li>
+<li><p>${j_k}$ is a random subset of indices：随机抽了memory bank的一个子集来approx全集的分母，实验发现取batch size大小的子集就可以，m=4096</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Proximal Regularization</p>
+<ul>
+<li><p>the learning process oscillates a lot</p>
+<ul>
+<li>we have one instance per class</li>
+<li>during each training epoch each class is only visited once</li>
+</ul>
+</li>
+<li><p>we introduce an additional term</p>
+<ul>
+<li>overall workflow：在每一个iteration t，feature representation是$v_i^t=f_{\theta}(x_i)$，而memory bank里面的representations来自上一个iteration step $V={v^{t-1}}$，我们从memory bank里面采样，并计算NCE loss，然后bp更新网络权重，然后将这一轮fp的representations update到memory bank的指定样本上，然后下一轮</li>
+<li>可以发现，在初始random阶段，梯度更新会比较快而且不稳定</li>
+<li><p>我们给positive sample的loss上额外加了一个$\lambda ||v_i^t-v_i^{t-1}||^2_2$，有点类似weight decay那种东西，开始阶段l2 loss会占主导，引导网络收敛</p>
+</li>
+<li><p><img src="/2021/05/19/memory-bank/proximal.png" width="50%;"></p>
+</li>
+<li><p>stabilize</p>
+</li>
+<li>speed up convergence</li>
+<li>improve the learned representations </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Weighted k-Nearest Neighbor Classifier</p>
+<ul>
+<li>a test time，先计算feature representation，然后跟memory bank的vectors分别计算cosine similarity $s_i=cos(v_i, f)$，选出topk neighbours $N_k$，然后进行weighted voting</li>
+<li>weighted voting：<ul>
+<li>对每个class c，计算它在topk neighbours的total weight，$w_c =\sum_{i \in N_k} \alpha_i 1(c_i=c)$</li>
+<li>$\alpha_i = exp(s_i/\tau)$</li>
+</ul>
+</li>
+<li>k = 200</li>
+<li>$\tau = 0.07$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/04/30/MoCo系列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/04/30/MoCo系列/" itemprop="url">MoCo系列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-30T10:56:21+08:00">
+                2021-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/04/30/MoCo系列/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/04/30/MoCo系列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers：</p>
+<p>[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming</p>
+<p>[2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Representations，Google Brain，混进来是因为它improve based on MoCo v1，而MoCo v2/v3又都是基于它改进</p>
+<p>[2020 MoCo v2] Improved Baselines with Momentum Contrastive Learning，kaiming</p>
+<p>[2021 MoCo v3] An Empirical Study of Training Self-Supervised Visual Transformers，kaiming</p>
+<h2 id="preview-自监督学习-Self-supervised-Learning"><a href="#preview-自监督学习-Self-supervised-Learning" class="headerlink" title="preview: 自监督学习 Self-supervised Learning"></a>preview: 自监督学习 Self-supervised Learning</h2><ol>
+<li><p>reference：<a href="https://ankeshanand.com/blog/2020/01/26/contrative-self-supervised-learning.html" target="_blank" rel="noopener">https://ankeshanand.com/blog/2020/01/26/contrative-self-supervised-learning.html</a></p>
+</li>
+<li><p>overview</p>
+<p><img src="/2021/04/30/MoCo系列/无监督.png" width="40%;"></p>
+<ul>
+<li>就是无监督</li>
+<li>针对的痛点（有监督训练模型）<ul>
+<li>标注成本高</li>
+<li>迁移性差</li>
+</ul>
+</li>
+<li>会基于数据特点，设置Pretext tasks（最常见的任务就是生成/重建），构造Pesdeo Labels来训练网络</li>
+<li>通常模型用来作为其他学习任务的预训练模型</li>
+<li>被认为是用来学习图像的通用视觉表示</li>
+</ul>
+</li>
+<li><p>methods</p>
+<ul>
+<li><p>从结构上区分主要就是两大类方法</p>
+<ul>
+<li>生成式：通过encoder-decoder结构还原输入，监督信号是输入输出尽可能相似<ul>
+<li>重建任务开销大</li>
+<li>没有建立直接的语义学习</li>
+<li>外加GAN的判别器使得任务更加复杂难训</li>
+</ul>
+</li>
+<li>判别式：输入两张图片，通过encoder编码，监督信号是判断两张图是否相似，判别式模型也叫Contrastive Learning</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/self-supervised.png" width="70%;"></p>
+</li>
+<li><p>从Pretext tasks上划分主要分为三类</p>
+<ul>
+<li>基于上下文（Context based） ：如bert的MLM，在句子/图片中随机扣掉一部分，然后推动模型基于上下文/语义信息预测这部分/相对位置关系</li>
+<li>基于时序（Temporal Based）：如bert的NSP，视频/语音，利用相邻帧的相似性，构建不同排序的序列，判断B是否是A的下一句/是否相邻帧</li>
+<li>基于对比（Contrastive Based）：比较正负样本，最大化相似度的loss在这里面被叫做InfoNCE</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>memory-bank</p>
+<ul>
+<li>Contrastive Based方法最常见的方式是在一个batch中构建正负样本进行对比学习<ul>
+<li>end-to-end</li>
+<li>每个mini-batch中的图像增强前后的两张图片互为正样本</li>
+<li>字典大小就是minibatch大小</li>
+</ul>
+</li>
+<li>memory bank包含数据集中所有样本编码后特征<ul>
+<li>随机采样一部分作为keys</li>
+<li>每个迭代只更新被采样的样本编码</li>
+<li>因为样本编码来自不同的training step，一致性差</li>
+</ul>
+</li>
+<li><p>MoCo</p>
+<ul>
+<li>动态编码库：out-of-date的编码出列</li>
+<li>momentum update：一致性提升</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/memory-bank.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>InfoNCE</p>
+<ul>
+<li><p>deep mind在CPC(Contrastive Predictive Coding)提出，论文以后有机会再展开</p>
+<ul>
+<li>unsupervised</li>
+<li>encoder：encode x into latent space representations z，resnet blocks</li>
+<li>autoregressive model：summarize each time-step set of {z} into a context representation c，GRUs</li>
+<li><p>probabilistic contrastive loss</p>
+<ul>
+<li>Noise-Contrastive Estimation</li>
+<li>Importance Sampling</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/CPC.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>训练目标是输入数据x和context vector c之间的mutual information</p>
+<ul>
+<li>每次从$p(x_{t+k}|c_t)$中采样一个正样本：正样本是这个序列接下来预测的东西，和c的相似性肯定要高于不想干的token</li>
+<li>从$p(x_{t+k})$中采样N-1个负样本：负样本是别的序列里面随机采样的东西</li>
+<li><p>目标是让正样本与context相关性高，负样本低</p>
+<p><img src="/2021/04/30/MoCo系列/InfoNCE.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning"><a href="#MoCo-v1-Momentum-Contrast-for-Unsupervised-Visual-Representation-Learning" class="headerlink" title="MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning"></a>MoCo v1: Momentum Contrast for Unsupervised Visual Representation Learning</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>unsupervised visual representation learning </li>
+<li>contrastive learning </li>
+<li><p>dynamic dictionary</p>
+<ul>
+<li>large</li>
+<li>consisitent</li>
+</ul>
+</li>
+<li><p>verified on</p>
+<ul>
+<li>7 down-stream tasks</li>
+<li>ImageNet classification</li>
+<li>VOC &amp; COCO det/seg</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>Unsupervised representation learning </p>
+<ul>
+<li>highly successful in NLP，in CV supervised is still the main-stream</li>
+<li>两个核心<ul>
+<li>pretext tasks</li>
+<li>loss functions</li>
+</ul>
+</li>
+<li>loss functions<ul>
+<li>生成式方法的loss是基于prediction和一个fix target来计算的</li>
+<li>contrastive-based的key target则是vary on-the-fly during training</li>
+<li>Adversarial losses没展开</li>
+</ul>
+</li>
+<li>pretext tasks<ul>
+<li>tasks involving recover：auto-encoder</li>
+<li>task involving pseudo-labels：通常有个exemplar/anchor，然后计算contrastive loss </li>
+</ul>
+</li>
+<li>contrastive learning VS pretext tasks<ul>
+<li>大量pretext tasks可以通过设计一些contrastive loss来实现</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>recent approaches using contrastive loss</p>
+<ul>
+<li>dynamic dictionaries<ul>
+<li>由keys组成：sampled from data &amp; represented by an encoder </li>
+</ul>
+</li>
+<li>train the encoder to perform dictionary look-up<ul>
+<li>given an encoded query</li>
+<li>similar to its matching key and dissimilar to others</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>desirable dictionary </p>
+<ul>
+<li>large：better sample</li>
+<li>consistent：training target consistent</li>
+</ul>
+</li>
+<li><p>MoCo：Momentum Contrast</p>
+<ul>
+<li>queue</li>
+<li>每个it step的mini-batch的编码入库</li>
+<li>the oldest are dequeued</li>
+<li><p>EMA：</p>
+<ul>
+<li>a slowly progressing key encoder</li>
+<li>momentum-based moving average of the query encoder</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/MoCo.png" width="50%;"></p>
+</li>
+<li><p>similar的定义：q &amp; k are from the same image</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>contrastive learning</p>
+<ul>
+<li>a encoded query $q$</li>
+<li>a set of encoded samples $\{k_0, k_1, …\}$</li>
+<li>assume：there is a single key $k_+$ in the dictionary that $q$ matches</li>
+<li>similarity measurement：dot product</li>
+<li>InfoNCE：<ul>
+<li>$L_q = -log \frac{exp(qk_+/\tau)}{\sum_0^K exp(qk/\tau)}$</li>
+<li>1 positive &amp; K negtive samples</li>
+<li>本质上是个softmax-based classifier，尝试将$q$分类成$k_+$</li>
+</ul>
+</li>
+<li>unsupervised workflow<ul>
+<li>with a encoder network $f_q$ &amp; $f_k$</li>
+<li>thus we have query &amp; sample representation $q=f_q(x^q)$ &amp; $k=f_k(x^k)$</li>
+<li>inputs $x$ can be images/patches/context(patches set)</li>
+<li>$f_q$ &amp; $f_k$ can be identical/partially shared/different</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>momentum contrast</p>
+<ul>
+<li><p>dictionary as a key</p>
+<ul>
+<li>the dictionary always represents a sampled subset of all data</li>
+<li>the current mini-batch入列</li>
+<li>the oldest mini-batch出列</li>
+</ul>
+</li>
+<li><p>momentum update</p>
+<ul>
+<li><p>large dictionary没法对keys进行back-propagation：因为sample太多了</p>
+</li>
+<li><p>only $f_q$ are updated by back-propagation：mini-batch</p>
+</li>
+<li><p>naive solution：copy $f_q$的参数给$f_k$，yields poor results，因为key encoder参数变化太频繁了，representation inconsistent issue</p>
+</li>
+<li><p>momentum update：$f_k = mf_k + (1-m)f_q$，$m=0.999$</p>
+</li>
+<li><p>三种更新方式对比</p>
+<p>  <img src="/2021/04/30/MoCo系列/key encoder.png" width="80%;"></p>
+<ul>
+<li>第一种end-to-end method：<ul>
+<li>use samples in current mini-batch as the dictionary</li>
+<li>keys are consistently encoded</li>
+<li>dictionary size is limited</li>
+</ul>
+</li>
+<li>第二种memory bank<ul>
+<li>A memory bank consists of the representations of all samples in the dataset</li>
+<li>the dictionary for each mini-batch is randomly sampled from the memory bank，不进行bp，thus enables large dictionary</li>
+<li>key representation is updated when it was last seen：inconsistent</li>
+<li>有些也用momentum update，但是是用在representation上，而不是encoder参数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>pretext task</p>
+<ul>
+<li>define positive pair：if the query and the key come from the same image</li>
+<li>我们从图上take two random views under random augmentation to form a positive pair</li>
+<li>然后用各自的encoder编码成q &amp; k</li>
+<li>每一对计算similarity：pos similarity</li>
+<li>然后再计算input queries和dictionary的similarity：neg similarity</li>
+<li>计算ce，update $f_q$</li>
+<li>用$f_q$ update $f_k$</li>
+<li>把k加入dictionary队列</li>
+<li><p>把最早的mini-batch出列</p>
+<p><img src="/2021/04/30/MoCo系列/MoCo code.png" width="50%;"></p>
+</li>
+<li><p>技术细节</p>
+<ul>
+<li>resnet：last fc dim=128，L2 norm</li>
+<li>temperature $\tau=0.07$</li>
+<li>augmentation<ul>
+<li>random resize + random(224,224) crop</li>
+<li>random color jittering</li>
+<li>random horizontal flip</li>
+<li>random grayscale conversion</li>
+</ul>
+</li>
+<li>shuffling BN<ul>
+<li>实验发现使用resnet里面的BN会导致不好的结果：猜测是intra-batch communication引导模型学习了一种cheating的low-loss solution</li>
+<li>具体做法是给$f_k$的输入mini-batch先shuffle the order，然后进行fp，然后再shuffle back，这样$f_q$和$f_k$的BN计算的mini-batch的statics就是不同的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations"><a href="#SimCLR-A-Simple-Framework-for-Contrastive-Learning-of-Visual-Representations" class="headerlink" title="SimCLR: A Simple Framework for Contrastive Learning of Visual Representations"></a>SimCLR: A Simple Framework for Contrastive Learning of Visual Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>simplify recently proposed contrastive self-supervised learning algorithms </li>
+<li>systematically study the major components <ul>
+<li>data augmentations</li>
+<li>learnable unlinear prediction head</li>
+<li>larger batch size and more training steps</li>
+</ul>
+</li>
+<li><p>outperform previous self-supervised &amp; semi-supervised learning methods on ImageNet</p>
+<p><img src="/2021/04/30/MoCo系列/acc.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>discriminative approaches based on contrastive learning</p>
+<ul>
+<li>maximizing agreement between differently augmented views of the same data sample </li>
+<li>via a contrastive loss in the latent space</li>
+</ul>
+</li>
+<li><p>major components &amp; conclusions</p>
+<ul>
+<li>数据增强很重要，unsupervised比supervised benefits more</li>
+<li>引入的learnable nonlinear transformation提升了representation quality</li>
+<li>contrastive cross entropy loss受益于normalized embedding和adjusted temperature parameter</li>
+<li>larger batch size and more training steps很重要，unsupervised比supervised benefits more</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>common framework</p>
+<p>  <img src="/2021/04/30/MoCo系列/framework.png" width="40%;"></p>
+<ul>
+<li><p>4 major components</p>
+<ul>
+<li>随机数据增强<ul>
+<li>results in two views of the same sample，构成positive pair</li>
+<li>crop + resize back + color distortions + gaussian blur</li>
+</ul>
+</li>
+<li>base encoder<ul>
+<li>用啥都行，本文用了resnet including the GAP</li>
+</ul>
+</li>
+<li>a projection head<ul>
+<li>将representation dim映射到the space where contrastive loss is applied（given 1 pos pair &amp; N neg pair，就是N+1 dim）</li>
+<li>之前有方法直接用linear projection</li>
+<li>我们用了带一个hidden layer的MLP：fc-bn-relu-fc</li>
+</ul>
+</li>
+<li>a contrastive loss</li>
+</ul>
+</li>
+<li><p>overall workflow</p>
+<ul>
+<li>random sample a minibatch of N</li>
+<li>random augmentation results in 2N data points</li>
+<li>对每个样本来讲，有1个positive pair，其余2(N-1)个data points都是negative samples</li>
+<li>set cosine similarity $sim(u,v)=u^Tv/|u||v|$</li>
+<li>given positive pair $(i,j)$ then the loss is $l_{i,j} = -log \frac{exp(s_{i,j}/\tau)}{\sum_{k\neq i}^{2N} exp(s_{i,k}/\tau)}$</li>
+<li>对每个positive pair都计算，包括$(i,j)$ 和$(j,i)$，叫那个symmetrized loss</li>
+<li><p>update encoder</p>
+<p><img src="/2021/04/30/MoCo系列/SimCLR.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>training with large batch size</p>
+<ul>
+<li>batch 8192，negatives 16382</li>
+<li>大batch时，linear learning rate scaling可能不稳定，所以用了LARS optmizer</li>
+<li>global BN，aggregate BN mean &amp; variance over all devices</li>
+<li>TPU</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning"><a href="#MoCo-v2-Improved-Baselines-with-Momentum-Contrastive-Learning" class="headerlink" title="MoCo v2: Improved Baselines with Momentum Contrastive Learning"></a>MoCo v2: Improved Baselines with Momentum Contrastive Learning</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>still working on contrastive unsupervised learning</li>
+<li>simple modifications on MoCo<ul>
+<li>introduce two effective SimCLR’s designs：</li>
+<li>an MLP head</li>
+<li>more data augmentation</li>
+<li>requires smaller batch size than SimCLR，making it possible to run on GPU</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>ImageNet classification </li>
+<li>VOC detection</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>MoCo &amp; SimCLR <ul>
+<li>contrastive unsupervised learning frameworks</li>
+<li>MoCo v1 shows promising</li>
+<li>SimCLR further reduce the gap</li>
+<li>we found two design imrpovements in SimCLR 在两个方法中都work，而且用在MoCo中shows better transfer learning results<ul>
+<li>an MLP projection head</li>
+<li>stronger data augmentation</li>
+</ul>
+</li>
+<li>同时MoCo framework相比较于SimCLR ，远不需要large training batches<ul>
+<li>SimCLR based on end-to-end mechanism，需要比较大的batch size，来提供足够多的negative pair</li>
+<li>MoCo则用了动态队列，所以不限制batch size</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>SimCLR <ul>
+<li>improves the end-to-end method</li>
+<li>larger batch：to provide more negative samples</li>
+<li>output layer：replace fc with a MLP head</li>
+<li>stronger data augmentation</li>
+</ul>
+</li>
+<li><p>MoCo</p>
+<ul>
+<li>a large number of negative samples are readily available</li>
+<li>所以就把后两项引入进来了</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/optimization.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>MLP head</p>
+<ul>
+<li>2-layer MLP(hidden dim=2048, ReLU)</li>
+<li>仅影响unsupervised training，有监督transfer learning的时候换头</li>
+<li><p>temperature param调整：从default 0.07 调整成optimal value 0.2</p>
+<p><img src="/2021/04/30/MoCo系列/temperature.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>augmentation</p>
+<ul>
+<li>add blur</li>
+<li>SimCLR还用了stronger color distortion：we found stronger color distortion in SimCLR hurts in our MoCo，所以没加</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>ablation</p>
+<ul>
+<li>MLP：在分类任务上的提升比检测大</li>
+<li><p>augmentation：在检测上的提升比分类大</p>
+<p><img src="/2021/04/30/MoCo系列/ablation.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>comparison</p>
+<p>  <img src="/2021/04/30/MoCo系列/comparison.png" width="50%;"></p>
+<ul>
+<li>large batches are not necessary for good acc：SimCLR longer training那个版本精度更高</li>
+<li>end-to-end的方法肯定more costly in memory and time：因为要bp两个encoder</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers"><a href="#MoCo-v3-An-Empirical-Study-of-Training-Self-Supervised-Visual-Transformers" class="headerlink" title="MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers"></a>MoCo v3: An Empirical Study of Training Self-Supervised Visual Transformers</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>self-supervised frameworks that based on Siamese network, including MoCo</li>
+<li>ViT：study the fundamental components for training self-supervised ViT</li>
+<li>MoCo v3：an incremental improvement of MoCo v1/2，striking for a better balance of simplicity &amp; accuracy &amp; scalability</li>
+<li>instability is a major issue</li>
+<li>scaling up ViT models<ul>
+<li>ViT-Large</li>
+<li>ViT-Huge</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>we go back to the basics and investigate the fundamental components of training deep neural networks<ul>
+<li>batch size</li>
+<li>learning rate</li>
+<li>optmizer</li>
+</ul>
+</li>
+<li>instability <ul>
+<li>instability is a major issue that impacts self-supervised ViT training</li>
+<li>but may not result in catastrophic failure，只会导致精度损失</li>
+<li>所以称之为hidden degradation</li>
+<li>use a simple trick to improve stability：freeze the patch projection layer in ViT</li>
+<li>and observes increasement in acc</li>
+</ul>
+</li>
+<li>NLP里面基于masked auto-encoding的framework效果要比基于contrastvie的framework好，图像正好反过来</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>MoCo v3</p>
+<ul>
+<li>take two crops for each image under random augmentation</li>
+<li>encoded by two encoders $f_q$ &amp; $f_k$ into vectors $q$ &amp; $k$</li>
+<li>we use the keys that naturally co-exist in the same batch<ul>
+<li>abandon the memory queue：因为发现batch size足够大（4096）的时候，memory queue就没啥acc gain了</li>
+<li>回归到batch-based sample pair</li>
+</ul>
+</li>
+<li>但是encoder k仍旧不回传梯度，还是基于encoder q进行动量更新</li>
+<li><p>symmetrized loss：</p>
+<ul>
+<li>$ctr(q_1, k_2) + ctr(q_2,k_1)$</li>
+<li>InfoNCE</li>
+<li>temperature</li>
+<li>两个crops分别计算ctr</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/MoCo v3.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>encoder </p>
+<ul>
+<li>encoder $f_q$<ul>
+<li>a backbone</li>
+<li>a projection head</li>
+<li>an extra prediction head</li>
+</ul>
+</li>
+<li>encoder $f_k$<ul>
+<li>a backbone</li>
+<li>a projection head</li>
+</ul>
+</li>
+<li>encoder $f_k$ is updated by the moving average of $f_q$，excluding the prediction head</li>
+</ul>
+</li>
+<li><p>baseline acc</p>
+<p>  <img src="/2021/04/30/MoCo系列/v3 base.png" width="50%;"></p>
+<ul>
+<li>basic settings，主要变动就是两个：<ul>
+<li>dynamic queue换成large batch</li>
+<li>encoder $f_q$的extra prediction head</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>use ViT</p>
+<ul>
+<li><p>直接用ViT替换resnet back met instability issue</p>
+</li>
+<li><p>batch size</p>
+<ul>
+<li><p>ViT里面的一个观点就是，model本身比较heavy，所以large batch is desirable</p>
+</li>
+<li><p>实验发现</p>
+<ul>
+<li>a batch of 1k &amp; 2k produces reasonably smooth curves：In this regime, the larger batch improves accuracy thanks to more negative samples</li>
+<li>a batch of 4k 有明显的untable dips：</li>
+<li><p>a batch of 6k has worse failure patterns：我们解读为在跳水点，training is partially restarted and jumps out of the current local optimum</p>
+<p><img src="/2021/04/30/MoCo系列/batch.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>learning rate</p>
+<ul>
+<li>lr较小，training比较稳定，但是容易欠拟合</li>
+<li>lr过大，会导致unstable，也会影响acc</li>
+<li><p>总体来说精度还是决定于stability</p>
+<p><img src="/2021/04/30/MoCo系列/lr.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>optimizer</p>
+<ul>
+<li>default adamW，batch size 4096</li>
+<li>有些方法用了LARS &amp; LAMB for large-batch training</li>
+<li><p>LAMB </p>
+<ul>
+<li>sensitive to lr</li>
+<li>optmal lr achieves slightly better accuracy than AdamW</li>
+<li>但是lr一旦过大，acc极速drop</li>
+<li>但是training curves still smooth，虽然中间过程有drop：我们解读为LAMB can avoid sudden change in the gradients，但是避免不了negative compact，还是会累加</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/lamb.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>a trick for improving stability</p>
+<ul>
+<li>we found a spike in gradient causes a dip in the training curve</li>
+<li>we also observe that gradient spikes happen earlier in the first layer (patch projection)</li>
+<li><p>所以尝试freezing the patch projection layer during training，也就是一个random的patch projection layer</p>
+<ul>
+<li>This stability benefits the final accuracy</li>
+<li>The improvement is bigger for a larger lr</li>
+<li>在别的ViT-back-framework上也有效（SimCLR、BYOL）</li>
+</ul>
+<p><img src="/2021/04/30/MoCo系列/random.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>we also tried BN，WN，gradient clip</p>
+<ul>
+<li>BN/WN does not improve</li>
+<li>gradient clip在threshold足够小的时候有用，推到极限就是freezing了</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>implementation details</p>
+<ul>
+<li>AdamW</li>
+<li>batch size 4096</li>
+<li>lr：warmup 40 eps then cosine decay</li>
+</ul>
+</li>
+<li><p>MLP heads</p>
+<ul>
+<li>projection head：3-layers，4096-BN-ReLU-4096-BN-ReLU-256</li>
+<li>prediction head：2-layers，4096-BN-ReLU-256</li>
+</ul>
+</li>
+<li><p>loss</p>
+<ul>
+<li>ctr里面有个scale的参数，$2\tau$</li>
+<li>makes it less sensitive to $\tau$ value</li>
+<li>$\tau=0.2$</li>
+</ul>
+</li>
+<li><p>ViT architecture</p>
+<p>  <img src="/2021/04/30/MoCo系列/ViT.png" width="45%;"></p>
+<ul>
+<li>跟原论文保持一致</li>
+<li>输入是224x244的image，划分成16x16/14x14的patch sequence，project成256d/196d的embedding</li>
+<li>加上sine-cosine-2D的PE</li>
+<li>再concat一个cls token</li>
+<li>经过一系列transformer blocks</li>
+<li>The class token after the last block (and after the final LayerNorm) is treated as the output of the backbone，and is the input to the MLP heads</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/15/optimizers优化器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/03/15/optimizers优化器/" itemprop="url">optimizers优化器</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-15T10:01:53+08:00">
+                2021-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/15/optimizers优化器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/15/optimizers优化器/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0-overview"><a href="#0-overview" class="headerlink" title="0. overview"></a>0. overview</h2><p>keywords：SGD, moment, Nesterov, adaptive, ADAM, Weight decay</p>
+<ol>
+<li>优化问题Optimization<ul>
+<li>to minimize目标函数</li>
+<li>grandient decent<ul>
+<li>gradient<ul>
+<li>numerical：数值法，approx，slow</li>
+<li>analytical：解析法，exact，fast</li>
+</ul>
+</li>
+<li>Stochastic<ul>
+<li>用minibatch的梯度来approximate全集</li>
+<li>$\theta_{k+1} = \theta_k - v_{t+1}(x_i,y_i)$</li>
+</ul>
+</li>
+<li>classic optimizers：SGD，Momentum，Nesterov‘s momentum</li>
+<li>adaptive optimizers：AdaGrad，Adadelta，RMSProp，Adam</li>
+</ul>
+</li>
+<li>Newton</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>modern optimizers for large-batch<ul>
+<li>AdamW</li>
+<li>LARS</li>
+<li>LAMB</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>common updating steps</p>
+<p> for current step t：</p>
+<p> step1：计算直接梯度，$g_t = \nabla f(w_t)$</p>
+<p> step2：计算一阶动量和二阶动量，$m_t \&amp; V_t$</p>
+<p> step3：计算当前时刻的下降梯度，$\eta_t = \alpha m_t/\sqrt {V_t}$</p>
+<p> step4：参数更新，$w_{t+1} = w_t - \eta_t$</p>
+<ul>
+<li>各种优化算法的主要差别在step1和step2上</li>
+</ul>
+</li>
+<li><p>滑动平均/指数加权平均/moving average/EMA</p>
+<ul>
+<li>局部均值，与一段时间内的历史相关</li>
+<li>$v_t = \beta v_{t-1}+(1-\beta)\theta_t$，大致等于过去$1/(1-\beta)$个时刻的$\theta$的平均值，但是在起始点附近偏差较大</li>
+<li>$v_{tbiased} = \frac{v_t}{1-\beta^t}$，做了bias correction</li>
+<li>t越大，越不需要修正，两个滑动均值的结果越接近</li>
+<li><p>优缺点：不用保存历史，但是近似</p>
+<p><img src="/2021/03/15/optimizers优化器/moving average.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SGD</p>
+<ul>
+<li>SGD没有动量的概念，$m_t=g_t$，$V_t=I^2$，$w_{t+1} = w_t - \alpha g_t$</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>仅依赖当前计算的梯度<ul>
+<li>缺点：下降速度慢，可能陷在local optima上持续震荡</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><p>SGDW (with weight decay)</p>
+<ul>
+<li>在权重更新的同时进行权重衰减</li>
+<li>$w_{t+1} = (1-\lambda)w_t - \alpha g_t$</li>
+<li>在SGD form的优化器中weight decay等价于在loss上L2 regularization</li>
+<li>但是在adaptive form的优化器中是不等价的！！因为historical func（ERM）中regularizer和gradient一起被downscale了，因此not as much as they would get regularized in SGDW</li>
+</ul>
+</li>
+<li><p>SGD with Momentum</p>
+<ul>
+<li>引入一阶动量，$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$，使用滑动均值，抑制震荡</li>
+<li>梯度下降的主要方向是此前累积的下降方向，略微向当前时刻的方向调整</li>
+</ul>
+</li>
+<li><p>SGD with Nesterov Acceleration</p>
+<ul>
+<li>look ahead SGD-momentum</li>
+<li>在local minima的时候，四周没有下降的方向，但是如果走一步再看，可能就会找到优化方向</li>
+<li>先跟着累积动量走一步，求梯度：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
+<li>用这个点的梯度方向来计算滑动平均，并更新梯度</li>
+</ul>
+</li>
+<li><p>Adagrad</p>
+<ul>
+<li>引入二阶动量，开启“自适应学习率”，$V_t = \sum_0^t g_k^2$，度量历史更新频率</li>
+<li>对于经常更新的参数，我们已经积累了大量关于它的知识，不希望被单个样本影响太大，希望学习速率慢一些；对于偶尔更新的参数，我们了解的信息太少，希望能从每个偶然出现的样本身上多学一些，即学习速率大一些</li>
+<li>$\eta_t = \alpha m_t / \sqrt{V_t}$，本质上为每个参数，对学习率分别rescale</li>
+<li>缺点：二阶动量单调递增，导致学习率单调衰减，可能会使得训练过程提前结束</li>
+</ul>
+</li>
+<li><p>AdaDelta/RMSProp</p>
+<ul>
+<li>参考momentum，对二阶动量也计算滑动平均，$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
+<li>避免了二阶动量持续累积、导致训练过程提前结束</li>
+</ul>
+</li>
+<li><p>Adam</p>
+<ul>
+<li>集大成者：把一阶动量和二阶动量都用起来，Adaptive Momentum<ul>
+<li>SGD-M在SGD基础上增加了一阶动量</li>
+<li>AdaGrad和AdaDelta在SGD基础上增加了二阶动量</li>
+</ul>
+</li>
+<li>一阶动量滑动平均：$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$</li>
+<li>二阶动量滑动平均：$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
+</ul>
+</li>
+<li><p>Nadam</p>
+<ul>
+<li>look ahead Adam</li>
+<li>把Nesterov的one step try加上：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
+<li>再Adam更新两个动量</li>
+</ul>
+</li>
+<li><p>经验超参</p>
+<ul>
+<li>$momentum=0.9$</li>
+<li>$\beta_1=0.9$</li>
+<li>$\beta_2=0.999$</li>
+<li>$m_0 = 0$</li>
+<li>$V_0 = 0$</li>
+<li>上面的图上可以看出，初期的$m_t$和$V_t$会无限接近于0，此时可以进行误差修正：$factor=\frac{1}{1-\beta^t}$</li>
+</ul>
+</li>
+<li><p>AdamW</p>
+<ul>
+<li>在adaptive methods中，解耦weight-decay和loss-based gradient在ERM过程中的绑定downscale的关系</li>
+<li>实质就是将导数项后移</li>
+</ul>
+<p><img src="/2021/03/15/optimizers优化器/AdamW.png" width="80%;"></p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/11/regnet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -828,7 +2524,8 @@
 <ul>
 <li>FROM image_name，指定依赖的镜像</li>
 <li>RUN command，在 shell 或者 exec 的环境下执行的命令</li>
-<li>ADD srcfile_path_inhost dstfile_incontainer，将本机文件复制到容器中</li>
+<li>COPY srcfile_path_inhost dstfile_incontainer，将本机文件复制到容器中</li>
+<li>ADD srcfile_path dstfile_incontainer，将本机文件复制到容器中，src文件不仅可以是local host，也可以是网络地址</li>
 <li>CMD [“executable”,”param1”,”param2”]，指定容器启动默认执行的命令</li>
 <li>WORKDIR path_incontainer，指定 RUN、CMD 与 ENTRYPOINT 命令的工作目录</li>
 <li>VOLUME [“/data”]，授权访问从容器内到主机上的目录</li>
@@ -843,9 +2540,6 @@
 <li><p>然后编辑dockerfile</p>
   <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04</span><br><span class="line">MAINTAINER amber &lt;amber.zhang@tum.de&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install basic dependencies</span></span><br><span class="line">RUN apt-get update </span><br><span class="line">RUN apt-get install -y wget vim cmake</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install Anaconda3</span></span><br><span class="line">RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ~/anaconda3.sh</span><br><span class="line">RUN bash ~/anaconda3.sh -b -p /home/anaconda3 &amp;&amp; rm ~/anaconda3.sh </span><br><span class="line">ENV PATH /home/anaconda3/bin:$PATH</span><br><span class="line"><span class="meta">#</span><span class="bash"> RUN <span class="built_in">echo</span> <span class="string">"export PATH=/home/anaconda3/bin:<span class="variable">$PATH</span>"</span> &gt;&gt; ~/.bashrc &amp;&amp; /bin/bash -c <span class="string">"source /root/.bashrc"</span> </span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> change mirror</span></span><br><span class="line">RUN mkdir ~/.pip \</span><br><span class="line">    &amp;&amp; cd ~/.pip    </span><br><span class="line">RUN echo '[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple/' &gt;&gt; ~/.pip/pip.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install tensorflow</span></span><br><span class="line">RUN /home/anaconda3/bin/pip install tensorflow-gpu==1.8.0</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>然后build dockerfile</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t &lt;docker_name&gt; .</span><br></pre></td></tr></table></figure>
-</li>
 </ul>
 </li>
 </ul>
@@ -853,7 +2547,10 @@
 </ol>
 </li>
 </ol>
+<pre><code>      * 然后build dockerfile
 
+          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t &lt;docker_name&gt; .</span><br></pre></td></tr></table></figure>
+</code></pre>
           
         
       
@@ -2292,1351 +3989,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/02/03/transform-in-CNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/03/transform-in-CNN/" itemprop="url">transform in CNN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-03T14:04:06+08:00">
-                2021-02-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/03/transform-in-CNN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/02/03/transform-in-CNN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li>几何变换<ul>
-<li>STN：<ul>
-<li>普通的CNN能够隐式的学习一定的平移、旋转不变性，让网络能够适应这种变换：降采样结构本身能够使得网络对变换不敏感</li>
-<li>从数据角度出发，我们还会引入各种augmentation，强化网络对变化的不变能力</li>
-<li>deepMind为网络设计了一个显式的变换模块来学习各种变化，将distorted的输入变换回去，让网络学习更简单的东西</li>
-<li>参数量：就是变换矩阵的参数，通常是2x3的纺射变化矩阵，也就是6个参数</li>
-</ul>
-</li>
-<li>deformable conv：<ul>
-<li>based on STN</li>
-<li>针对分类和检测分别提出deformable convolution和deformable RoI pooling：</li>
-<li>感觉deformable RoI pooling和guiding anchor里面的feature adaption是一个东西</li>
-<li>参数量：regular kernel params 3x3 + deformable offsets 3x3x2</li>
-<li>what’s new？<ul>
-<li>个人认为引入更多的参数引入的变化</li>
-<li>首先STN是从output到input的映射，使用变换矩阵M通常只能表示depictable transformation，且全图只有1个transformation</li>
-<li>其次STN的sampling kernel也是预定义的算法，对kernel内的所有pixel使用相同的变化，也就是1个weight factor</li>
-<li>deformable conv是从input到output的映射，映射可以是任意的transformation，且3x3x2的参数最多可以包含3x3种transformation</li>
-<li>sampling kernel对kernel内的每个点，也可以有不同的权重，也就是3x3个weight factor</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>还有啥跟形变相关的</li>
-</ul>
-</li>
-<li>attention机制<ul>
-<li>spatial attention：STN，sSE</li>
-<li>channel attention：SENet</li>
-<li>同时使用空间attention和通道attention机制：CBAM</li>
-</ul>
-</li>
-<li><p>papers</p>
-<ul>
-<li>[STN] STN: Spatial Transformer Networks，STN的变换是pre-defined的，是针对全局featuremap的变换</li>
-<li>[DCN 2017] Deformable Convolutional Networks ，DCN的变换是更随机的，是针对局部kernel分别进行的变化，基于卷积核添加location-specific shift</li>
-<li>[DCNv2 2018] Deformable ConvNets v2: More Deformable, Better Results，进一步消除irrelevant context，基于卷积核添加weighted-location-specific shift，提升performance</li>
-<li>[attention系列paper] [SENet &amp;SKNet &amp; CBAM &amp; GC-Net][<a href="https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/">https://amberzzzz.github.io/2020/03/13/attention%E7%B3%BB%E5%88%97/</a>]</li>
-</ul>
-</li>
-</ol>
-<h2 id="STN-Spatial-Transformer-Networks"><a href="#STN-Spatial-Transformer-Networks" class="headerlink" title="STN: Spatial Transformer Networks"></a>STN: Spatial Transformer Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>传统卷积：lack the ability of spacially invariant</li>
-<li>propose a new learnable module<ul>
-<li>can be inserted into CNN</li>
-<li>spatially manipulate the data</li>
-<li>without any extra supervision</li>
-<li>models learn to be invariant to transformations</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>spatially invariant<ul>
-<li>the ability of being invariant to large transformations of the input data</li>
-</ul>
-</li>
-<li>max-pooling<ul>
-<li>在一定程度上spatially invariant</li>
-<li>因为receptive fields are fixed and local and small</li>
-<li>必须叠加到比较深层的时候才能实现，intermediate feature layers对large transformations不太行</li>
-<li>是一种pre-defined mechanism，跟sample无关</li>
-</ul>
-</li>
-<li>spatial transformation module<ul>
-<li>conditioned on individual samples</li>
-<li>dynamic mechanism</li>
-<li>produce a transformation and perform it on the entire feature map </li>
-</ul>
-</li>
-<li>task场景<ul>
-<li>distorted digits分类：对输入做tranform能够simplify后面的分类任务</li>
-<li>co-localisation：</li>
-<li>spatial attention</li>
-</ul>
-</li>
-<li>related work<ul>
-<li>生成器用来生成transformed images，从而判别器能够学习分类任务from transformation supervision</li>
-<li>一些methods试图从网络结构、feature extractors的角度的获得invariant representations，while STN aims to achieve this by manipulating the data</li>
-<li>manipulating the data通常就是基于attention mechanism，crop涉及differentiable问题</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation </p>
-<ul>
-<li>localisation network：predict transform parameters</li>
-<li>grid generator：基于predicted params生成sampling grid</li>
-<li><p>sampler：element-multiply</p>
-<p><img src="/2021/02/03/transform-in-CNN/spacial transformer.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>localisation network</p>
-<ul>
-<li>input feature map $U \in R^{h<em>w</em>c}$</li>
-<li>same transformation is applied to each channel</li>
-<li>generate parameters of transformation $\theta$：1-d vector</li>
-<li>fc / conv + final regression layer</li>
-</ul>
-</li>
-<li><p>parameterised sampling grid</p>
-<ul>
-<li><p>sampling kernel</p>
-</li>
-<li><p>applied by pixel</p>
-</li>
-<li><p>general affine transformation：cropping，translation，rotation，scale，skew</p>
-</li>
-<li><p>ouput map上任意一点一定来自变换前的某一点，反之不一定，input map上某一点可能是bg，被crop掉了，所以pointwise transformation写成反过来的：</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/transform-in-CNN/pointwise transformation.png" width="50%;"></p>
-<p>  <img src="/2021/02/03/transform-in-CNN/transformation.png" width="70%;"></p>
-</li>
-<li><p>target points构成的点集就是sampling points on the input feature map</p>
-</li>
-</ul>
-</li>
-<li><p>differentiable image sampling </p>
-<ul>
-<li><p>通过上一步的矩阵transformation，得到input map上需要保留的source point set</p>
-</li>
-<li><p>对点集中每一点apply kernel</p>
-</li>
-<li><p>通用的插值表达式：</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/interpolation.png" width="70%;"></p>
-</li>
-<li><p>最近邻kernel是个pulse函数</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/nearest.png" width="70%;"></p>
-</li>
-<li><p>bilinear kernel是个distance&gt;1的全mute掉，分段可导</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/bilinear.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>STN：Spatial Transformer Networks </p>
-<ul>
-<li>把spatial transformer嵌进CNN去：learn how to actively transform the features to help minimize the overall cost</li>
-<li>computationally fast</li>
-<li>几种用法<ul>
-<li>feed the output of the localization network $\theta$ to the rest of the network：因为transform参数explicitly encodes目标的位置姿态信息</li>
-<li>place multiple spatial transformers at increasing depth：串行能够让深层的transformer学习更抽象的变换</li>
-<li>place multiple spatial transformers in parallel：并行的变换使得每个变换针对不同的object</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<p> <img src="/2021/02/03/transform-in-CNN/error.png" width="70%;"></p>
-<ul>
-<li>R、RTS、P、E：distortion ahead</li>
-<li>aff、proj、TPS：transformer predefined<ul>
-<li>aff：给定角度？？</li>
-<li>TPS：薄板样条插值</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Deformable-Convolutional-Networks"><a href="#Deformable-Convolutional-Networks" class="headerlink" title="Deformable Convolutional Networks"></a>Deformable Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>CNN：fixed geometric structures</li>
-<li>enhance the transformation modeling capability<ul>
-<li>deformable convolution</li>
-<li>deformable RoI pooling</li>
-</ul>
-</li>
-<li>without additional supervision</li>
-<li>share similiar spirit with STN</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>to accommodate geometric variations </p>
-<ul>
-<li>data augmentation is limited to model large, unknown transformations </li>
-<li>fixed receptive fields is undesirable for high level CNN layers that encode the semantics </li>
-<li>使用大量增广的数据，枚举不全，而且收敛慢，所需网络参数量大</li>
-<li>对于提取语义特征的高层网络来讲，固定的感受野对不同目标不友好</li>
-</ul>
-</li>
-<li><p>introduce two new modules </p>
-<ul>
-<li>deformable convolution<ul>
-<li>learning offsets for each kernel via additional convolutional layers </li>
-</ul>
-</li>
-<li><p>deformable RoI pooling</p>
-<ul>
-<li>learning offset for each bin partition of the previous RoI pooling </li>
-</ul>
-<p><img src="/2021/02/03/transform-in-CNN/deform.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>operate on the 2D spatial domain </li>
-<li>remains the same across the channel dimension </li>
-</ul>
-</li>
-<li><p>deformable convolution</p>
-<ul>
-<li>正常的卷积：<ul>
-<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n)$</li>
-<li>$p_n \in R\{(-1,-1),(-1,0),…, (0,0), (1,1)\}$</li>
-</ul>
-</li>
-<li>deformable conv：with offsets $\Delta p_n$<ul>
-<li>$y(p_0) = \sum w(p_n)*x(p_0 + p_n + \Delta p_n)$</li>
-<li>offset value is typically fractional </li>
-<li>bilinear interpolation：<ul>
-<li>$x(p) = \sum_q G(q,p)x(q)$</li>
-<li>其中$G(q,p)$是条件：$G(q,p)=max(0, 1-|q_x-p_x|)*max(0, 1-|q_y-p_y|)$</li>
-<li>只计算和offset点距离小于1个单位的邻近点</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>实现<ul>
-<li><img src="/2021/02/03/transform-in-CNN/conv.png" width="40%;"></li>
-<li>offsets conv和特征提取conv是一样的kernel：same spatial resolution and dilation（N个position）</li>
-<li>the channel dimension 2N：因为是x和y两个方向的offset</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>deformable RoI pooling</p>
-<ul>
-<li><p>RoI pooling converts an input feature map of arbitrary size into fixed size features </p>
-</li>
-<li><p>常规的RoI pooling</p>
-<ul>
-<li>divides ROI into k*k bins and for each bin：$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p)/n_{ij}$</li>
-<li>对feature map上划分到每个bin里面所有的点</li>
-</ul>
-</li>
-<li><p>deformable RoI pooling：with offsets $\Delta p_{ij}$</p>
-<ul>
-<li>$y(i,j) = \sum_{p \in bin(i,j)} x(p_0+p+\Delta p_{ij})/n_{ij}$</li>
-<li>scaled normalized offsets：$\Delta p_{ij} = \gamma \Delta p_{ij} (w,h) $</li>
-<li>normalized offset value is fractional </li>
-<li>bilinear interpolation on the pooled map as above</li>
-</ul>
-</li>
-<li><p>实现</p>
-<ul>
-<li><img src="/2021/02/03/transform-in-CNN/pooling.png" width="40%;"></li>
-<li>fc layer：k*k*2个element（sigmoid？）</li>
-</ul>
-</li>
-<li><p>position sensitive RoI Pooling</p>
-<ul>
-<li>fully convolutional  </li>
-<li>input feature map先通过卷积扩展成k*k*(C+1)通道</li>
-<li><p>对每个C+1(包含k<em>k个feature map)，conv出全图的offset(2\</em>k*k个)</p>
-<p><img src="/2021/02/03/transform-in-CNN/pspooling.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>deformable convNets</p>
-<ul>
-<li>initialized with zero weights</li>
-<li>learning rates are set to $\beta$ times of the learning rate for the existing layers <ul>
-<li>$\beta=1.0$ for conv</li>
-<li>$\beta=0.01$ for fc</li>
-</ul>
-</li>
-<li>feature extraction<ul>
-<li>back：ResNet-101 &amp; Aligned-Inception-ResNet </li>
-<li>withoutTop：A randomly initialized 1x1 conv is added at last to reduce the channel dimension to 1024 </li>
-<li>last block<ul>
-<li>stride is changed from 2 to 1</li>
-<li>the dilation of all the convolution filters with kernel size&gt;1 is changed from 1 to 2</li>
-</ul>
-</li>
-<li>Optionally last block<ul>
-<li>use deformable conv in res5a,b,c</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>segmentation and detection<ul>
-<li>deeplab predicts 1x1 score maps</li>
-<li>Category-Aware RPN run region proposal with specific class</li>
-<li>modified faster R-CNN：add ROI pooling at last conv</li>
-<li>optional faster R-CNN：use deformable ROI pooling</li>
-<li>R-FCN：state-of-the-art detector</li>
-<li>optional R-FCN：use deformable ROI pooling</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/02/03/transform-in-CNN/Illustration.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>Accuracy steadily improves when more deformable convolution layers are used：使用越多层deform conv越好，经验取了3</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table1.png" width="80%;"></p>
-</li>
-<li><p>the learned offsets are highly adaptive to the image content：大目标的间距大，因为reception field大，consistent in different layers </p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table2.png" width="45%;"></p>
-</li>
-<li><p>atrous convolution also improves：default networks have too small receptive fields，但是dilation需要手调到最优</p>
-</li>
-<li><p>using deformable RoI pooling alone already produces noticeable performance gains, using both obtains significant accuracy improvements</p>
-<p>  <img src="/2021/02/03/transform-in-CNN/table3.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Deformable-ConvNets-v2-More-Deformable-Better-Results"><a href="#Deformable-ConvNets-v2-More-Deformable-Better-Results" class="headerlink" title="Deformable ConvNets v2: More Deformable, Better Results"></a>Deformable ConvNets v2: More Deformable, Better Results</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>DCN能够adapt一定的geometric variations，但是仍存在extend beyond image content的问题</li>
-<li>to focus on pertinent image regions<ul>
-<li>increased modeling power<ul>
-<li>more deformable layers</li>
-<li>updated DCNv2 modules</li>
-</ul>
-</li>
-<li>stronger training<ul>
-<li>propose feature mimicking scheme</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>incorporated into Faster-RCNN &amp; Mask RCNN</li>
-<li>COCO for det &amp; set</li>
-</ul>
-</li>
-<li>still lightweight and easy to incorporate</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>DCNv1<ul>
-<li>deformable conv：在standard conv的基础上generate location-specific offsets which are learned from the preceding feature maps</li>
-<li>deformable pooling：offsets are learned for the bin positions in RoIpooling</li>
-<li>通过可视化散点图发现有部分散点落在目标外围</li>
-</ul>
-</li>
-<li>propose DCNv2<ul>
-<li>equip more convolutional layers with offset</li>
-<li>modified module<ul>
-<li>each sample not only undergoes a learned offset</li>
-<li>but also a learned feature amplitude</li>
-</ul>
-</li>
-<li>effective trainin<ul>
-<li>use RCNN as the teacher network since RCNN learns features unaffected by irrelevant info outside the ROI</li>
-<li>feature mimicking loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>stacking more deformable conv layers</p>
-<ul>
-<li>replace more regular conv layers by their deformable counterparts：<ul>
-<li>resnet50的stage3、4、5的3x3conv都替换成deformable conv：13个conv layer</li>
-<li>DCNv1是把stage5的3个resblock的3x3 conv替换成deformable conv：3个deconv layer</li>
-</ul>
-</li>
-<li>因为DCNv1里面在PASCAL上面实验发现再多的deconv精度就饱和了，但是DCNv2是在harder dataset COCO上面的best-acc-efficiency-tradeoff</li>
-</ul>
-</li>
-<li><p>modulated deformable conv</p>
-<ul>
-<li>modulate the input feature amplitudes from different spacial locations/bins<ul>
-<li>set the learnable offset &amp; scalar for the k-th location：$\Delta p_k$和$\Delta m_k$</li>
-<li>set the conv kernel dilation：$p_k$，resnet里面都是1</li>
-<li>the value for location p is：$y(p) = \sum_{k=1}^K w_k x(p+p_k+\Delta p_k)\Delta m_k$，bilinear interpolation</li>
-</ul>
-</li>
-<li>目的是抑制无关信号</li>
-<li>learnable offset &amp; scalar obtained via a separate conv layer over the same input feature map x</li>
-<li>输出有3K个channel：2K for xy-offset，K for scalar<ul>
-<li>offset的conv后面没激活函数，因为范围无限</li>
-<li>scalar的conv后面有个sigmoid，将range控制在[0,1]</li>
-<li>两个conv全0初始化</li>
-<li>两个conv layer的learning rate比existing layers小一个数量级</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>modulated deformable RoIpooling</p>
-<ul>
-<li>given an input ROI</li>
-<li>split into K(7x7) spatial bins</li>
-<li>average pooling over the sampling points for each bin计算bin的value</li>
-<li>the bin value is：$y(k) = \sum_{j=1}^{n_k} x(p_{kj}+\Delta p_k)\Delta m_k /n_k$，bilinear interpolation</li>
-<li>a sibling branch<ul>
-<li>2个1024d-fc：gaussian initialization with 0.01 std dev</li>
-<li>1个3Kd-fc：全0初始化</li>
-<li>last K channels + sigmoid</li>
-<li>learning rate跟existing layers保持一致</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>RCNN feature mimicking</p>
-<ul>
-<li>发现无论是conv还是deconv，error-bound都很大</li>
-<li>尽管从设计思路上，DCNv2是带有mute irrelevant的能力的，但是事实上并没做到</li>
-<li>说明such representation cannot be learned well through standard FasterRCNN training procedure：<ul>
-<li>说白了就是supervision力度不够</li>
-<li>需要additional guidance</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>feature mimic loss</p>
-<ul>
-<li><p>enforced only on positive ROIs：因为背景类往往需要更长距离/更大范围的context信息</p>
-</li>
-<li><p>architecture</p>
-<ul>
-<li>add an additional RCNN branch</li>
-<li>RCNN input cropped images，generate 14x14 featuremaps，经过两个fc变成1024-d</li>
-<li>和FasterRCNN里对应的counterpart，计算cosine similarity</li>
-<li><p>这个太扯了不展开了</p>
-<p><img src="/2021/02/03/transform-in-CNN/mimic.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/28/spineNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/28/spineNet/" itemprop="url">spineNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-28T16:25:17+08:00">
-                2021-01-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/28/spineNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/28/spineNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization"><a href="#SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization" class="headerlink" title="SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization"></a>SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>object detection task<ul>
-<li>requiring simultaneous recognition and localization</li>
-<li>solely encoder performs not well</li>
-<li>while encoder-decoder architectures are ineffective</li>
-</ul>
-</li>
-<li><p>propose SpineNet</p>
-<ul>
-<li>scale-permuted intermediate features</li>
-<li>cross-scale connections</li>
-<li>searched by NAS on detection COCO</li>
-<li>can transfer to classification tasks</li>
-<li><p>在轻量和重量back的一阶段网络中都涨点领先</p>
-<p><img src="/2021/01/28/spineNet/scale-permuted.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>scale-decreasing backbone <ul>
-<li>throws away the spatial information by down-sampling</li>
-<li>challenging to recover</li>
-<li>接一个轻量的FPN：</li>
-</ul>
-</li>
-<li>scale-permuted model <ul>
-<li>scales of features can increase/decrease anytime：retain the spacial information </li>
-<li>connections go across scales：multi-scale fusion</li>
-<li>searched by NAS</li>
-<li>是一个完整的FPN，不是encoder-decoder那种可分的形式</li>
-<li>directly connect to classification and bounding box regression subnets</li>
-<li>base on ResNet50<ul>
-<li>use bottleneck feature blocks</li>
-<li>two inputs for each feature blocks</li>
-<li>roughly the same computation</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>overall architecture<ul>
-<li>stem：scale-decreased architecture </li>
-<li>scale-permuted network</li>
-<li>blocks in the stem network can be candidate inputs for the following scale-permuted network </li>
-</ul>
-</li>
-<li>scale-permuted network<ul>
-<li>building blocks：$B_k$</li>
-<li>feature level：$L_3 - L_7$</li>
-<li>output features：1x1 conv，$P_3 - P_7$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>search space</p>
-<ul>
-<li><p>scale-permuted network：</p>
-<ul>
-<li>block只能从前往后connect</li>
-<li>based on resNet blocks</li>
-<li>channel 256 for $L_5, L_6, L_7$</li>
-</ul>
-</li>
-<li><p>cross-scale connections：</p>
-<ul>
-<li><p>two input connections for each block</p>
-</li>
-<li><p>from lower ordering block / stem</p>
-</li>
-<li><p>resampling</p>
-<ul>
-<li>narrow factor  $\alpha$：1x1 conv</li>
-<li>上采样：interpolation</li>
-<li>下采样：3x3 s2 conv</li>
-<li><p>element-wise add</p>
-<p><img src="/2021/01/28/spineNet/resampling.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>block adjustment</p>
-<ul>
-<li>intermediate blocks can adjust its scale level &amp; type</li>
-<li>level from {-1, 0, 1, 2}</li>
-<li>select from bottleneck / residual block</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>family of models</p>
-<ul>
-<li>R[N] - SP[M]：N feature layers in stem &amp; M feature layers in scale-permuted layers</li>
-<li>gradually shift from stem to SP</li>
-<li><p>with size decreasing </p>
-<p><img src="/2021/01/28/spineNet/shifting.png" width="45%;"></p>
-<p><img src="/2021/01/28/spineNet/family.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>spineNet family</p>
-<ul>
-<li>basic：spineNet-49</li>
-<li>spineNet-49S：channel数scaled down by 0.65</li>
-<li>spineNet-96：double the number of blocks</li>
-<li>spineNet-143：repeat 3 times，fusion narrow factor $\alpha=1$</li>
-<li>spineNet-190：repeat 4 times，fusion narrow factor $\alpha=1$，channel数scaled up by 1.3</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>在mid/heavy量级上，比resnet-family-FPN涨出两个点</p>
-<p>  <img src="/2021/01/28/spineNet/heavy.png" width="45%;"></p>
-</li>
-<li><p>在light量级上，比mobileNet-family-FPN涨出一个点</p>
-<p>  <img src="/2021/01/28/spineNet/light.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/27/guided-anchoring/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/27/guided-anchoring/" itemprop="url">guided anchoring</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-27T14:05:29+08:00">
-                2021-01-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/27/guided-anchoring/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/27/guided-anchoring/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>原作者知乎reference：<a href="https://zhuanlan.zhihu.com/p/55854246" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/55854246</a></p>
-<ul>
-<li>不完全是anchor-free，因为还是有decision grid to choose from的，应该说是adaptive anchor instead of hand-picked</li>
-<li>为了特征和adaptive anchor对齐，引入deformable conv</li>
-</ul>
-<h2 id="Region-Proposal-by-Guided-Anchoring"><a href="#Region-Proposal-by-Guided-Anchoring" class="headerlink" title="Region Proposal by Guided Anchoring"></a>Region Proposal by Guided Anchoring</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>most methods<ul>
-<li>predefined anchors</li>
-<li>do a uniformed dense prediction </li>
-</ul>
-</li>
-<li>our method<ul>
-<li>use sematic features to guide the anchoring</li>
-<li>anchor size也是网络预测参数，compute from feature map</li>
-<li>arbitrary aspect ratios </li>
-</ul>
-</li>
-<li>feature inconsistency<ul>
-<li>不同的anchor loc都是对应feature map上某一个点</li>
-<li>变化的anchor size和固定的位置向量之间存在inconsistency</li>
-<li>引入feature adaption module</li>
-</ul>
-</li>
-<li>use high-quality proposals<ul>
-<li>GA-RPN提升了proposal的质量</li>
-<li>因此我们对proposal进入stage2的条件更严格</li>
-</ul>
-</li>
-<li>adopt in Fast R-CNN, Faster R-CNN and RetinaNet均涨点<ul>
-<li>RPN提升显著：9.1</li>
-<li>MAP也有涨点：1.2-2.7</li>
-</ul>
-</li>
-<li>还可以boosting trained models<ul>
-<li>boosting a two-stage detector by a fine-tuning schedule</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>alignment &amp; consistency</p>
-<ul>
-<li><p>我们用feature map的pixels作为anchor representations，那么anchor centers必须跟feature pixels保持align</p>
-</li>
-<li><p>不同pixel的reception field必须跟对应的anchor size保持匹配</p>
-</li>
-<li>previous sliding window scheme对每个pixel都做一样的操作，用同样一组anchor，因此是align和consist的</li>
-<li>previous progressly refining scheme对anchor的位置大小做了refinement，ignore the alignment &amp; consistency issue，是不对的！！</li>
-</ul>
-</li>
-<li><p>disadvantage of predefined anchors</p>
-<ul>
-<li>hard hyperparams</li>
-<li>huge pos/neg imbalance &amp; computation </li>
-</ul>
-</li>
-<li><p>we propose GA-RPN</p>
-<ul>
-<li>learnable anchor shapes to mitigate the hand-picked issue</li>
-<li>feature adaptation to solve the consistency issue</li>
-<li>key concerns in this paper<ul>
-<li>learnable anchors</li>
-<li>joint anchor distribution </li>
-<li>alignment &amp; consistency</li>
-<li>high-quality proposals </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>$p(x,y,w,h|I) = p(x,y|I)p(w,h|x,y,I)$</li>
-<li>将问题解耦成位置和尺寸的预测，首先anchor的loc服从full image的均匀分布，anchor的size建立在loc存在的基础上</li>
-<li>two branches for loc &amp; shape prediction<ul>
-<li>loc：binary classification，hxwx1</li>
-<li>shape：location-dependent shapes，hxwx2</li>
-<li>anchors：loc probabilities above a certain threshold &amp; correponding ‘most probable’ anchor shape</li>
-</ul>
-</li>
-<li>multi-scale<ul>
-<li>the anchor generation parameters are shared</li>
-</ul>
-</li>
-<li><p>feature adaptation module</p>
-<ul>
-<li>adapts the feature according to the anchor shape </li>
-</ul>
-<p><img src="/2021/01/27/guided-anchoring/guided anchoring.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>anchor location prediction</p>
-<ul>
-<li>indicates the probability of an object’s center  </li>
-<li>一层卷积：1x1 conv，channel1，sigmoid</li>
-<li>transform back：each grid(i,j) corresponds to coords ((i+0.5)*s, (j+0.5)*s) on the origin map</li>
-<li>filter out 90% of the regions</li>
-<li>thus replace the ensuing conv layers by masked convs</li>
-<li>groud truth<ul>
-<li>binary label map </li>
-<li>each level：center region &amp; ignore region &amp; outside region，基于object center的方框<ul>
-<li>$\sigma_1=0.2，\sigma_2=0.5$：region box的长宽系数</li>
-<li>？？？用centerNet的heatmap会不会更好？？？</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>focal loss $L_{loc}$</li>
-</ul>
-</li>
-<li>anchor shape prediction<ul>
-<li>predicts the best shape for each location</li>
-<li>best shape：a shape that lead to best iou with the nearest gt box</li>
-<li>一层卷积：1x1 conv，channel2，[-1,1]</li>
-<li>transform layer：transform direct [-1,1] outputs to real box shape<ul>
-<li>$w = \sigma <em> s </em> e^{dw}$</li>
-<li>$h = \sigma <em> s </em> e^{dh}$</li>
-<li>s：stride</li>
-<li>$\sigma$：经验参数，8 in experiments</li>
-</ul>
-</li>
-<li>set 9 pairs of (w,h) as RetinaNet，calculate the IoU of these sampled anchors with gt，take the max as target value</li>
-<li>bounded iou loss：$L_{shape} = L_1(1-min(\frac{w}{w_g}, \frac{w_g}{w})) + L_1(1-min(\frac{h}{h_g}, \frac{h_g}{h}))$ </li>
-</ul>
-</li>
-<li>feature adaptation<ul>
-<li>intuition：the feature corresponding to different size of anchor shapes应该encode different content region</li>
-<li>inputs：feature map &amp; anchor shape</li>
-<li>location-dependent transformation：3x3 deformable conv</li>
-<li>deformable conv的offset是anchor shape得到的</li>
-<li>outputs：adapted features</li>
-</ul>
-</li>
-<li>with adapted features<ul>
-<li>then perform further classification and bounding-box regression </li>
-</ul>
-</li>
-<li>training<ul>
-<li>jointly optimize：$L = \lambda_1 L_{loc} + \lambda_2 L_{shape} + L_{cls} + L_{reg}$</li>
-<li>$\lambda_1=0.2，\lambda_2=0.5$</li>
-<li>each level of feature map should only target objects of a specific scale range：但是ASFF论文主张说这种arrange by scale的模式会引入前背景inconsistency？？</li>
-</ul>
-</li>
-<li>High-quality Proposals <ul>
-<li>set a higher positive/negative threshold </li>
-<li>use fewer samples  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/25/ASFF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/25/ASFF/" itemprop="url">ASFF</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-25T17:17:57+08:00">
-                2021-01-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/25/ASFF/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/25/ASFF/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Learning-Spatial-Fusion-for-Single-Shot-Object-Detection"><a href="#Learning-Spatial-Fusion-for-Single-Shot-Object-Detection" class="headerlink" title="Learning Spatial Fusion for Single-Shot Object Detection"></a>Learning Spatial Fusion for Single-Shot Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>inconsistency when fuse across different feature scales</li>
-<li>propose ASFF<ul>
-<li>suppress the inconsistency </li>
-<li>spatially filter conflictive information：想法应该跟SSE-block类似</li>
-</ul>
-</li>
-<li><p>build on yolov3</p>
-<ul>
-<li>introduce a bag of tricks</li>
-<li>anchor-free pipeline</li>
-</ul>
-<p><img src="/2021/01/25/ASFF/ASFF.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>ssd is one of the first to generate pyramidal feature representations<ul>
-<li>deeper layers reuse the formers</li>
-<li>bottom-up path</li>
-<li>small instances suffers low acc because containing insufficient semanic info</li>
-</ul>
-</li>
-<li>FPN use top-down path<ul>
-<li>shares rich semantics at all levels </li>
-<li>improvement：more strengthening feature fusion </li>
-</ul>
-</li>
-<li>在使用FPN时，通常不同scale的目标绑定到不同的level上面<ul>
-<li>inconsistency：其他level的feature map对应位置的信息则为背景</li>
-<li>some methods set ignore region in adjacent features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>introduce advanced techniques  <ul>
-<li>mixup</li>
-<li>cosine learning rate schedule </li>
-<li>sync-bn</li>
-<li>an anchor-free branch to run jointly with anchor-based ones</li>
-<li>L1 loss + IoU loss</li>
-</ul>
-</li>
-<li>fusion<ul>
-<li>全联接而非adjacent merge：三个level的fuse map都来自三个level的feature map</li>
-<li>上采样：<ul>
-<li>1x1 conv：对齐channel</li>
-<li>upsamp with interpolation</li>
-</ul>
-</li>
-<li>下采样：<ul>
-<li>s2：3x3 s2 conv</li>
-<li>s4：maxpooling + 3x3 s2 conv</li>
-</ul>
-</li>
-<li>adaptive fusion<ul>
-<li>pixel level的reweight</li>
-<li>shared across channels：hxwx1</li>
-<li>对来自三个level的feature map，resolution对齐以后，分别1x1conv，channel 1</li>
-<li>norm the weights：softmax</li>
-<li>为啥能suppress inconsistency：三个level的像素点，只激活一个另外两个是0的情况是绝对不harm的，相当于上面ignore那个方法拓展成adaptive</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>training<ul>
-<li>apply mixup on the classification pretraining of D53</li>
-<li>turn off mixup augmentation for the last 30 epochs. </li>
-</ul>
-</li>
-<li>inference<ul>
-<li>the detection header at each level first predicts the shape of anchors？？？这个不太懂</li>
-</ul>
-</li>
-<li>ASFF &amp; ASFF*<ul>
-<li>enhanced version of ASFF by integrating other lightweight modules </li>
-<li>dropblock &amp; RFB</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实现</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ASFF</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, level, activate, rfb=False, vis=False)</span>:</span></span><br><span class="line">        super(ASFF, self).__init__()</span><br><span class="line">        self.level = level</span><br><span class="line">        self.dim = [<span class="number">512</span>, <span class="number">256</span>, <span class="number">128</span>]</span><br><span class="line">        self.inter_dim = self.dim[self.level]</span><br><span class="line">        <span class="keyword">if</span> level == <span class="number">0</span>:</span><br><span class="line">            self.stride_level_1 = conv_bn(<span class="number">256</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">512</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">1</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">256</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">2</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>, stride=<span class="number">1</span>)</span><br><span class="line">            self.compress_level_1= conv_bn(<span class="number">256</span>,self.inter_dim,kernel=<span class="number">1</span>,stride=<span class="number">1</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">128</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        compress_c = <span class="number">8</span> <span class="keyword">if</span> rfb <span class="keyword">else</span> <span class="number">16</span>  </span><br><span class="line">        self.weight_level_0 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_1 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_2 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_levels = conv_bias(compress_c * <span class="number">3</span>, <span class="number">3</span>, kernel=<span class="number">1</span>, stride=<span class="number">1</span>, padding=<span class="number">0</span>)</span><br><span class="line">        self.vis = vis</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x_level_0, x_level_1, x_level_2)</span>:</span></span><br><span class="line">      	<span class="comment"># 跟论文描述一样：上采样先1x1conv对齐，再upinterp，下采样3x3 s2 conv</span></span><br><span class="line">        <span class="keyword">if</span> self.level == <span class="number">0</span>:</span><br><span class="line">            level_0_resized = x_level_0</span><br><span class="line">            level_1_resized = self.stride_level_1(x_level_1)</span><br><span class="line">            level_2_downsampled_inter = F.max_pool2d(x_level_2, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>)</span><br><span class="line">            level_2_resized = self.stride_level_2(level_2_downsampled_inter)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">1</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_resized = x_level_1</span><br><span class="line">            level_2_resized = self.stride_level_2(x_level_2)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">2</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">4</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_compressed = self.compress_level_1(x_level_1)</span><br><span class="line">            sh = torch.tensor(level_1_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_1_resized = F.interpolate(level_1_compressed, tuple(sh),<span class="string">'nearest'</span>)</span><br><span class="line">            level_2_resized = x_level_2</span><br><span class="line">        <span class="comment"># 这里得到的resized特征图不直接转换成一通道的weighting map，</span></span><br><span class="line">        <span class="comment"># 而是先1x1conv降维到8/16，然后concat，然后3x3生成3通道的weighting map</span></span><br><span class="line">        <span class="comment"># weighting map相当于一个prediction head，所以是conv_bias_softmax，无bn</span></span><br><span class="line">        level_0_weight_v = self.weight_level_0(level_0_resized)</span><br><span class="line">        level_1_weight_v = self.weight_level_1(level_1_resized)</span><br><span class="line">        level_2_weight_v = self.weight_level_2(level_2_resized)</span><br><span class="line">        levels_weight_v = torch.cat((level_0_weight_v, level_1_weight_v, level_2_weight_v), <span class="number">1</span>)</span><br><span class="line">        levels_weight = self.weight_levels(levels_weight_v)</span><br><span class="line">        levels_weight = F.softmax(levels_weight, dim=<span class="number">1</span>)</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># reweighting</span></span><br><span class="line">        fused_out_reduced = level_0_resized * levels_weight[:, <span class="number">0</span>:<span class="number">1</span>, :, :] + \</span><br><span class="line">                            level_1_resized * levels_weight[:, <span class="number">1</span>:<span class="number">2</span>, :, :] + \</span><br><span class="line">                            level_2_resized * levels_weight[:, <span class="number">2</span>:, :, :]</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># 3x3的conv，是特征图平滑</span></span><br><span class="line">        out = self.expand(fused_out_reduced)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.vis:</span><br><span class="line">            <span class="keyword">return</span> out, levels_weight, fused_out_reduced.sum(dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3691,7 +4043,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3704,7 +4056,7 @@ P_s(X) \neq P_t(X)</script></li>
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

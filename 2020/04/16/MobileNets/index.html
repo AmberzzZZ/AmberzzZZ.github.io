@@ -102,7 +102,15 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/swish.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/mobileNetV3.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/LR-ASPP.png">
-<meta property="og:updated_time" content="2020-05-18T02:21:21.000Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/lite-latency.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/mobileOne.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/Metric%20Correlations.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/CPU%20correlation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/activation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/MobileOne%20block.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/MobileOne%20family.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2020/04/16/MobileNets/MobileOne%20training.png">
+<meta property="og:updated_time" content="2022-07-12T10:49:10.553Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MobileNets">
 <meta name="twitter:description" content="preview 动机  计算力有限 模型压缩／使用小模型   深度可分离卷积 Depthwise Separable Convolution  将标准卷积拆分为两个操作：深度卷积(depthwise convolution) 和逐点卷积(pointwise convolution) 标准卷积：参数量k*k*input_channel*output_channel 深度卷积(depthwise co">
@@ -398,11 +406,11 @@
 </li>
 <li><p>papers</p>
 <ul>
-<li><p>[V1] MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications，主要贡献Depthwise Separable Convolution</p>
-</li>
-<li><p>[V2] MobileNetV2: Inverted Residuals and Linear Bottlenecks，主要贡献inverted residual with linear bottleneck</p>
-</li>
-<li>[V3] Searching for MobileNetV3，模型结构升级(inverted-res-block + SE-block)，通过NAS，而非手动设计</li>
+<li>[V1 CVPR2017] MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications，Google，主要贡献Depthwise Separable Convolution</li>
+<li>[V2 CVPR2018] MobileNetV2: Inverted Residuals and Linear Bottlenecks，Google，主要贡献inverted residual with linear bottleneck</li>
+<li>[V3 ICCV2019] Searching for MobileNetV3，Google，模型结构升级多了SE(inverted-res-block + SE-block)，是通过NAS而非手动设计</li>
+<li>[EfficientNet-lite ICML2019]  EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks，efficientNet家族的scale-down版本，原始的EfficientNet是基于Mobile3的basic block，而Lite版本有很多专供移动端的改动：去掉SE、改用RELU6、</li>
+<li>[MobileOne 2022] An Improved One millisecond Mobile Backbone，Apple，</li>
 </ul>
 </li>
 </ol>
@@ -686,6 +694,186 @@
 </ul>
 </li>
 </ol>
+<h2 id="EfficientNet-lite"><a href="#EfficientNet-lite" class="headerlink" title="EfficientNet-lite"></a>EfficientNet-lite</h2><ol>
+<li><p>没有专门的paper</p>
+<ul>
+<li>基于efficientNet向移动端改进</li>
+<li><a href="https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite" target="_blank" rel="noopener">https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite</a></li>
+<li><a href="https://blog.tensorflow.org/2020/03/higher-accuracy-on-vision-models-with-efficientnet-lite.html" target="_blank" rel="noopener">https://blog.tensorflow.org/2020/03/higher-accuracy-on-vision-models-with-efficientnet-lite.html</a></li>
+</ul>
+</li>
+<li><p>model zoo</p>
+<p> | model              | width | depth | resolution | droprate |<br> | ————————— | ——- | ——- | ————— | ———— |<br> | efficientnet-lite0 | 1.    | 1.    | 224        | .2       |<br> | efficientnet-lite1 | 1.    | 1.1   | 240        | .2       |<br> | efficientnet-lite2 | 1.1   | 1.2   | 260        | .3       |<br> | efficientnet-lite3 | 1.2   | 1.4   | 280        | .3       |<br> | efficientnet-lite4 | 1.4   | 1.8   | 300        | .3       |<br> |                    |       |       |            |          |</p>
+<ul>
+<li><p>关键数据：</p>
+<ul>
+<li>lite4精度可以达到80.4%，同时保持在Pixel 4 CPU上real-time运行：30ms/image</li>
+<li>latency：10-30ms</li>
+<li>model size：5M-15M</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/lite-latency.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>&lt;img src=&quot;MobileNets/lite-size.png&quot; width=&quot;40%;&quot; /&gt;
+
+3. challenges
+
+    * Quantization量化：移动端设备支持的浮点精度有限——训练后量化，将浮点模型tf model转化成tfLite model（全整数int8/半浮点float16），
+    * Heterogeneous hardware移动端设备参差不齐：好多操作不支持，尽量替换成底层支持的op
+
+4. modifications
+
+    * Removed squeeze-and-excitation networks：去掉SE，not well supported
+
+    * swish替换成RELU6：有利于post-training quantization
+
+        * 一开始将浮点替换成整型的时候观察到huge acc drop：75 -&gt; 48
+        * 发现是因为浮点太wide-ranged了，直接映射到int8太多精度损失
+        * 所以替换成激活区间有限的relu6 [0,6]
+
+        &lt;img src=&quot;MobileNets/int8.png&quot; width=&quot;40%;&quot; /&gt;&lt;img src=&quot;MobileNets/quantization.png&quot; width=&quot;40%;&quot; /&gt;
+
+    * Fixed the stem and head while scaling models up：stem的resolution大，head的channel大，scaleup都对参数量/计算量影响比较大，只scaleup中间的stage
+</code></pre><h2 id="MobileOne-An-Improved-One-millisecond-Mobile-Backbone"><a href="#MobileOne-An-Improved-One-millisecond-Mobile-Backbone" class="headerlink" title="MobileOne: An Improved One millisecond Mobile Backbone"></a>MobileOne: An Improved One millisecond Mobile Backbone</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>FLOPs &amp; 参数量等指标并不直接和移动端latency相关</li>
+<li><p>this paper</p>
+<ul>
+<li>调研了各种mobileNets的优化瓶颈：architectural and optimization bottlenecks</li>
+<li>提出了MobileOne</li>
+</ul>
+</li>
+<li><p>精度</p>
+<ul>
+<li>低于1ms/image的速度，top 1 acc 75.9%</li>
+<li>上面的eff-lite0要10ms，top 1 acc 74.+%，涨点2.3%</li>
+<li><p>Mobile- Former精度近似，速度要快38x</p>
+<p><img src="/2020/04/16/MobileNets/mobileOne.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>previous methods<ul>
+<li>大部分foucs on 优化FLOPs</li>
+<li>而且会引入new architecture designs &amp; custom layers，如hard-swish，这在移动端通常不原生支持</li>
+</ul>
+</li>
+<li>existing metric &amp; latency<ul>
+<li>FLOPs does not account for memory cost and degree of parallelism</li>
+<li>sharing parameters leads to higher FLOPS but smaller model size</li>
+<li>skip-connections / branching incur memory costs</li>
+</ul>
+</li>
+<li>结构优化<ul>
+<li>要找到真正限制on-device latency的要素</li>
+</ul>
+</li>
+<li>训练优化<ul>
+<li>直接训练小模型精度肯定差，通常是decoupling train-time &amp; test-time architecture</li>
+<li>进一步地还做了relaxing regularization</li>
+</ul>
+</li>
+<li>the proposed MobileOne<ul>
+<li>use basic operators</li>
+<li>introduces linear branches which get re-parameterized at inference-time：与之前方法的区别是引入了over-parameterization branches【repVGG是把常规的resblock搞成一个线形op了，本文的branch有k个，是把好多个branch合并一起，所以起名叫over？】</li>
+<li>inference time model has only feed-forward structure</li>
+<li>generalizes well to other tasks：在分类、检测、分割上都outperforming</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Metric Correlations</p>
+<ul>
+<li><p>parameter count and FLOPs</p>
+<p><img src="/2020/04/16/MobileNets/Metric Correlations.png" width="60%;"></p>
+</li>
+<li><p>很多模型参数量很大，但是latency更小——只要右边的点纵坐标比左边的低都是这种case，如3(efficientnet-b0)&amp;2(shufflenet-v2)</p>
+</li>
+<li><p>FLOPs和参数量近似的情况下，卷积模型通常比他们的transformer counterpart latency更小——可以看到transformer模型都在右下角</p>
+</li>
+<li><p>CPU correlation</p>
+<p>  <img src="/2020/04/16/MobileNets/CPU correlation.png" width="60%;"></p>
+<ul>
+<li>mobile device与FLOPs适度相关，与参数量基本无关</li>
+<li>CPU的latency更无关</li>
+<li>结构的影响更大，SE-block和skip都影响挺大的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Key Bottlenecks</p>
+<ul>
+<li><p>Activation Functions</p>
+<ul>
+<li><p>搞了同样的网络架构，用不同的激活函数</p>
+<p><img src="/2020/04/16/MobileNets/activation.png" width="30%;"></p>
+</li>
+<li><p>激活函数越花，latency越大，归因于synchronization cost，个别激活函数有通过特殊硬件加速的实现</p>
+</li>
+<li>从通用角度，本文选用ReLU</li>
+</ul>
+</li>
+<li><p>Architectural Blocks</p>
+<ul>
+<li>根本因素是memory access cost &amp; degree of parallelism</li>
+<li>分支越多，memory access cost越大，因为存在多节点交互更多</li>
+<li>而像global pooling这种force synchronization需要同步计算的，也影响overall run-time</li>
+<li>上面截图有这个</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>MobileOne Architecture</p>
+<ul>
+<li><p>MobileOne Block</p>
+<ul>
+<li>training &amp; test time 不一样</li>
+<li>training time<ul>
+<li>basic block还是类似mobileV1的depth-wise + point-wise</li>
+<li>每个3x3 donv 和 1x1 pconv都变成了一个多分枝的block</li>
+<li>block有k个 re-parameterizable branch，k是个超参，1-5</li>
+<li>除此之外还有两个常规的branch：1x1 dconv &amp; BN</li>
+</ul>
+</li>
+<li><p>inference time</p>
+<ul>
+<li>只有一条data steam</li>
+<li>合并思路类似repvgg：所有的线形计算都可以合并</li>
+</ul>
+<p><img src="/2020/04/16/MobileNets/MobileOne block.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Model Scaling</p>
+<ul>
+<li><p>提供了5个尺寸的模型，主要变化在channel，深度是没变的</p>
+<p><img src="/2020/04/16/MobileNets/MobileOne family.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training</p>
+<ul>
+<li>小模型训练，need less regularization，但是weight decay对训练初期又很重要</li>
+<li>cosine schedule for both LR &amp; weight decay</li>
+<li>还用了efficientNetV2里面提到的progressive learning：从简单任务开始训练，逐渐增加难度（resolution &amp; dataaug） &amp; 超参（regularization）</li>
+<li><p>还有EMA：model ensemble</p>
+<p><img src="/2020/04/16/MobileNets/MobileOne training.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 
       
     </div>
@@ -812,7 +1000,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -825,7 +1013,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -868,7 +1056,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#preview"><span class="nav-number">1.</span> <span class="nav-text">preview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNets-Efficient-Convolutional-Neural-Networks-for-Mobile-Vision-Applications"><span class="nav-number">2.</span> <span class="nav-text">MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNetV2-Inverted-Residuals-and-Linear-Bottlenecks"><span class="nav-number">3.</span> <span class="nav-text">MobileNetV2: Inverted Residuals and Linear Bottlenecks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Searching-for-MobileNetV3"><span class="nav-number">4.</span> <span class="nav-text">Searching for MobileNetV3</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#preview"><span class="nav-number">1.</span> <span class="nav-text">preview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNets-Efficient-Convolutional-Neural-Networks-for-Mobile-Vision-Applications"><span class="nav-number">2.</span> <span class="nav-text">MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileNetV2-Inverted-Residuals-and-Linear-Bottlenecks"><span class="nav-number">3.</span> <span class="nav-text">MobileNetV2: Inverted Residuals and Linear Bottlenecks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Searching-for-MobileNetV3"><span class="nav-number">4.</span> <span class="nav-text">Searching for MobileNetV3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EfficientNet-lite"><span class="nav-number">5.</span> <span class="nav-text">EfficientNet-lite</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MobileOne-An-Improved-One-millisecond-Mobile-Backbone"><span class="nav-number">6.</span> <span class="nav-text">MobileOne: An Improved One millisecond Mobile Backbone</span></a></li></ol></div>
             
 
           </div>

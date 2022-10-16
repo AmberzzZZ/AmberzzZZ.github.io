@@ -100,7 +100,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/attention.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/decoupled%20attention.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2021/12/08/det-transformers/anchor%20DETR.png">
-<meta property="og:updated_time" content="2022-06-02T11:21:17.687Z">
+<meta property="og:updated_time" content="2022-06-28T08:59:47.183Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="det-transformers">
 <meta name="twitter:description" content="目标检测leaderboard: https://paperswithcode.com/sota/object-detection-on-coco boxAP swin开启了霸榜时代：家族第一名63.1 接着是YOLO家族：家族第一名57.3，YOLOv4是55.8 DETR：论文里是44.9(没在榜单上)，只有一个deformable DETR是52.3 时代的眼泪Cascade Mask R">
@@ -380,11 +380,30 @@
 </li>
 </ul>
 <ul>
+<li>目前检测架构的几个霸榜算法<ul>
+<li>DETR系列end-to-end</li>
+<li>Swin放在传统二阶段架构里面</li>
+<li>YOLO</li>
+<li>tricks加持：multi-scale、TTA、self-training、cascade、GIoU</li>
+</ul>
+</li>
+</ul>
+<ul>
 <li><p>papers    </p>
 <p>  [DETR 2020] End-to-End Object Detection with Transformers：Facebook，首个端到端检测架构，无需nms等后处理，难优化，MSA的显存/计算量</p>
 <p>  [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows：微软，主要是swin-back的建模能力强，放在啥框架里都很行</p>
 <p>  [deformable DETR 2021] DEFORMABLE DETR: DEFORMABLE TRANSFORMERS FOR END-TO-END OBJECT DETECTION：商汤，将MSA卷积话，解决transformer的high-resolution困境</p>
 <p>  [anchor DETR 2022] Anchor DETR: Query Design for Transformer-Based Object Detection：旷视，new query design，也是针对attention结构的变种（cross-attention），精度更高，显存更少，速度更快，收敛更快</p>
+<p>  [DDQ 2022] What Are Expected Queries in End-to-End Object Detection?  商汤，基于DETR，讨论新的dense queries</p>
+</li>
+</ul>
+<ul>
+<li><p>repo</p>
+<p>  <a href="https://github.com/facebookresearch/detr" target="_blank" rel="noopener">https://github.com/facebookresearch/detr</a></p>
+<p>  <a href="https://github.com/facebookresearch/3detr，3D版本" target="_blank" rel="noopener">https://github.com/facebookresearch/3detr，3D版本</a></p>
+<p>  <a href="https://github.com/fundamentalvision/Deformable-DETR" target="_blank" rel="noopener">https://github.com/fundamentalvision/Deformable-DETR</a></p>
+<p>  <a href="https://github.com/megvii-research/AnchorDETR" target="_blank" rel="noopener">https://github.com/megvii-research/AnchorDETR</a></p>
+<p>  <a href="https://github.com/jshilong/DDQ，暂时没开源代码，只有主页" target="_blank" rel="noopener">https://github.com/jshilong/DDQ，暂时没开源代码，只有主页</a></p>
 </li>
 </ul>
 <h2 id="Swin-details-for-object-detection"><a href="#Swin-details-for-object-detection" class="headerlink" title="Swin details for object detection"></a>Swin details for object detection</h2><ol>
@@ -632,7 +651,7 @@
 <ul>
 <li>module的输入和输出都是same resolution的feature maps</li>
 <li>add a scale-level embedding $e_l$：用来指示输入的query pixel来自哪个scale level，但是它是随机初始化的，然后随着网络训练【？？？】</li>
-<li>query是pixels，reference points就是它自身</li>
+<li>query是pixels，reference points就是它自身：代码里是query embed + fc来实现</li>
 </ul>
 </li>
 </ul>
@@ -943,7 +962,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -956,7 +975,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

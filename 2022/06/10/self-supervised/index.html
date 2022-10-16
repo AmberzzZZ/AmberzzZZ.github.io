@@ -89,6 +89,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/SimMIM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/masking.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/AvgDist.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/SimMIM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/distance.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/entropy.png">
@@ -96,7 +97,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/CKA.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/classification.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/06/10/self-supervised/detection.png">
-<meta property="og:updated_time" content="2022-06-12T10:57:09.140Z">
+<meta property="og:updated_time" content="2022-06-14T03:40:25.718Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="self-supervised">
 <meta name="twitter:description" content="自监督papers  MoCo系列：contrastive-based [2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming [2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Repres">
@@ -455,7 +456,7 @@
 <li>pixel-level reconstruction use simple L1 loss<ul>
 <li>regression比较适配continuous signal</li>
 <li>performs no worse than classification approaches</li>
-<li>【QUESTION】分类任务一般怎么设计</li>
+<li>【QUESTION】分类任务一般怎么设计：后面实验里面，把RGB灰度值分解成8/256个bin，然后分类</li>
 </ul>
 </li>
 </ul>
@@ -535,13 +536,82 @@
 </li>
 <li><p>实验</p>
 <ul>
-<li>AvgDist</li>
+<li><p>pre-training settings</p>
+<ul>
+<li>swinB：input 192x192，window size=6</li>
+<li>dataset：ImageNet-1K，a light data augmentation (random resize cropping/random flipping /color normalization)</li>
+<li>AdamW：weight decay=0.05，beta=[0.9,0.999]</li>
+<li>cosine LR scheduler：100 epochs (warmup 10 ep)，baseLR=8e-4</li>
+<li>batch size：2048</li>
+<li>random masking：mask ratio=0.6，mask patch size=32</li>
+</ul>
+</li>
+<li><p>fine-tuning settings</p>
+<ul>
+<li>AdamW、batch size、masking 参数一致</li>
+<li>cosine LR：baseLR=5e-3</li>
+<li>a stochastic depth rate：0.1</li>
+<li>a layer-wise learning rate decay：0.9</li>
+<li>strong data augmentation：RandAug，Mixup，Cutmix，label smoothing，random erasing</li>
+</ul>
+</li>
+<li><p>AvgDist</p>
+<p>  <img src="/2022/06/10/self-supervised/AvgDist.png" width="50%;"></p>
+<ul>
+<li>measures the averaged Euclidean distance of masked pixels to the nearest visible ones：被遮挡的patch embedding与其最近的visible patch的embedding欧几里得距离</li>
+<li>mask ratio越大，AvgDist越大</li>
+<li>mask patch size越大，AvgDist越大</li>
+<li>AvgDist的值在[10,20]区间时，模型的精度最高</li>
+</ul>
+</li>
+<li><p>一些精度记录</p>
+<ul>
+<li>SwinV2-H achieves 87.1% top-1 accuracy，在只使用ImageNet-1K数据集里面精度最佳</li>
+<li>SwinV2-G借助了外部数据，但比google用的少，40× smaller，achieves strong performance<ul>
+<li>84.0% top-1 on ImageNet-V2</li>
+<li>63.1/54.4 box/mask mAP on COCO object detection</li>
+<li>59.9 mIoU on ADE20K semantic segmentation</li>
+<li>86.8% top-1 acc on Kinetics-400 action recognition</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Visualization</p>
+<ul>
+<li>【20220614】目前初步实验下来，预训练的生成模型，生成的图片会呈现明显的棋盘格，因为每个x32的feature pixel代表了一个32x32的RGB patch，官方论文里面的图也很棋盘格，不知道该训练到啥程度算结束</li>
+<li><p>What capability is learned? </p>
+<ul>
+<li>random masking：the shape and texture of masked parts can be well recovered，以及unmasked区域会观察到显著棋盘格效应，因为这部分区域在训练过程中是不回传梯度的</li>
+<li>masking most parts of a major object：can still predict an existence of object by the negligible clues</li>
+<li>masking the full major object：the masked area will be inpainted with background textures</li>
+</ul>
+</li>
+<li><p>Prediction v.s. reconstruction</p>
+<ul>
+<li>比较了masked region recover和全图recover两个任务</li>
+<li>从重建结果上看，后者视觉效果更好一点(棋盘格没那么明显，因为是全局预测)，但是精度则低了一个点：probably the model capacity is wasted at the recovery of the unmasked area which may not be that useful for fine-tuning</li>
+<li><p>auto-encoders and masked image modeling两个方法都是重建任务，but they are built on different philosophies：</p>
+<ul>
+<li>前者是visible signal reconstruction</li>
+<li>后者是prediction of invisible signals</li>
+</ul>
+</li>
+<li><p>MIM也可以设计成全图重建，但这相当于融合了两个任务</p>
+<ul>
+<li>prediction &amp; reconstruction</li>
+<li>从finetuning精度上看two tasks are fundamentally different in their internal mechanisms，两个任务的内部机制不同，合起来做不会促进</li>
+<li>the task to predict might be a more promising representation：看起来prediction任务学到的representation对下游任务更有用一些</li>
+</ul>
+</li>
+<li><p>【个人理解重建任务更local一点，所以细节更好看，prediction任务更long-range一些，但是为什么有说对low-level/fine-grained downstream task更好呢？】</p>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol>
-<ul>
-<li></li>
-</ul>
 <h2 id="Revealing-the-Dark-Secrets-of-Masked-Image-Modeling"><a href="#Revealing-the-Dark-Secrets-of-Masked-Image-Modeling" class="headerlink" title="Revealing the Dark Secrets of Masked Image Modeling"></a>Revealing the Dark Secrets of Masked Image Modeling</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -742,6 +812,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2022/07/11/模型压缩/" rel="prev" title="模型压缩">
+                模型压缩 <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -824,7 +898,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">156</span>
+                  <span class="site-state-item-count">160</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -837,7 +911,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-count">94</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
