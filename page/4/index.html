@@ -276,6 +276,630 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/01/MuST/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/01/MuST/" itemprop="url">MuST谷歌多任务自训练</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-01T15:35:24+08:00">
+                2021-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/01/MuST/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/01/MuST/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p>recollect</p>
+<p>  [SimCLR]</p>
+<p>  [MoCo]</p>
+</li>
+</ul>
+<h2 id="Multi-Task-Self-Training-for-Learning-General-Representations"><a href="#Multi-Task-Self-Training-for-Learning-General-Representations" class="headerlink" title="Multi-Task Self-Training for Learning General Representations"></a>Multi-Task Self-Training for Learning General Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learning general feature representations</li>
+<li>expect a single general model<ul>
+<li>相比较于training specialized models for various tasks</li>
+<li>harness from independent specialized teacher models</li>
+<li>with a multi-task pseudo dataset</li>
+<li>trained with multi-task learning</li>
+</ul>
+</li>
+<li>evalutate on 6 vision tasks<ul>
+<li>image recognition (classification, detection, segmentation)</li>
+<li>3D geometry estimation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>pretraining &amp; transfer learning</p>
+<ul>
+<li>transformer一般都是这个套路，BiT&amp;ViT</li>
+<li>pretraining<ul>
+<li>supervised / unsupervised</li>
+<li>learn feature representations</li>
+</ul>
+</li>
+<li>transfer learning<ul>
+<li>on downstream tasks</li>
+<li>the features may not necessarily be useful</li>
+<li>最典型的就是ImageNet pre-training并不能improve COCO segmentation，但是Objects365能够大幅提升</li>
+</ul>
+</li>
+<li>pretraining tasks必须要和downstream task align，learn specialized features，不然白费</li>
+</ul>
+</li>
+<li><p>learning general features</p>
+<ul>
+<li>a model simultaneously do well on multiple tasks</li>
+<li>NLP的bert是一个典型用多任务提升general ability的</li>
+<li>CV比较难这样做是因为标签variety，没有这样的大型multi-task dataset</li>
+</ul>
+</li>
+<li><p>multi-task learning</p>
+<ul>
+<li>shared backbone (如ResNet-FPN)</li>
+<li>small task-specific heads</li>
+</ul>
+</li>
+<li><p>self-training</p>
+<ul>
+<li>use a supervised model to generate pseudo labels on unlabeled data</li>
+<li>then a student model is trained on the pseudo labeled data</li>
+<li>在各类任务上都proved涨点</li>
+<li>但是迄今为止都是focused on a single task</li>
+</ul>
+</li>
+<li><p>in this work</p>
+<ul>
+<li><p>lack of large scale multi-task dataset的issue，通过self-training to fix，用pseudo label</p>
+</li>
+<li><p>specialized/general issue，通过多任务，训练目标就是六边形战士，absorb the knowledge of different tasks in the shared backbone</p>
+</li>
+<li><p>three steps</p>
+<ul>
+<li>trains specialized teachers independently on labeled datasets （分类、分割、检测、深度估计）</li>
+<li>the specialized teachers are then used to label a larger unlabeled dataset（ImageNet） to create a multi- task pseudo labeled dataset</li>
+<li><p>train a student model with multi-task learning</p>
+<p><img src="/2021/09/01/MuST/MuST.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>MuST的特质</p>
+<ul>
+<li>improve with more unlabeled data，数据越多general feature越好</li>
+<li>can improve upon already strong checkpoints，在海量监督高精度模型基础上fine-tune，仍旧能在downstream tasks涨点</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Specialized Teacher Models</p>
+<ul>
+<li>4 teacher models<ul>
+<li>classification：train from scratch，ImageNet</li>
+<li>detection：train from scratch，Object365</li>
+<li>segmentation：train from scratch，COCO</li>
+<li>depth estimation：fine-tuning from pre-trained checkpoint</li>
+</ul>
+</li>
+<li>pseudo labeling<ul>
+<li>unlabeled / partially labeled datasets</li>
+<li>for detection：hard score threshold of 0.5</li>
+<li>for segmentation：hard score threshold of 0.5</li>
+<li>for classification：soft labels——probs distribution</li>
+<li>for depth：直接用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Multi-Task Student Model</p>
+<ul>
+<li><p>模型结构</p>
+<p>  <img src="/2021/09/01/MuST/student.png" width="50%;"></p>
+<ul>
+<li>shared back<ul>
+<li>C5：for classification</li>
+<li>feature pyramids {P3,P4,P5,P6,P7}：for detection</li>
+<li>fused P2：for pixel-wise prediction，把feature pyramids rescale到level2然后sum</li>
+</ul>
+</li>
+<li>heads<ul>
+<li>classification head：ResNet design，GAP C5 + 线性层</li>
+<li>object detection task：Mask R-CNN design，RPN是2 hidden convs，Fast R-CNN是4 hidden convs + 1 fc</li>
+<li>pixel-wise prediction heads：3 hiddent convs + 1 linear conv head，分割和深度估计任务independent，不share heads</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Teacher-student training</p>
+<ul>
+<li>using the same architecture </li>
+<li>same data augmentation</li>
+<li>teacher和student的main difference就是dataset和labels</li>
+</ul>
+</li>
+<li><p>Learning From Multiple Teachers</p>
+<ul>
+<li>every image has supervision for all tasks</li>
+<li>labels may come from supervised or pseudo labels</li>
+<li>如果使用ImageNet数据集，classification就是真标签，det/seg/depth supervision则是伪标签</li>
+<li>balance the loss contribution<ul>
+<li>加权和，task-specific weights</li>
+<li>for ImageNet，use $w_i = \frac{b_slr_{it}}{b_{it}lr_{s}}$</li>
+<li>follow the scaling rule：lr和batch size成正比</li>
+<li>except for depth loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Cross Dataset Training</p>
+<ul>
+<li>training across ImageNet, object365 and COCO</li>
+<li>有标签的就用原标签，没有的用伪标签，supervised labels and pseudo labels are treated equally，而不是分别采样和训练</li>
+<li>balance the datasets：合在一起然后均匀采样</li>
+</ul>
+</li>
+<li><p>Transfer Learning</p>
+<ul>
+<li>得到general student model以后，fine-tune on 一系列downstream tasks</li>
+<li>这些downstream datasets与MuST model的训练数据都是not align的</li>
+<li>这个实验要证明的是supervised model（如teacher model）和self-supervised model（如用pseudo label训练出来的student model），在downstream tasks上迁移学习能performance是差不多的，【注意⚠️：如果迁移datasets前后align就不是这样了，pretrain显然会更好！！！】</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/GHM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/31/GHM/" itemprop="url">GHM</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-31T15:48:50+08:00">
+                2021-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/31/GHM/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/31/GHM/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>families:</p>
+<ul>
+<li>[class-imbalanced CE]</li>
+<li>[focal loss]</li>
+<li>[generalized focal loss] focal loss(CE)的连续版本</li>
+<li>[ohem]</li>
+</ul>
+<p>keras implementation:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">weightedCE_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.8</span></span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    wce = tf.where(y_true&gt;<span class="number">0.5</span>, alpha* , (<span class="number">1</span>-alpha)* )</span><br><span class="line">    <span class="keyword">return</span> wce</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		alpha = <span class="number">.25</span></span><br><span class="line">		gamma = <span class="number">2</span></span><br><span class="line">		</span><br><span class="line">		pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># easy/hard reweight</span></span><br><span class="line">		fl = -K.pow(pt, gamma) * K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># pos/neg reweight</span></span><br><span class="line">    fl = tf.where(y_true&gt;<span class="number">0.5</span>, alpha*fl, (<span class="number">1</span>-alpha)*fl)</span><br><span class="line">    <span class="keyword">return</span> fl</span><br><span class="line">  </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">generalized_focal_loss</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">		<span class="comment"># CE = -ytlog(yp)-(1-yt)log(1-yp)</span></span><br><span class="line">  	<span class="comment"># GFL = |yt-yp|^beta * CE</span></span><br><span class="line">    beta = <span class="number">2</span></span><br><span class="line">    <span class="comment"># clip y_pred</span></span><br><span class="line">    y_pred = K.clip(y_pred, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -y_true*K.log(y_pred) - (<span class="number">1</span>-y_true)*K.log(<span class="number">1</span>-y_pred)   <span class="comment"># [N,C]</span></span><br><span class="line">    <span class="comment"># easy/hard reweight</span></span><br><span class="line">    gfl = K.pow(K.abs(y_true-y_pred), beta) * ce</span><br><span class="line">    <span class="keyword">return</span> gfl</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ce_ohem</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">  	pt = K.abs(y_true-y_pred)</span><br><span class="line">		<span class="comment"># clip</span></span><br><span class="line">    pt = K.clip(pt, K.epsilon(), <span class="number">1</span>-K.epsilon())</span><br><span class="line">    <span class="comment"># ce</span></span><br><span class="line">    ce = -K.log(<span class="number">1.</span>-pt)</span><br><span class="line">    <span class="comment"># sort loss</span></span><br><span class="line">    k = <span class="number">50</span></span><br><span class="line">    ohem_loss, indices = tf.nn.top_k(ce, k=k)   <span class="comment"># topk loss: [k,], topk indices: [k,], idx among 0-b</span></span><br><span class="line">    mask = tf.where(ce&gt;=ohem_loss[k<span class="number">-1</span>], tf.ones_like(ce), tf.zeros_like(ce))</span><br><span class="line">    <span class="keyword">return</span> mask*ce</span><br></pre></td></tr></table></figure>
+<h2 id="Gradient-Harmonized-Single-stage-Detector"><a href="#Gradient-Harmonized-Single-stage-Detector" class="headerlink" title="Gradient Harmonized Single-stage Detector"></a>Gradient Harmonized Single-stage Detector</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>one-stage detector<ul>
+<li>核心challenge就是imbalance issue</li>
+<li>imbalance between positives and negatives</li>
+<li>imbalance between easy and hard examples</li>
+<li>这两项都能归结为对梯度的作用：a term of the gradient</li>
+</ul>
+</li>
+<li>we propose a novel gradient harmonizing mechanism (GHM) <ul>
+<li>balance the gradient flow</li>
+<li>easy to embed in cls/reg losses like CE/smoothL1</li>
+<li>GHM-C for anchor classification</li>
+<li>GHM-R for bounding box refinement</li>
+</ul>
+</li>
+<li>proved substantial improvement on COCO<ul>
+<li>41.6 mAP</li>
+<li>surpass FL by 0.8</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>imbalance issue</p>
+<ul>
+<li><p>easy and hard：</p>
+<ul>
+<li>OHEM</li>
+<li>directly abandon examples</li>
+<li>导致训练不充分</li>
+</ul>
+</li>
+<li><p>positive and negative</p>
+<ul>
+<li>focal loss</li>
+<li>有两个超参，跟data distribution绑定</li>
+<li>not adaptive</li>
+</ul>
+</li>
+<li><p>通常正样本既是少量样本又是困难样本，而且可以通通归结为梯度分布不均匀的问题</p>
+<p>  <img src="/2021/08/31/GHM/gradients.png" width="50%;"></p>
+<ul>
+<li>大量样本只贡献很小的梯度，通常对应着大量负样本，总量多了也可能会引导梯度（左图）</li>
+<li>hard样本要比medium样本数量大，我们通常将其看作离群点，因为模型稳定以后这些hard examples仍旧存在，他们会影响模型稳定性（左图）</li>
+<li>GHM的目标就是希望不同样本的gradient contribution保持harmony，相比较于CE和FL，简单样本和outlier的total contribution都被downweight，比较harmony（右图）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>we propose gradient harmonizing mechanism (GHM)</p>
+<ul>
+<li>希望不同样本的gradient contribution保持harmony</li>
+<li>首先研究gradient density，按照梯度聚类样本，并相应reweight</li>
+<li>针对分类和回归设计GHM-C loss和GHM-R loss</li>
+<li>verified on COCO<ul>
+<li>GHM-C比CE好得多，sligtly better than FL</li>
+<li>GHM-R也比smoothL1好</li>
+<li>attains SOTA</li>
+</ul>
+</li>
+<li>dynamic loss：adapt to each batch</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Problem Description</p>
+<ul>
+<li><p>define gradient norm $g = |p - p^*|$</p>
+<p>  <img src="/2021/08/31/GHM/norm.png" width="40%;"></p>
+</li>
+<li><p>the distribution g from a converged model</p>
+<p>  <img src="/2021/08/31/GHM/distribution.png" width="40%;"></p>
+<ul>
+<li>easy样本非常多，不在一个数量级，会主导global gradient</li>
+<li>即使收敛模型也无法handle一些极难样本，这些样本梯度与其他样本差异较大，数量还不少，也会误导模型</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Gradient Density</p>
+<ul>
+<li>define gradient density $GD(g) = \frac{1}{l_{\epsilon}(g)} \sum_{k=1} \delta_{\epsilon}(g_k,g)$<ul>
+<li><img src="/2021/08/31/GHM/hyper.png" width="40%;"></li>
+<li>given a gradient value g</li>
+<li>统计落在中心value为$g$，带宽为$\epsilon$的范围内的梯度的样本量</li>
+<li>再用带宽去norm</li>
+</ul>
+</li>
+<li>define the gradient density harmony parameter $\beta_i = \frac{N}{GD(g_i)}$<ul>
+<li>N是总样本量</li>
+<li>其实就是与density成反比</li>
+<li>large density对应样本会被downweight</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GHM-C Loss</p>
+<ul>
+<li><p>将harmony param作为loss weight，加入现有loss</p>
+<p>  <img src="/2021/08/31/GHM/harmony.png" width="40%;"></p>
+</li>
+<li><p><img src="/2021/08/31/GHM/norm1.png" width="50%;"></p>
+<ul>
+<li>可以看到FL主要压简单样本（基于sample loss），GHM两头压（基于sample density）</li>
+<li>最终harmonize the total gradient contribution of different density group</li>
+<li>dynamic wrt mini-batch：使得训练更加efficient和robust</li>
+</ul>
+</li>
+<li><p>Unit Region Approximation</p>
+<ul>
+<li>将gradient norm [0,1]分解成M个unit region</li>
+<li>每个region的宽度$\epsilon = \frac{1}{M}$</li>
+<li>落在每个region内的样本数计作$R_{ind(g)}$，$ind(g)$是g所在region的start idx</li>
+<li>the approximate gradient density：$\hat {GD}(g) = \frac{R_{ind(g)}}{\epsilon} =R_{ind(g)}M $</li>
+<li><p>approximate harmony parameter &amp; loss：</p>
+<ul>
+<li>we can attain good performance with quite small M</li>
+<li>一个密度区间内的样本可以并行计算，计算复杂度O(MN)</li>
+</ul>
+<p><img src="/2021/08/31/GHM/approx.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>EMA</p>
+<ul>
+<li>一个mini-batch可能是不稳定的</li>
+<li>所以通过历史累积来更新维稳：SGDM和BN都用了EMA</li>
+<li>现在每个region里面的样本使用同一组梯度，我们对每个region的样本量应用了EMA<ul>
+<li>t-th iteraion</li>
+<li>j-th region</li>
+<li>we have $R_j^t$</li>
+<li>apply EMA：$S_j^t = \alpha S_j^(t-1) + (1-\alpha )R_j^t$</li>
+<li>$\hat GD(g) = S_{ind(g)} M$</li>
+</ul>
+</li>
+<li>这样gradient density会更smooth and insensitive to extreme data</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GHM-R loss</p>
+<ul>
+<li><p>smooth L1：</p>
+<p>  <img src="/2021/08/31/GHM/SL1.png" width="40%;"></p>
+<ul>
+<li>通常分界点设置成$\frac{1}{9}$</li>
+<li>SL1在线性部分的导数永远是常数，没法去distinguishing of examples</li>
+<li>用$|d|$作为gradient norm则存在inf</li>
+</ul>
+</li>
+<li><p>所以先改造smooth L1：Authentic Smooth L1</p>
+<p>  <img src="/2021/08/31/GHM/ASL.png" width="40%;"></p>
+<p>  <img src="/2021/08/31/GHM/ASL1.png" width="40%;"></p>
+<ul>
+<li>$\mu=0.02$</li>
+<li>梯度范围正好在[0,1)</li>
+</ul>
+</li>
+<li><p>define gradient norm as $gr = |\frac{d}{\sqrt{d^2+\mu^2}}|$</p>
+<ul>
+<li><p>观察converged model‘s gradient norm for ASL1，发现大量是outliers</p>
+<p>  <img src="/2021/08/31/GHM/gr.png" width="40%;"></p>
+</li>
+<li><p>同样用gradient density进行reweighting</p>
+<p>  <img src="/2021/08/31/GHM/GHMR.png" width="40%;"></p>
+</li>
+<li><p>收敛状态下，不同类型的样本对模型的gradient contribution</p>
+<p>  <img src="/2021/08/31/GHM/rcontrib.png" width="40%;"></p>
+<ul>
+<li>regression是对所有正样本进行计算，主要是针对离群点进行downweighting</li>
+<li>这里面的一个观点是：在regression task里面，并非所有easy样本都是不重要的，在分类task里面，easy样本大部分都是简单的背景类，但是regression分支里面的easy sample是前景box，而且still deviated from ground truth，仍旧具有充分的优化价值</li>
+<li>所以GHM-R主要是upweight the important part of easy samples and downweight the outliers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/R-FCN/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2962,697 +3586,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/mlp系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/27/mlp系列/" itemprop="url">mlp系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T14:39:20+08:00">
-                2021-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/27/mlp系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/mlp系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[papers]</p>
-<ul>
-<li>[MLP-Mixer] MLP-Mixer: An all-MLP Architecture for Vision，Google</li>
-<li>[ResMLP] ResMLP: Feedforward networks for image classification with data-efficient training，Facebook</li>
-</ul>
-<p>[references]</p>
-<p><a href="https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect</a></p>
-<p><a href="https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww</a></p>
-<h2 id="MLP-Mixer-An-all-MLP-Architecture-for-Vision"><a href="#MLP-Mixer-An-all-MLP-Architecture-for-Vision" class="headerlink" title="MLP-Mixer: An all-MLP Architecture for Vision"></a>MLP-Mixer: An all-MLP Architecture for Vision</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>image classification task</li>
-<li>neither of [CNN, attention] are necessary</li>
-<li>our proposed MLP-Mixer<ul>
-<li>仅包含multi-layer-perceptrons</li>
-<li>independently to image patches</li>
-<li>repeated applied across either spatial locations or feature channels</li>
-<li>two types<ul>
-<li>applied independently to image patches</li>
-<li>applied across patches</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/mixer.png" width="70%;"></p>
-<ul>
-<li>输入是token sequences<ul>
-<li>non-overlapping image patches</li>
-<li>linear projected to dimension C</li>
-</ul>
-</li>
-<li>Mixer Layer<ul>
-<li>maintain the input dimension</li>
-<li>channel-mixing MLP<ul>
-<li>operate on each token independently</li>
-<li>可以看作是1x1的conv</li>
-</ul>
-</li>
-<li>token-mixing MLP<ul>
-<li>operate on each channel independently</li>
-<li>take each spatial vectors (hxw)x1 as inputs</li>
-<li>可以看作是一个global depth-wise conv，s1，same pad，kernel size是(h,w)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>最后对token embedding做GAP，提取sequence vec，然后进行类别预测</li>
-</ul>
-</li>
-<li><p>idea behind Mixer</p>
-<ul>
-<li>clearly separate the per-location operations &amp; cross-location operations </li>
-<li>CNN是同时进行这俩的</li>
-<li>transformer的MSA同时进行这俩，MLP只进行per-location operations</li>
-</ul>
-</li>
-<li><p>Mixer Layer</p>
-<ul>
-<li><p>two MLP blocks</p>
-</li>
-<li><p>given input $X\in R^{SC}$，S for spatial dim，C for channel dim</p>
-<p>  <img src="/2021/05/27/mlp系列/blocks.png" width="70%;"></p>
-</li>
-<li><p>先是token-mixing MLP</p>
-<ul>
-<li>acts on S dim</li>
-<li>maps $R^S$ to $R^S$</li>
-<li>share across C-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>然后是channel-mixing MLP</p>
-<ul>
-<li>acts on C dim</li>
-<li>maps $R^C$ to $R^C$</li>
-<li>share across S-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>fixed width，更接近transformer/RNN，而不是CNN那种金字塔结构</p>
-</li>
-<li><p>不使用positional embeddings</p>
-<ul>
-<li>the token-mixing MLPs are sensitive to the order of the input tokens</li>
-<li>may learn to represent locations</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training"><a href="#ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training" class="headerlink" title="ResMLP: Feedforward networks for image classification with data-efficient training"></a>ResMLP: Feedforward networks for image classification with data-efficient training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>entirely build upon MLP</li>
-<li>alternates from a simple residual network<ul>
-<li>a linear layer to interact with image patches</li>
-<li>a two-layer FFN to interact independently with each patch</li>
-<li>affine transform替代LN是一个特别之处</li>
-</ul>
-</li>
-<li>trained with modern strategy<ul>
-<li>heavy data-augmentation </li>
-<li>optionally distillation</li>
-</ul>
-</li>
-<li>show good performace on ImageNet classification</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>strongly inspired by ViT but simpler<ul>
-<li>没有attention层，只有fc层+gelu</li>
-<li>没有norm层，因为much more stable to train，但是用了affine transformation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/ResMLP.png" width="70%;"></p>
-<ul>
-<li>takes flattened patches as inputs<ul>
-<li>typically N=16：16x16</li>
-</ul>
-</li>
-<li>linear project the patches into embeddings<ul>
-<li>form $N^2$ d-dim embeddings</li>
-</ul>
-</li>
-<li>ResMLP Layer<ul>
-<li>main the dim throughout $[N^2,d]$</li>
-<li>a simple linear layer<ul>
-<li>interaction between the patches</li>
-<li>applied to all channels independently</li>
-<li>类似depth-wise conv with global kernel的东西，线性！！</li>
-</ul>
-</li>
-<li>a two-layer-mlp<ul>
-<li>fc-GELU-fc</li>
-<li>independently applied to all patches</li>
-<li>非线性！！</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>average pooled $[d-dim]$ + linear classifier $cls-dim$</li>
-</ul>
-</li>
-<li><p>Residual Multi-Layer Perceptron Layer</p>
-<ul>
-<li>a linear layer + a FFN layer</li>
-<li>each layer is paralleled with a skip-connection</li>
-<li><p>没用LN，但是用了learnable affine transformation</p>
-<ul>
-<li>$Aff_{\alpha, \beta} (x) = Diag(\alpha) x + \beta$</li>
-<li>rescale and shifts the input component-wise：对每个patch，分别做affine变换</li>
-<li>在推理阶段可以与上一层线性层合并：no cost</li>
-<li>用了两次<ul>
-<li>第一个用在main path上用来替代LN：初值为identity transform(1,0)</li>
-<li>第二个在residual path里面，down scale to boost，用一个small value初始化</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>given input： $d\times N^2$ matrix $X$</p>
-<p>  <img src="/2021/05/27/mlp系列/mlp1.png" width="50%;"></p>
-<ul>
-<li>affine在d-dim上做</li>
-<li>第一个Linear layer在$N^2-dim$上做：参数量$N^2 \times N^2$</li>
-<li><p>第二、三个Linear layer在$d-dim$上做：参数量$d \times 4d$ &amp; $4d \times d$</p>
-<p><img src="/2021/05/27/mlp系列/mlp2.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/24/torch-note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/24/torch-note/" itemprop="url">torch-note</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-24T15:23:48+08:00">
-                2021-05-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/24/torch-note/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/24/torch-note/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>常用库函数</p>
-<p>1.1 torch.flatten(input, start_dim=0, end_dim=-1)：展开start_dim到end_dim之间的dim成一维</p>
-<p>1.2 [einops][<a href="https://ggcgarciae.github.io/einops/2-einops-for-deep-learning/].rearrange(element" target="_blank" rel="noopener">https://ggcgarciae.github.io/einops/2-einops-for-deep-learning/].rearrange(element</a>, pattern)：贼强，用高级pattern指导张量变换</p>
-</li>
-<li><p>torch.cuda.amp</p>
-<p>自动混合精度：FloatTensor &amp; HalfTensor</p>
-<ul>
-<li><p>安装</p>
-</li>
-<li><p>使用</p>
-</li>
-</ul>
-</li>
-<li><p>torch.jit.script</p>
-<p>将模型从纯Python程序转换为能够独立于Python运行的TorchScript程序</p>
-</li>
-<li><p>[torch.nn.DataParallel &amp; DistributedDataParallel][<a href="https://blog.csdn.net/kuweicai/article/details/120516410" target="_blank" rel="noopener">https://blog.csdn.net/kuweicai/article/details/120516410</a>]</p>
-<ul>
-<li><p>DP和DDP都是实现数据并行方式的分布式训练，主要区别如下：</p>
-<ul>
-<li>DP是单进程多线程，DDP是采用多进程（有进程通信）</li>
-<li>DP只能在单机上使用，DDP单机和多机都可以使用</li>
-<li>DDP相比于DP训练速度要快</li>
-<li>DP的架构是有一个main GPU，然后一对多通信&amp;同步其他子GPU，全程负责将切分的数据和复制的模型发布到子GPU上，通信时间和卡数目成正比，DDP的通信结构是环状worker，从一开始就分配给每个进程独立的获取数据&amp;构建模型任务，每个GPU接收的数据量&amp;信息量恒定，通信成本恒定（[reference][<a href="https://blog.csdn.net/qiumokucao/article/details/120179961]）" target="_blank" rel="noopener">https://blog.csdn.net/qiumokucao/article/details/120179961]）</a></li>
-</ul>
-</li>
-<li><p>DP使用</p>
-<ul>
-<li>简单的单机多卡，forward pass在多卡上做，然后汇总的主卡，模型更新只在主卡上做，然后再分发到各子GPU</li>
-<li>GPU利用率低</li>
-<li>只需要给single model做一个封装</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net = torch.nn.DataParallel(model,device_ids=[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>])</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>[DDP使用][<a href="https://zhuanlan.zhihu.com/p/107139605" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/107139605</a>]</p>
-<ul>
-<li><p>每个batch以后，分发模型权重，太麻烦了，可以考虑同步梯度，把所有卡的loss同步，然后各自梯度更新（需要设置同样的seed）就好了——【重复计算好多遍】 要快过 【io通信分发】</p>
-</li>
-<li><p>相对复杂，核心配置参数：</p>
-<ul>
-<li>group：进程组，默认情况下，只有一个组</li>
-<li>world size：全局进程个数，如果是多机多卡就表示机器数量，如果是单机多卡就表示 GPU 数量</li>
-<li>rank：进程号，多机多卡表示机器编号，单机多卡表示 GPU编号</li>
-<li>local_rank：进程内GPU 编号</li>
-</ul>
-</li>
-<li><p>两种代码封装方式</p>
-<ul>
-<li>spawn</li>
-<li>launch：一般看到的都是torch.distributed.launch</li>
-</ul>
-</li>
-<li><p>torch.distributed.launch</p>
-<ul>
-<li><p>用法：python3 -m torch.distributed.launch [—usage] single_training_script.py [—training_script_args]</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[-h] [--nnodes NNODES] [--node_rank NODE_RANK]</span><br><span class="line">[--nproc_per_node NPROC_PER_NODE] [--master_addr MASTER_ADDR]</span><br><span class="line">[--master_port MASTER_PORT] [--use_env] [-m] [--no_python]</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>      * -h/--help：查看帮助
-      * --nnodes NNODES：节点数
-      * --node_rank NODE_RANK：当前节点的rank
-      * --nproc_per_node NPROC_PER_NODE：每个节点的GPU数量
-      * --master_addr MASTER_ADDR：node 0的IP/host name，单机多卡时候就是127.0.0.1
-      * --master_port MASTER_PORT：node 0的free port，用来节点间通信
-      * --use_env：读取环境变量的LOCAL_RANK，然后用来传递local rank
-      * -m：类似python -m，如果single_training_script.py被打包成python module了，可以-m调用
-      * --no_python：用不上
-
-    * 查看帮助：python -m torch.distributed.launch --help
-</code></pre><ol>
-<li><p>指定GPU</p>
-<ul>
-<li><p>在代码里面指定</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">os.environ[<span class="string">'CUDA_VISIBLE_DEVICES'</span>] = <span class="string">'0'</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在命令行运行脚本/文件时指定</p>
- <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CUDA_VISIBLE_DEVICES=0,1 python3 train.py</span><br><span class="line">CUDA_VISIBLE_DEVICES=0,1 sh run.sh</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在sh脚本中指定</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source bashrc</span><br><span class="line">export CUDA_VISIBLE_DEVICES=gpu_ids &amp;&amp; python3 train.py    # 两个命令</span><br><span class="line">CUDA_VISIBLE_DEVICES=gpu_ids python3 train.py              # 1个命令</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>优先级：代码&gt;命令&gt;脚本</p>
-</li>
-</ul>
-<p>============================== 分隔符 ================================</p>
-<ul>
-<li><p>.cuda()指定</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model.cuda(gpu_id)      <span class="comment"># 只能指定一张显卡</span></span><br><span class="line">model.cuda(<span class="string">'cuda:'</span>+str(gpu_ids))    <span class="comment"># 可以多卡</span></span><br><span class="line">model.cuda(<span class="string">'cuda:1,2'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>torch.cuda.set_device()指定</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">torch.cuda.set_device(gpu_id)   <span class="comment"># 单卡</span></span><br><span class="line">torch.cuda.set_device(<span class="string">'cuda:'</span>+str(gpu_ids)) <span class="comment"># 可指定多卡</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>优先级：.cuda() &gt; torch.cuda.set_device()</p>
-</li>
-</ul>
-<p>============================== 分隔符 ================================</p>
-<ul>
-<li><p>另外分隔符上下两种指定方式，指定的GPU设备的效果，会叠加：</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># run shell</span></span><br><span class="line">CUDA_VISIBLE_DEVICES=<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span> python3 train.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 代码内部</span></span><br><span class="line">model.cuda(<span class="number">1</span>)</span><br><span class="line">loss.cuda(<span class="number">1</span>)</span><br><span class="line">tensor.cuda(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>此时代码会运行在GPU3上，因为首先指定GPU 2 3 4 5作为VISIBLE_DEVICES，内部编号0 1 2 3，然后在代码内部指定1号卡，也就是外部的3号</li>
-</ul>
-</li>
-<li><p>推荐os.environ[‘CUDA_VISIBLE_DEVICES’] = ‘0’ 方式，童叟无欺</p>
-</li>
-</ul>
-</li>
-<li><p>随机种子</p>
-<p>为了保证每次训练的可复现性，在程序开始的时候固定torch的随机种子，同时也把numpy的随机种子固定</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">torch.manual_seed(<span class="number">0</span>)</span><br><span class="line">torch.cuda.manual_seed_all(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">torch.backends.cudnn.deterministic = <span class="keyword">True</span>     <span class="comment"># 每次卷积计算算法固定</span></span><br><span class="line">torch.backends.cudnn.benchmark = <span class="keyword">False</span>        <span class="comment"># 同上，组合使用</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>多卡同步 BN</p>
-<ul>
-<li><p>默认情况下，各卡用各自的数据独立计算均值和标准差</p>
-<ul>
-<li><p>因为最开始的任务mini-batch够大</p>
-</li>
-<li><p>数据同步通信浪费时间</p>
-</li>
-<li>【QUESTION】一个疑问，滑动平均最终都是近似样本均值的吧，是不是只影响训练初期的收敛速度啊，和精度有直接影响吗？？【一个解释】因为总体的数据会切分，然后分配给每个卡，这样多卡的情况下，其实不能完全保证一张卡是跑过全集的，所以可能导致每个 GPU 过拟合自己那份数据</li>
-</ul>
-</li>
-<li><p>同步BN用所有卡的数据一起计算均值和标准差，BP的时候计算全局梯度，对检测任务提升较大</p>
-</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sync_bn = torch.nn.SyncBatchNorm(num_features, eps=<span class="number">1e-05</span>, momentum=<span class="number">0.1</span>, affine=<span class="keyword">True</span>, </span><br><span class="line">                                 track_running_stats=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>张量</p>
-<ul>
-<li><p>基本属性</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tensor = torch.randn(<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>)</span><br><span class="line">print(tensor.type())  <span class="comment"># 数据类型</span></span><br><span class="line">print(tensor.size())  <span class="comment"># 张量的shape，是个元组</span></span><br><span class="line">print(tensor.dim())   <span class="comment"># 维度的数量</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>轴命名 &amp; 替代axis-index</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Tensor[N, C, H, W]</span></span><br><span class="line">images = torch.randn(<span class="number">32</span>, <span class="number">3</span>, <span class="number">56</span>, <span class="number">56</span>)</span><br><span class="line">images.sum(dim=<span class="number">1</span>)</span><br><span class="line">images.select(dim=<span class="number">1</span>, index=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># PyTorch 1.3之后</span></span><br><span class="line">NCHW = [‘N’, ‘C’, ‘H’, ‘W’]</span><br><span class="line">images = torch.randn(<span class="number">32</span>, <span class="number">3</span>, <span class="number">56</span>, <span class="number">56</span>, names=NCHW)</span><br><span class="line">images.sum(<span class="string">'C'</span>)</span><br><span class="line">images.select(<span class="string">'C'</span>, index=<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 也可以这么设置</span></span><br><span class="line">tensor = torch.rand(<span class="number">3</span>,<span class="number">4</span>,<span class="number">1</span>,<span class="number">2</span>,names=(<span class="string">'C'</span>, <span class="string">'N'</span>, <span class="string">'H'</span>, <span class="string">'W'</span>))</span><br><span class="line"><span class="comment"># 使用align_to可以对维度方便地排序</span></span><br><span class="line">tensor = tensor.align_to(<span class="string">'N'</span>, <span class="string">'C'</span>, <span class="string">'H'</span>, <span class="string">'W'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>数据类型转换</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置默认类型，pytorch中的FloatTensor远远快于DoubleTensor</span></span><br><span class="line">torch.set_default_tensor_type(torch.FloatTensor)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 类型转换</span></span><br><span class="line">tensor = tensor.cuda()       <span class="comment"># cuda类型的tensor仅用于在GPU上进行计算，不能与其他类型混用</span></span><br><span class="line">tensor = tensor.cpu()        <span class="comment"># cpu类型的tensor可以与ndarrray/PIL.Image自由转换</span></span><br><span class="line">tensor = tensor.float()</span><br><span class="line">tensor = tensor.long()</span><br><span class="line"></span><br><span class="line"><span class="comment"># ndarray</span></span><br><span class="line">ndarray = tensor.cpu().numpy()</span><br><span class="line">tensor = torch.from_numpy(ndarray).float()</span><br><span class="line">tensor = torch.from_numpy(ndarray.copy()).float()</span><br><span class="line"></span><br><span class="line"><span class="comment"># PIL.Image</span></span><br><span class="line">image = PIL.Image.fromarray(torch.clamp(tensor*<span class="number">255</span>, min=<span class="number">0</span>, max=<span class="number">255</span>).byte().permute(<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>).cpu().numpy())   <span class="comment"># byte()=uint8(), char()=int8(), [C,H,W]-&gt;[H,W,C]</span></span><br><span class="line">image = torchvision.transforms.functional.to_pil_image(tensor)</span><br><span class="line">tensor = torch.from_numpy(np.asarray(PIL.Image.open(path))).permute(<span class="number">2</span>,<span class="number">0</span>,<span class="number">1</span>).float() / <span class="number">255</span>    <span class="comment"># 0-1的f32, [C,H,W]</span></span><br><span class="line">tensor = torchvision.transforms.functional.to_tensor(PIL.Image.open(path)) </span><br><span class="line"></span><br><span class="line"><span class="comment"># scalar</span></span><br><span class="line">value = torch.rand(<span class="number">1</span>).item()</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>张量基本操作</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 负步长，pytorch不支持tensor[::-1]这样的负步长操作，需要通过张量索引实现</span></span><br><span class="line">tensor = tensor[:,:,:,torch.arange(tensor.size(<span class="number">3</span>) - <span class="number">1</span>, <span class="number">-1</span>, <span class="number">-1</span>).long()]   <span class="comment"># [N,C,H,W] 水平翻转</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 复制张量</span></span><br><span class="line">tensor.clone()                <span class="comment"># new memory, still in computation graph</span></span><br><span class="line">tensor.detach()               <span class="comment"># shared memory, not in computation graph</span></span><br><span class="line">tensor.detach.clone()()       <span class="comment"># new memory, not in computation graph</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 张量比较</span></span><br><span class="line">torch.allclose(tensor1, tensor2)  <span class="comment"># float tensor</span></span><br><span class="line">torch.equal(tensor1, tensor2)     <span class="comment"># int tensor</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 矩阵乘法</span></span><br><span class="line"><span class="comment"># Matrix multiplcation: (m*n) * (n*p) -&gt; (m*p).</span></span><br><span class="line">result = torch.mm(tensor1, tensor2)</span><br><span class="line"><span class="comment"># Batch matrix multiplication: (b*m*n) * (b*n*p) -&gt; (b*m*p)</span></span><br><span class="line">result = torch.bmm(tensor1, tensor2)</span><br><span class="line"><span class="comment"># Element-wise multiplication: (m*n) * (m*n) -&gt; (m*n)</span></span><br><span class="line">result = tensor1 * tensor2</span><br><span class="line">result = torch.mul(tensor1, tensor2)</span><br><span class="line"><span class="comment"># xjb乘之matmul: 不限定输入几维矩阵，始终后两维进行矩阵乘法，前面的维度broadcast</span></span><br><span class="line">a = torch.ones(<span class="number">2</span>,<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>)</span><br><span class="line">b = torch.ones(<span class="number">5</span>,<span class="number">4</span>,<span class="number">2</span>)</span><br><span class="line">c = torch.matmul(a,b)    <span class="comment"># torch.Size([2,5,3,2])</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>数据集Dataset, DataLoader</p>
-<ul>
-<li><p>torch.utils.data.Dataset：Dataset可以理解为一个list，上层调用时候会传给他一个index，dataset则复制读取、变换、预处理指定文件，返回一个(input_x, target_y)-pair，主体结构如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomDataset</span><span class="params">(torch.utils.data.Dataset)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># TODO</span></span><br><span class="line">        <span class="comment"># 1. Initialize file path or list of file names.</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, index)</span>:</span></span><br><span class="line">        <span class="comment"># TODO</span></span><br><span class="line">        <span class="comment"># 1. Read one data from file (e.g. using numpy.fromfile, PIL.Image.open).</span></span><br><span class="line">        <span class="comment"># 2. Preprocess the data (e.g. torchvision.Transform).</span></span><br><span class="line">        <span class="comment"># 3. Return a data pair (e.g. image and label).</span></span><br><span class="line">        <span class="comment">#这里需要注意的是，第一步：read one data，是一个data</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># You should change 0 to the total size of your dataset.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Dataset的长度代表样本量</span></span><br><span class="line"><span class="comment"># DataLoader的长度代表batch steps</span></span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>torch.utils.data.DataLoader：DataLoader是真正对接模型这一层，负责整合batch data，同时调整采样策略、workers、shuffle等一系列设置，用如下参数将其实例化（加粗为常用）：</p>
-<ul>
-<li><strong>dataset(Dataset):</strong> 传入的数据集</li>
-<li><strong>batch_size(int, optional):</strong> 每个batch有多少个样本</li>
-<li><strong>shuffle(bool, optional):</strong> 在每个epoch开始的时候，对数据进行重新排序</li>
-<li><strong>sampler(Sampler, optional):</strong> 自定义从数据集中取样本的策略，如果指定这个参数，那么shuffle必须为False</li>
-<li>batch_sampler(Sampler, optional): 与sampler类似，但是一次只返回一个batch的indices（索引），需要注意的是，一旦指定了这个参数，那么batch_size,shuffle,sampler,drop_last就不能再制定了（互斥——Mutually exclusive）</li>
-<li><strong>num_workers (int, optional):</strong> 这个参数决定了有几个进程来处理data loading。0意味着所有的数据都会被load进主进程。（默认为0）</li>
-<li>collate_fn (callable, optional): 将一个list的sample组成一个mini-batch的函数</li>
-<li><strong>pin_memory (bool, optional)：</strong> 如果设置为True，那么data loader将会在返回它们之前，将tensors拷贝到CUDA中的固定内存（CUDA pinned memory）中</li>
-<li><strong>drop_last (bool, optional):</strong> 如果设置为True：这个是对最后的未完成的batch来说的，比如你的batch_size设置为64，而一个epoch只有100个样本，那么训练的时候后面的36个就被扔掉了。 如果为False（默认），那么会继续正常执行，只是最后的batch_size会小一点</li>
-<li>timeout(numeric, optional):如果是正数，表明等待从worker进程中收集一个batch等待的时间，若超出设定的时间还没有收集到，那就不收集这个内容了。这个numeric应总是大于等于0。默认为0</li>
-<li>worker_init_fn (callable, optional): 每个worker初始化函数 If not None, this will be called on eachworker subprocess with the worker id (an int in [0, num_workers - 1]) as input, after seeding and before data loading. (default: None) </li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>采样器Sampler</p>
-<ul>
-<li><p>所有的采样器都继承自torch.utils.data.sampler</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SequentialSampler</span><span class="params">(Sampler)</span>:</span></span><br><span class="line">  <span class="string">r"""Samples elements sequentially, always in the same order.</span></span><br><span class="line"><span class="string">    Arguments:</span></span><br><span class="line"><span class="string">        data_source (Dataset): dataset to sample from</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">   <span class="comment"># 产生顺序 迭代器</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, data_source)</span>:</span></span><br><span class="line">        self.data_source = data_source</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> iter(range(len(self.data_source)))     <span class="comment"># 主要区别在这里</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> len(self.data_source)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>已有Sampler</p>
-<pre><code>* SequentialSampler(data_source)：按顺序采集，data_source可以是一个Dataset，返回一个indices的生成器
-</code></pre><ul>
-<li><strong>RandomSampler(data_source, replacement=False, num_samples=None)：</strong>随机、有/无放回、采集指定数目的样本<ul>
-<li><strong>SubsetRandomSampler(indices)：</strong>无放回采样，就是打乱全集，是RandomSampler的懒人常用写法</li>
-</ul>
-</li>
-<li>WeightedRandomSampler(weights, num_samples, replacement=True)：也是RandomSampler的衍生，样本带了权重<ul>
-<li>BatchSampler(sampler, batch_size, drop_last)：将以上Sampler包装成批索引返回</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>模型</p>
-<ul>
-<li><p>nn.Module：定义模型时继承的基类，因为基类封装了train/eval/梯度回传等高级功能，就相当于keras的Model类</p>
-<ul>
-<li>自定义层、模型、Loss都是继承这个类</li>
-<li><p>迭代模型的所有子层：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> model.modules():               <span class="comment"># 返回所有子层</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(layer, torch.nn.Conv2d):</span><br><span class="line">        torch.nn.init.kaiming_normal_(layer.weight, mode=<span class="string">'fan_out'</span>,</span><br><span class="line">                                      nonlinearity=<span class="string">'relu'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> model.named_modules():         <span class="comment"># 返回所有的[名字,子层]pairs</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(layer[<span class="number">1</span>],nn.Conv2d):</span><br><span class="line">         conv_model.add_module(layer[<span class="number">0</span>],layer[<span class="number">1</span>])</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>model(x) 前用 model.train() 和 model.eval() 切换网络状态</p>
-</li>
-</ul>
-</li>
-<li><p>nn.ModuleList：是个List，可以把任意 nn.Module 的子类加入到这个List，而且是会自动注册到整个网络上（在computation graph上），但是用普通的python List定义则不会真正添加进网络结构里（应该跟局部定义域有关吧）</p>
-<ul>
-<li>module的执行顺序根据 forward 函数来决定</li>
-<li>一个module可以在 forward 函数中被调用多次，但是参数共享</li>
-</ul>
-</li>
-<li><p>nn.Sequential：它更进一步，已经在内部实现了forward方法——定义即实现，必须按照层顺序去定义</p>
-</li>
-<li><p>nn.Xxx &amp; nn.functional.xxx：如nn.Conv2d和nn.functional.conv2d，这就类似keras.Layer.Conv2d和tf.nn.conv2d，一个是封装的层，需要实例化使用，一个是函数借口，直接使用但是要传入参数</p>
-</li>
-<li><p>模型参数量：torch.numel</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">total_parameters = sum(torch.numel(p) <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters())</span><br><span class="line">trained_parameters = sum(torch.numel(p) <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> p.requires_grad)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>模型参数：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">model.parameters()     <span class="comment"># 生成器</span></span><br><span class="line">model.state_dict()     <span class="comment"># dict</span></span><br><span class="line"></span><br><span class="line">model.load_state_dict(torch.load(<span class="string">'model.pth'</span>), strict=<span class="keyword">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型参数量：torch.numel</span></span><br><span class="line">sum_parameters = sum(torch.numel(parameter) <span class="keyword">for</span> parameter <span class="keyword">in</span> model.parameters())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 浮点运算次数：GFLOPs</span></span><br><span class="line">model.layers[<span class="number">0</span>].flops() / <span class="number">1e9</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>1个special case：BN层，在调用.parameters()方法的时候，可以看到BN层只有两个参数，但是实际上还有running mean &amp; running std，这两个变量严格来说不算网络参数，而是一个数值统计，所以在state_dict()里面可以看到</li>
-</ul>
-</li>
-<li><p>以较大学习率微调全连接层，较小学习率微调卷积层</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = torchvision.models.resnet18(pretrained=<span class="keyword">True</span>)</span><br><span class="line">finetuned_parameters = list(map(id, model.fc.parameters()))</span><br><span class="line">conv_parameters = (p <span class="keyword">for</span> p <span class="keyword">in</span> model.parameters() <span class="keyword">if</span> id(p) <span class="keyword">not</span> <span class="keyword">in</span> finetuned_parameters)</span><br><span class="line">parameters = [&#123;<span class="string">'params'</span>: conv_parameters, <span class="string">'lr'</span>: <span class="number">1e-3</span>&#125;, </span><br><span class="line">              &#123;<span class="string">'params'</span>: model.fc.parameters()&#125;]</span><br><span class="line">optimizer = torch.optim.SGD(parameters, lr=<span class="number">1e-2</span>, momentum=<span class="number">0.9</span>, weight_decay=<span class="number">1e-4</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>pytorch-summary</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3702,7 +3640,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">160</span>
+                  <span class="site-state-item-count">162</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3715,7 +3653,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">94</span>
+                  <span class="site-state-item-count">95</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
