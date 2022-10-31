@@ -276,6 +276,592 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/01/20/how-to-train-ViT/" itemprop="url">how to train ViT</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-20T18:30:32+08:00">
+                2022-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/20/how-to-train-ViT/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/20/how-to-train-ViT/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>炼丹大法：</p>
+<p>[Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了</p>
+<p>[Google 2022] Model soups: averaging weights of multiple fine-tuned models improves accuracy without increasing inference time，多个模型权重做平均</p>
+<p>[Facebook DeiT 2021] Training data-efficient image transformers &amp; distillation through attention，常规技巧大全</p>
+<h2 id="How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><a href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers" class="headerlink" title="How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers"></a>How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>ViT vs. CNN<ul>
+<li>没有了平移不变形</li>
+<li>requires large dataset and strong AugReg</li>
+</ul>
+</li>
+<li>这篇paper的contribution是用大量实验说明，carefully selected regularization and augmentation比憨憨增加10倍数据量有用，简单讲就是在超参方面给一些insight</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>basic setup</p>
+<ul>
+<li><p>pre-training + transfer-learning：是在google research的原版代码上，TPU上跑的</p>
+</li>
+<li><p>inference是在timm的torch ViT，用V100跑的</p>
+</li>
+<li><p>data</p>
+<ul>
+<li>pretraining：imagenet</li>
+<li>transfer：cifar</li>
+</ul>
+</li>
+<li><p>models</p>
+<ul>
+<li>[ViT-Ti, ViT-S, ViT-B and ViT-L][<a href="https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py" target="_blank" rel="noopener">https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py</a>]</li>
+<li>决定模型scale的几个要素：<ul>
+<li>depth：12，24，32，40，48</li>
+<li>embed_dim：192，384，768，1024，1280，1408</li>
+<li>mlp_ratio：4，48/11，64/13</li>
+<li>num_heads：3，6，12，16</li>
+</ul>
+</li>
+<li>还有影响计算量的变量：<ul>
+<li>resolution：224，384</li>
+<li>patch_size：8，16，32</li>
+</ul>
+</li>
+<li><p>和原版唯一的不同点是去掉了MLP head里面的hidden layer——那个fc-tanh，据说没有performance提升，还会引发optimization instabilities</p>
+<p><img src="/2022/01/20/how-to-train-ViT/ViTs.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Regularization and data augmentations</p>
+<ul>
+<li>dropout after each dense-act except the Dense_QKV：0.1</li>
+<li>stochastic depth：线性增长dbr，till 0.1</li>
+<li>Mixup：beta分布的alpha</li>
+<li>RandAugment：randLayers L &amp; randMagnitude M</li>
+<li>weight decay：0.1 / 0.03，注意这个weight decay是裸的，实际计算是new_p = new_p - p*weight_decay*lr，这个WD*lr可以看作实际的weight decay，也就1e-4/-5量级</li>
+</ul>
+</li>
+<li><p>Pre-training</p>
+<ul>
+<li>Adam：[0.9,0.999]</li>
+<li>batch size：4096</li>
+<li>cosine lr schedule with linear warmup(10k steps)</li>
+<li>gradients clip at global norm 1</li>
+<li>crop &amp; random horizontal flipping</li>
+<li>epochs：ImageNet-1k 300 epochs，ImageNet-21k [30,300] epochs</li>
+</ul>
+</li>
+<li><p>Fine-tuning</p>
+<ul>
+<li>SGD：0.9</li>
+<li>batch size：512</li>
+<li>cosine lr schedule with linear warmup</li>
+<li>gradients clip at global norm 1</li>
+<li>resolution：[224,384]</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>结论</p>
+<ul>
+<li><p>Scaling datasets with AugReg and compute：加大数据量，加强aug&amp;reg</p>
+<ul>
+<li><p>proper的AugReg和10x的数据量都能引导模型精度提升，而且是差不多的水平</p>
+<p><img src="/2022/01/20/how-to-train-ViT/f1.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Transfer is the better option：永远用预权重去transfer，尤其大模型</p>
+<ul>
+<li>在数据量有限的情况下，train from scratch基本上不能追上transfer learning的精度</li>
+</ul>
+<p><img src="/2022/01/20/how-to-train-ViT/f2.png" width="40%;"></p>
+</li>
+<li><p>More data yields more generic models：加大数据，越大范化性越好</p>
+</li>
+<li><p>Prefer augmentation to regularization：非要比的话aug &gt; reg，成年人两个都要</p>
+<ul>
+<li>for mid-size dataset like ImageNet-1k any kind of AugReg helps</li>
+<li>for a larger dataset like ImageNet-21k regularization almost hurts，但是aug始终有用</li>
+</ul>
+<p><img src="/2022/01/20/how-to-train-ViT/f4.png" width="70%;"></p>
+</li>
+<li><p>Choosing which pre-trained model to transfer</p>
+</li>
+<li>Prefer increasing patch-size to shrinking model-size：显存有限情况下优先加大patch size<ul>
+<li>相似的计算时间，Ti-16要比S-32差</li>
+<li>因为patch-size只影响计算量，而model-size影响了参数量，直接影响模型性能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Training-data-efficient-image-transformers-amp-distillation-through-attention"><a href="#Training-data-efficient-image-transformers-amp-distillation-through-attention" class="headerlink" title="Training data-efficient image transformers &amp; distillation through attention"></a>Training data-efficient image transformers &amp; distillation through attention</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>大数据+大模型的高精度模型不是谁都负担得起的</li>
+<li>we produce competitive model<ul>
+<li>use Imagenet only</li>
+<li>on single computer，8-gpu</li>
+<li>less than 3 days，53 hours pretraining + 20 hours finetuning</li>
+<li>模型：86M，top-1 83.1%</li>
+<li>脸厂接地气！！！</li>
+</ul>
+</li>
+<li>we also propose a tranformer-specific teacher-student strategy<ul>
+<li>token-based distillation</li>
+<li>use a convnet as teacher</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>本文就是在探索训练transformer的hyper-parameters、各种训练技巧</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit.png" width="50%;"></p>
+</li>
+<li><p>Knowledge Distillation (KD)</p>
+<ul>
+<li>本文主要关注teacher-student</li>
+<li>用teacher生成的softmax结果（soft label）去训练学生，相当于用student蒸馏teacher</li>
+</ul>
+</li>
+<li>the class token<ul>
+<li>a trainable vector</li>
+<li>和patch token接在一起</li>
+<li>然后接transformer layers</li>
+<li>然后 projected with a linear layer to predict the class</li>
+<li>这种结构force self-attention在patch token和class token之间进行信息交换</li>
+<li>因为class token是唯一的监督信息，而patch token是唯一的输入变量</li>
+</ul>
+</li>
+<li>contributions<ul>
+<li>scaling down models：DeiT-S和DeiT-Ti，向下挑战resnet50和resnet18</li>
+<li>introduce a new distillation procedure based on a distillation token，类似class token的角色</li>
+<li>特殊的distillation机制使得transformer相比较于从同类结构更能从convnet上学到更多</li>
+<li>well transfer</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>首先假设我们有了一个strong teacher，我们的任务是通过exploiting the teacher来训练一个高质量的transformer</p>
+</li>
+<li><p>Soft distillation</p>
+<ul>
+<li>teacher的softmax logits不直接做标签，而是计算两个KL divergence</li>
+<li><p>CE + KL loss</p>
+<p><img src="/2022/01/20/how-to-train-ViT/Soft distillation.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Hard-label distillation</p>
+<ul>
+<li>就直接用作label</li>
+<li><p>CE + CE</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hard distillation.png" width="80%;"></p>
+</li>
+<li><p>实验发现hard比soft结果好</p>
+</li>
+</ul>
+</li>
+<li><p>Distillation token</p>
+<ul>
+<li>在token list上再添加一个new token</li>
+<li>跟class token的工作任务一样</li>
+<li>distillation token的优化目标是上述loss的distillation component</li>
+<li>与class token相辅相成</li>
+<li><p>作为对比，也尝试了用原本的CE loss训练两个独立的class token，发现这样最终两个class token的cosine similarity高度接近1，说明额外的class token没有带来有用的东西，但是class token和distillation token的相似度最多也就0.93，说明distillation branch给模型add something，【难道不是因为target不同所以才不同吗？？？】</p>
+<p><img src="/2022/01/20/how-to-train-ViT/deit1.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Fine-tuning with distillation</p>
+<ul>
+<li>finetuning阶段用teacher label还是ground truth label？</li>
+<li>实验结果是teacher label好一点</li>
+</ul>
+</li>
+<li><p>Joint classifiers</p>
+<ul>
+<li>两个softmax head相加</li>
+<li>然后make the prediction</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Training details &amp; ablation</p>
+<ul>
+<li><p>Initialization</p>
+<ul>
+<li>Transformers are highly sensitive to initialization，可能会导致不收敛</li>
+<li>推荐是weights用truncated normal distribution</li>
+</ul>
+</li>
+<li><p>Data-Augmentation</p>
+<ul>
+<li>Auto-Augment, Rand-Augment, random erasing, Mixup等等</li>
+<li>transformers require a strong data augmentation：几乎都有用</li>
+<li><p>除了Dropout：所以我们把Dropout置零了</p>
+<p><img src="/2022/01/20/how-to-train-ViT/training details.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Optimizers &amp; Regularization</p>
+<ul>
+<li>AdamW</li>
+<li>和ViT一样的learning rate</li>
+<li><p>但是much smaller weight decay：发现weight decay会hurt convergence</p>
+<p><img src="/2022/01/20/how-to-train-ViT/hyper.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/13/MAE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/01/13/MAE/" itemprop="url">MAE</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-13T11:08:34+08:00">
+                2022-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/13/MAE/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/13/MAE/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<p>[MAE] Masked Autoencoders Are Scalable Vision Learners：恺明，将BERT的掩码自监督模式搬到图像领域，设计基于masked patches的图像重建任务</p>
+<p>[VideoMAE] VideoMAE: Masked Autoencoders are Data-Efﬁcient Learners for Self-Supervised Video Pre-Training：腾讯AI Lab，进一步搬运到video领域</p>
+<h2 id="Masked-Autoencoders-Are-Scalable-Vision-Learners"><a href="#Masked-Autoencoders-Are-Scalable-Vision-Learners" class="headerlink" title="Masked Autoencoders Are Scalable Vision Learners"></a>Masked Autoencoders Are Scalable Vision Learners</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>一种自监督训练(pretraining)方式，用来提升模型泛化性能</li>
+<li>技术方案：<ul>
+<li>mask &amp; reconstruct</li>
+<li>encoder-decoder architecture<ul>
+<li>encoder operates only on visible patches：首先对input patches做random sampling，只选取少量patches给到encoder</li>
+<li>lightweight decoder run reconstruction on (masked) tokens：将encoded patches和mask tokens组合，给到decoder，用于重建原始图像</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>精度<ul>
+<li>with MAE pretraining，ViT-Huge on ImageNet-1k：87.8%</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>自监督路线能给到模型更大体量的数据，like NLP，masked autoencoding也是经典的BERT训练方式，but现实是autoencoding methods in vision lags behind NLP</p>
+<ul>
+<li>information density：NLP是通过提取高级语义信息去推断空缺的，而图像如果有充足的邻里低级空间信息，就能重建出来不错的效果，导致模型没学到啥高级语义信息就收敛了，本文的解决方案是random mask极大比例的patches，largely reduce redundancy</li>
+<li>decoder plays a different role be- tween reconstructing text and images：和上一条呼应，visual decoder重建的是像素，低级信息，NLP decoder重建的是词向量，是高级表征，因此BERT用了个贼微小的结构来建模decoder——一个MLP，但是图像这边decoder的设计就重要的多——plays a key role in determining the semantic level of the learned latent representations </li>
+</ul>
+</li>
+<li><p>our MAE</p>
+<ul>
+<li>不对称encoder-decoder</li>
+<li>high portion masking：既提升acc又减少计算量，easy to scale-up</li>
+<li><p>workflow</p>
+<ul>
+<li>MAE pretraing：encode random sampled patches，decode encoded&amp;masked tokens</li>
+<li>down stream task：save encoder for recognition tasks</li>
+</ul>
+<p><img src="/2022/01/13/MAE/MAE.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>masking<ul>
+<li>切分图像：non-overlapping patches</li>
+<li>随机采样：random sample the patches following a uniform distribution</li>
+<li>high masking ratio：一定要构建这样的task，不能简单通过邻里低级信息恢复出来，必须要深入挖掘高级语义信息，才能推断出空缺是啥</li>
+</ul>
+</li>
+<li>MAE encoder<ul>
+<li>ViT</li>
+<li>given patches：linear proj + PE</li>
+<li>operates on a small visible subset(25%) of the full set</li>
+<li>负责recognition任务</li>
+</ul>
+</li>
+<li>MAE decoder<ul>
+<li>a series of Transformer blocks：远小于encoder，narrower and shallower，单个token的计算量是encoder的&lt;10%</li>
+<li>given full set tokens<ul>
+<li>mask tokens：a shared &amp; learned vector 用来表征missing patches</li>
+<li>add PE：从而区别不同的mask token</li>
+</ul>
+</li>
+<li>负责reconstruction任务</li>
+</ul>
+</li>
+<li>Reconstruction target<ul>
+<li>decoder gives the full set reconstructed tokens：[b,N,D]<ul>
+<li>N：patch sequence length</li>
+<li>D：patch pixel values</li>
+</ul>
+</li>
+<li>reshape：[b,H,W,C]</li>
+<li>重建loss，per-pixel MSE：compute only on masked patches</li>
+<li>【QUESTION，这个还没理解】还有一个变体，官方代码里叫norm_pix_loss，声称是for better representation learning，以每个patch的norm作为target：<ul>
+<li>对每个masked patch，计算mean&amp;std，</li>
+<li>然后normalize，</li>
+<li>这个normed patch作为reconstruction target</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/12/08/det-transformers/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3348,451 +3934,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/16/L2-Regularization-and-Batch-Norm/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/16/L2-Regularization-and-Batch-Norm/" itemprop="url">L2 Regularization and Batch Norm</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-16T13:53:55+08:00">
-                2021-09-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/16/L2-Regularization-and-Batch-Norm/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/16/L2-Regularization-and-Batch-Norm/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>reference：</p>
-<p><a href="https://blog.janestreet.com/l2-regularization-and-batch-norm/" target="_blank" rel="noopener">https://blog.janestreet.com/l2-regularization-and-batch-norm/</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/56142484" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/56142484</a></p>
-<p><a href="https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html" target="_blank" rel="noopener">https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html</a></p>
-<p>解释了之前的一个疑点：</p>
-<ul>
-<li>在keras自定义的BN层中，没有类似kernel_regularizer这样的参数</li>
-<li>在我们写自定义optmizer的时候，BN层也不进行weight decay的</li>
-</ul>
-<h2 id="L2-Regularization-versus-Batch-and-Weight-Normalization"><a href="#L2-Regularization-versus-Batch-and-Weight-Normalization" class="headerlink" title="L2 Regularization versus Batch and Weight Normalization"></a>L2 Regularization versus Batch and Weight Normalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>两个common tricks：Normalization（BN、WN、LN等）和L2 Regularization<ul>
-<li>发现两者结合时L2 regularization对normalization层没有正则效果</li>
-<li>L2 regularization反而对norm layer的scale有影响，间接影响了learning rate</li>
-<li>现代优化器如Adam只能间接消除这种影响</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>BN</p>
-<ul>
-<li>popular in training deep networks</li>
-<li>solve the problem of covariate shift</li>
-<li>使得每个神经元的输入保持normal分布，加速训练</li>
-<li>mean &amp; variance：training time基于每个mini-batch计算，test time使用所有iteration的mean &amp; variance的EMA</li>
-</ul>
-</li>
-<li><p>usually trained with SGD with L2 regularization</p>
-<ul>
-<li><p>result in weight decay：从数学表示上等价于对权重做衰减</p>
-</li>
-<li><p>每一步权重scaled by a 小于1的数</p>
-</li>
-<li>但是normalization strategies是对scale of the weights invariant的，因为在输入神经元之前都会进行norm</li>
-<li>therefore<ul>
-<li>there is no regularizing effect</li>
-<li>rather strongly influence the learning rate??👂</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>L2 Regularization </p>
-<ul>
-<li><p>formulation：</p>
-<ul>
-<li>在loss的基础上加一个regularization term，$L_{\lambda}(w)=L(w)+\lambda ||w||^2_2$</li>
-<li>loss是每个样本经过一系列权重运算，$L(w)=\sum_N l_i (y(X_i;w,\gamma,\beta))$</li>
-<li>当使用normalization layer的时候：$y(X_i;w,\alpha,\beta)=y(X_i;\alpha w,\gamma,\beta)$，即loss term不会变</li>
-<li>$L_{\lambda}(\alpha w)=L(w)+\lambda||w||^2_2$</li>
-<li>在有normalization layer的时候，L2 penalty还是能够通过reg term force权重的scale越来越小，但是不会影响优化进程（不影响main objective value），因为loss term不变</li>
-</ul>
-</li>
-<li><p>Effect of the Scale of Weights on Learning Rate</p>
-<ul>
-<li>BN层的输出是scale invariant的，但是梯度不是，梯度是成反比被抑制的！</li>
-<li><p>所以weights在变小，同时梯度在变大！</p>
-<p><img src="/2021/09/16/L2-Regularization-and-Batch-Norm/lr.png" width="70%;"></p>
-</li>
-<li><p>在减小weight scale的时候，网络的梯度会变大，等价于学习率在变大，会引起震荡不稳定</p>
-</li>
-<li>所以在设定hyper的时候，如果我们要适当加大weight decay $\lambda$，就要反比scale学习率</li>
-</ul>
-</li>
-<li><p>Effect of Regularization on the Scale of Weights</p>
-<ul>
-<li>during training the scale of weights will change<ul>
-<li>the gradients of the loss function will cause the norm of the weights to grow</li>
-<li>the regularization term causes the weights to shrink</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/10/SAM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/10/SAM/" itemprop="url">SAM</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-10T11:08:26+08:00">
-                2021-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/10/SAM/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/10/SAM/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>google brain，引用量51，但是ImageNet榜单/SOTA模型的对比实验里面经常能够看到这个SAM，出圈形式为分类模型+SAM</p>
-<p>SAM：Sharpness-Aware Minimization，锐度感知最小化</p>
-<p>official repo：<a href="https://github.com/google-research/sam" target="_blank" rel="noopener">https://github.com/google-research/sam</a></p>
-<h2 id="Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization"><a href="#Sharpness-Aware-Minimization-for-Efficiently-Improving-Generalization" class="headerlink" title="Sharpness-Aware Minimization for Efficiently Improving Generalization"></a>Sharpness-Aware Minimization for Efficiently Improving Generalization</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>heavily overparametered models：training loss能训到极小，但是generalization issue</li>
-<li>we propose<ul>
-<li>Sharpness-Aware Minimization (SAM)</li>
-<li>同时最小化loss和loss sharpness</li>
-<li>improve model generalization</li>
-<li>robustness to label noise</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>CIFAR 10&amp;100</li>
-<li>ImageNet</li>
-<li>finetuning tasks</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>typical loss &amp; optimizer</p>
-<ul>
-<li>population loss：我们实际想得到的是在当前训练集所代表的分布下的最优解</li>
-<li><p>training set loss：但事实上我们只能用所有的训练样本来代表这个分布</p>
-<p><img src="/2021/09/10/SAM/loss.png" width="80%;"></p>
-</li>
-<li><p>因为loss函数是non-convex的，所以可能存在多个local even global minima对应的loss value是一样的，但是generalization performance确是不同的</p>
-</li>
-</ul>
-</li>
-<li><p>成熟的全套防止过拟合手段</p>
-<ul>
-<li>loss</li>
-<li>optimizer</li>
-<li>dropout</li>
-<li>batch normalization</li>
-<li>mixed sample augmentations</li>
-</ul>
-</li>
-<li>our approach<ul>
-<li>directly leverage the geometry of the loss landscape</li>
-<li>and its connection to generalization (generalization bound)</li>
-<li>proved additive to existing techniques</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>motivation</p>
-<ul>
-<li>rather than 寻找一个weight value that have low loss，我们寻找的是那种连带他临近的value都能有low loss的value</li>
-<li>也就是既有low loss又有low曲度</li>
-</ul>
-</li>
-<li><p>sharpness term</p>
-<ul>
-<li>$\max \limits_{||\epsilon||_p &lt; \rho} L_s(w+\epsilon) - L_s(w)$</li>
-<li>衡量模型在w处的sharpness</li>
-</ul>
-</li>
-<li><p>Sharpness-Aware Minimization (SAM) formulation</p>
-<ul>
-<li>sharpness term再加上train loss再加上regularization term</li>
-<li>$L_S^{SAM}(w)=\max\limits_{a} L_s(w+\epsilon)$</li>
-<li>$\min \limits_{w} L_S^{SAM}(w) + \lambda ||w||^2_2$</li>
-<li>prevent the model from converting to a sharp minimum</li>
-</ul>
-</li>
-<li><p>effective approximation</p>
-<ul>
-<li><p>bound</p>
-<ul>
-<li>with $\frac{1}{p} + \frac{1}{q} = 1$</li>
-</ul>
-<p><img src="/2021/09/10/SAM/bound.png" width="80%;"></p>
-</li>
-<li><p>approximation</p>
-<p><img src="/2021/09/10/SAM/approximation.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>pseudo code</p>
-<p>  <img src="/2021/09/10/SAM/algorithm.png" width="80%;"></p>
-<ul>
-<li>given a min-batch</li>
-<li>首先计算当前batch的training loss，和当前梯度，$w_t$ to $w_{t+1}$</li>
-<li>然后计算近似为梯度norm的步长$\hat\epsilon(w)$，equation2，$w_t$ to $w_{adv}$，这里面的adv联动了另一篇论文《AdvProp: Adversarial Examples Improve Image Recognition》</li>
-<li>然后计算近似的sharpness term，可以理解为training loss在w邻居处的梯度，equation3，应该是蓝色箭头的反方向，图上没标记出来</li>
-<li>用w邻居的梯度来更新w的权重，用负梯度（蓝色箭头）</li>
-<li>overll就是：要向前走之前，先回退，缺点是两次梯度计算，时间double</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验结论</p>
-<ul>
-<li><p>能优化到损失的最平坦的最小值的地方，增强泛化能力</p>
-<p>  <img src="/2021/09/10/SAM/minimum.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3847,7 +3988,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">162</span>
+                  <span class="site-state-item-count">164</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3860,7 +4001,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">95</span>
+                  <span class="site-state-item-count">96</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

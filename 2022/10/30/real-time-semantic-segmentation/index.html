@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta property="og:type" content="article">
+<meta property="og:title" content="real-time semantic segmentation">
+<meta property="og:url" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/leaderboard.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/FAM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/halve.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/feature%20map.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/gatemap.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/fuse.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/SFNet-Lite.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/detail%20guidance.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/STDC.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/reception%20field.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/STDC%20hypers.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/STDC-Seg.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/detail%20feature.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/backbone%20cmp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/backbone%20cmp1.png">
+<meta property="og:updated_time" content="2022-10-30T11:25:59.958Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="real-time semantic segmentation">
+<meta name="twitter:description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/leaderboard.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/"/>
+
+
+
+
+
+  <title>real-time semantic segmentation | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">real-time semantic segmentation</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-30T10:02:35+08:00">
+                2022-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/10/30/real-time-semantic-segmentation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/30/real-time-semantic-segmentation/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>cityscape leaderboard:</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/leaderboard.png" width="80%;"></p>
+<ul>
+<li>[PIDNet 2022] </li>
+<li>[SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing</li>
+<li>[SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</li>
+<li>[PP-LiteSeg 2022] PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</li>
+<li>DDRNet</li>
+<li>[STDC-Seg 2021CVPR] Rethinking BiSeNet For Real-time Semantic Segmentation</li>
+</ul>
+<h2 id="PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller"><a href="#PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller" class="headerlink" title="PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller"></a>PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</h2><ol>
+<li>动机</li>
+<li>论点</li>
+<li>方法</li>
+</ol>
+<h2 id="SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><a href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow" class="headerlink" title="SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow"></a>SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>widely used atrous convolution &amp; feaature pyramid: computation intensive or ineffective</li>
+<li>we propose SFNet &amp; SFNet-Lite<ul>
+<li>Flow Alignment Module (FAM) to learn sematic flow</li>
+<li>Gated Dual Flow Alignment Module (GD-FAM): directly align the highest &amp; lowest resolution feature maps</li>
+</ul>
+</li>
+<li>speed &amp; accuracy <ul>
+<li>verified on 4 driving datasets (Cityscapes, Mapillary, IDD and BDD)</li>
+<li>SFNet-Lite-R18 back: 80.1 mIoU / 60 FPS </li>
+<li>SFNet-Lite-STDC back: 78.8 mIoU / 120 FPS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>previous methods</p>
+<ul>
+<li>FCN<ul>
+<li>开创性的工作</li>
+<li>lack of detailed object boundary information due to down-sampling</li>
+</ul>
+</li>
+<li>deeplab<ul>
+<li>atrous convolutions （last 4/5 stage）</li>
+<li>multiscale feature representation （ASPP）</li>
+</ul>
+</li>
+<li>vision transformer<ul>
+<li>建模成query-based per-segment prediction</li>
+<li>strong performance but real time inference speed不理想</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>trade-off</p>
+<ul>
+<li>maintain detailed resolution：空洞卷积，resolution大计算量就大，很难实时</li>
+<li>get features that exhibit strong semantic representation：biFPN style feature merge，有一定提升，但还是不如those hold large feature maps</li>
+<li>本文的推测是：ineffective propagation of semantics from deep layers to shallow layers，across level的semantics are not well aligned，粗暴的downsample再upsample，无法恢复细节边缘信息</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li>propose FAM &amp; SFNet<ul>
+<li>不同stage的feature之间，先做alignment，warp low level feature之后再merge</li>
+<li>R18-back： 79.8% mIoU / 33 FPS on cityscape</li>
+<li>DF2-back：77.8% mIoU / 103 FPS </li>
+</ul>
+</li>
+<li><p>propose GD-FAM &amp; SFNet-Lite</p>
+<ul>
+<li>为了更快，把密集的FAM换成只做一次的GD-FAM</li>
+<li>只merge this highest &amp; lowest尺度的features</li>
+<li>ResNet-18 back：80.1% mIoU / 49 FPS on cityscape</li>
+<li>STDCv1-back： 78.7 mIoU / 120 FPS</li>
+</ul>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/FAM.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>出发点： the misalignment between feature maps caused by residual connection, repeated downsampling and up- sampling operations</p>
+</li>
+<li><p>inspiration：dynamic upsampling interpolation </p>
+</li>
+<li><p>FAM</p>
+<ul>
+<li><p>build in the FPN framework</p>
+</li>
+<li><p>define Semantic Flow：between different levels in a feature pyramid</p>
+</li>
+<li><p>pipeline</p>
+<ul>
+<li>首先通道对齐</li>
+<li>然后上采样，尺度对齐，$F \in R^{H\times W \times C}$</li>
+<li>然后concat两个level的特征，（但是没有像真正的光流对齐FlowNet一样再concat上grid coordinates）</li>
+<li>然后用两层3x3的卷积做semantic flow field的预测，$\Delta_{low-level} \in R^{H\times W\times 2}$</li>
+<li>然后warp low-level feature</li>
+<li><p>然后add &amp; halve</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/halve.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>和deformable conv的区别</p>
+<ul>
+<li>首先这个offset是通过融合两个尺度特征得到的，DCN是特征自己预测的</li>
+<li>其次DCN是为了得到更大的/更自由的reception field，more like attention，本文是为了align feature</li>
+</ul>
+</li>
+<li><p>可以看到warp &amp; add以后的feature map相比较于直接上采样然后add，更加structurally neat，目标可以有更consistent的representation</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/feature map.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>the whole network</p>
+<ul>
+<li>backbone<ul>
+<li>ImageNet pretrained ResNet / DF series</li>
+<li>4 stages</li>
+<li>stride2 in the first place per stage</li>
+<li>Pyramid Pooling Module (PPM)，ASPP/NL is also experimented，后面实验部分说精度不如PPM</li>
+</ul>
+</li>
+<li>Aligned FPN decoder<ul>
+<li>encoder那边过来的stage2/3/4的low-level feature，被FAM aligned，然后fused into their bottom levels</li>
+<li>最终的x4的prediction feature，concat来自所有尺度的特征，考虑到也存在mis-alignment，本文也实验性的添加了PPM，但是在real-time application中没加</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Gated Dual Flow Alignment Module and SFNet-Lite</p>
+<ul>
+<li><p>上述版本的SFNet，在speed上是比BiSegNet慢的，thus we explore more compact decoder</p>
+</li>
+<li><p>takes F1 &amp; F4 as inputs</p>
+</li>
+<li><p>outputs a refined high-resolution map</p>
+</li>
+<li><p>pipeline</p>
+<ul>
+<li>首先将F4上采样的F1的resolution</li>
+<li>然后concat，然后3x3convs，预测offsets，$\Delta \in R^{H\times W\times 4}$</li>
+<li><p>然后split成$\Delta_{F1}$和$\Delta_{F4}$，分别给到F1和F4做align</p>
+</li>
+<li><p>再用F1和F4生成一个gate map，attention-style的结构，用pooling，1x1 conv和sigmoid，给两个warped feature做gated sum，思路是make full use of high level semantic feature and let the low level feature as a supplement of high level feature</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/gatemap.png" width="40%;"></p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/fuse.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SFNet-Lite structure</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/SFNet-Lite.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation"><a href="#STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation" class="headerlink" title="STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation"></a>STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>BiSeNet<ul>
+<li>use extra path to encode spatial information (low-level)</li>
+<li>time consuming</li>
+<li>not convenient to use pretrained backbones</li>
+<li>the auxiliary path is always lack of low-level information guidance</li>
+</ul>
+</li>
+<li>this paper<ul>
+<li>回归test-time singe-stream manner</li>
+<li>用一个Detail guidance module来促进backbone的low-level stage学习spatial feature，有直接监督，且test-time free cost</li>
+<li>设计了STDC backbone，主要包含STDC module (Short-Term Dense Concatentae Network)，有点类似denseNet的block</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>ImageNet</li>
+<li>Cityscapes: STDC1-Seg50 / 71.9% mIoU / 250.4 FPS,  STDC2-Seg75 / 76.8% mIoU / 97.0 FPS</li>
+<li>CamVid</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overview</p>
+<ul>
+<li><p>single-stream</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/detail guidance.png" width="40%;"></p>
+</li>
+<li><p>STDC backbone</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/STDC.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Short-Term Dense Concatenate Module</p>
+<ul>
+<li>each module is separated into several blocks：block1永远是1x1，block2/3/4是3x3</li>
+<li>the output gathers multi-scale information</li>
+<li><p>一种是stride1的一种是stride2的，reception field如下</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/reception field.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Classification Architecture</p>
+<ul>
+<li>stage1/2分别是一个conv-bn-relu</li>
+<li><p>stage3/4/5是STDC Module，每个stage的第一个module用stride2 </p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/STDC hypers.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Segmentation Architecture</p>
+<ul>
+<li>STDC back：用stage3/4/5的feature map（x8/16/32）</li>
+<li>stage3的feature作为low-level feature</li>
+<li>stage4/5以及global pooling的stage5的feature作为high-level context feature，做FPN：stage4/5通过Attention Refine Module（类似SE），然后和前一个feature level做add，然后上采样，然后conv</li>
+<li>以上的feature通过Feature Fusion Module（也类似SE block）融合</li>
+<li>SegHead：3x3conv-1x1conv</li>
+<li><p>stage3的feature上还接了一个DetailHead</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/STDC-Seg.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Detail Guidance of Low-level Features</p>
+<ul>
+<li>detail path是用来encode spatial detail（boundary/corner）</li>
+<li>建模成binary segmentation task</li>
+<li>首先将ground truth map通过Detail Aggregation module得到detail map<ul>
+<li>一个stride1/2/4的Laplacian operator（conv kernel）</li>
+<li>然后是upsampling</li>
+<li>然后fuse and 1x1 conv</li>
+<li>最后用thresh 0.1转换成binary detail mask</li>
+</ul>
+</li>
+<li>detail loss：dice + bce</li>
+<li><p>有了detail guidance以后能够force backbone的stage3 feature保留更加detail的low-level feature</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/detail feature.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>backbone实验</p>
+<ul>
+<li><p>对标MobileNetV3和EfficientNet-B0，精度和速度都是更好的</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/backbone cmp.png" width="50%;"></p>
+</li>
+<li><p>ImageNet精度&amp;Flops，Flops比较大，但都是3x3卷积，推理速度更快</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/backbone cmp1.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/10/23/mask2former/" rel="next" title="mask2former">
+                <i class="fa fa-chevron-left"></i> mask2former
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/10/30/tiny-dataset/" rel="prev" title="tiny dataset">
+                tiny dataset <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller"><span class="nav-number">1.</span> <span class="nav-text">PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><span class="nav-number">2.</span> <span class="nav-text">SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

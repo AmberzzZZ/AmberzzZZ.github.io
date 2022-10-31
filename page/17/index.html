@@ -276,6 +276,632 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/02/graph-based-optimization/" itemprop="url">Graph-based Optimization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-02T15:32:59+08:00">
+                2018-05-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/02/graph-based-optimization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/02/graph-based-optimization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h3><p>基于图优化的slam主要分为以下三个部分：</p>
+<ul>
+<li>前端：基于传感器数据建图，<strong>匹配相邻帧</strong>，添加节点和边（raw graph），节点表示机器人的位姿，边表示节点之间的位姿联系。<strong>位姿信息可以来自里程计计算，可以来自ICP激光点云匹配，也可以来自闭环检测反馈</strong>。</li>
+<li>后端：<strong>优化</strong>图，<strong>基于历史信息的约束</strong>，调整新加入的机器人位姿顶点使其尽量满足边的约束（optimized graph）。</li>
+<li>宏观的闭环检测：根据闭环信息<strong>优化</strong>矫正整个拓扑图。</li>
+</ul>
+<p>这里面涉及到了<strong>两个优化</strong>，一个是后端局部优化，一个是全局闭环优化，两者计算的思路是一样的。</p>
+<h3 id="2-优化"><a href="#2-优化" class="headerlink" title="2 优化"></a>2 优化</h3><h4 id="2-1-全局闭环优化，用于矫正整个拓扑图"><a href="#2-1-全局闭环优化，用于矫正整个拓扑图" class="headerlink" title="2.1 全局闭环优化，用于矫正整个拓扑图"></a>2.1 全局闭环优化，用于矫正整个拓扑图</h4><p>前端后端完成的事情是<strong>探索并创建新的节点</strong>，获得新的测量值，添加新的位姿关系方程：</p>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{split}
+& x_0 + z_{01} = x_1\\
+& x_1 + z_{12} = x_2\\
+& ...\\
+& x_{k-1} + z_{k-1, k} = x_{k}\\
+\end{split}
+\end{eqnarray}</script><p>而全局闭环检测<strong>添加已知节点之间</strong>的位姿约束关系：</p>
+<script type="math/tex; mode=display">
+\begin{equation}
+x_i + z_{i j} = x_j, \ \ \ \ i,j\in [0, k]
+\end{equation}</script><p>再添加一个<strong>初始条件</strong>（不是必须的，但是后面实验表明固定一个顶点比不固定效果要好——相当于有一个明确可信的基准）：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><ul>
+<li>以上线性方程组中，<strong>闭环检测部分的方程中的两个结点都在前面出现过，因此不增加矩阵的秩</strong>，因此最终要求解包含$k$个方程$k+1$个未知数的线性方程组。</li>
+<li>闭环的关键性：如果没有闭环条件，方程组$Ax=b$左右两边秩是相等的——有唯一解，添加了闭环条件以后，相当于方程组左侧$A$的秩不变，但是右侧$b$的秩则增加了，$rank(A) &lt; rank(A, b)$——没有解析解，只有最优。</li>
+<li>实际上状态$\textbf x$是一个包含夹角$\theta$的向量$[x, y, \theta]$，实际相对位姿的计算<strong>并非简单的线性叠加</strong>：</li>
+</ul>
+<script type="math/tex; mode=display">
+\textbf x \oplus \Delta \textbf x = 
+\begin{pmatrix}
+x + \Delta x cos\theta - \Delta y sin \theta  \\
+y + \Delta x sin\theta + \Delta y cos \theta  \\
+normAngle(\theta + \Delta \theta)
+\end{pmatrix}</script><p><strong>举个栗子</strong>：</p>
+<blockquote>
+<p>机器人从起始位置$x_0=0$处出发，里程计测得它向前移动了1m，到达$x_1$，接着测得它向后移动了0.8m，到达$x_2$，这时通过闭环检测，发现他回到了起始位置。</p>
+</blockquote>
+<p>首先根据给出信息构建图：</p>
+<script type="math/tex; mode=display">
+x_0 + 1 = x_1\\
+x_1 - 0.8 = x_2</script><p>然后根据闭环条件添加约束：</p>
+<script type="math/tex; mode=display">
+x_2 = x_0</script><p>补充初始条件：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><p>使用<strong>最小二乘法</strong>求上述方程组的最优解，首先构建<strong>残差平方和函数</strong>：</p>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{split}
+& f_1 = x_0 = 0\\
+& f_2 = x_1 - x_0 - 1 = 0\\
+& f_3 = x_2 - x_1 + 0.8 = 0\\
+& f_4 = x_2 - x_0 = 0
+\end{split}
+\end{eqnarray}</script><script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 + (x_2-x_1+0.8)^2 + (x_2-x_0)^2</script><p>然后对每个参数<strong>求偏导</strong>：</p>
+<script type="math/tex; mode=display">
+\frac{\partial c}{\partial x_1} = -x_0 + 2x_1-x_2 -1.8=0\\
+\frac{\partial c}{\partial x_2} = -x_0 - x_1 +2x_2 + 0.8 = 0</script><p>解得$x_1 = 0.93, x_2 = 0.07$，可以看到闭环矫正了所有节点的位姿，优化了整个拓扑图。</p>
+<h4 id="2-2-后端局部优化，用于矫正局部地图"><a href="#2-2-后端局部优化，用于矫正局部地图" class="headerlink" title="2.2 后端局部优化，用于矫正局部地图"></a>2.2 后端局部优化，用于矫正局部地图</h4><p>再举个栗子：</p>
+<blockquote>
+<p>机器人从起始位置$x_0=0$处出发，并观测到其正前方2m处有一个路标$l_0$，里程计测得它向前移动了1m，到达$x_1$，这时观测到路标在其正前方0.8m处。</p>
+</blockquote>
+<p>首先根据前端信息建图 raw graph（这样建图明显是存在累积误差的）：</p>
+<script type="math/tex; mode=display">
+x_0 + 1 = x_1</script><p>然后添加闭环约束：</p>
+<script type="math/tex; mode=display">
+x_1 + 0.8 = l_0\\
+x_0 + 2 = l_0</script><p>初始条件：</p>
+<script type="math/tex; mode=display">
+x_0 = 0</script><p>构建残差平方和：</p>
+<script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + (x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>求偏导求解：$x_1 = 1.07, l_0 = 1.93$，可以看到后端是对前端新添加进来的节点位姿做了矫正，消除部分测量误差。</p>
+<p>这里面涉及到两种传感器信息——里程计和激光雷达，两种传感器的精度是有差别的，我们对其的信任程度也应该不同，反映到公式中就是<strong>要为不同传感器信息赋予不同的权重</strong>。假设编码器信息更准确，那么：</p>
+<script type="math/tex; mode=display">
+c = \Sigma_{i=1}^4 f_i^2 = x_0^2 + \textbf{10}(x_1-x_0-1)^2 +(l_0-x_0-2)^2 + (l_0-x_1-0.8)^2</script><p>调整权重之后解得：$x_1 = 1.01, l_0 = 1.9$，可以看到<strong>计算结果会向着更信任的传感器的测量结果靠近</strong>。</p>
+<h4 id="2-3-严格推导"><a href="#2-3-严格推导" class="headerlink" title="2.3 严格推导"></a>2.3 严格推导</h4><p><strong>2.3.1 信息矩阵（误差权重矩阵)</strong></p>
+<p>图优化问题转化为最小二乘问题，首先是带权重的残差平方和函数的一般形式：</p>
+<script type="math/tex; mode=display">
+F(x) = \Sigma_{i,j} e(x_i, x_j, z_{i,j})^T\Omega_{i,j}e(x_i, x_j, z_{i,j})</script><script type="math/tex; mode=display">
+x^{*} = argminF(x)</script><p>其中的$\Omega_{i,j}$项就是上文提到的误差权重矩阵，它的正式名字叫<strong>信息矩阵</strong>。</p>
+<p>传感器的测量值，可以看作是以真值为中心的多元高斯分布：</p>
+<script type="math/tex; mode=display">
+f_x(x_1, x_2, ..., x_k) = \frac{1}{\sqrt{}(2\pi)^k|\Sigma|}exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))</script><p>协方差矩阵$\Sigma$对角线上的值表示每一维对应的方差，该方差值越大表示该维度不确定性越大，对应的信息权重应该越小。<strong>实际上拓扑图上每条边对应的信息矩阵就是对应测量协方差矩阵的逆</strong>。</p>
+<p><strong>2.3.2 非线性</strong></p>
+<p>上文已经提到，位姿变化非线性——<strong>非线性最小二乘问题</strong>，要采用迭代法求解。迭代法需要有一个<strong>好的初始假设值</strong>，然后在这个值附近<strong>增量式迭代</strong>寻找最优解。</p>
+<script type="math/tex; mode=display">
+f(x) = \Sigma e^T\Omega e\\
+最小二乘问题目标函数：min \frac{1}{2}||f(x)||_2^2</script><p>首先要将非线性函数转化成关于增量$\Delta x$的线性函数——泰勒展开，根据具体的展开形式又分为：</p>
+<ul>
+<li><p>一阶、二阶梯度法</p>
+<p>直接<strong>对目标函数</strong>在$x$附近进行泰勒展开：</p>
+<script type="math/tex; mode=display">
+||f(x+\Delta x)||_2^2 \approx ||f(x)||_2^2 +J(x) \Delta x = \frac{1}{2} \Delta x^T H \Delta x</script><p><strong>一阶梯度法（最速下降法）</strong>：只保留一阶梯度，并引入步长$\lambda$：</p>
+<script type="math/tex; mode=display">
+\Delta x^* = -\lambda J^T(x)</script><p><strong>二阶梯度法（牛顿法）</strong>：保留一阶和二阶梯度信息</p>
+<script type="math/tex; mode=display">
+J^T(x)+H\Delta x^*=0</script><p>最速下降法过于贪心，容易走出锯齿路线，增加迭代次数。牛顿法需要计算目标函数的二阶导数（Hessian矩阵），计算困难。</p>
+</li>
+</ul>
+<ul>
+<li><p>高斯牛顿法</p>
+<p><strong>对$f(x)$而不是目标函数$f(x)^2$</strong>在$x$附近进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+f(x+\Delta x) \approx f(x) + J(x) \Delta x</script><p>对应每一个误差函数$e_{ij}$：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+& e_{ij}(x_i+\Delta x_i, x_j+\Delta x_j) = e_{i,j}(x+\Delta x)  \\
+&\approx e_{ij} +\frac{\partial e_{ij}}{\partial x}\Delta x = e_{ij} +  J_{ij}\Delta x
+\end{split}</script><p>​            其中$J_{ij}$为初始值附近的雅可比矩阵（定义见卡尔曼滤波）。</p>
+<p>带入目标函数得到<strong>近似二阶展开</strong>：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+& F_{ij}(x+\Delta x) = e_{ij}(x+\Delta x)^T \Omega_{ij}e_{ij}(x+\Delta x)\\
+& \approx (e_{ij} +  J_{ij}\Delta x)^T \Omega_{ij}(e_{ij} +  J_{ij}\Delta x)\\
+& = \underbrace{e_{ij}^T\Omega_{ij}e_{ij}}_{c_{ij}} + 2\underbrace{e_{ij}^T\Omega_{ij}J_{ij}}_{b_{ij}^T}\Delta x + \Delta x^T \underbrace{J_{ij}^T\Omega_{ij}J_{ij}}_{H_{ij}}\Delta x\\
+& = c_{ij} + 2b_{ij}^T\Delta x + \Delta x^T H_{ij}\Delta x
+\end{split}</script><p>求解增量$\Delta x$：</p>
+<script type="math/tex; mode=display">
+2b + 2H\Delta x^* = 0\\
+高斯牛顿方程：H\Delta x^* = -b\\</script><p>对比牛顿法可见，<strong>高斯牛顿法用$J^TJ$作为二阶Hessian矩阵的近似，简化了计算</strong>。</p>
+<p>上述算法要求近似$H$矩阵是正定且可逆的，实际数据很难满足，因而在使用高斯牛顿算法时可能出现<strong>$H$为奇异矩阵或病态</strong>的情况，增量稳定性较差，导致算法不收敛。</p>
+<blockquote>
+<p>图形上来思考，就是近似后的梯度方向不再是梯度变化最快的方向，可能引起不稳定。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p>列文伯格—马夸尔特法</p>
+<p>为$\Delta x$添加一个信赖区域，不让它因为过大而使得近似$f(x+\Delta x) = f(x) + J(x)\Delta x$不准确。</p>
+<script type="math/tex; mode=display">
+\rho = \frac{f(x+\Delta x) - f(x)}{J(x) \Delta x}</script><p>可以看到如果$\rho$接近1，说明近似比较好。如果$\rho$比较大，说明实际减小的值远大于估计减小的值，需要放大近似范围，反之你懂的。</p>
+<script type="math/tex; mode=display">
+||D\Delta x_k||_2^2 \leq \mu</script><p>将每次迭代得到的$\Delta x$限定在一个半径为信赖区域的椭球中，根据$\rho$的大小修改信赖区域。于是问题转化成为了<strong>带不等式约束的优化问题</strong>：</p>
+<script type="math/tex; mode=display">
+min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2, \ \ s.t. ||D \Delta x ||^2 = \mu</script><p>用拉格朗日乘子转化成无约束问题：</p>
+<script type="math/tex; mode=display">
+min_\Delta x \frac{1}{2}||f(x) + J(x)\Delta x||^2_2 + \frac{\lambda}{2}||D \Delta x ||^2</script><p>展开后得到如下形式：</p>
+<script type="math/tex; mode=display">
+(H + \lambda D^TD)\Delta x^* = -b</script><p>通常把$D$取值为单位阵$I$，得到更简化形式：</p>
+<script type="math/tex; mode=display">
+(H + \lambda I)\Delta x^* = -b</script><p>当$\lambda$较小时，$H$占主要地位，说明二次近似模型较好，LM算法更接近高斯牛顿法。当$\lambda$较大时，$\lambda I$占主要地位，LM算法更接近一阶梯度法。修正了线性方程组矩阵的病态问题，比高斯牛顿法更加健壮，但是收敛速度也更慢。</p>
+<blockquote>
+<p>图形上思考，LM算法修正了高斯牛顿法得到的梯度，以此固定一个搜索区域，在区域内寻找最优。</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>2.3.3 稀疏矩阵</strong></p>
+<p>对于误差函数$e_{ij}$，它只和$e_i$和$e_j$有关，因此它的雅可比矩阵有如下结构（行数是$x$的维度，列数是拓扑图中节点映射关系的数目）：</p>
+<script type="math/tex; mode=display">
+J_{ij} = 
+\begin{bmatrix}
+0 & ... & 0 & \underbrace{\frac{\partial e_{i}}{\partial x_i}}_{A_{ij}} & 0 & ... &  \underbrace{\frac{\partial e_{j}}{\partial x_j}}_{B_{ij}} & 0 & ... & 0
+\end{bmatrix}</script><p>相应地$b_{ij}$是一个包含很多0的列向量：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+ b_{ij}^T& = e_{ij}^T \Omega_{ij} J_{ij}\\
+&= e_{ij}^T\Omega_{ij} (0 ... A_{ij}...B_{ij}...0)\\
+&=(0...e_{ij}^T\Omega_{ij}A_{ij}...e_{ij}^T\Omega_{ij}B_{ij}...0)
+\end{split}</script><p>$b = \Sigma_{ij} b_{ij}$：</p>
+<p><img src="/2018/05/02/graph-based-optimization/b.png" alt=""></p>
+<p>$H_{ij}$是一个包含很多0的对称阵：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+H_{ij}& = J_{ij}^T \Omega_{ij}J_{ij} \\
+& = 
+\begin{pmatrix}
+...\\
+A_{ij}^T\\
+...\\
+B_{ij}^T\\
+...
+\end{pmatrix}
+\Omega_{ij}
+\begin{pmatrix}
+... & A_{ij} & ... & B_{ij} & ...
+\end{pmatrix}\\
+& =
+\begin{pmatrix}
+    &  \\
+& A_{ij}^T\Omega{ij}A_{ij} & A_{ij}^T\Omega_{ij}B_{ij} & \\
+  & \\
+& B{ij}^T\Omega_{ij}A_{ij} & B_{ij}^T\Omega_{ij}B_{ij}& \\
+   & 
+\end{pmatrix}
+\end{split}</script><p>$H=\Sigma_{ij}H_{ij}$：</p>
+<p><img src="/2018/05/02/graph-based-optimization/H.png" alt=""></p>
+<p>梳理一下计算流程：$e_{ij} \to  J_{ij}  \to A_{ij}, B_{ij} \to b_{ij}, H_{ij} \to b, H \to \Delta x^* \to x$</p>
+<p><strong>2.3.4 误差函数</strong></p>
+<p>前面定义过位姿的非线性叠加，显然位姿误差也不是简单的线性加减关系：</p>
+<script type="math/tex; mode=display">
+e_{ij}(x_i, x_j) = t2v(Z_{ij}^{-1}(X_i^{-1}.X_j))</script><p>其中的$Z_{ij}$、$X_i$、$X_j$都是矩阵形式。$X_i^{-1}X_j$表示节点j到节点i之间的位姿差异$\hat Z_{ij}$，假设这个转移矩阵形式如下：</p>
+<script type="math/tex; mode=display">
+\hat Z_{ij} = 
+\begin{bmatrix}
+R_{2*2} & t_{2*1} \\
+0 & 1
+\end{bmatrix}</script><p>假设测量值$Z_{ij}$形式如下：</p>
+<script type="math/tex; mode=display">
+Z_{ij} = 
+\begin{bmatrix}
+R^{'} & t^{'}\\
+0 & 1
+\end{bmatrix}</script><p>分块矩阵的求逆过程如下：</p>
+<script type="math/tex; mode=display">
+\begin{split}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}^{-1}& =
+\begin{bmatrix}
+\begin{bmatrix}
+I & t\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+R & 0\\
+0 & 1
+\end{bmatrix}
+\end{bmatrix}^{-1}=
+\begin{bmatrix}
+R & 0\\
+0 & 1
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+I & t\\
+0 & 1
+\end{bmatrix}^{-1}\\
+& =\begin{bmatrix}
+R^T & 0\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+I & -t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^T & -R^Tt\\
+0 & 1
+\end{bmatrix}
+\end{split}</script><p>所以误差$e_{ij}$计算如下：</p>
+<script type="math/tex; mode=display">
+E_{ij} = Z_{ij}^{-1}\hat Z_{ij} = 
+\begin{bmatrix}
+R^{'} & t^{'}\\
+0 & 1
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^{'T} & -R^{'T}t^{'}\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+R & t\\
+0 & 1
+\end{bmatrix}=
+\begin{bmatrix}
+R^{'T}R & R^{'T}(t-t^{'})\\
+0 & 1
+\end{bmatrix}</script><script type="math/tex; mode=display">
+e_{ij} = t2v(E_{ij})=
+\begin{bmatrix}
+R_z(t_{\hat z} - t_z)_{2*1}\\
+\theta_\hat z - \theta_z
+\end{bmatrix}_{3*1}=
+\begin{bmatrix}
+R_z(x_{\hat z} - x_z)\\
+R_z(y_{\hat z} - y_z)\\
+\theta_\hat z - \theta_z
+\end{bmatrix}=
+\begin{bmatrix}
+R_z[R_i(x_{j} - x_i) - x_z]\\
+R_z[R_i(y_{j} - y_{i}) - y_z]\\
+\theta_j - \theta_i - \theta_z
+\end{bmatrix}</script><p>求解雅可比矩阵$J_{ij}$：</p>
+<script type="math/tex; mode=display">
+A_{ij} = 
+\begin{bmatrix}
+\frac{\partial e_1}{\partial x_i} & \frac{\partial e_1}{\partial y_i} & \frac{\partial e_1}{\partial \theta_i}\\
+\frac{\partial e_2}{\partial x_i} & \frac{\partial e_2}{\partial y_i} & \frac{\partial e_2}{\partial \theta_i}\\
+\frac{\partial e_3}{\partial x_i} & \frac{\partial e_3}{\partial y_i} & \frac{\partial e_3}{\partial \theta_i}\\
+\end{bmatrix}=
+\begin{bmatrix}
+-R_z^TR_i^T & 0 & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(x_j-x_i)\\
+0 & -R_z^TR_i^T  & R_z^T\frac{\partial R_I^T}{\partial \theta_i}(y_j-y_i)\\
+0 & 0 & -1
+\end{bmatrix}</script><script type="math/tex; mode=display">
+B_{ij} = 
+\begin{bmatrix}
+R_z^TR_i^T & 0\\
+0 & 1
+\end{bmatrix}</script><p>累加$b$和$H$矩阵： </p>
+<script type="math/tex; mode=display">
+b_{[i]} += A_{ij}\Omega_{ij}e_{ij}\\
+b_{[j]} += B_{ij}^T\Omega_{ij}e_{ij}\\
+H_{[ii]} += A_{ij}^T\Omega_{ij}A_{ij}\\
+H_{[ij]} += A_{ij}^T\Omega_{ij}B_{ij}\\
+H_{[ji]} += B_{ij}^T\Omega_{ij}A_{ij}\\
+H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/29/关联分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/29/关联分析/" itemprop="url">关联分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-29T23:57:01+08:00">
+                2018-04-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/29/关联分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/29/关联分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h4><p><strong>频繁项集</strong>：集合，${a, b, c}$</p>
+<p><strong>关联规则</strong>：映射，$a\to b$</p>
+<p><strong>支持度</strong>：针对某个频繁项集，$support(频繁项集a) = \frac{freq(频繁项集a)}{freq(所有项集)}$</p>
+<p><strong>可信度</strong>：衡量某条关联规则，$confidence(a\to b) = \frac{support(a|b)}{support(a)}$</p>
+<p>对于包含N个元素的数据集，可能的集合有$2^N - 1$种，暴力遍历显然药丸，因此引入Apriori原理。</p>
+<p><strong>Apriori原理</strong>：减少可能的项集，避免指数增长。</p>
+<ul>
+<li>backwards：如果某个项集是频繁的，那么它的所有子集也是频繁的。</li>
+<li>forwards：如果一个项集是非频繁项集，那么它的所有超集也是非频繁的。</li>
+</ul>
+<h4 id="2-Apriori算法"><a href="#2-Apriori算法" class="headerlink" title="2 Apriori算法"></a>2 Apriori算法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori</span><span class="params">(dataSet, minSupport=<span class="number">0.5</span>)</span>:</span></span><br></pre></td></tr></table></figure>
+<p>算法思路：从单个项集开始检查，去掉那些不满足最小支持度的项集，然后对剩下的集合进行组合，得到包含两个元素的项集，重复扫描，然后将剩余项集组合成包含三个元素的集合，依次类推，直到所有项集都被去掉。</p>
+<ul>
+<li>为啥最后会得到空集：因为包含所有元素的项集一定不是频繁项集，否则根据Apriori原理，它的全部子集都是频繁项集。</li>
+<li>如何从包含k个元素的项集集合生成包含k+1个元素的项集集合：从k个元素的项集到k+1个元素项集的扩充，<strong>只允许有一个元素的不同</strong>，算法中为了避免重复结果，<strong>只对前k-1个元素相同的两个项集求并集</strong>。</li>
+</ul>
+<p>代码实现过程中发现了几个知识记录一下：</p>
+<ul>
+<li>map函数的返回值：python2下直接返回列表，python3下返回的是迭代器：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">map(frozenset, C1)</span><br><span class="line"><span class="comment"># 返回 &lt;map object at 0x101e78940&gt; </span></span><br><span class="line"></span><br><span class="line">list(map(frozenset, C1))</span><br><span class="line"><span class="comment"># 返回 list[frozenset1(), frozenset2(), ...]</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>字典的update方法：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 将dict2的键值添加到dict1中，在涉及迭代操作时可以省略传递中间值</span><br><span class="line">dict1.update(dict2)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>set &amp; frozenset：set<strong>无排序</strong>且不重复，并且可变，因此unhashable。frozenset不可变，可以用作字典的key。</li>
+</ul>
+<h4 id="3-关联规则"><a href="#3-关联规则" class="headerlink" title="3 关联规则"></a>3 关联规则</h4><p>对一个包含k个元素的频繁项集，其中可能的关联规则有：</p>
+<script type="math/tex; mode=display">
+C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此延续Apriori的思路，关联规则也有一条类似的属性：</p>
+<ul>
+<li>如果某条规则的前件不满足最小可信度要求，那么它的所有子集也不满足最小可信度要求。</li>
+<li>对应的，如果某条规则的后件不满足最小可信度要求，那么它的所有超集也不满足。</li>
+</ul>
+<p>算法思路：对每个至少包含两个元素的频繁项集，从后部只包含一个元素的规则开始，对这些规则进行测试，接下来对所有剩余规则的后件进行组合，得到包含两个元素的后件（对应的补集就是前件），依次类推，直到测试完所有可能的后件。</p>
+<ul>
+<li>为啥只检查<strong>前后件互补</strong>的规则：因为一个频繁项集的所有子集也都是频繁项集，所以一个频繁项集中不互补的规则将是该频繁项集的某个子集的互补规则。</li>
+</ul>
+<h4 id="4-FP-growth算法"><a href="#4-FP-growth算法" class="headerlink" title="4 FP-growth算法"></a>4 FP-growth算法</h4><p>Apriori算法避免了暴力遍历子项集的指数式增长，但是对每一个新生成的频繁项集，都要扫描整个数据集，当数据集很大时，这种抛物线式增长的时间复杂度也不太令人满意。</p>
+<p>FP-growth算法借助一种称为<strong>FP树</strong>的数据结构存储数据，来抽象原始数据集：</p>
+<ul>
+<li><strong>项集</strong>以路径的方式存储在树中</li>
+<li><strong>相似项</strong>之间相连接成链表</li>
+</ul>
+<ul>
+<li>一个元素项可以在FP树中出现多次</li>
+<li>FP树存储的是元素的出现频率</li>
+<li>项集完全不同时，树才会分叉，否则会有复用路径</li>
+</ul>
+<p>​算法思路：首先遍历一遍原始数据集，记录元素的出现频率，去掉不满足最小支持度的元素。然后再遍历一遍剩下的集合元素，<strong>构建FP树</strong>。然后就可以通过FP树挖掘频繁项集。</p>
+<p>构建FP树：依次遍历每一个项集，首先将其中的非频繁项移除，并按照元素出现频率对过滤后的元素进行重排序。<strong>对过滤、排序后的集合</strong>，如果树中已存在现有元素，则增加现有元素的计数值，如果不存在，则向树中添加一个分支，新增节点的同时还要更新链表元素。主要就涉及两个数据结构：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义节点数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">treeNode</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, nameValue, numOccur, parentNode)</span>:</span></span><br><span class="line">        self.name</span><br><span class="line">        self.count</span><br><span class="line">        self.nodeLink   <span class="comment"># 链表信息，指向下一个相似项</span></span><br><span class="line">        self.parent</span><br><span class="line">        self.children</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line"><span class="comment"># 用于存储元素frequency以及链接相似项的字典数据结构</span></span><br><span class="line">freq = &#123;&#125;</span><br><span class="line">freq[node_name] = [frequency, node1, node2, ...]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>因为集合中元素的出现频率可能相等，因此过滤排序的结果不唯一，生成的树结构也会有差异。</li>
+<li>第一次遍历删除非频繁元素时，发现字典在迭代过程中不能删除item，我转化成list暴力解决了，不知道有没有什么优雅的方式。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">del</span> freq[item]</span><br><span class="line"><span class="comment"># 返回 RuntimeError: dictionary changed size during iteration</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> list(freq.keys()):</span><br><span class="line">    <span class="keyword">if</span> freq[item] &lt; minSupport:</span><br><span class="line">        <span class="keyword">del</span>(freq[item])</span><br></pre></td></tr></table></figure>
+<p>挖掘频繁项集：首先创建条件模式基，然后利用条件模式基，构建条件FP树。</p>
+<p><strong>1 条件模式基</strong>：以所查找元素项为结尾的<strong>前缀路径</strong>集合，并且每条前缀路径都与<strong>起始元素项</strong>的计数值相关联。（这里面用到了前面定义的parent和nodeLink属性）</p>
+<p><strong>2 构造条件FP树</strong>：与构造树的过程相同，使用的dataSet换成了条件模式基而已，函数参数count就是预留彩蛋。这样得到的就是<strong>指定频繁项的条件FP树</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">updateTree</span><span class="params">(cond_set, myTree, freq_header, count)</span>:</span></span><br><span class="line"><span class="comment"># cond_set: 一条path</span></span><br><span class="line"><span class="comment"># myTree: 根节点</span></span><br><span class="line"><span class="comment"># freq_header: dict[node_name] = [frequency, head_node]</span></span><br><span class="line"><span class="comment"># count: path对应的count</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>构造的条件FP树过滤掉了条件模式基中的一些元素：这些元素本身是频繁项，但是与指定元素组合的集合不是频繁的。</li>
+<li>相应地，条件树中剩余元素与指定频繁项组合的集合是频繁的。</li>
+</ul>
+<p><strong>3 迭代</strong>：从生成的条件FP树中，可以得到更复杂的频繁项。求解复杂频繁项的条件模式基，进而生成对应的条件FP树，就能得到更复杂的频繁项，依次类推进行迭代，直到FP树为空。</p>
+<p>​    </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/25/sublime注册码被无限次移除/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -583,7 +1209,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">162</span>
+                  <span class="site-state-item-count">164</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -596,7 +1222,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">95</span>
+                  <span class="site-state-item-count">96</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -276,6 +276,639 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/01/TokenLearner/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/06/01/TokenLearner/" itemprop="url">TokenLearner</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-01T13:49:52+08:00">
+                2022-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/01/TokenLearner/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/01/TokenLearner/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>recollect：</p>
+<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，开启了vision transformer的固定范式，都是切割patches作为tokens，这也对应了文本的词/字符切割，但是一个patch和一个词向量的信息量是不一样的（像素信息更低级）</p>
+<p>[TokenLearner 2022] TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?    Google，使用更少数量的、能够挖掘重要信息的learnable tokens，</p>
+<p>repo：<a href="https://github.com/google-research/scenic/tree/main/scenic/projects/token_learner" target="_blank" rel="noopener">https://github.com/google-research/scenic/tree/main/scenic/projects/token_learner</a></p>
+<p>unofficial keras repo：<a href="https://github.com/ariG23498/TokenLearner" target="_blank" rel="noopener">https://github.com/ariG23498/TokenLearner</a></p>
+<h2 id="TokenLearner-What-Can-8-Learned-Tokens-Do-for-Images-and-Videos"><a href="#TokenLearner-What-Can-8-Learned-Tokens-Do-for-Images-and-Videos" class="headerlink" title="TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?"></a>TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>tokens<ul>
+<li>previous：densely sampled patches</li>
+<li>ours：a handful of adpatively learned tokens</li>
+</ul>
+</li>
+<li>learn to mine important tokens in visual data<ul>
+<li>find a few import visual tokens</li>
+<li>enable long range pair-wise attention</li>
+</ul>
+</li>
+<li>applicable to both image &amp; video tasks<ul>
+<li>strong performance</li>
+<li>computationally more efficient</li>
+</ul>
+</li>
+<li>comparable results are verified on classifications tasks<ul>
+<li>与state-of-the-arts on ImageNet对比</li>
+<li>video datasets, including Kinetics-400, Kinetics-600, Charades, and AViD</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>the main challenge of ViTs<ul>
+<li>require too many tokens：按照16x16的切割方式，512x512的图像也对应着1024个tokens</li>
+<li>transformer block的computation和memory是基于token length平方型增长的</li>
+<li>因此限制了larger image/longer video</li>
+</ul>
+</li>
+<li>thus we propose TokenLearner<ul>
+<li>a learnable module</li>
+<li>take image as input</li>
+<li>generates a small set of tokens</li>
+<li>idea很直接：找到图像的重点区域regions-of-importance，然后用重点区域生成token</li>
+<li>实验发现保留8-16个（之前transformer block通常保留200-500通道数）就能够保持甚至提升精度，同时降低flops</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>TokenLearner</p>
+<ul>
+<li><p>formulation</p>
+<ul>
+<li>a space-time tensor input $X$：$X \in R^{T \times H \times W \times C}$</li>
+<li>a temporal slice $X_t$：$X_t \in R^{H \times W \times C}$</li>
+<li>T是时间维度，如果是image的话T=1，HWC是常规的长/宽/通道数</li>
+<li>for every time frame t，we learn to generate a series of tokens $Z_t$ from the input frame $X_t$：$Z_t=[z_i]_{i=1}^S$ </li>
+<li>thus we use a tokenizer function $A_i$：$z_i=A_i(X_t)$，adaptively selects important combination of pixels</li>
+<li>这样的function我们有S个，而且S远远小于HW，通常S=8</li>
+</ul>
+</li>
+<li><p>tokenizer function </p>
+<ul>
+<li>implemented with a spatial attention mechanism </li>
+<li>首先生成一个spatial weight map (size HW1)</li>
+<li>然后乘在$X_t$上，得到an intermediate weighted tensor (size HWC)</li>
+<li>最后进行spatial维度的global averge pooling，将weighted maps转化成vector (size C)</li>
+<li>所有的resulting tokens are gathered to form the output $Z_t =[z_i]_{i=1}^S\in R^{S \times C}$</li>
+<li>spatial attention的实现有两种<ul>
+<li>本文v1.0使用了一层/多层卷积(channel=S)+sigmoid</li>
+<li>本文v1.1使用了一个MLP(dense-gelu-dense)</li>
+<li>（这两个版本的参数量差距巨大啊）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>图：将$R^{HWC}$的input image稀疏映射到$R^{SC}$</p>
+<p>  <img src="/2022/06/01/TokenLearner/TokenLearner.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>TokenFuser</p>
+<ul>
+<li><p>after the Transformer layers，此时的tensor flow还是$R^{SC}$</p>
+</li>
+<li><p>引入TokenFuser</p>
+<ul>
+<li>fuse information across tokens，融合所有token</li>
+<li>remap the representation back to origin resolution，重映射</li>
+</ul>
+</li>
+<li><p>首先做fuse：give tokens $Y\in R^{ST \times C}$，乘以一个learnable weight $M (ST \times ST)$，得到tensor  $\in R^{ST \times C}$，可以理解为空间（或时空）关联</p>
+</li>
+<li><p>然后做remap，对每个temporal slice $Y_t \in R^{SC}$:</p>
+<p>  <img src="/2022/06/01/TokenLearner/TokenFuser.png" width="60%;"></p>
+<ul>
+<li>$X_t^{j+1} = B(Y_t, X_t^j) = B_w Y_t + X_t^j = \beta_i(X_t^j)Y_t+X_t^j$<ul>
+<li>$X_t^j$是TokenLinear的残差输入，也就是原图HWC，等待被reweight的分支</li>
+<li>$X_t^{j+1}$是模块输出</li>
+<li>$Y_t^j$是TokenFuser的fuse这步的结果，对应图上transformer output SC</li>
+</ul>
+</li>
+<li>$\beta_i()$是个dense+sigmoid，作用在原图上，得到HWS的weight tensor $B_w$</li>
+<li>然后乘上Y得到HWC</li>
+<li>再加上这个残差</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>整体架构</p>
+<ul>
+<li><p>整体计算流程</p>
+<p>  <img src="/2022/06/01/TokenLearner/overall.png" width="80%;"></p>
+</li>
+<li><p>两种模型结构（有/没有TokenFuser）</p>
+<p>  <img src="/2022/06/01/TokenLearner/models.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>settings</p>
+<ul>
+<li>tobeadded</li>
+</ul>
+</li>
+<li><p>TokenFuser的ablation实验：整体有提升，模型越大提升越不明显</p>
+<p>  <img src="/2022/06/01/TokenLearner/drop.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/05/20/cython-flask/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/05/20/cython-flask/" itemprop="url">cython & flask</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-05-20T10:33:47+08:00">
+                2022-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/05/20/cython-flask/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/05/20/cython-flask/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>python的编译</p>
+<ul>
+<li><p>pyc：</p>
+<ul>
+<li><p>pyc是编译py之后生成的二进制文件，由python虚拟机来执行的</p>
+</li>
+<li><p>在模块被加载时，.pyc文件比.py文件更快</p>
+</li>
+<li><p>可直接反编译为源码</p>
+</li>
+<li><p>生成方式1：</p>
+<ul>
+<li>生成pyc文件：python -m py_compile {file1,file2}.py / python -m compileall DIR</li>
+<li>删除py文件：find . -name “*.py” |xargs rm -rf</li>
+<li>删除pycache目录：find . -name “pycache” |xargs rm -rf</li>
+</ul>
+</li>
+<li><p>生成方式2：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># single file</span></span><br><span class="line"><span class="keyword">import</span> py_compile</span><br><span class="line">py_compile.compile(<span class="string">'$file_path'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># dir</span></span><br><span class="line"><span class="keyword">import</span> compileall</span><br><span class="line">compileall.compile_dir(<span class="string">'$dir'</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>cython编译成动态库.so：</p>
+<ul>
+<li>pyx文件由cython编译为.c文件，.c文件由C/C++编译器编译为.so动态库</li>
+<li>能起到代码保护的作用</li>
+<li>但是编译速度太慢了</li>
+<li>注意在编译的时候每个库里必须有一个__init__.py文件</li>
+<li>生成方式：<ul>
+<li>创建setup.py</li>
+<li>运行python setup.py build_ext</li>
+<li>会在执行目录下，新增build文件夹，里面放有.so</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>python的反编译</p>
+<ul>
+<li>pyc：<ul>
+<li>需要安装第三方库：pip install uncompyle6 </li>
+<li>uncompyle6 -o . *.pyc</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Flask（<a href="https://zhuanlan.zhihu.com/p/32202156）" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/32202156）</a></p>
+<ul>
+<li><p>一些概念</p>
+<ul>
+<li>API：应用程序接口，由服务器（Server）提供，一般是web server（网络服务器），使得外部机器通过API读取、编辑网站数据，通俗来讲API是一套协议，规定了与外界的沟通方式——如何发送请求和接受响应</li>
+<li>HTTP动词（GET、POST、PUT、DELETE）：它们分别对应四种基本操作：GET用来获取资源，POST用来新建资源（也可以用于更新资源），PUT用来更新资源，DELETE用来删除资源</li>
+<li>装饰器：放在函数前面，相当于将函数对象传入这个wrapper方法中</li>
+</ul>
+</li>
+<li><p>startup：URL</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Index Page'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/hello')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Hello World'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/user/&lt;string:username&gt;')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show_user_profile</span><span class="params">(username)</span>:</span></span><br><span class="line">    <span class="comment"># show the user profile for that user</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'User %s'</span> % username</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># app.run()</span></span><br><span class="line">    app.run(debug=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>    * app = Flask(\__name__): 新建一个Flask类的实例，这是一个wsgi（Web服务器网关接口，Python Web Server Gateway Interface）
+
+    * @app.route(URL): 用route装饰器告诉Flask什么样的URL能够触发我们的函数
+           - @app.route(&#39;/&#39;)就代表默认根地址http://127.0.0.1:5000/
+
+           - @app.route(&#39;/hello&#39;)则代表http://127.0.0.1:5000/hello
+
+           - @app.route(&#39;/user/&lt;str: username&gt;&#39;)则带了传入变量以及它的变量转换器，e.g. http://127.0.0.1:5000/user/amber
+
+                &lt;img src=&quot;cython-flask/转换器.png&quot; width=&quot;60%;&quot; /&gt;
+
+           - 同时可以看到，每执行一次访问，debug界面生成一次GET请求（&quot;GET /hello HTTP/1.1&quot;）以及服务器返回的内容（200），具体的解释在下面的章节
+
+    * def index()/hello_world()/show_user_profile(username): 这些函数在生成指定URL时被调用，这些方法都叫做视图函数
+
+    &lt;img src=&quot;cython-flask/url.png&quot; width=&quot;40%;&quot; /&gt;   &lt;img src=&quot;cython-flask/get.png&quot; width=&quot;40%;&quot; /&gt;
+
+* HTTP方法
+
+  * HTTP 方法，通过浏览器告知服务器，客户端想对请求的页面做什么
+
+    * GET(方法)告知服务器：只获取页面上的信息并发给我，这是最常用的方法
+    * POST(方法)告诉服务器：想在 URL 上发布新信息。并且服务器必须确保数据已存储且仅存储一次，这是 HTML 表单通常发送数据到服务器的方法
+    * PUT(方法)类似 POST 但是服务器可能触发了存储过程多次，多次覆盖掉旧值。你可能会问这有什么用，当然这是有原因的。考虑到传输中连接可能会丢失，在这种情况下浏览器和服务器之间的系统可能安全地第二次接收请求，而不破坏其它东西。因为 POST 它只触发一次，所以用 POST 是不可能的
+
+    * DELETE(方法)删除给定位置的信息
+
+  * 默认情况下，路由只回应GET请求，如上图的GET info，在访问指定URL时候就被触发了，具体方法通过route()装饰器传递methods参数来指定
+
+* 设计一个简单的应用todoList
+
+  * 首先设计一个根URL：如http://[hostname]/todo/api/v1.0/
+
+    * hostname：[ip：port_id]
+    * todo：应用名称
+    * api/v1.0：API版本
+
+  * 第二步规划数据结构和动作
+
+    * 动作
+
+    | HTTP方法 |                       URL                       |         动作         |
+    | :------: | :---------------------------------------------: | :------------------: |
+    |   GET    |      http://[hostname]/todo/api/v1.0/tasks      |     检索任务清单     |
+    |   GET    | http://[hostname]/todo/api/v1.0/tasks/[task_id] |     检索指定任务     |
+    |   POST   |      http://[hostname]/todo/api/v1.0/tasks      |   创建一个新的任务   |
+    |   PUT    | http://[hostname]/todo/api/v1.0/tasks/[task_id] | 更新一个已存在的任务 |
+    |  DELETE  | http://[hostname]/todo/api/v1.0/tasks/[task_id] |     删除一个任务     |
+    |          |                                                 |                      |
+
+    ​    可以看到我们通过指定HTTP method，可以在同一个URL上实现不同的请求
+
+    * 任务的数据结构
+        * id:唯一标识。整型。
+        * title:简短的任务描述。字符串型。
+        * description:完整的任务描述。文本型。
+        * done:任务完成状态。布尔值型。
+
+  * 第三步实现第一个方法：get_tasks()
+
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">global</span> tasks</span><br><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_tasks</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> jsonify(&#123;<span class="string">'tasks'</span>: tasks&#125;)</span><br></pre></td></tr></table></figure>
+
+
+    通过访问http://127.0.0.1:5000/todo/api/v1.0/tasks可以查看task列表
+
+  * 第四步实现【获取指定任务/删除任务】方法：get_task(task_id)/delete_task(task_id)
+
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">	<span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['DELETE'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+
+    这两个方法比较类似，都是先查询，存在即执行操作，否则抛出404
+
+  * 第五步实现【创建一个新的任务】方法：create_task()
+
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_task</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> request.json <span class="keyword">or</span> <span class="string">'title'</span> <span class="keyword">not</span> <span class="keyword">in</span> request.json:</span><br><span class="line">        abort(<span class="number">400</span>)</span><br><span class="line">    <span class="comment"># new task</span></span><br><span class="line">    task = &#123;</span><br><span class="line">        <span class="string">'id'</span>: tasks[<span class="number">-1</span>][<span class="string">'id'</span>] + <span class="number">1</span>,</span><br><span class="line">        <span class="string">'title'</span>: request.json[<span class="string">'title'</span>],   <span class="comment"># not blank</span></span><br><span class="line">        <span class="string">'description'</span>: request.json.get(<span class="string">'description'</span>, <span class="string">""</span>),</span><br><span class="line">        <span class="string">'done'</span>: <span class="keyword">False</span></span><br><span class="line">    &#125;</span><br><span class="line">    tasks.append(task)</span><br><span class="line">    <span class="keyword">return</span> jsonify(&#123;<span class="string">'task'</span>: task&#125;), <span class="number">201</span></span><br></pre></td></tr></table></figure>
+
+
+    这里面出现了**request和状态码**，这部分内容放在下一节
+
+  * 第六步实现【更新一个任务】方法：update_task(task_id)
+
+      <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">update_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">    <span class="comment"># request.json</span></span><br><span class="line">	<span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+
+* 配置服务器ip和端口号
+</code></pre><ol>
+<li><p>HTTP请求（<a href="https://www.jianshu.com/p/4456b0906708）" target="_blank" rel="noopener">https://www.jianshu.com/p/4456b0906708）</a></p>
+<ul>
+<li><p>flask的工作，就是开启一个server，监听client端发出的请求，并作出响应，请求和响应都是以http request的方式</p>
+<p> <img src="/2022/05/20/cython-flask/request.png" width="40%;"></p>
+</li>
+<li><p>服务器端就是flask开启的web server，客户端通过浏览器向server传递指令</p>
+<p> <img src="cython-flask/http.png" width="30%;"></p>
+</li>
+<li><p>请求报文 request message</p>
+<ul>
+<li><p>请求报文由请求行（HTTP方法、URL、协议版本）、首部字段(header)、空行、请求数据（内容实体）组成</p>
+<p><img src="/2022/05/20/cython-flask/request message.png" width="70%;"></p>
+</li>
+<li><p>request对象</p>
+<ul>
+<li><p>假设请求的url是：<a href="http://helloflask.com/hello?name=Grey" target="_blank" rel="noopener">http://helloflask.com/hello?name=Grey</a></p>
+<ul>
+<li>http：//：协议字符串，指定要使用的协议，这里是http协议</li>
+<li>helloflask.com：服务器的地址（域名）</li>
+<li>/hello：资源路径（route）</li>
+<li>?name=Grey：query string，查询字符串，查询字符串从?开始,以键值对的形式写出,多个键值对之间用&amp;分隔</li>
+</ul>
+</li>
+<li><p>属性和方法：</p>
+<p><img src="/2022/05/20/cython-flask/attr1.png" width="70%;"></p>
+<p><img src="/2022/05/20/cython-flask/attr2.png" width="70%;"></p>
+<ul>
+<li>上面出现的request.json，就是在获取json格式的报文</li>
+<li>本例中执行request.args.get(‘name’, ‘’)，就能获取到url请求中name的value——Grey</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>路由匹配 &amp; server处理</p>
+<ul>
+<li><p>当server能够匹配到http request给出的host/URL和methods的时候，就会调用对应的视图函数，否则得到404</p>
+</li>
+<li><p>查看当前server定义的所有路由：</p>
+<ul>
+<li>export FLASK_APP=todo</li>
+<li><p>flask routes</p>
+<p><img src="/2022/05/20/cython-flask/routes.png" width="40%;"></p>
+</li>
+<li><p>每个路由对应：断点（Endpoint）、HTTP方法（Methods）和URL规则（Rule），其中static是flask添加的特殊路由，用来访问静态文件</p>
+</li>
+</ul>
+</li>
+<li><p>生成响应</p>
+<ul>
+<li><p>在flask程序中，客户端发出的请求触发响应的视图函数，获取的返回值会作为响应的主体最后生成完整的响应，即响应报文</p>
+</li>
+<li><p>视图函数可以返回最多由三个元素组成的元组：响应主体、状态码、首部字段</p>
+</li>
+<li><p>默认的状态码为200</p>
+</li>
+<li><p>首部字段可以为字典，或是两元素元组组成的列表</p>
+</li>
+<li><p>一个普通的响应可以只返回主体内容，其余保持默认值（200，{}）</p>
+</li>
+<li><p>在abort()函数中传入状态码即可返回对应的错误响应，不需要return，abort之后的代码将不会被执行</p>
+</li>
+<li><p>Flask中可以调用make_response()方法将视图函数返回值转换为响应对象</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> make_response</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/foo')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    response = make_response(<span class="string">'Hello, World!'</span>)</span><br><span class="line">    response.mimetype = <span class="string">'text/plain'</span></span><br><span class="line">    <span class="keyword">return</span> response</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p>响应报文 response message</p>
+<ul>
+<li><p>视图函数可以返回最多由三个元素组成的元组：响应主体、状态码、首部字段，这就是响应的主体</p>
+</li>
+<li><p>响应的报文首部包含一些关于响应和服务器的信息，这些内容由Flask生成</p>
+</li>
+<li><p>浏览器接收到响应后，会将响应主体解析并显示在浏览器窗口上</p>
+</li>
+<li><p>响应报文主要由协议版本、状态码（status code）、原因短语（reason phrase）、响应首部和响应主体组成</p>
+<p><img src="/2022/05/20/cython-flask/response.png" width="60%;"></p>
+</li>
+<li><p>常见HTTP状态码</p>
+<p><img src="/2022/05/20/cython-flask/status.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/05/05/Matting/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2333,592 +2966,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/20/how-to-train-ViT/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/01/20/how-to-train-ViT/" itemprop="url">how to train ViT</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-20T18:30:32+08:00">
-                2022-01-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/01/20/how-to-train-ViT/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/20/how-to-train-ViT/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>炼丹大法：</p>
-<p>[Google 2021] How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers，Google，rwightman，这些个点其实原论文都提到过了，相当于补充实验了</p>
-<p>[Google 2022] Model soups: averaging weights of multiple fine-tuned models improves accuracy without increasing inference time，多个模型权重做平均</p>
-<p>[Facebook DeiT 2021] Training data-efficient image transformers &amp; distillation through attention，常规技巧大全</p>
-<h2 id="How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers"><a href="#How-to-train-your-ViT-Data-Augmentation-and-Regularization-in-Vision-Transformers" class="headerlink" title="How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers"></a>How to train your ViT? Data, Augmentation, and Regularization in Vision Transformers</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>ViT vs. CNN<ul>
-<li>没有了平移不变形</li>
-<li>requires large dataset and strong AugReg</li>
-</ul>
-</li>
-<li>这篇paper的contribution是用大量实验说明，carefully selected regularization and augmentation比憨憨增加10倍数据量有用，简单讲就是在超参方面给一些insight</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>basic setup</p>
-<ul>
-<li><p>pre-training + transfer-learning：是在google research的原版代码上，TPU上跑的</p>
-</li>
-<li><p>inference是在timm的torch ViT，用V100跑的</p>
-</li>
-<li><p>data</p>
-<ul>
-<li>pretraining：imagenet</li>
-<li>transfer：cifar</li>
-</ul>
-</li>
-<li><p>models</p>
-<ul>
-<li>[ViT-Ti, ViT-S, ViT-B and ViT-L][<a href="https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py" target="_blank" rel="noopener">https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py</a>]</li>
-<li>决定模型scale的几个要素：<ul>
-<li>depth：12，24，32，40，48</li>
-<li>embed_dim：192，384，768，1024，1280，1408</li>
-<li>mlp_ratio：4，48/11，64/13</li>
-<li>num_heads：3，6，12，16</li>
-</ul>
-</li>
-<li>还有影响计算量的变量：<ul>
-<li>resolution：224，384</li>
-<li>patch_size：8，16，32</li>
-</ul>
-</li>
-<li><p>和原版唯一的不同点是去掉了MLP head里面的hidden layer——那个fc-tanh，据说没有performance提升，还会引发optimization instabilities</p>
-<p><img src="/2022/01/20/how-to-train-ViT/ViTs.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Regularization and data augmentations</p>
-<ul>
-<li>dropout after each dense-act except the Dense_QKV：0.1</li>
-<li>stochastic depth：线性增长dbr，till 0.1</li>
-<li>Mixup：beta分布的alpha</li>
-<li>RandAugment：randLayers L &amp; randMagnitude M</li>
-<li>weight decay：0.1 / 0.03，注意这个weight decay是裸的，实际计算是new_p = new_p - p*weight_decay*lr，这个WD*lr可以看作实际的weight decay，也就1e-4/-5量级</li>
-</ul>
-</li>
-<li><p>Pre-training</p>
-<ul>
-<li>Adam：[0.9,0.999]</li>
-<li>batch size：4096</li>
-<li>cosine lr schedule with linear warmup(10k steps)</li>
-<li>gradients clip at global norm 1</li>
-<li>crop &amp; random horizontal flipping</li>
-<li>epochs：ImageNet-1k 300 epochs，ImageNet-21k [30,300] epochs</li>
-</ul>
-</li>
-<li><p>Fine-tuning</p>
-<ul>
-<li>SGD：0.9</li>
-<li>batch size：512</li>
-<li>cosine lr schedule with linear warmup</li>
-<li>gradients clip at global norm 1</li>
-<li>resolution：[224,384]</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>结论</p>
-<ul>
-<li><p>Scaling datasets with AugReg and compute：加大数据量，加强aug&amp;reg</p>
-<ul>
-<li><p>proper的AugReg和10x的数据量都能引导模型精度提升，而且是差不多的水平</p>
-<p><img src="/2022/01/20/how-to-train-ViT/f1.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Transfer is the better option：永远用预权重去transfer，尤其大模型</p>
-<ul>
-<li>在数据量有限的情况下，train from scratch基本上不能追上transfer learning的精度</li>
-</ul>
-<p><img src="/2022/01/20/how-to-train-ViT/f2.png" width="40%;"></p>
-</li>
-<li><p>More data yields more generic models：加大数据，越大范化性越好</p>
-</li>
-<li><p>Prefer augmentation to regularization：非要比的话aug &gt; reg，成年人两个都要</p>
-<ul>
-<li>for mid-size dataset like ImageNet-1k any kind of AugReg helps</li>
-<li>for a larger dataset like ImageNet-21k regularization almost hurts，但是aug始终有用</li>
-</ul>
-<p><img src="/2022/01/20/how-to-train-ViT/f4.png" width="70%;"></p>
-</li>
-<li><p>Choosing which pre-trained model to transfer</p>
-</li>
-<li>Prefer increasing patch-size to shrinking model-size：显存有限情况下优先加大patch size<ul>
-<li>相似的计算时间，Ti-16要比S-32差</li>
-<li>因为patch-size只影响计算量，而model-size影响了参数量，直接影响模型性能</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Training-data-efficient-image-transformers-amp-distillation-through-attention"><a href="#Training-data-efficient-image-transformers-amp-distillation-through-attention" class="headerlink" title="Training data-efficient image transformers &amp; distillation through attention"></a>Training data-efficient image transformers &amp; distillation through attention</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>大数据+大模型的高精度模型不是谁都负担得起的</li>
-<li>we produce competitive model<ul>
-<li>use Imagenet only</li>
-<li>on single computer，8-gpu</li>
-<li>less than 3 days，53 hours pretraining + 20 hours finetuning</li>
-<li>模型：86M，top-1 83.1%</li>
-<li>脸厂接地气！！！</li>
-</ul>
-</li>
-<li>we also propose a tranformer-specific teacher-student strategy<ul>
-<li>token-based distillation</li>
-<li>use a convnet as teacher</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>本文就是在探索训练transformer的hyper-parameters、各种训练技巧</p>
-<p><img src="/2022/01/20/how-to-train-ViT/deit.png" width="50%;"></p>
-</li>
-<li><p>Knowledge Distillation (KD)</p>
-<ul>
-<li>本文主要关注teacher-student</li>
-<li>用teacher生成的softmax结果（soft label）去训练学生，相当于用student蒸馏teacher</li>
-</ul>
-</li>
-<li>the class token<ul>
-<li>a trainable vector</li>
-<li>和patch token接在一起</li>
-<li>然后接transformer layers</li>
-<li>然后 projected with a linear layer to predict the class</li>
-<li>这种结构force self-attention在patch token和class token之间进行信息交换</li>
-<li>因为class token是唯一的监督信息，而patch token是唯一的输入变量</li>
-</ul>
-</li>
-<li>contributions<ul>
-<li>scaling down models：DeiT-S和DeiT-Ti，向下挑战resnet50和resnet18</li>
-<li>introduce a new distillation procedure based on a distillation token，类似class token的角色</li>
-<li>特殊的distillation机制使得transformer相比较于从同类结构更能从convnet上学到更多</li>
-<li>well transfer</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>首先假设我们有了一个strong teacher，我们的任务是通过exploiting the teacher来训练一个高质量的transformer</p>
-</li>
-<li><p>Soft distillation</p>
-<ul>
-<li>teacher的softmax logits不直接做标签，而是计算两个KL divergence</li>
-<li><p>CE + KL loss</p>
-<p><img src="/2022/01/20/how-to-train-ViT/Soft distillation.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Hard-label distillation</p>
-<ul>
-<li>就直接用作label</li>
-<li><p>CE + CE</p>
-<p><img src="/2022/01/20/how-to-train-ViT/hard distillation.png" width="80%;"></p>
-</li>
-<li><p>实验发现hard比soft结果好</p>
-</li>
-</ul>
-</li>
-<li><p>Distillation token</p>
-<ul>
-<li>在token list上再添加一个new token</li>
-<li>跟class token的工作任务一样</li>
-<li>distillation token的优化目标是上述loss的distillation component</li>
-<li>与class token相辅相成</li>
-<li><p>作为对比，也尝试了用原本的CE loss训练两个独立的class token，发现这样最终两个class token的cosine similarity高度接近1，说明额外的class token没有带来有用的东西，但是class token和distillation token的相似度最多也就0.93，说明distillation branch给模型add something，【难道不是因为target不同所以才不同吗？？？】</p>
-<p><img src="/2022/01/20/how-to-train-ViT/deit1.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Fine-tuning with distillation</p>
-<ul>
-<li>finetuning阶段用teacher label还是ground truth label？</li>
-<li>实验结果是teacher label好一点</li>
-</ul>
-</li>
-<li><p>Joint classifiers</p>
-<ul>
-<li>两个softmax head相加</li>
-<li>然后make the prediction</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Training details &amp; ablation</p>
-<ul>
-<li><p>Initialization</p>
-<ul>
-<li>Transformers are highly sensitive to initialization，可能会导致不收敛</li>
-<li>推荐是weights用truncated normal distribution</li>
-</ul>
-</li>
-<li><p>Data-Augmentation</p>
-<ul>
-<li>Auto-Augment, Rand-Augment, random erasing, Mixup等等</li>
-<li>transformers require a strong data augmentation：几乎都有用</li>
-<li><p>除了Dropout：所以我们把Dropout置零了</p>
-<p><img src="/2022/01/20/how-to-train-ViT/training details.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Optimizers &amp; Regularization</p>
-<ul>
-<li>AdamW</li>
-<li>和ViT一样的learning rate</li>
-<li><p>但是much smaller weight decay：发现weight decay会hurt convergence</p>
-<p><img src="/2022/01/20/how-to-train-ViT/hyper.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/13/MAE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/01/13/MAE/" itemprop="url">MAE</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-13T11:08:34+08:00">
-                2022-01-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/01/13/MAE/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/13/MAE/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[MAE] Masked Autoencoders Are Scalable Vision Learners：恺明，将BERT的掩码自监督模式搬到图像领域，设计基于masked patches的图像重建任务</p>
-<p>[VideoMAE] VideoMAE: Masked Autoencoders are Data-Efﬁcient Learners for Self-Supervised Video Pre-Training：腾讯AI Lab，进一步搬运到video领域</p>
-<h2 id="Masked-Autoencoders-Are-Scalable-Vision-Learners"><a href="#Masked-Autoencoders-Are-Scalable-Vision-Learners" class="headerlink" title="Masked Autoencoders Are Scalable Vision Learners"></a>Masked Autoencoders Are Scalable Vision Learners</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>一种自监督训练(pretraining)方式，用来提升模型泛化性能</li>
-<li>技术方案：<ul>
-<li>mask &amp; reconstruct</li>
-<li>encoder-decoder architecture<ul>
-<li>encoder operates only on visible patches：首先对input patches做random sampling，只选取少量patches给到encoder</li>
-<li>lightweight decoder run reconstruction on (masked) tokens：将encoded patches和mask tokens组合，给到decoder，用于重建原始图像</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>精度<ul>
-<li>with MAE pretraining，ViT-Huge on ImageNet-1k：87.8%</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>自监督路线能给到模型更大体量的数据，like NLP，masked autoencoding也是经典的BERT训练方式，but现实是autoencoding methods in vision lags behind NLP</p>
-<ul>
-<li>information density：NLP是通过提取高级语义信息去推断空缺的，而图像如果有充足的邻里低级空间信息，就能重建出来不错的效果，导致模型没学到啥高级语义信息就收敛了，本文的解决方案是random mask极大比例的patches，largely reduce redundancy</li>
-<li>decoder plays a different role be- tween reconstructing text and images：和上一条呼应，visual decoder重建的是像素，低级信息，NLP decoder重建的是词向量，是高级表征，因此BERT用了个贼微小的结构来建模decoder——一个MLP，但是图像这边decoder的设计就重要的多——plays a key role in determining the semantic level of the learned latent representations </li>
-</ul>
-</li>
-<li><p>our MAE</p>
-<ul>
-<li>不对称encoder-decoder</li>
-<li>high portion masking：既提升acc又减少计算量，easy to scale-up</li>
-<li><p>workflow</p>
-<ul>
-<li>MAE pretraing：encode random sampled patches，decode encoded&amp;masked tokens</li>
-<li>down stream task：save encoder for recognition tasks</li>
-</ul>
-<p><img src="/2022/01/13/MAE/MAE.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>masking<ul>
-<li>切分图像：non-overlapping patches</li>
-<li>随机采样：random sample the patches following a uniform distribution</li>
-<li>high masking ratio：一定要构建这样的task，不能简单通过邻里低级信息恢复出来，必须要深入挖掘高级语义信息，才能推断出空缺是啥</li>
-</ul>
-</li>
-<li>MAE encoder<ul>
-<li>ViT</li>
-<li>given patches：linear proj + PE</li>
-<li>operates on a small visible subset(25%) of the full set</li>
-<li>负责recognition任务</li>
-</ul>
-</li>
-<li>MAE decoder<ul>
-<li>a series of Transformer blocks：远小于encoder，narrower and shallower，单个token的计算量是encoder的&lt;10%</li>
-<li>given full set tokens<ul>
-<li>mask tokens：a shared &amp; learned vector 用来表征missing patches</li>
-<li>add PE：从而区别不同的mask token</li>
-</ul>
-</li>
-<li>负责reconstruction任务</li>
-</ul>
-</li>
-<li>Reconstruction target<ul>
-<li>decoder gives the full set reconstructed tokens：[b,N,D]<ul>
-<li>N：patch sequence length</li>
-<li>D：patch pixel values</li>
-</ul>
-</li>
-<li>reshape：[b,H,W,C]</li>
-<li>重建loss，per-pixel MSE：compute only on masked patches</li>
-<li>【QUESTION，这个还没理解】还有一个变体，官方代码里叫norm_pix_loss，声称是for better representation learning，以每个patch的norm作为target：<ul>
-<li>对每个masked patch，计算mean&amp;std，</li>
-<li>然后normalize，</li>
-<li>这个normed patch作为reconstruction target</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2973,7 +3020,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">162</span>
+                  <span class="site-state-item-count">164</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2986,7 +3033,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">95</span>
+                  <span class="site-state-item-count">96</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

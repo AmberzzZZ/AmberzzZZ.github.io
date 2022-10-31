@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/22/CLIP系列/clip%20hypers.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/22/CLIP系列/zero-shot.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/22/CLIP系列/linear%20probe.png">
-<meta property="og:updated_time" content="2022-10-23T09:22:06.069Z">
+<meta property="og:updated_time" content="2022-10-30T03:32:38.012Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CLIP系列">
 <meta name="twitter:description" content="papers [2021 CLIP] Learning Transferable Visual Models From Natural Language Supervision [2022 MaskCLIP] Extract Free Dense Labels from CLIP [2022 DenseCLIP ]DenseCLIP: Language-Guided Dense Predictio">
@@ -453,9 +453,9 @@
 </li>
 <li><p>temperature parameter</p>
 <ul>
-<li>0.07</li>
-<li>clip to prevent scaling the logits by more than 100</li>
+<li>0.07，clip to prevent scaling the logits by more than 100</li>
 <li>原始的logits/T，但是新logits不超过100</li>
+<li>这是因为cosine similarity的输出在[-1,1]，而一般用于分类预测的logits通常是不限幅的，所以用temperature factor来拉大cos logits之间的差异，提高正样本置信度</li>
 <li>necessary for training stability</li>
 </ul>
 <p><img src="/2022/10/22/CLIP系列/clip hypers.png" width="60%;"></p>
@@ -642,7 +642,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">162</span>
+                  <span class="site-state-item-count">164</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -655,7 +655,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">95</span>
+                  <span class="site-state-item-count">96</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
