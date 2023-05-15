@@ -276,6 +276,227 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/19/cv2-numpy-tobeadded/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/19/cv2-numpy-tobeadded/" itemprop="url">cv2&numpy&tobeadded</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-19T10:45:32+08:00">
+                2020-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/19/cv2-numpy-tobeadded/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/cv2-numpy-tobeadded/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li>矩阵乘法<ul>
+<li>np.dot(A,B)：真正的矩阵乘法</li>
+<li>np.multiply(A,B) &amp; np重载的*：element-wise product，矩阵中对应元素相乘</li>
+<li>cv的A.dot(B) &amp; cv重载的*：真正的矩阵乘法</li>
+<li>cv的A.mul(B) ：element-wise product，矩阵中对应元素相乘</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>图像旋转</p>
+<p> 通过仿射矩阵<code>cv2.getRotationMatrix2D</code>和仿射变换函数<code>cv2.warpAffine</code>来实现</p>
+<ul>
+<li><p>src：输入图像</p>
+</li>
+<li><p>M：变换矩阵</p>
+</li>
+<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
+</li>
+<li><p>flags：插值方法</p>
+</li>
+<li><p>borderMode：边界像素模式</p>
+</li>
+<li><p>borderValue：边界填充值，默认为0</p>
+<p>cv2.getRotationMatrix2D(center, angle, scale)：返回一个2x3的变换矩阵</p>
+</li>
+<li><p>center：旋转中心</p>
+</li>
+<li>angle：旋转角度，<strong>正值是逆时针旋转</strong></li>
+<li><p>scale：缩放因子</p>
+<p>cv2.warpAffine(src, M, dsize[, dst[, flags[, borderMode[, borderValue]]]]))：返回变换后的图像</p>
+</li>
+<li><p>src：输入图像</p>
+</li>
+<li><p>M：变换矩阵</p>
+</li>
+<li><p>dsize：输出图像的大小（基于图像<strong>原点</strong>裁剪）</p>
+</li>
+<li><p>flags：插值方法</p>
+</li>
+<li><p>borderMode：边界像素模式</p>
+</li>
+<li><p>borderValue：边界填充值，默认为0</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rotate_img</span><span class="params">(angle, img, interpolation=cv2.INTER_LINEAR, points=[])</span>:</span></span><br><span class="line">    h, w = img.shape</span><br><span class="line">    rotataMat = cv2.getRotationMatrix2D((w/<span class="number">2</span>, h/<span class="number">2</span>), math.degrees(angle), <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># rotate_img1: 输出图像尺寸不变，超出原图像部分被cut掉</span></span><br><span class="line">    rotate_img1 = cv2.warpAffine(img, rotataMat, dsize=(w, h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">   	<span class="comment"># rotate_img2: 输出图像尺寸变大，保留超出原图像部分，新的坐标原点保证旋转中心仍旧位于图像中心</span></span><br><span class="line">    new_h = int(w*math.fabs(math.sin(angle)) + h*math.fabs(math.cos(angle)))</span><br><span class="line">    new_w = int(h*math.fabs(math.sin(angle)) + w*math.fabs(math.cos(angle)))</span><br><span class="line">    rotataMat[<span class="number">0</span>, <span class="number">2</span>] += (new_w - w) / <span class="number">2</span></span><br><span class="line">    rotataMat[<span class="number">1</span>, <span class="number">2</span>] += (new_h - h) / <span class="number">2</span></span><br><span class="line">    rotate_img2 = cv2.warpAffine(img, rotataMat, dsize=(new_w, new_h), flags=interpolation, borderMode=cv2.BORDER_CONSTANT, borderValue=<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 坐标点的变换</span></span><br><span class="line">    rotated_points = []</span><br><span class="line">    <span class="keyword">for</span> point <span class="keyword">in</span> points:</span><br><span class="line">        point = rotataMat.dot([[point[<span class="number">0</span>]], [point[<span class="number">1</span>]], [<span class="number">1</span>]])</span><br><span class="line">        rotated_points.append((int(point[<span class="number">0</span>]), int(point[<span class="number">1</span>])))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> rotate_img2, rotated_points</span><br></pre></td></tr></table></figure>
+<p>使用tips：</p>
+</li>
+<li><p>如果不修改仿射变换矩阵的平移参数，坐标原点的位置不发生改变</p>
+</li>
+<li><p>dsize指定的输出图像是从原点位置开始裁剪</p>
+</li>
+<li><p>坐标点的变换满足公式：</p>
+<script type="math/tex; mode=display">
+  dst(x,y) = src(M_{11}x+M_{12}y+M_{13}, M_{21}x+M_{22}y+M_{23})</script></li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>np.meshgrid(*xi,**kwargs)</p>
+<p> 这个函数神他妈坑，作用是Return coordinate matrices from coordinate vectors. Make N-D coordinate arrays for vectorized evaluations of N-D scalar/vector fields over N-D grids, given one-dimensional coordinate arrays x1, x2,…, xn. 但是尝试一下会发现：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z)</span><br><span class="line">print(x.shape)       <span class="comment"># (20, 10, 30)</span></span><br></pre></td></tr></table></figure>
+<p> xy轴坐标是反过来的，这是因为optional args里面有一个indexing：</p>
+<p> <strong>indexing</strong> : {‘xy’, ‘ij’}, Cartesian (‘xy’, default) or matrix (‘ij’) indexing of output.</p>
+<p> 我们想要得到的坐标系和输入的轴一一对应，得指定参数<code>indexing=&#39;ij&#39;</code></p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line">z = np.arange(<span class="number">0</span>,<span class="number">30</span>,<span class="number">1</span>)</span><br><span class="line">x, y, z= np.meshgrid(x, y, z, indexing=<span class="string">'ij'</span>)</span><br><span class="line">print(x.shape)      <span class="comment"># (10, 20, 30)</span></span><br></pre></td></tr></table></figure>
+<p> 还有一个参数sparse，因为每根轴的坐标都是复制的，所以可以稀疏存储，此时函数返回值变化：</p>
+<p> <strong>sparse</strong> : bool, If True a sparse grid is returned in order to conserve memory. Default is False.</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>,<span class="number">10</span>,<span class="number">1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>,<span class="number">20</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y)</span><br><span class="line">print(xx)        <span class="comment"># a 20x10 list</span></span><br><span class="line"></span><br><span class="line">xx, yy = np.meshgrid(x, y, sparse=<span class="keyword">True</span>)</span><br><span class="line">print(xx)        <span class="comment"># a 1*10 list</span></span><br><span class="line">print(yy)        <span class="comment"># a 20*1 list</span></span><br><span class="line"><span class="comment"># 所以整体上还是个20*10的矩阵</span></span><br></pre></td></tr></table></figure>
+<p> 二维可视化：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">z = xx**<span class="number">2</span> + yy**<span class="number">2</span>            <span class="comment"># xx和yy既可以是dense convervation也可以是sparse convervation</span></span><br><span class="line">h = plt.contourf(x,y,z)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>np.tile(A,reps)</p>
+<p> 这个函数挺有用的，把数组沿着指定维度复制，比stack、concat啥的都优雅，能自动创建新的维度</p>
+<ul>
+<li>A：array_like, The input array.</li>
+<li>reps：array_like, The number of repetitions of <em>A</em> along each axis.</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>np.reshape(a, newshape, order=’C’)</p>
+<p> 这个函数贼常用，但是一般用于二维的时候没考虑重组顺序这件事</p>
+<ul>
+<li><p>order: {‘C’, ‘F’, ‘A’}, optional，简单理解，reshape的通用实现方式是先将真个array拉直，然后依次取数据填入指定维度，C是从最里面的维度开始拉直&amp;构造，F是从最外面的维度开始拉直&amp;构造，A for auto</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">a = np.arange(<span class="number">6</span>)</span><br><span class="line">array([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># C-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">       [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Fortran-like index ordering</span></span><br><span class="line">np.reshape(a, (<span class="number">2</span>, <span class="number">3</span>), order=<span class="string">'F'</span>)</span><br><span class="line">array([[<span class="number">0</span>, <span class="number">4</span>, <span class="number">3</span>],</span><br><span class="line">       [<span class="number">2</span>, <span class="number">1</span>, <span class="number">5</span>]])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>tf和keras里面也有reshape，是没有order参数的，默认是’C’</p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/04/16/MobileNets/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4972,203 +5193,6 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/12/25/NiN-network-in-network/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/25/NiN-network-in-network/" itemprop="url">NiN: network in network</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T17:08:30+08:00">
-                2019-12-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/12/25/NiN-network-in-network/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/25/NiN-network-in-network/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="Network-In-Network"><a href="#Network-In-Network" class="headerlink" title="Network In Network"></a>Network In Network</h3><ol>
-<li><p>动机</p>
-<ul>
-<li>enhance model discriminability(获得更好的特征描述)：propose mlpconv</li>
-<li>less prone to overfitting：propose global average pooling</li>
-</ul>
-</li>
-<li><p>论点</p>
-<p> <strong>comparison 1:</strong></p>
-<ul>
-<li>conventional CNN uses linear filter, which implicitly makes the assumption that the latent concepts are linearly separable. </li>
-<li>traditional CNN is stacking [linear filters+nonlinear activation/linear+maxpooling+nonlinear]：这里引出了一个激活函数和池化层先后顺序的问题，对于avg_poolling，两种操作得到的结果是不一样的，先接激活函数会丢失部分信息，所以应该先池化再激活，对于MAX_pooling，两种操作结果一样，但是先池化下采样，可以减少激活函数的计算量，<strong>总结就是先池化再激活</strong>。但是好多网络实际实现上都是relu紧跟着conv，后面接pooling，这样比较interpretable——cross feature map pooling </li>
-<li><p>mlpconv layer can be regarded as a highly nonlinear function(filter-fc-activation-fc-activation-fc-activation…)</p>
-<p><img src="/2019/12/25/NiN-network-in-network/mlpconv.png" width="50%;"></p>
-<p><strong>comparison 2:</strong></p>
-</li>
-<li><p>maxout network imposes the prior that instances of a latent concept lie within a convex set in the input space【QUESTION HERE】</p>
-</li>
-<li><p>mlpconv layer is a universal function approximator instead of a convex function approximator  </p>
-<p><strong>comparison 3:</strong></p>
-</li>
-<li><p>fully connected layers are prone to overfitting and heavily depend on dropout regularization </p>
-</li>
-<li>global average pooling is more meaningful and interpretable, moreover it itself is a structural regularizer【QUESTION HERE】</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>use <strong>mlpconv layer</strong> to replace conventional GLM(linear filters)</li>
-<li>use <strong>global average pooling</strong> to replace traditional fully connected layers</li>
-<li>the overall structure is a stack of mlpconv layers, on top of which lie the global average pooling and the objective cost layer</li>
-<li>Sub-sampling layers can be added in between the mlpconv as in CNN</li>
-<li>dropout is applied on the outputs of all but the last mlpconv layers for regularization</li>
-<li>another regularizer applied is weight decay </li>
-</ul>
-<p><img src="/2019/12/25/NiN-network-in-network/NIN.png" width="70%;"></p>
-</li>
-<li><p>细节</p>
-<ul>
-<li><p>preprocessing：global contrast normalization and ZCA whitening </p>
-</li>
-<li><p>augmentation：translation and horizontal flipping</p>
-</li>
-<li><p>GAP for conventional CNN：CNN+FC+DROPOUT &lt; CNN+GAP &lt; CNN+FC</p>
-<ul>
-<li>gap is effective as a regularizer</li>
-<li>slightly worse than the dropout regularizer result for some reason</li>
-</ul>
-</li>
-<li><p>confidence maps </p>
-<ul>
-<li>explicitly enforce feature maps in the last mlpconv layer of NIN to be confidence maps of the categories by means of global average pooling：NiN将GAP的输出直接作为output layer，因此每一个类别对应的feature map可以近似认为是 confidence map。</li>
-<li>the strongest activations appear roughly at the same region of the object in the original image：特征图上高响应区域基本与原图上目标区域对应。</li>
-<li>this motivates the possibility of performing object detection via NIN</li>
-</ul>
-</li>
-<li><p>architecture：实际中多层感知器使用1x1conv来实现，增加的多层感知器相当于是一个含参的池化层，通过对多个特征图进行含参池化，再传递到下一层继续含参池化，这种级联的<strong>跨通道的含参池化</strong>让网络有了更复杂的表征能力。</p>
-<p>  <img src="/2019/12/25/NiN-network-in-network/architecture.png" width="55%;"></p>
-</li>
-</ul>
-</li>
-<li><p>总结</p>
-<ol>
-<li>mlpconv：stronger local reception unit</li>
-<li>gap：regularizer &amp; bring confidence maps</li>
-</ol>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -5223,7 +5247,7 @@ k = [k_0 + log_2 (\sqrt{wh}/224)]</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">167</span>
+                  <span class="site-state-item-count">168</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

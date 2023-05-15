@@ -276,6 +276,469 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/10/c-for-record/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/10/c-for-record/" itemprop="url">c++ for record</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-10T23:52:40+08:00">
+                2018-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/10/c-for-record/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/10/c-for-record/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近开始着手写slam代码，看一些常用库源码的时候发现各种力不从心，一些c++11的骚操作竟然没见过，是时候完整撸一发c++ primer祭天了。</p>
+<ol>
+<li><p>iostream</p>
+<ul>
+<li>标准输入：cin</li>
+<li>标准输出：cout、cerr、clog</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">int</span> v1=<span class="number">0</span>, v2=<span class="number">0</span>;</span><br><span class="line"><span class="built_in">cin</span> &gt;&gt; v1 &gt;&gt; v2;</span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; v1+v2 &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"><span class="built_in">cerr</span> &lt;&lt; <span class="string">"This is nonsense."</span> &lt;&lt; <span class="built_in">endl</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>&lt;&lt; 和 &gt;&gt; 的方向表示了数据流的走向，也就是赋值的方向。cerr用来输出错误信息。</li>
+</ul>
+</li>
+<li><p>控制流</p>
+<ul>
+<li><p>while：每次执行循环之前先检查<strong>循环条件</strong></p>
+</li>
+<li><p>do while：先执行循环体后检查条件</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (condition)</span><br><span class="line">    statement</span><br><span class="line">   </span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">    statement</span><br><span class="line"><span class="keyword">while</span> (condition);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>for：每次执行循环之前先检查<strong>循环条件</strong>，执行循环之后执行<strong>表达式</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (init-statement; condition; expression)</span><br><span class="line">&#123;</span><br><span class="line">    statemnt</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 范围for语句</span></span><br><span class="line"><span class="keyword">for</span> (declaration : expression)</span><br><span class="line">	statement</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>switch：</p>
+<ul>
+<li>case label：case标签必须是<strong>整形常量</strong>表达式</li>
+<li>如果某个case标签匹配成功，会<strong>往后顺序执行所有case分支</strong>，直到结尾或者遇到break</li>
+<li>default标签</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span>(ch)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'a'</span>: <span class="keyword">case</span> <span class="string">'b'</span>: <span class="keyword">case</span> <span class="string">'c'</span>:</span><br><span class="line">    	++cnt;</span><br><span class="line">    	<span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>break：负责终止离他最近的while、do while、for或switch语句。</p>
+</li>
+<li><p>continue：负责终止离他最近的while、do while、for循环的当前迭代。</p>
+</li>
+<li><p>goto：无条件跳转到同一函数内的某个<strong>带标签语句</strong>。</p>
+<blockquote>
+<p>labeled statement: <code>label: statement</code></p>
+</blockquote>
+</li>
+<li><p>异常</p>
+<ul>
+<li><p>throw：<strong>引发异常</strong>，后面紧随一个异常类型，终止当前函数，将控制权转移给能够处理该异常的代码。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdexcept&gt;</span></span></span><br><span class="line"><span class="comment">// runtime_error 标准库异常类型</span></span><br><span class="line"><span class="keyword">throw</span> runtime_error(<span class="string">"Data must refer to same name"</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>try：<strong>处理异常</strong>，后面紧随一套catch子句用来处理异常。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    program statements</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception-declaration) &#123;</span><br><span class="line">    handler-statements</span><br><span class="line">&#125; <span class="keyword">catch</span> (exception-declaration) &#123;</span><br><span class="line">    handler-statements</span><br><span class="line">&#125; ...</span><br></pre></td></tr></table></figure>
+<p>try语句块内声明的变量在块外无法访问，即使是catch语句。</p>
+<p>catch一旦完成，程序跳转到最后一个catch子句之后的语句。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>类</p>
+<p>类型 &amp; 对象（实例），变量 &amp; 行为（方法）。</p>
+<ul>
+<li><p>存在类内默认初始化</p>
+</li>
+<li><p>类通常被定义在头文件中，头文件名字应与类的名字保持一致</p>
+<blockquote>
+<p>头文件通常包含只能被定义一次的实体，如类、const等。</p>
+<p>头文件保护符#ifndef系列，创建<strong>预处理变量</strong>，防止多次包含。</p>
+</blockquote>
+</li>
+<li><p>构造函数初始值列表：冒号以及冒号和花括号之间的代码</p>
+<blockquote>
+<p>列表只说明用于初始化成员的值，而不限定初始化的具体顺序。</p>
+<p>成员的初始化顺序与它们在类定义中的出现顺序一致。</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为类成员初始化</span></span><br><span class="line">Sales_data(<span class="keyword">const</span> <span class="built_in">string</span> &amp;s, <span class="keyword">unsigned</span> n, <span class="keyword">double</span> p)</span><br><span class="line">		 : bookNo(s), units_sold(n), revenue(p*n) &#123;&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 区别于赋值</span></span><br><span class="line">Sales_data(<span class="keyword">const</span> <span class="built_in">string</span> &amp;s, <span class="keyword">unsigned</span> n, <span class="keyword">double</span> p)</span><br><span class="line">&#123;</span><br><span class="line">    bookNo = s;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接口与封装：</p>
+<ul>
+<li>定义在private说明符之后的成员只能被类内成员函数访问，封装了类的实现细节。</li>
+<li>定义在public说明符之后的成员可以在整个程序内被访问，定义类的接口。</li>
+</ul>
+</li>
+<li><p>class和struct的区别：成员访问权限</p>
+<ul>
+<li>struct：定义在第一个说明符之前的成员是public</li>
+<li>class：定义在第一个说明符之前的成员是private</li>
+</ul>
+</li>
+<li><p>友元：允许其他类或函数访问它的非公有成员，在类内添加以friend关键字开始的友元声明。</p>
+<blockquote>
+<p>友元的声明仅仅指定了访问权限，而非一个通常意义上的函数声明。</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Sales_data</span> &#123;</span></span><br><span class="line"><span class="comment">// 友元声明</span></span><br><span class="line"><span class="function"><span class="keyword">friend</span> Sales_data <span class="title">add</span><span class="params">(<span class="keyword">const</span> Sales_data&amp;, <span class="keyword">const</span> Sales_data&amp;)</span></span>;</span><br><span class="line"><span class="comment">// 非公有成员</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="built_in">string</span> bookNo;</span><br><span class="line">	<span class="keyword">double</span> revenue = <span class="number">0.0</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>静态成员static：与类本身相关联，不属于任何一个对象，因此不是在创建类对象的时候被定义的，因此通常在类的外部定义和初始化，在类内部添加以static关键字开始的静态成员声明。</p>
+</li>
+</ul>
+</li>
+<li><p>内置类型</p>
+<ul>
+<li>内存中的一个地址对应一个字节</li>
+<li>unsigned类型表示<strong>大于等于0</strong>的数（$[0, 2^{n}-1]$），被赋给一个超出表示范围的数时，<strong>自动取余</strong>，作为循环条件时当心进入<strong>无限循环</strong></li>
+<li>signed类型正负值范围平衡（$[-2^{n-1}, 2^{n-1}-1]$），被赋给一个超出表示范围的数时，<strong>结果未定义</strong></li>
+<li>字符型char，单引号，一个字节</li>
+<li>字符串型，双引号，常量字符数组，结尾隐含空字符 ‘\0’</li>
+<li>nullptr = 0（传统NULL包含在cstdlib头文件内）</li>
+</ul>
+</li>
+<li><p>变量</p>
+<ul>
+<li><p><strong>列表初始化</strong>，花括号</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 拷贝初始化</span></span><br><span class="line"><span class="keyword">int</span> x=<span class="number">0</span>;</span><br><span class="line"><span class="keyword">int</span> x=&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="comment">// 直接初始化</span></span><br><span class="line"><span class="keyword">int</span> x&#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">x</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>变量声明extern，源于<strong>分离式编译</strong>机制，一个变量只能被定义一次，可以声明多次</p>
+</li>
+<li><p>作用域，嵌套作用域 &amp; 内部重定义</p>
+</li>
+</ul>
+</li>
+<li><p>复合类型</p>
+<ul>
+<li><p>引用，<code>typename &amp;declaration</code>，浅拷贝，绑定一个对象，<strong>引用不是对象</strong></p>
+</li>
+<li><p>指针，<code>typename *declaration</code>，存放对象地址</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a;</span><br><span class="line"><span class="keyword">int</span> *p, *q=a;</span><br><span class="line">p = &amp;a;</span><br><span class="line">p = q;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>取地址符&amp;</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> *p = a;</span><br><span class="line"><span class="keyword">int</span> *p = &amp;a;</span><br><span class="line"><span class="comment">// a---&gt;对象 &amp;a---&gt;地址</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解引用符*</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> a;</span><br><span class="line"><span class="keyword">int</span> *p;</span><br><span class="line">*p ---&gt; undefined</span><br><span class="line">p = &amp;a;</span><br><span class="line">*p = <span class="number">10</span>;</span><br><span class="line"><span class="comment">// p---&gt;指针 *p---&gt;对象</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>void* 指针，可以指向任意类型的对象，但是不能进行对象操作</p>
+</li>
+</ul>
+</li>
+<li><p>const限定符</p>
+<ul>
+<li><p>参与编译预处理</p>
+</li>
+<li><p>要实现多个文件共享，必须在const变量<strong>定义</strong>之前加上extern关键字</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// define</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> bufferSize = fcn();</span><br><span class="line"><span class="comment">// declare</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="keyword">int</span> bufferSize;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>允许任意表达式作为初始值（允许隐式类型转换）</p>
+</li>
+<li><p>常量引用，允许非常量赋值，实际引用一个内存中的“临时值”</p>
+</li>
+<li><p>指向常量的指针，允许非常量赋值，但是不能通过该指针修改对象</p>
+</li>
+<li><p>常量指针，指针始终指向同一个对象</p>
+</li>
+<li><p>常量表达式constexpr，表达式在编译过程中就能得到计算结果</p>
+</li>
+</ul>
+</li>
+<li><p>处理类型</p>
+<ul>
+<li><p>类型别名typedef &amp; using</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传统</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">double</span> base;</span><br><span class="line"><span class="keyword">typedef</span> base *p;    <span class="comment">// p是double指针</span></span><br><span class="line">base a;</span><br><span class="line">p p1=&amp;a;</span><br><span class="line"><span class="comment">// c++11</span></span><br><span class="line"><span class="keyword">using</span> base = <span class="keyword">double</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>auto类型说明符，让编译器分析表达式所属类型并为变量赋值</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一条类型声明语句中所有变量的类型必须保持一致</span></span><br><span class="line"><span class="keyword">auto</span> i=<span class="number">0</span>, *p=&amp;i;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>decltype类型指示符，仅分析表达式返回类型，不做赋值（因此不做实际计算）</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">decltype</span>(f()) a=x;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>string</p>
+<ul>
+<li><p>读取，<code>&gt;&gt;</code>不读取空白，遇到空白符停止，<code>getline</code>保留空白符，遇到换行符停止。</p>
+</li>
+<li><p>字符串字面值不是string对象，而是<strong>C风格字符串</strong>，<code>c_str()</code>成员函数能够将string对象转化成C风格字符串</p>
+</li>
+<li><p>遍历，<strong>范围for语句</strong>，每次迭代declare的变量会被初始化为expression的下一个元素</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (declaration : expression)</span><br><span class="line">	statement</span><br><span class="line"><span class="function"><span class="built_in">string</span> <span class="title">str</span><span class="params">(<span class="string">"some string"</span>)</span></span>;</span><br><span class="line"><span class="comment">// 赋值</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> c: str)</span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; c &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"><span class="comment">// 引用</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> &amp;c: str)</span><br><span class="line">    c = <span class="built_in">toupper</span>(c);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>size()</code>返回的类型是<code>string::size_type</code>，通常用auto</p>
+</li>
+</ul>
+</li>
+<li><p>vector</p>
+<ul>
+<li>类模版，<strong>相同类型</strong>对象的集合，声明时必须提供元素类型<code>vector&lt;int&gt;</code></li>
+<li>添加元素<code>push_back()</code></li>
+</ul>
+</li>
+<li><p>迭代器</p>
+<ul>
+<li>所有标准库容器都支持迭代器，只有少数支持下标访问</li>
+<li><code>begin()</code>返回指向第一个元素的迭代器，<code>end()</code>返回<strong>尾后元素</strong>的迭代器</li>
+<li><code>cbegin()</code>和<code>cend()</code>操作类似，返回值是const_iterator，不能修改对象</li>
+<li>迭代器的类型是<code>container::iterator</code>和<code>container::const_iterator</code>，通常用auto</li>
+<li>解引用迭代器得到对象</li>
+<li>箭头运算符<code>-&gt;</code>，结合解引用+成员访问两个操作</li>
+<li>迭代器失效：容器改变容量</li>
+</ul>
+</li>
+<li><p>数组</p>
+<ul>
+<li>大小固定，编译的时候维度应该已知，因此必须是常量表达式</li>
+<li>不能用做拷贝和赋值</li>
+</ul>
+</li>
+<li><p>表达式</p>
+<ul>
+<li><p>左值和右值</p>
+<p>​    C语言中，<strong>左值</strong>指的是既能出现在等号左边也能出现在等号右边的变量或表达式，通常来说就是有名字的变量，而<strong>右值</strong>只能出现在等号右侧，通常就是一些没有名字也取不到地址的中间结果。</p>
+<p>继承到C++中归纳来讲就是：当一个对象被用作右值的时候，用的是对象的值（内容），当被用作左值的时候，用的是对象的身份（在内存中的位置）。</p>
+</li>
+<li><p>求值顺序</p>
+<blockquote>
+<p>有四种运算符明确规定了求值顺序，逻辑与（&amp;&amp;）、逻辑或（||）、条件（?:）、逗号（,）运算符。</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; i &lt;&lt; ++i &lt;&lt; <span class="built_in">endl</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>前置版本和后置版本的递增递减</p>
+<p>用于复合运算中时，</p>
+<p>前置版本首先修改对象，然后将对象本身作为左值返回。</p>
+<p>后置版本将对象<strong>原始值的副本</strong>作为右值返回。</p>
+</li>
+<li><p>位运算</p>
+<ul>
+<li>整形提升，char8-&gt;int32</li>
+<li>添0，越界丢弃</li>
+</ul>
+</li>
+<li><p>逗号运算符：含有两个运算对象，首先对左表达式求值，然后将求值结果丢弃掉，最右边的表达式的值将作为整个逗号表达式的值。本质上，逗号的作用是导致一些列运算被顺序执行。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 分别对逗号表达式内对象赋值，然后返回最右cnt的值</span></span><br><span class="line">var = (count=<span class="number">19</span>, incr=<span class="number">10</span>, cnt++)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>函数</p>
+</li>
+</ol>
+<ul>
+<li><p>局部静态对象static：首次调用时被初始化，直到程序终止才被销毁。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 只初始化一次，函数调用结束以后这个值仍有效</span></span><br><span class="line">    <span class="keyword">static</span> cnt = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> ++cnt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>参数传递：如果形参被声明为引用类型，它将<strong>绑定</strong>到对应的实参上（传引用调用），否则将实参的值<strong>拷贝</strong>后赋给形参（传值调用）。</p>
+</li>
+<li><p>含有可变形参的函数</p>
+<ul>
+<li><p>所有实参类型相同，可以使用initializer_list模版类型的形参，列表中元素是const。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">initializer_list</span>&lt;T&gt; lst;</span><br><span class="line"><span class="built_in">initializer_list</span>&lt;T&gt; lst&#123;a, b, c, ...&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写可变参数<strong>模版</strong></p>
+</li>
+<li><p>省略符形参：对应的实参无需类型检查</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 带部分形参类型</span><br><span class="line">void foo(parm_list, ...);</span><br><span class="line"></span><br><span class="line">void foo(...);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>内联函数incline：避免函数调用开销</p>
+</li>
+<li><p>调试帮助</p>
+<ul>
+<li>NDEBUG预处理变量：用于关闭调试状态，assert将跳过不执行。</li>
+<li>assert (expr) 预处理宏：如果表达式为假，assert输出信息并终止程序。</li>
+</ul>
+<blockquote>
+<p>预处理名字由预处理而非编译器管理，因此可以直接使用名字而无须提供using声明。</p>
+</blockquote>
+</li>
+</ul>
+<ol>
+<li>static_cast和dynamic_cast强制类型转换<ul>
+<li>static_cast \<type-id> (expression)：暴力类型转换，不运行类型检查。</type-id></li>
+<li>dynamic_cast\<type-id> (expression)：运行类型检查，下行转换安全。</type-id></li>
+</ul>
+</li>
+<li>new &amp; delete：new [] 要和 delete []对应上。</li>
+<li>c++的oop特性（private public…）只在编译时刻有意义。同一类的对象可以互相访问私有成员。</li>
+<li>firend：注意方向是give acess to，授权friend访问自己的private。编译时刻检查。</li>
+<li>composition：组合，用一系列对象构造对象。</li>
+<li>inheritance：继承，用一些类来构造新的类。</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> :</span> <span class="keyword">public</span> A&#123;</span><br><span class="line">    ....</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>构造：子类构造的时候要先构造父类，析构的时候反过来，先析构子类。</p>
+<p>重名：name hiding，special for c++。</p>
+<ol>
+<li>​    protected：designed for sub class。子类可以直接访问。其他类看不到。</li>
+<li>overload：参数表必须不同，否则编译器无法识别。</li>
+<li>default argument：defaults must be added from right to left。must be declared in .h files。发生在编译时刻。</li>
+<li>inline：不用真正调用函数，而是直接插入汇编代码段。tradeoff between space and time consuming。区别于宏，宏是没有类型检查的。</li>
+<li><p>const</p>
+<ul>
+<li>declare a variable：是变量，而不是常数</li>
+</ul>
+</li>
+<li>变量的生存期限<ul>
+<li>Automatic：local variables，存活在{}函数定义里面</li>
+<li>dynamic：controlled by special instructions，比如main里面实例化的变量/类/内存，最后delete/free它</li>
+<li>thread：</li>
+<li>static：程序运行时间内有效</li>
+</ul>
+</li>
+<li>存储<ul>
+<li>stack：快，小，用于Automatic</li>
+<li>heap：慢，大，用于dynamic</li>
+</ul>
+</li>
+<li>指针<ul>
+<li>比引用灵活：可以在程序存活期间改指别的目标</li>
+<li>用于支持底层的各类不连续存储：dynamic memory各种链表</li>
+<li>智能指针<ul>
+<li>std::unique_pointer<t>：每个object只能有一个unique pointer，pointer和target的生存时间相同</t></li>
+<li>std::shared_pointer<t>：每个object可以有多个，只要pointer存在target就存在</t></li>
+<li>std::weak_pointer<t>：同上</t></li>
+<li>c++11里面是shared_ptr、unique_ptr 以及 weak_ptr</li>
+</ul>
+</li>
+<li>nullptr：可以当false用，free memory，所以不能解引用，*p会segmentation fault</li>
+<li>const<ul>
+<li>T*：自由指针</li>
+<li>T const*：用read-only way指向value</li>
+<li>T* const：常数指针，不能改指</li>
+<li>T const* const：即不能改指，也不能改数</li>
+</ul>
+</li>
+<li>this指针<ul>
+<li>available inside member functions：类/函数等{}里面</li>
+<li>返回object的地址</li>
+<li>this-&gt;能够访问成员</li>
+<li>*this表示object本身</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>unique<ul>
+<li>java里面有garbage collector，扫描那种没有指针的内存地址，然后销毁，但是不及时</li>
+<li>c++里面关键字类型可以自动回收</li>
+<li>unique_ptr保存在stack里面，但是它创建的对象在heap里面，unique_ptr失效的时候heap里的object也销毁掉</li>
+<li>move可以给object切换指针</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/05/08/cmake/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1802,7 +2265,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">167</span>
+                  <span class="site-state-item-count">168</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
