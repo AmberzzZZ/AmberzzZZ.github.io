@@ -632,7 +632,61 @@
         
           
             <p>paper collection</p>
+<p>[Similarity KD 2019] Similarity-Preserving Knowledge Distillation</p>
 <p>[CWD 2020] Channel-wise Knowledge Distillation for Dense Prediction</p>
+<h2 id="Similarity-Preserving-Knowledge-Distillation"><a href="#Similarity-Preserving-Knowledge-Distillation" class="headerlink" title="Similarity-Preserving Knowledge Distillation"></a>Similarity-Preserving Knowledge Distillation</h2><ol>
+<li><p>与其他KD methods的区别：</p>
+<ul>
+<li>the student is not required to mimic the representation space of the teacher, but rather to preserve the pairwise similarities in its own representation space</li>
+<li>监督student和teacher的similarity</li>
+<li>适用场景：<ul>
+<li>feature shape对不齐：channel/stride，也可以用1x1 conv对齐</li>
+<li>CNN/transformer之间的KD，模型本质diversity就不同</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<p> <img src="/2022/11/05/knowledge-distillation/similarity KD.png" width="40%;"></p>
+<ul>
+<li><p>given activation map（feature）$F$</p>
+<ul>
+<li>compute similarity：$F*F^T/L2norm(F)$</li>
+<li>compute KD loss：$\frac{1}{b^2}MSE(t,s)$</li>
+</ul>
+</li>
+<li><p>code</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">similarity_loss</span><span class="params">(self, f_s, f_t)</span>:</span></span><br><span class="line">    bs = f_s.shape[<span class="number">0</span>]</span><br><span class="line">    f_s = f_s.view(bs, <span class="number">-1</span>)</span><br><span class="line">    f_t = f_t.view(bs, <span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    G_s = f_s * f_s.T   <span class="comment"># bxb</span></span><br><span class="line">    G_s = F.normalize(G_s, p=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line">    G_t = f_t * f_t.T</span><br><span class="line">    G_t = F.normalize(G_t, p=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    G_diff = G_t - G_s</span><br><span class="line">    loss = (G_diff * G_diff).view(<span class="number">-1</span>).sum() / (bs * bs)</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>其他KD methods</p>
+<ul>
+<li><p>response based：KL divergence loss</p>
+<ul>
+<li><p>作用于softmax以后的probs（可以有temperature factor）</p>
+</li>
+<li><p>$L_{RD} (p_t, p_s) = L_R (p_t, p_s)$</p>
+</li>
+<li><p>$L_R()$通常是KL divergence loss</p>
+</li>
+<li><p>KL divergence loss</p>
+<p>  <img src="/2022/11/05/knowledge-distillation/KLDivLoss.png" width="60%;"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pred在调用KLDivLoss方法计算loss时先做log，防止先两个normed prob先做除法损失精度</span></span><br><span class="line">pred = F.log_softmax(torch.randn(<span class="number">3</span>, <span class="number">5</span>, requires_grad=<span class="keyword">True</span>))</span><br><span class="line">target = F.softmax(torch.rand(<span class="number">3</span>, <span class="number">5</span>))</span><br><span class="line">loss = nn.KLDivLoss(reduction=<span class="string">"batchmean"</span>)(pred, target)</span><br><span class="line"><span class="comment"># target在调用KLDivLoss时也可以先做log</span></span><br><span class="line">log_target = F.log_softmax(torch.rand(<span class="number">3</span>, <span class="number">5</span>))</span><br><span class="line">output = nn.KLDivLoss(reduction=<span class="string">"batchmean"</span>, log_target=<span class="keyword">True</span>)(pred, log_target)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kl_categorical</span><span class="params">(p_logit, q_logit)</span>:</span></span><br><span class="line">    p = F.softmax(p_logit, dim=<span class="number">-1</span>)</span><br><span class="line">    _kl = torch.sum(p * (F.log_softmax(p_logit, dim=<span class="number">-1</span>) - F.log_softmax(q_logit, dim=<span class="number">-1</span>)), <span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">return</span> torch.mean(_kl)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>feature based</p>
+<ul>
+<li>$L_{FD} (f_t, f_s) = L_F (\Phi_s(f_t), \Phi_s(f_s))$</li>
+<li>$\Phi()$是transform function，用来align feature dimension</li>
+<li>$L_F()$是similarity function，通常可以是L1、L2、L_CE、L_MMD</li>
+<li>MMD：maximum mean discrepancy</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 
           
         
