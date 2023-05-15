@@ -276,6 +276,865 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/07/11/模型压缩/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/07/11/模型压缩/" itemprop="url">模型压缩</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-07-11T16:33:01+08:00">
+                2022-07-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/07/11/模型压缩/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/07/11/模型压缩/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>模型压缩常用方法</p>
+<ol>
+<li>模型裁剪：网络中不需要的权重进行修剪，包括非结构化裁剪/结构化裁剪</li>
+<li>模型量化：用uint8之类的低bit数域来映射和还原f32的浮点权重</li>
+<li>知识蒸馏：teacher student，利用soft label</li>
+<li>网络结构设计：MobileNet、ShuffleNet</li>
+</ol>
+<ol>
+<li>模型裁剪<ul>
+<li>非结构化裁剪<ul>
+<li>裁剪掉某些不重要的神经元实现</li>
+<li>裁剪力度较大，可以压缩几十倍</li>
+<li>需要定制化的软硬件支持</li>
+</ul>
+</li>
+<li>结构化裁剪<ul>
+<li>channel、filter、shape的re-selection</li>
+<li>灵活部署</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/10/self-supervised/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/06/10/self-supervised/" itemprop="url">self-supervised</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-10T14:17:44+08:00">
+                2022-06-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/10/self-supervised/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/10/self-supervised/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p>自监督papers</p>
+<ul>
+<li><p>MoCo系列：contrastive-based</p>
+<p>[2019 MoCo v1] Momentum Contrast for Unsupervised Visual Representation Learning，kaiming</p>
+<p>[2020 SimCLR] A Simple Framework for Contrastive Learning of Visual Representations，Google Brain，混进来是因为它improve based on MoCo v1，而MoCo v2/v3又都是基于它改进</p>
+<p>[2020 MoCo v2] Improved Baselines with Momentum Contrastive Learning，kaiming</p>
+<p>[2021 MoCo v3] An Empirical Study of Training Self-Supervised Visual Transformers，kaiming</p>
+</li>
+<li><p>MAE：reconstruct-based</p>
+<p>[2021 MAE] Masked Autoencoders Are Scalable Vision Learners：恺明，将BERT的掩码自监督模式搬到图像领域，设计基于masked patches的图像重建任务</p>
+</li>
+<li><p>MIM：reconstruct-based</p>
+<p>[2021 SimMIM] SimMIM: A Simple Framework for Masked Image Modeling：微软，swin v2的scale up模型用了这个自监督方法来缓解data hungary issue</p>
+<p>[2022 MIM] Revealing the Dark Secrets of Masked Image Modeling：微软，类似上一篇的展开实验part，</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="SimMIM-a-Simple-Framework-for-Masked-Image-Modeling"><a href="#SimMIM-a-Simple-Framework-for-Masked-Image-Modeling" class="headerlink" title="SimMIM: a Simple Framework for Masked Image Modeling"></a><em>SimMIM</em>: a Simple Framework for Masked Image Modeling</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>propose a simple framework of MIM<ul>
+<li>without the need of special designs</li>
+<li>simple designs revealed strong learning performance</li>
+</ul>
+</li>
+<li>major components<ul>
+<li>使用较大patch size：random masking of the input image with a moderately large masked patch size (e.g., 32) makes a powerful pre-text task</li>
+<li>进行pixel-level的regression预测：predicting RGB values of raw pixels by direct regression performs no worse than the patch classification approaches with complex designs</li>
+<li>轻量的预测头：the prediction head can be as light as a linear layer, with no worse performance than heavier ones</li>
+</ul>
+</li>
+<li>proved on ImageNet<ul>
+<li>普通模型ViT-B：pretraing+finetuning，ImageNet-1k，83.8% top-1</li>
+<li>大模型SwinV2-H：87.1% top-1</li>
+<li>超大模型SwinV2-G：MIM能够leverage the data-hungry issue，使用更少量的数据训练超大模型至SOTA</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>自监督里面的numerous pretext tasks</p>
+<ul>
+<li>gray-scale image colorization：图像上色</li>
+<li>jigsaw puzzle solving：打乱的patches重新排序</li>
+<li>split-brain auto-encoding：图像分成两部分，两条分支，交叉预测对方</li>
+<li>rotation prediction：given变换前后的图像X&amp;Y，预测变换参数</li>
+<li>learning to cluster：「特征聚类，将簇心标签赋给其成员，训练一个task，特征聚类」，迭代这个过程</li>
+</ul>
+</li>
+<li><p>Masked signal modeling</p>
+<ul>
+<li>图像和NLP的主要区别<ul>
+<li>images exhibit stronger locality：neighbor pixels就是high related的，language的词序则不存在必然的距离相关性</li>
+<li>visual signals are raw and low-level：因此预测pixel-level的重建任务是否对high-level recognition task有增益？</li>
+<li>the visual signal is continuous, and the text token is discrete</li>
+</ul>
+</li>
+<li>bridge the modality gaps through several special designs<ul>
+<li>converting continuous signals into color clusters </li>
+<li>patch tokenization using an additional network</li>
+<li>block-wise masking strategy to break short-range connections</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li><p>propose a simple framework，无需上述复杂设计</p>
+<p><img src="/2022/06/10/self-supervised/SimMIM.png" width="40%;"></p>
+</li>
+<li><p>Random masking：</p>
+<ul>
+<li>patch-level的随机masking，适配vision transformer</li>
+<li>大一点的patch size(32) works for a wide range of masking ratio</li>
+<li>小的patch size(8) 需要masking ratio as high as 80% to perform well</li>
+<li>NLP里面的masking ratio通常比较小，如0.15，我们认为是因为info-level不一致</li>
+</ul>
+</li>
+<li>1-layer prediction head<ul>
+<li>extremely lightweight</li>
+<li>同时target resolution也不建议太大（12-96都可以好于192x192）</li>
+<li>achieves sligtly better transferring performance than heavy heads</li>
+<li>这个自监督的头预训练完了要丢弃的，所以越小越好，不要过多承担模型能力</li>
+</ul>
+</li>
+<li>pixel-level reconstruction use simple L1 loss<ul>
+<li>regression比较适配continuous signal</li>
+<li>performs no worse than classification approaches</li>
+<li>【QUESTION】分类任务一般怎么设计：后面实验里面，把RGB灰度值分解成8/256个bin，然后分类</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>A Masked Image Modeling Framework：4 major components</p>
+<ul>
+<li>masking strategy</li>
+<li>encoder architecture：ViT &amp; Swin </li>
+<li>prediction head</li>
+<li>prediction target：either the raw pixels or a transformation</li>
+</ul>
+</li>
+<li><p>Masking Strategy</p>
+<ul>
+<li>mask token<ul>
+<li>use a learnable mask token vector to replace each masked patch</li>
+<li>token dimension 和 visible那部分patch embedding一致</li>
+</ul>
+</li>
+<li>Patch-aligned random masking <ul>
+<li>就是以patch为单位随机masking</li>
+<li>swin的patch size是随阶段增长的，从4到32，we adopt 32</li>
+<li>for ViT we adopt 32</li>
+</ul>
+</li>
+<li><p>Other masking strategies：用了16/32</p>
+<ul>
+<li>square：随机放置的大方框</li>
+<li>block-wise：复杂设计的</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/masking.png" width="90%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Prediction Head</p>
+<ul>
+<li>as light as a linear layer</li>
+<li>实验也尝试过2-layer MLP、an inverse Swin-T、an inverse Swin-B 这种逐渐heavy的</li>
+<li>上采样 if required：<ul>
+<li>ViT编码得到x16的feature maps</li>
+<li>Swin编码得到x32的feature maps</li>
+<li>用一个1x1 conv / linear，将feature dim扩展到patch size <em> patch size </em> 3，如swin-RGB就是32*32*3=3072</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Prediction Targets</p>
+<ul>
+<li><p>regression</p>
+<ul>
+<li>也可以考虑将grouth-truth降采样到feature size</li>
+<li>L1 loss：计算masked区域RGB像素的L1 loss，然后mean on pixels</li>
+<li>实验也尝试了L2 / smoothL1</li>
+</ul>
+</li>
+<li><p>Other prediction targets</p>
+<ul>
+<li>previous approaches大多数将masked signals转化成clusters or classes，然后perform a classification task</li>
+<li>Color clustering（iGPT）：将巨型dataset的RGB values聚类成512个cluster，每个预测pixel is assigned to最邻近的cluster</li>
+<li>Vision tokenization（BEiT）：用一个pretrained discrete VAE network将image patches转化成token，并作为classification target</li>
+<li>Channel-wise bin color discretization：每个颜色通道独立分类，灰度值离散化为8/256 bins</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Evaluation protocols</p>
+<ul>
+<li>首先将模型在imagenet1k上finetuning，然后看分类精度</li>
+<li>或者其他down-stream tasks的指标来评估</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>pre-training settings</p>
+<ul>
+<li>swinB：input 192x192，window size=6</li>
+<li>dataset：ImageNet-1K，a light data augmentation (random resize cropping/random flipping /color normalization)</li>
+<li>AdamW：weight decay=0.05，beta=[0.9,0.999]</li>
+<li>cosine LR scheduler：100 epochs (warmup 10 ep)，baseLR=8e-4</li>
+<li>batch size：2048</li>
+<li>random masking：mask ratio=0.6，mask patch size=32</li>
+</ul>
+</li>
+<li><p>fine-tuning settings</p>
+<ul>
+<li>AdamW、batch size、masking 参数一致</li>
+<li>cosine LR：baseLR=5e-3</li>
+<li>a stochastic depth rate：0.1</li>
+<li>a layer-wise learning rate decay：0.9</li>
+<li>strong data augmentation：RandAug，Mixup，Cutmix，label smoothing，random erasing</li>
+</ul>
+</li>
+<li><p>AvgDist</p>
+<p>  <img src="/2022/06/10/self-supervised/AvgDist.png" width="50%;"></p>
+<ul>
+<li>measures the averaged Euclidean distance of masked pixels to the nearest visible ones：被遮挡的patch embedding与其最近的visible patch的embedding欧几里得距离</li>
+<li>mask ratio越大，AvgDist越大</li>
+<li>mask patch size越大，AvgDist越大</li>
+<li>AvgDist的值在[10,20]区间时，模型的精度最高</li>
+</ul>
+</li>
+<li><p>一些精度记录</p>
+<ul>
+<li>SwinV2-H achieves 87.1% top-1 accuracy，在只使用ImageNet-1K数据集里面精度最佳</li>
+<li>SwinV2-G借助了外部数据，但比google用的少，40× smaller，achieves strong performance<ul>
+<li>84.0% top-1 on ImageNet-V2</li>
+<li>63.1/54.4 box/mask mAP on COCO object detection</li>
+<li>59.9 mIoU on ADE20K semantic segmentation</li>
+<li>86.8% top-1 acc on Kinetics-400 action recognition</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Visualization</p>
+<ul>
+<li>【20220614】目前初步实验下来，预训练的生成模型，生成的图片会呈现明显的棋盘格，因为每个x32的feature pixel代表了一个32x32的RGB patch，官方论文里面的图也很棋盘格，不知道该训练到啥程度算结束</li>
+<li><p>What capability is learned? </p>
+<ul>
+<li>random masking：the shape and texture of masked parts can be well recovered，以及unmasked区域会观察到显著棋盘格效应，因为这部分区域在训练过程中是不回传梯度的</li>
+<li>masking most parts of a major object：can still predict an existence of object by the negligible clues</li>
+<li>masking the full major object：the masked area will be inpainted with background textures</li>
+</ul>
+</li>
+<li><p>Prediction v.s. reconstruction</p>
+<ul>
+<li>比较了masked region recover和全图recover两个任务</li>
+<li>从重建结果上看，后者视觉效果更好一点(棋盘格没那么明显，因为是全局预测)，但是精度则低了一个点：probably the model capacity is wasted at the recovery of the unmasked area which may not be that useful for fine-tuning</li>
+<li><p>auto-encoders and masked image modeling两个方法都是重建任务，but they are built on different philosophies：</p>
+<ul>
+<li>前者是visible signal reconstruction</li>
+<li>后者是prediction of invisible signals</li>
+</ul>
+</li>
+<li><p>MIM也可以设计成全图重建，但这相当于融合了两个任务</p>
+<ul>
+<li>prediction &amp; reconstruction</li>
+<li>从finetuning精度上看two tasks are fundamentally different in their internal mechanisms，两个任务的内部机制不同，合起来做不会促进</li>
+<li>the task to predict might be a more promising representation：看起来prediction任务学到的representation对下游任务更有用一些</li>
+</ul>
+</li>
+<li><p>【个人理解重建任务更local一点，所以细节更好看，prediction任务更long-range一些，但是为什么有说对low-level/fine-grained downstream task更好呢？】</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Revealing-the-Dark-Secrets-of-Masked-Image-Modeling"><a href="#Revealing-the-Dark-Secrets-of-Masked-Image-Modeling" class="headerlink" title="Revealing the Dark Secrets of Masked Image Modeling"></a>Revealing the Dark Secrets of Masked Image Modeling</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>Masked image modeling (MIM) as pre-training<ul>
+<li>proved effective</li>
+<li>but how it works remains unclear</li>
+</ul>
+</li>
+<li>we compare MIM with mainstream supervised models<ul>
+<li>through visualizations &amp; experiments</li>
+<li>to cover the key representational differents</li>
+</ul>
+</li>
+<li>visualizations <ul>
+<li>发现MIM brings locality inductive bias to all layers：信息流更不丢东西？</li>
+<li>相比之下supervised models在lower layers更关注局部信息，在higher layers则更关注全局信息</li>
+<li>supervised models在last layers的attention head基本没啥差别（都是global semantic info），但是MIM在last layers仍旧能够keep diversity on attention heads</li>
+<li>less diversity harms the fine-tuning performance</li>
+</ul>
+</li>
+<li>experiments<ul>
+<li>发现MIM相比较于supervised models更胜任tasks with weak semantics / fine-grained tasks</li>
+<li>【猜测】image-level label 驱动 pixel-level study的效果更好？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>masked signal modeling</p>
+<ul>
+<li>mask a portion of input signals and tries to predict them</li>
+<li>属于比较经典的recover-based自监督任务设计</li>
+<li>language, vision, and speech场景都有在用</li>
+</ul>
+</li>
+<li><p>masked image modeling (MIM)</p>
+<ul>
+<li>achieve very high fine-tuning accuracy</li>
+<li>thus this paper wants a deeper understanding </li>
+<li><p>we use SimMIM framework：就是基于ViT/swin-back+light-weight head重建pixel-level图像的任务</p>
+<ul>
+<li>random masking with large patch size</li>
+<li>a-linear-layer prediction head</li>
+<li>predict raw RGB pixels use L1 loss</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/SimMIM.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Visualizations</p>
+<ul>
+<li><p>attention weights have a clear meaning：每个token比重多大</p>
+</li>
+<li><p>从三个方面来分析</p>
+<ul>
+<li>averaged attention distance to measure whether it is local attention or global attention</li>
+<li>entropy of attention distribution to measure whether it is focused attention or broad attention：这跟上面不一个意思吗</li>
+<li>KL divergence of different attention heads to investigate that attention heads are attending different tokens or similar ones</li>
+</ul>
+</li>
+<li><p>Local Attention or Global Attention</p>
+<ul>
+<li><p>图像信息带有strong locality：neighbor pixels天然地highly correlated，所以才会有conv这样的带有local priors的设计，但是transformer结构有没有这种inductive bias就值得讨论了</p>
+</li>
+<li><p>computing averaged attention distance in each attention head of each layer</p>
+<p>  <img src="/2022/06/10/self-supervised/distance.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，lower layer focus locally，higher layers focus more globally</li>
+<li>MIM模型每层的attention heads则表现的充满diversity，始终保有local &amp; global pixels</li>
+<li>说明MIM brings locality inductive bias【不太理解】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Focused Attention or Broad Attention</p>
+<ul>
+<li><p>averaging the entropy of each head’s attention distribution</p>
+<p>  <img src="/2022/06/10/self-supervised/entropy.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，lower layer的一些attention heads有非常focused attention，大部分higher layers的attention heads则focus very broadly</li>
+<li>MIM模型每层都很diverse，每层都兼顾了focused attention &amp; broad attention</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Diversity on Attention Heads</p>
+<ul>
+<li><p>看每个attention head关注的token是否相似</p>
+</li>
+<li><p>computing the KL divergence between different heads</p>
+<p>  <img src="/2022/06/10/self-supervised/diversity.png" width="80%;"></p>
+<ul>
+<li>constastive模型与supervised模型表现类似，diversity逐渐变小，最后几层甚至都没了</li>
+<li>losing diversity limits the capacity of the model：损害了模型表达能力</li>
+<li>去掉supervised模型的后面几层去进行下游任务精度会保持甚至提升，说明supervised pretrained model后面几层确实对下游任务有负面影响</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Investigating the Representation Structures via CKA similarity</p>
+<ul>
+<li><p>前面都是在看同层不同attention heads，这里观察不同层的feature maps</p>
+</li>
+<li><p>via the CKA similarity between feature representations of different layers</p>
+<p><img src="/2022/06/10/self-supervised/CKA.png" width="80%;"></p>
+<ul>
+<li>MIM和constastive模型表现类似，每层的feature representation structures高度相似</li>
+<li>supervised模型则每层差异比较大</li>
+<li>给这些预训练模型加载权重的时候随机调换一些层进行下游任务，MIM只有轻微掉点，但是supervised会受影响更大</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Experiments</p>
+<ul>
+<li><p>on 3 types of downstream tasks</p>
+<ul>
+<li>semantic understanding tasks：classification，Concept Generalization (CoG)  &amp; 12-dataset (K12) &amp; iNaturalist-18 (iNat18)</li>
+<li>geometric and motion tasks：pose/depth estimation/video tracking，COCO &amp; CrowdPose &amp; NYUv2</li>
+<li>combined tasks：object detection，COCO</li>
+</ul>
+</li>
+<li><p>Semantic Understanding Tasks</p>
+<ul>
+<li>用了三个数据集，从ImageNet pretrained去transfer</li>
+<li>settings<ul>
+<li>AdamW</li>
+<li>cosine learning rate schedule</li>
+<li>100 epochs with 20 warm-up</li>
+<li>input 224x224</li>
+<li>DropPath</li>
+</ul>
+</li>
+<li>发现ImageNet cover的类别supervised模型会好于MIM模型，没cover的类/fine-grained的类都是MIM精度更高，说明MIM的 representation power的transfer能力更强</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/classification.png" width="80%;"></p>
+</li>
+<li><p>Geometric and Motion Tasks</p>
+<ul>
+<li>主要测试目标定位能力，不太关注高级语义信息</li>
+<li>全面超越</li>
+</ul>
+</li>
+<li><p>Combined Task of Object Detection</p>
+<ul>
+<li>COCO目标检测</li>
+<li>Mask-RCNN framework</li>
+<li>也是clearly outperform</li>
+<li>然后观察到MIM模型的定位task收敛的faster and better，supervised模型则对分类能力更有用，也说明了MIM更专注geometric and motion tasks</li>
+</ul>
+<p><img src="/2022/06/10/self-supervised/detection.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/03/FAN-full-attention-networks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/06/03/FAN-full-attention-networks/" itemprop="url">FAN:full attention networks</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-03T09:53:14+08:00">
+                2022-06-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/03/FAN-full-attention-networks/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/03/FAN-full-attention-networks/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>paper: <a href="https://arxiv.org/abs/2204.12451" target="_blank" rel="noopener">https://arxiv.org/abs/2204.12451</a></p>
+<p>repo: <a href="https://github.com/NVlabs/FAN" target="_blank" rel="noopener">https://github.com/NVlabs/FAN</a></p>
+<h2 id="Understanding-The-Robustness-in-Vision-Transformers"><a href="#Understanding-The-Robustness-in-Vision-Transformers" class="headerlink" title="Understanding The Robustness in Vision Transformers"></a>Understanding The Robustness in Vision Transformers</h2><ol>
+<li>动机<ul>
+<li>ViT展现出了strong robustness（图像出现各类corruption的时候仍旧保持特征提取能力），但是缺少systematic understanding</li>
+<li>this paper<ul>
+<li>examine the role of self-attention</li>
+<li>further propose a family of fully attentional networks (FANs) that strengthen its capability</li>
+</ul>
+</li>
+<li>verified state-of-the-art on<ul>
+<li>ImageNet-1k：acc 87.1% </li>
+<li>downstream tasks：semantic segmentation and object detection</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>论点<ul>
+<li>ViT针对non-local relations的建模被认为是the robustness against various corruptions的重要要素</li>
+<li>但是convNext用纯卷积网络也达到了相当的精度，raising the interest in the actual role of self-attention in robust generalization</li>
+<li>our approach <ul>
+<li>首先是观察：<ul>
+<li>在执行分类任务的时候，网络天然地做出了目标的分割——self-attention promotes mid-level representations</li>
+<li>对每层ViT的输出tokens做spectral clustering，观察到了极大的特征值</li>
+<li>发现极大特征值的数量与input perturbation是存在相关性的——这两个指标在mid-level layers中会显著降低，从而保持robustness，同时 indicates the symbiosis of grouping </li>
+</ul>
+</li>
+<li>然后进一步探究这个grouping phenomenon<ul>
+<li>发现self-attention类似于information bottleneck (IB)，这个暂时不理解</li>
+</ul>
+</li>
+<li>最后是对transformer结构的改动<ul>
+<li>原始的ViT block，用MSA（multi heads）去提取不同特征，然后用MLP去整合</li>
+<li>本文在融合的时候，加了一个channel attention</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/01/TokenLearner/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2271,701 +3130,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/02/Faiss/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/03/02/Faiss/" itemprop="url">Faiss</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-02T10:55:52+08:00">
-                2022-03-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/03/02/Faiss/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/02/Faiss/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Faiss-A-library-for-efficient-similarity-search"><a href="#Faiss-A-library-for-efficient-similarity-search" class="headerlink" title="Faiss: A library for efficient similarity search"></a>Faiss: A library for efficient similarity search</h2><ol>
-<li><p>official site：</p>
-<p> 主页：<a href="https://ai.facebook.com/tools/faiss/" target="_blank" rel="noopener">https://ai.facebook.com/tools/faiss/</a></p>
-<p> repo/wiki：<a href="https://github.com/facebookresearch/faiss" target="_blank" rel="noopener">https://github.com/facebookresearch/faiss</a></p>
-</li>
-<li></li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/" itemprop="url">HMC: Hierarchical Multi-Label Classification Networks</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-02-25T17:50:18+08:00">
-                2022-02-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>ICML2018，multi-label，hierarchical </p>
-<p>理想数据集的类别间是互斥的，但是现实往往存在层级/包含关系，多个数据集合并时也会有这个情况</p>
-<p>reference code: <a href="https://github.com/Tencent/NeuralNLP-NeuralClassifier/blob/master/model/classification/hmcn.py" target="_blank" rel="noopener">https://github.com/Tencent/NeuralNLP-NeuralClassifier/blob/master/model/classification/hmcn.py</a></p>
-<h2 id="HMCN-Hierarchical-Multi-Label-Classification-Networks"><a href="#HMCN-Hierarchical-Multi-Label-Classification-Networks" class="headerlink" title="HMCN: Hierarchical Multi-Label Classification Networks"></a>HMCN: Hierarchical Multi-Label Classification Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>HMC：hierarchical multi-label classification<ul>
-<li>classes are hierarchically structured，类别是有层级关系的</li>
-<li>objects can be assigned to multiple paths，目标可能点亮多条tree path——多标签</li>
-</ul>
-</li>
-<li>application domains<ul>
-<li>text classification</li>
-<li>image annotation</li>
-<li>bioinformatics tasks such as protein function prediction</li>
-</ul>
-</li>
-<li>propose HMCN<ul>
-<li>local + global loss</li>
-<li>local：discover local hierarchical class-relationships </li>
-<li>global：global information from the entire class while penalizing hierarchical violations</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>common methods<ul>
-<li>local-based：<ul>
-<li>建立层级的top-down局部分类器，每个局部分类器用于区分当前层级，combine losses</li>
-<li>computation expensive，更善于提取wordTree局部的信息，容易overfitting</li>
-</ul>
-</li>
-<li>global-based：<ul>
-<li>只有一个分类器，将global structure associate起来</li>
-<li>cheap，没有error-propagation problem，容易underfitting</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>our novel approach<ul>
-<li>combine两者的优点</li>
-<li>recurrent / non-recurrent版本都有</li>
-<li>由multiple outputs构成<ul>
-<li>每个class hierarchy level有一个输出：local output</li>
-<li>全局还有一个global output</li>
-</ul>
-</li>
-<li>also introduce a hierarchical violation penalty</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>a feed-forward architecture (HMCN-F)</p>
-<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/HMCN-F.png" width="50%;"></p>
-<ul>
-<li>notations<ul>
-<li>feature vec $x \in R^{D}$：输入向量</li>
-<li>$C^h$：每层的节点</li>
-<li>$|H|$：总层数</li>
-<li>$|C|$：总类数</li>
-</ul>
-</li>
-<li>global flow<ul>
-<li>第一行横向的data flow</li>
-<li>将$i^{th}$层的信息carry到第$(i+1)^{th}$层</li>
-<li>第一层：$A_G^1 = \phi(W_G^1 x +b_G^1)$</li>
-<li>接下来的层：$A_G^h = \phi(W_G^h(A_G^{h-1} \odot x) +b_G^h)$</li>
-<li>最终的global prediction：$P_G=\sigma(W_G^{H+1}A_G^{H}+b_G^{H+1}) \in R^{|C|}$</li>
-</ul>
-</li>
-<li>local flow<ul>
-<li>start from 每个level的global hidden layer</li>
-<li>local hidden layer：$A_L^h = \phi(W_T^hA_G^{h} +b_T^h)$</li>
-<li>local prediction：$P_L^h = \sigma(W_L^hA_L^{h} +b_L^h) \in R^{C^h}$</li>
-</ul>
-</li>
-<li>merge information<ul>
-<li>将local的prediction vectors concat起来</li>
-<li>然后和global preds相加</li>
-<li>$P_F = \beta (P_L^1 \odot P_L^2 \odot… P_L^1) + (1-\beta) P_G$</li>
-</ul>
-</li>
-<li>hyperparams<ul>
-<li>$\beta=0.5$</li>
-<li>fc-bn-dropout：dim=384，drop_rate=0.6</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>a recurrent architecture (HMCN-R)</p>
-<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/HMCN-R.png" width="70%;"></p>
-</li>
-<li><p>training details</p>
-<ul>
-<li>small datasets with large number of classes</li>
-<li>Adam</li>
-<li>lr=1e-3</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>【小batch反而结果更好】one can achieve better results by training HMCN models with smaller batches</li>
-<li></li>
-</ul>
-</li>
-</ol>
-<h2 id="YOLO9000-回顾yolov2的wordTree"><a href="#YOLO9000-回顾yolov2的wordTree" class="headerlink" title="YOLO9000: 回顾yolov2的wordTree"></a>YOLO9000: 回顾yolov2的wordTree</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>联合训练，为了扩展类数<ul>
-<li>检测样本梯度回传full loss</li>
-<li>分类样本只梯度回传分类loss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Hierarchical classification</p>
-<ul>
-<li><p>构建WordTree</p>
-</li>
-<li><p>对每个节点的预测是一个条件概率：$Pr(child_node|parent_node)$</p>
-</li>
-<li><p>这个节点的绝对概率是整条链路的乘积</p>
-</li>
-<li><p>每个样本的根节点概率$Pr(object)$是1</p>
-</li>
-<li><p>对每个节点下面的所有children做softmax</p>
-<p>  <img src="/2022/02/25/HMC-Hierarchical-Multi-Label-Classification-Networks/wordTree.jpeg" width="50%;"></p>
-</li>
-<li><p>首先论文就先用darknet19训了一个1369个节点的层次分类任务</p>
-<ul>
-<li>1000类flat softmax on ImageNet：72.9% top-1，91.2% top-5</li>
-<li>1369类wordTree softmax on ImageNet：71.9% top-1，90.4% top-5</li>
-<li>观察到Performance degrades gracefully：总体精度下降很少，而且即使分不清是什么狗品种，狗这一类的概率还是能比较高</li>
-</ul>
-</li>
-<li><p>然后用在检测上</p>
-<ul>
-<li>每个目标框的根节点概率$Pr(object)$是yolo的obj prob</li>
-<li>仍旧对每个节点做softmax，标签是高于0.5的最深节点，不用连乘条件概率<ul>
-<li>take the highest confidence path at every split</li>
-<li>until we reach some threshold</li>
-<li>and we predict that object class</li>
-</ul>
-</li>
-<li>对一个分类样本<ul>
-<li>我们用全图类别概率最大的bounding box，作为它的分类概率</li>
-<li>然后还有objectness loss，预测的obj prob用0.3IOU来threshold：即如果这个bnd box的obj prob&lt;0.3是要算漏检的</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/01/21/ConvNext/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/01/21/ConvNext/" itemprop="url">ConvNext</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-21T16:34:46+08:00">
-                2022-01-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/01/21/ConvNext/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/01/21/ConvNext/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>facebook，2022，<a href="https://github.com/facebookresearch/ConvNeXt" target="_blank" rel="noopener">https://github.com/facebookresearch/ConvNeXt</a></p>
-<p>inductive biases（归纳偏置）</p>
-<ul>
-<li>卷积具有较强的归纳偏置：即strong man-made settings，如local kernel和shared weights，只有spatial neighbor之间有关联，且在不同位置提取特征的卷积核共享——视觉边角特征与空间位置无关</li>
-<li>相比之下，transformer结构就没有这种很人为的先验的设定，就是global的优化目标，所以收敛也慢</li>
-</ul>
-<h2 id="A-ConvNet-for-the-2020s"><a href="#A-ConvNet-for-the-2020s" class="headerlink" title="A ConvNet for the 2020s"></a>A ConvNet for the 2020s</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>reexamine the design spaces and test the limits of what a pure ConvNet can achieve</li>
-<li>精度<ul>
-<li>achieving 87.8% ImageNet top-1 acc</li>
-<li>outperforming Swin Transformers on COCO detection and ADE20K segmentation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>conv<ul>
-<li>a sliding window strategy is intrinsic</li>
-<li>built-in inductive biases：卷积的归纳偏置是locality和spatial invariance<ul>
-<li>即空间相近的grid elements有联系而远的没有：translation equivariance is a desirable property</li>
-<li>空间不变性：shared weights，inherently efficient</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>ViT<ul>
-<li>除了第一层的patchify layer引入卷积，其余结构introduces no image-specific inductive bias</li>
-<li>global attention这个设定的主要问题是平方型增长的计算量</li>
-<li>使得这个结构在classification任务上比较work，但是在其他任务场景里面（需要high resolution，需要hierarchical features）使用受限</li>
-</ul>
-</li>
-<li>Hierarchical Transformers<ul>
-<li>hybrid approach：重新引入local attention这个理念</li>
-<li>能够用于各类任务</li>
-<li>揭露了卷积/locality的重要性</li>
-</ul>
-</li>
-<li>this paper brings back convolutions<ul>
-<li>propose a family of pure ConvNets called ConvNeXt</li>
-<li>a Roadmap：from ResNet to ConvNet</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>from ResNet to ConvNet</p>
-<ul>
-<li>ResNet-50 / Swin-T：FLOPs around 4.5e9</li>
-<li>ResNet-200 / Swin-B around 15e9</li>
-<li><p>首先用transformer的训练技巧训练初始的resnet，作为baseline，然后逐步改进结构</p>
-<ul>
-<li>macro design</li>
-<li>ResNeXt</li>
-<li>inverted bottleneck</li>
-<li>large kernel size</li>
-<li>various layer-wise micro designs</li>
-</ul>
-<p><img src="/2022/01/21/ConvNext/design.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Training Techniques</p>
-<ul>
-<li>300 epochs</li>
-<li>AdamW</li>
-<li>aug：Mixup，CutMix，RandAugment，Random Erasing</li>
-<li>reg：Stochastic Depth，Label Smoothing</li>
-<li><p>这就使得resnet的精度从76.1%提升到78.8%</p>
-<p><img src="/2022/01/21/ConvNext/pretraining.png" width="40%;">  <img src="/2022/01/21/ConvNext/finetuning.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Macro Design</p>
-<ul>
-<li>宏观结构就是multi-stage，每个stage的resolution不同，涉及的结构设计有<ul>
-<li>stage compute ratio</li>
-<li>stem cell</li>
-</ul>
-</li>
-<li>swin的stage比是1:1:3:1，larger model是1:1:9:1，因此将resnet50的3:4:6:3调整成3:3:9:3，acc从 78.8% 提升至 79.4%</li>
-<li>将stem替换成更加aggressive的patchify，4x4conv，s4，non-overlapping，acc从 79.4% 提升至 79.5%</li>
-</ul>
-</li>
-<li><p>ResNeXt-ify</p>
-<ul>
-<li>用分组卷积来实现更好的FLOPs/acc的trade-off</li>
-<li>分组卷积带来的model capacity loss用增加网络宽度来实现</li>
-<li>使用depthwise convolution，同时width从64提升到96<ul>
-<li>groups=channels</li>
-<li>similar to the weighted sum of self-attention：在spatial-dim上mix information</li>
-</ul>
-</li>
-<li>acc提升至80.5%，FLOPs增加5.3G</li>
-</ul>
-</li>
-<li><p>Inverted Bottleneck</p>
-<ul>
-<li><p>transformer block的ffn中，hidden layer的宽度是输入宽度的4倍</p>
-</li>
-<li><p>MobileNet &amp; EfficientNet里面也有类似的结构：中间大，头尾小</p>
-<p><img src="/2022/01/21/ConvNext/mobileblock.png" width="40%;">   <img src="/2022/01/21/ConvNext/effblock.png" width="40%;"></p>
-</li>
-<li><p>而原始的resne(X)t是bottleneck结构：中间小，两头大，为了节约计算量</p>
-</li>
-</ul>
-<p><img src="/2022/01/21/ConvNext/inversed bottleneck.png" width="50%;"></p>
-<ul>
-<li>reduce FLOPs：因为shortcut上面的1x1计算量小了</li>
-<li>精度稍有提升：80.5% to 80.6%，R200/Swin-B上则更显著一点，81.9% to 82.6%</li>
-</ul>
-</li>
-<li><p>Large Kernel Sizes</p>
-<ul>
-<li>首先将conv layer提前，类比transformer的MSA+FFN</li>
-<li>reduce FLOPs，同时精度下降至79.9%</li>
-<li>然后增大kernel size，尝试[3,5,7,9,11]，发现在7的时候精度饱和</li>
-<li>acc：from 79.9% (3×3) to 80.6% (7×7)</li>
-</ul>
-</li>
-<li><p>Micro Design：layer-level的一些尝试</p>
-<ul>
-<li>Replacing ReLU with GELU：原始的transformer paper里面也是用的ReLU，但是后面的先进transformer里面大量用了GeLU，实验发现可以替换，但是精度不变</li>
-<li>Fewer activation functions：transformer block里面有QKV dense，有proj dense，还有FFN里的两个fc层，其中只有FFN的hidden layer接了个GeLU，而原始的resnet每个conv后面都加了relu，我们将resnet也改成只有类似线性层的两个1x1 conv之间有激活函数，acc提升至81.3%，nearly match Swin</li>
-<li><p>Fewer normalization layers：我们比transformer还少用一个norm（因为实验发现加上入口那个LN没提升），acc提升至81.4%，already surpass Swin</p>
-</li>
-<li><p>Substituting BN with LN：BN对于convNet，能够加快收敛抑制过拟合，直接给resnet替换LN会导致精度下降，但是在逐步改进的block上面替换则会slightly提升，81.5%</p>
-</li>
-<li>Separate downsampling layers：学Swin，不再将stride2嵌入resnet conv，而是使用独立的2x2 s2conv，同时发现在resolution改变的时候加入norm layer能够stabilize training——每个downsamp layer/stem/final GAP之后都加一个LN，acc提升至82%，significantly exceeding Swin</li>
-</ul>
-<p><img src="/2022/01/21/ConvNext/block.png" width="40%;"></p>
-</li>
-<li><p>overall structural params</p>
-<p><img src="/2022/01/21/ConvNext/architecture.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3020,7 +3184,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-count">167</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3033,7 +3197,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3080,7 +3244,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

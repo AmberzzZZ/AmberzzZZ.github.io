@@ -276,6 +276,1148 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/12/soft-teacher/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/08/12/soft-teacher/" itemprop="url">soft teacher</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-12T12:25:09+08:00">
+                2021-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/12/soft-teacher/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/12/soft-teacher/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>keywords：semi-supervised, curriculum, pseudo labels, </p>
+<h2 id="End-to-End-Semi-Supervised-Object-Detection-with-Soft-Teacher"><a href="#End-to-End-Semi-Supervised-Object-Detection-with-Soft-Teacher" class="headerlink" title="End-to-End Semi-Supervised Object Detection with Soft Teacher"></a>End-to-End Semi-Supervised Object Detection with Soft Teacher</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>end-to-end training：相比较于其他方法的multi-stage</p>
+</li>
+<li><p>semi-supervised：用外部unlabeled数据，以及pseudo-label based approach</p>
+</li>
+<li><p>propose two techniques</p>
+<ul>
+<li>soft teacher mechanism：pseudo样本的classification loss用teacher model的prediction score来加权</li>
+<li>box jittering mechanism：挑选reliable pseudo boxes</li>
+</ul>
+</li>
+<li><p>verified</p>
+<ul>
+<li>use SWIN-L as baseline</li>
+<li>metric on COCO：60.4 mAP</li>
+<li><p>if pretrained with Object365：61.3 mAP</p>
+<p><img src="/2021/08/12/soft-teacher/swin.png" width="90%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>we present this end-to-end pseudo-label based semi-supervised object detection framework<ul>
+<li>simultaneously performs<ul>
+<li>pseudo-labeling：teacher</li>
+<li>training detector use the current pseudo-labels &amp; a few training sample：student</li>
+</ul>
+</li>
+<li>teacher is an exponential moving average (EMA) of the student model</li>
+<li>mutually enforce each other</li>
+<li>soft teacher approach<ul>
+<li>teacher model的作用是给student model生成的box candidates打分，</li>
+<li>高于一定阈值的为前景，但是可能有部分前景被归类为背景，所以用这个score作为reliability measure，给标记为背景框的cls loss进行加权</li>
+</ul>
+</li>
+<li>reliability measure</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview </p>
+<p> <img src="/2021/08/12/soft-teacher/overview.png" width="80%"></p>
+<ul>
+<li>两个model：student和teacher</li>
+<li>teacher model用来生成pseudo labels：two set of pseudo boxes，一个用于class branch，一个用于regression branch</li>
+<li>student model用supervised&amp;unsupervised sample的loss来更新</li>
+<li>teacher model用student model的EMA来更新</li>
+<li>two crucial designs<ul>
+<li>soft teacher</li>
+<li>box jittering</li>
+</ul>
+</li>
+<li>整体的工作流程就是，每个training iteration，先按照一定比例抽取labeled&amp;unlabeled sample构成data batch，然后用teacher model生成unlabeled data的pseudo label（thousands of box candidates+NMS+score filter），然后将其作为unlabeled sample的ground truth，训练student model，overall loss是supervised loss和unsupervised loss的加权和</li>
+<li>在训练开始阶段，两个模型都是随机初始化的，teacher模型随着student模型的更新而更新</li>
+<li>FixMatch：<ul>
+<li>输入给teacher模型的样本使用weak aug</li>
+<li>输入给student模型的样本使用strong aug</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>soft teacher</p>
+<ul>
+<li><p>detector的pseudo-label质量很重要</p>
+</li>
+<li><p>所以用score thresh=0.9去定义box candidates的前/背景</p>
+</li>
+<li><p>但是这时候如果用传统的IoU来定义student model的box candidates的pos/neg，会有一部分前景框被当作背景</p>
+</li>
+<li><p>to alleviate </p>
+<ul>
+<li>assess the reliability of each student-generated box candidate to be a real background</li>
+<li>given a student-generated box candidate，用teacher model的detection head去预测这个框的background score</li>
+</ul>
+</li>
+<li><p>overall unsupervised cls loss</p>
+<script type="math/tex; mode=display">
+  L_u^{cls} = \frac{1}{N_b^{fg}} \sum_i^{N_b^{fg}} l_{cls} (b_i^{fg}, G_{cls}) + \sum_j^{N_b^{bg}}w_j l_{cls} (b_j^{bg}, G_{cls})\\
+  w_j = \frac{r_j}{\sum_{k=1}^{N_b^{bg}}r_k}</script><ul>
+<li>$G_{cls}$是the set of boxes teacher generated for classification，就是teacher model预测的top1000经过nms和score filter之后的boxes</li>
+<li>$b_i^{fg}$是student candidates中被assign为前景的框，$b_i^{bg}$是student candidates中被assign为背景的框，assign的原则就是score&gt;0.9</li>
+<li>$w_j$是对assign为背景的框的加权</li>
+<li>$r_k$是reliability score，是student model通过hard score thresh assign为背景的框，用teacher model的detection head去预测的bg score</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>box jittering</p>
+<ul>
+<li><p>fg score thresh和box iou并不呈现strong positive correlation，说明基于这个原则产生的框pseudo-labels并不一定适合box regression</p>
+</li>
+<li><p>localization reliability：</p>
+<ul>
+<li>衡量一个pseudo box的consistency</li>
+<li>given a pseudo box，sample一系列jitter box around it，再用teacher model去预测这些jitter box得到refined boxes</li>
+<li>refined box和pseudo box的variance越小，说明这个框的localization reliability越高</li>
+</ul>
+<script type="math/tex; mode=display">
+\hat b_i = refine(jitter(b_i))\\
+\overline \sigma_i = \frac{1}{4} \sum_1^4 \hat \sigma_k\\
+\hat \sigma_k = \frac{\sigma_k}{0.5 (h(b_i)+w(b_i))}</script><ul>
+<li>$\hat b_i$是refined boxes</li>
+<li>$\sigma_k$是refine boxes的四个坐标基于原始box的标准差</li>
+<li>$\hat \sigma_k$是上面那个标准差基于原始box的尺度进行归一化</li>
+<li>$\overline\sigma$是refine boxes四个坐标的normed std的平均值</li>
+<li>只计算teacher box candidates里面，fg score&gt;0.5的那部分</li>
+</ul>
+</li>
+<li><p>overall unsupervised reg loss</p>
+<script type="math/tex; mode=display">
+  L_u^{reg} = \frac{1}{N_b^{fg}} \sum_1^{N_b^{fg}} l_{reg} (b_i^{fg}, G_{reg})</script><ul>
+<li>$b_i^{fg}$是student candidates中被assign为前景的框，即cls score&gt;0.9那些预测框</li>
+<li>$G_{cls}$是the set of boxes teacher generated for regression，就是jittered reliability大于一定阈值的candidates</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overall unsupervised loss：cls loss和reg loss之和，然后用样本数进行norm</p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/07/13/GNN-GCN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/07/13/GNN-GCN/" itemprop="url">GNN&GCN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-13T15:48:56+08:00">
+                2021-07-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/07/13/GNN-GCN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/07/13/GNN-GCN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>reference：<a href="https://www.cnblogs.com/siviltaram/p/graph_neural_network_2.html" target="_blank" rel="noopener">https://www.cnblogs.com/siviltaram/p/graph_neural_network_2.html</a></p>
+</li>
+<li><p>key concepts</p>
+<ul>
+<li>图神经网络（Graph Neural Network，GNN）</li>
+<li>图卷积神经网络（Graph Convolutional Neural Network）</li>
+<li>频域（Spectral-domain）</li>
+<li>空域（Spatial-domain）</li>
+</ul>
+</li>
+<li><p>图神经网络</p>
+<ul>
+<li><p>image &amp; graph</p>
+<p>  <img src="/2021/07/13/GNN-GCN/image.png" width="45%;"></p>
+</li>
+<li><p>节点（Node）</p>
+<ul>
+<li>每个节点有其特征，用$x_v$表示</li>
+</ul>
+</li>
+<li><p>边（Edge）</p>
+<ul>
+<li>连接两个节点的边也有其特征，用$x_{v,u}$表示</li>
+</ul>
+</li>
+<li><p>隐藏状态</p>
+<ul>
+<li>图的学习目标是获得每个节点的隐藏状态</li>
+</ul>
+</li>
+<li><p>局部输出函数</p>
+<ul>
+<li>选取一个节点</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>图卷积</p>
+<ul>
+<li><p>一张图片就可以看作一个非常稠密的图，阴影部分代表卷积核，右侧则是一个普通的图，和图卷积核</p>
+<ul>
+<li>在image为代表的欧式空间中，结点的邻居数量都是固定的，但在graph这种非欧空间中，结点有多少邻居并不固定</li>
+<li><p>传统的卷积核不能直接用于抽取图上结点的特征</p>
+<p><img src="/2021/07/13/GNN-GCN/gcn.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>两个主流思路</p>
+<ul>
+<li>把非欧空间的图转换成欧式空间，然后使用传统卷积</li>
+<li>找出一种可处理变长邻居结点的卷积核在图上抽取特征</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/06/22/few-shot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/06/22/few-shot/" itemprop="url">few-shot</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-22T11:46:43+08:00">
+                2021-06-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/06/22/few-shot/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/06/22/few-shot/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
+<li><p>few-shot</p>
+<ul>
+<li>few-shot learning：通过少量样本学习识别模型</li>
+<li>问题：过拟合&amp;泛化性，数据增强和正则能在一定程度上缓解但不解决，还是推荐从大数据上迁移学习</li>
+<li>共识：<ul>
+<li>样本量有限的情况下，不依靠外部数据很难得到不错的结果，当下所有的解决方案都是借助外部数据作为先验知识，构造学习任务</li>
+<li>迁移数据也不是随便找的，数据集的domain difference越大，迁移效果越差（e.g. 用miniImagenet做类间迁移，效果不错，但是用miniImagenet做base class用CUB做novel class，学习效果会明显下降）</li>
+</ul>
+</li>
+<li>数据集：<ul>
+<li>miniImagenet：自然图像，600张，100类</li>
+<li>Omniglot：手写字符，1623张，50类</li>
+<li>CUB：鸟集，11788张，200类，可用于细粒度，可以用于zero-shot</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>methods</p>
+<ul>
+<li><p>pretraining + finetuning</p>
+<ul>
+<li>pretraining阶段用base class训练一个feature extractor</li>
+<li><p>finetuning阶段fix feature extractor重新训练一个classifier</p>
+<p><img src="/2021/06/22/few-shot/pretraining.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>基于度量学习</p>
+<ul>
+<li>引入distance metric其实都算度量学习，所以上面（pretraining+finetuning）和下面（meta learning）的方法都有属于度量学习的方法</li>
+</ul>
+</li>
+<li><p>基于元学习</p>
+<p><img src="/2021/06/22/few-shot/metalearning.png" width="60%;"></p>
+<ul>
+<li>base class&amp;novel class：base class是已有的大数据集，多类别，大样本量，novel class是我们要解决的小数据集，类别少，每类样本也少</li>
+<li>N-way-K-shot：基于novel class先在base class上构建多个子任务，N-way就是构建随机N个类别的分类任务，K-shot就是每个类别对应样本量为K</li>
+<li><p>supportset S &amp; queryset Q：N-way-K-shot的训练集和测试集，来自base class中相同的类别，均用于training procedure</p>
+</li>
+<li><p>与传统分类任务对比：</p>
+<p><img src="/2021/06/22/few-shot/meta1.jpeg" width="45%;">        <img src="/2021/06/22/few-shot/meta2.jpeg" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>leaderboard：<a href="https://few-shot.yyliu.net/miniimagenet.html" target="_blank" rel="noopener">https://few-shot.yyliu.net/miniimagenet.html</a></p>
+</li>
+</ul>
+</li>
+<li><p>papers</p>
+<ul>
+<li>[2015 siamese]：Siamese Neural Networks for One-shot Image Recognition，核心思想就是基于孪生网络构建similarity任务，用一个大数据集构造的same/diff pairs去训练，然后直接用在novel set上，metric是reweighted L1</li>
+<li>[2016 MatchingNet]：Matching Networks for One Shot Learning，本质上也是孪生网络+metric learning，监督的是support set S和test set B的相似度——在S下训练的模型在B的预测结果误差最小，网络上的创新是用了memory&amp;attention，train procedure的创新在于“test and train conditions must match N-way-K-shot”，</li>
+<li>[2017 ProtoNet]：Prototypical Networks for Few-shot Learning，</li>
+<li>[2019 few-shot综述]：A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</li>
+</ul>
+</li>
+</ol>
+<h2 id="Siamese-Neural-Networks-for-One-shot-Image-Recognition"><a href="#Siamese-Neural-Networks-for-One-shot-Image-Recognition" class="headerlink" title="Siamese Neural Networks for One-shot Image Recognition"></a>Siamese Neural Networks for One-shot Image Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learning good features is expensive</li>
+<li>when little data is available：一个典型任务one-shot learning</li>
+<li>we desire<ul>
+<li>generalize to the new distribution without extensive retraining</li>
+</ul>
+</li>
+<li>we propose<ul>
+<li>train a siamese network to rank similarity between inputs</li>
+<li>capitalize on powerful discriminative features</li>
+<li>generalize the network to new data/new classes</li>
+</ul>
+</li>
+<li>experiment on<ul>
+<li>character recognition</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>general strategy</p>
+<ul>
+<li>learn image representation：supervised metric-based approach，siamese neural network</li>
+<li><p>reuse the feature extractor：on new data，without any retraining</p>
+<p><img src="/2021/06/22/few-shot/siamese.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>why siamese</p>
+<ul>
+<li>we hypothesize that networks which do well at verification tasks should generalize to one-shot classification</li>
+</ul>
+</li>
+<li><p>siamese nets</p>
+<ul>
+<li>twin networks accept distinct inputs that are joined by an energy function at the top</li>
+<li>twin back shares the weights：symmetric</li>
+<li>原始论文用了contrastive energy function：contains dual terms to increase like-pairs energy &amp; decrease unlike-pairs energy</li>
+<li>in this paper we use weighted L1 + sigmoid</li>
+</ul>
+</li>
+<li><p>model</p>
+<ul>
+<li><p>conv-relu-maxpooling：conv of varying sizes</p>
+</li>
+<li><p>最后一个conv-relu完了接flatten-fc-sigmoid得到归一化的feature vector</p>
+</li>
+<li><p>然后是joined layer：计算两个feature vector的L1 distance后learnable reweighting</p>
+<p>  <img src="/2021/06/22/few-shot/reweighting.png" width="45%;"></p>
+</li>
+<li><p>然后接sigmoid</p>
+<p><img src="/2021/06/22/few-shot/architecture.png" width="85%;"></p>
+</li>
+</ul>
+</li>
+<li><p>loss</p>
+<ul>
+<li>binary classifier</li>
+<li>regularized CE</li>
+<li>loss function里面加了layer-wise-L2正则</li>
+<li>bp的时候两个孪生网络的bp gradient是additive的</li>
+</ul>
+</li>
+<li><p>weight initialization</p>
+<ul>
+<li>conv weights：mean 0 &amp; std var 0.01</li>
+<li>conv bias：mean 0.5 &amp; std var 0.01</li>
+<li>fc weights：mean 0 &amp; std var 0.2</li>
+<li>fc bias：mean 0.5 &amp; std var 0.01</li>
+</ul>
+</li>
+<li><p>learning schedule</p>
+<ul>
+<li>uniform lr decay 0.01</li>
+<li>individual lr rate &amp; momentum</li>
+<li>annealing</li>
+</ul>
+</li>
+<li><p>augmentation</p>
+<ul>
+<li>individual affine distortions</li>
+<li>每个affine param的probability 0.5</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>  &lt;img src=&quot;few-shot/affine.png&quot; width=&quot;45%;&quot; /&gt;
+</code></pre><ol>
+<li><p>实验</p>
+<ul>
+<li>dataset<ul>
+<li>Omniglot：50个字母（international/lesser known/fictitious）</li>
+<li>训练用的子集：60% of the total data，12个drawer创建的30个字母，每类样本数一样多</li>
+<li>validation：4个drawer的10个字母</li>
+<li>test：4个drawer的10个字母</li>
+<li>8个affine transforms：9倍样本量，same&amp;different pairs</li>
+<li>在不经过微调训练的条件下，模型直接应用在MNIST数据集，仍有70%的准确率：泛化能力</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>评价</p>
+<ul>
+<li>孪生网络对于两个图像之间的差异是非常敏感的<ul>
+<li>一只黄色的猫和黄色的老虎之间的差别要比一只黄色的猫和黑色的猫之间的差别更小</li>
+<li>一个物体出现在图像的左上角和图像的右下角时其提取到的特征信息可能截然不同</li>
+<li>尤其经过全连接层，空间位置信息被破坏</li>
+</ul>
+</li>
+<li>手写字符数据集相比较于ImageNet太简单了<ul>
+<li>优化网络结构：MatchingNet</li>
+<li>更好的训练策略：meta learning</li>
+</ul>
+</li>
+<li>现在去复现已经没啥意义，算是metric learning在小样本学习上的一个startup吧</li>
+</ul>
+</li>
+</ol>
+<h2 id="MatchingNet-Matching-Networks-for-One-Shot-Learning"><a href="#MatchingNet-Matching-Networks-for-One-Shot-Learning" class="headerlink" title="MatchingNet: Matching Networks for One Shot Learning"></a>MatchingNet: Matching Networks for One Shot Learning</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learning new concepts rapidly from little data</li>
+<li>employ ideas<ul>
+<li>metric learning</li>
+<li>memory cell</li>
+</ul>
+</li>
+<li>define one-shot learning problems<ul>
+<li>Omniglot</li>
+<li>ImageNet</li>
+<li>language tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>parametric models learns slow and require large datasets</li>
+<li>non-parametric models rapidly assimilate new examples</li>
+<li>we aim to incorporate both</li>
+<li>we propose Matching Nets<ul>
+<li>uses recent advances in attention and memory that enable rapid learning</li>
+<li>test and train conditions must match：如果要测试一个n类的新分布，就要在m类大数据集上训类似的minibatch——抽n个类，每类show a few examples</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>build one-shot learning within the set-to-set framework</p>
+<ul>
+<li><p>训练以后的模型不需要进一步tuning就能produce sensible test labels for unobserved classes</p>
+</li>
+<li><p>given a small support set $S=\{(x_i,y_i)\}^k_{i=0}$</p>
+</li>
+<li><p>train a classifier $c_S$</p>
+</li>
+<li><p>given a test example $\hat x$：we get a probability distribution $\hat y=c_S(\hat x)$</p>
+</li>
+<li><p>define the mapping：$S \rightarrow c_S $ to be $P(\hat y| \hat x ,S)$</p>
+</li>
+<li><p>when given a new support set $S^{‘}=\{\hat x\}$：直接用模型P去预测$\hat y$就可以了</p>
+</li>
+<li><p>simplest form：</p>
+<script type="math/tex; mode=display">
+  \hat y = \sum_{i=1}^k a(\hat x, x_i)y_i</script><ul>
+<li>a是attention mechanism：如果和测试样本$\hat x$最远的b个支持样本$x_i$的attention是0，其余为一个定值，这就等价于一个k-b-NN机制</li>
+<li>$y_i$ act as memories：可以把每个$y_i$看作是每个$x_i$提取到的信息保存成memory</li>
+<li><p>workflow定义：given a input，我们基于attention锁定corresponding samples in the support set，并retrieve the label</p>
+<p><img src="/2021/06/22/few-shot/formulation.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>attention kernel</p>
+<ul>
+<li>用一个embedding function先将$\hat x$和$x_i$转化成embeddings</li>
+<li>然后计算和每个$x_i$ embedding的cosine distance</li>
+<li>然后softmax，得到每个的attention value</li>
+<li>softmax之后的attention value，大部分是N选1，如果每个attention value都不高，说明query sample和训练集每类都不像，是个novel</li>
+</ul>
+</li>
+<li><p>Full Context Embeddings（FCE）</p>
+<ul>
+<li><p>简单的模式下f和g就是两个shared weights的CNN feature extractor，FCE是接在常规feature vector后面精心设计的一个结构</p>
+</li>
+<li><p>设计思路</p>
+<ul>
+<li>g：support set don’t get embedded individually</li>
+<li>f：support set modify how we embed the test image</li>
+</ul>
+</li>
+<li><p>the first issue：</p>
+<ul>
+<li><p>bidirectional Long-Short Term Memory</p>
+</li>
+<li><p>encoder the whole support set as contexts，each time step的输入是$g^{‘}(x_i)$</p>
+<p>  <img src="/2021/06/22/few-shot/biLSTM.png" width="35%;"></p>
+</li>
+<li><p>skip connection</p>
+<script type="math/tex; mode=display">
+  g(x_i) = \overrightarrow{h_i}+\overleftarrow{h_i}+g^{'}(x_i)</script></li>
+</ul>
+</li>
+<li><p>the second issue</p>
+<ul>
+<li><p>LSTM with read attention over the whole set S</p>
+</li>
+<li><p>$f(\hat x, S)=attLSTM(f^{‘}(\hat x), g(S), K)$</p>
+<p>  <img src="/2021/06/22/few-shot/FCE.png" width="55%;"></p>
+</li>
+<li><p>$f^{‘}(\hat x)$是query sample的feature vector，作为LSTM each time step的输入</p>
+</li>
+<li><p>$K$是fixed number of unrolling steps，限制LSTM计算的step，也就是feature vector参与LSTM循环计算的次数，最终的输出是$h_K$</p>
+</li>
+<li><p>skip connection as above</p>
+</li>
+<li><p>support set S的引入：</p>
+<ul>
+<li>content based attention + softmax</li>
+<li>$r_{k-1}$和$h_{k-1}$是concat到一起，作为hidden states：【QUESTION】这样lstm cell的hidden size就变了啊？？？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>attention of K fixed unrolling steps</p>
+</li>
+<li><p>encode $x_i$ in the context of the support set S</p>
+</li>
+</ul>
+</li>
+<li><p>training strategy</p>
+<ul>
+<li>the training procedure has to be chosen carefully so as to match the never seen</li>
+<li>task define：从全集中选取few unique classes(e.g. 5)，每个类别选取few examples(e.g. 1-5)，构成support set S，再从对应类别抽一个batch B，训练目标就是minimise the error predicting the labels in the batch B conditioned on the support set S</li>
+<li><p>batch B的预测过程就是figure1：需要$g(S(x_i,y_i))$和$f(\hat x)$计算$P(\hat y|\hat x, S)$，然后和$gt(\hat y)$计算log loss</p>
+<p><img src="/2021/06/22/few-shot/matchingnetloss.png" width="55%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>模式</p>
+<ul>
+<li>N-way-K-shot train</li>
+<li>one-shot test：用唯一的one-shot novel sample生成对应类别的feature vector，然后对每个test sample计算cosine distance，选择最近的作为其类别</li>
+</ul>
+</li>
+<li><p>comparing methods</p>
+<ul>
+<li>baseline classifier + NN</li>
+<li>MANN</li>
+<li>Convolutional Siamese Net + NN</li>
+<li>further finetuning：one-shot</li>
+</ul>
+</li>
+<li>结论<ul>
+<li>using more examples for k-shot classification helps all models</li>
+<li>5-way is easier than 20-way</li>
+<li>siamese net在5-shot的时候跟our method差不多，但是one-shot degrades rapidly </li>
+<li>FCE在简单数据集（Omniglot）上没啥用，在harder task（<em>mini</em>ImageNet）显著提升</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION"><a href="#A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION" class="headerlink" title="A CLOSER LOOK AT FEW-SHOT CLASSIFICATION"></a>A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>为主流方法提供一个consistent comparative analysis，并且发现：<ul>
+<li>deeper backbones significantly reduce differences</li>
+<li>reducing intra-class variation is an important factor when shallow backbone</li>
+</ul>
+</li>
+<li>propose a modified baseline method<ul>
+<li>achieves com- petitive performance</li>
+<li>verified on miniImageNet &amp; CUB</li>
+</ul>
+</li>
+<li>in realistic cross-domain settings<ul>
+<li>generalization analysis</li>
+<li>baseline method with standard fine-tuning win</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>three main categories of methods</p>
+<ul>
+<li>initialization based<ul>
+<li>aims to learn good model initialization</li>
+<li>to achieve rapid adaption with a limited number of training samples</li>
+<li>have difficulty in handling domain shifts</li>
+</ul>
+</li>
+<li>metric learning based<ul>
+<li>训练目标是learn to compare</li>
+<li>if a model can determine the similarity of two images, it can classify an unseen input image with the labeled instances：本质是similarity计算器，脱离label level</li>
+<li>花式训练策略：meta learning/graph</li>
+<li>花式距离metric：cosine/Euclidean</li>
+<li>turns out大可不必：<ul>
+<li>a simple baseline method with a distance- based classifier is competitive to the sophisticated algorithms</li>
+<li>simply reducing intra-class variation in a baseline method leads to competitive performance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>hallucination based<ul>
+<li>用base class训练一个生成模型，然后用生成模型给novel class造假数据</li>
+<li>通常和metric-based模型结合起来用，不单独分析</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>two main challenges 没法统一横向比较</p>
+<ul>
+<li>implementation details有差异，baseline approach被under-estimated：无法准确量化the relative performance gain</li>
+<li>lack of domain shift between base &amp; novel datasets：makes the evaluation scenarios unrealistic</li>
+</ul>
+</li>
+<li>our work<ul>
+<li>针对代表性方法conduct consistent comparative experiments on common ground<ul>
+<li>discoveries on deeper backbones</li>
+</ul>
+</li>
+<li>轻微改动baseline method获得显著提升<ul>
+<li>replace the linear classifier with distance-based classifier</li>
+</ul>
+</li>
+<li>practical sceneries with domain shift<ul>
+<li>发现这种现实场景下，那些代表性的few-shot methods反而干不过baseline method</li>
+</ul>
+</li>
+<li>open source code：<a href="https://github.com/wyharveychen/CloserLookFewShot" target="_blank" rel="noopener">https://github.com/wyharveychen/CloserLookFewShot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>baseline<ul>
+<li>standard transfer learning：pre-training + fine-tuning</li>
+<li>training stage<ul>
+<li>train a feature extractor $f_{\theta}$ and a classifier $C_{W_b}$</li>
+<li>use abundant base class labeled data</li>
+<li>standard CE loss</li>
+</ul>
+</li>
+<li>fine-tuning stage<ul>
+<li>fix feature extractor $f_{\theta}$</li>
+<li>train a new classifier $C_{W_n}$</li>
+<li>use the few labeled novel samples</li>
+<li>standard CE loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>baseline++<ul>
+<li>variant of the baseline：唯一的不同就在于classifier design</li>
+<li>显式地reduce intra-class varation among features during training，和center loss思路有点像，但是center loss的质心是滑动平均的，这里面的质心是learnable的</li>
+<li>training stage<ul>
+<li>write the weight matrix $W_b$ as $[w_1, w_2, …, w_c]$，类似每类的簇心</li>
+<li>for an input feature，compute cosine similarity</li>
+<li>multiply a class-wise learnable scalar to adjust origin [-1,1] value to fit softmax</li>
+<li>然后用softmax对similarity vector进行归一化，作为predict label</li>
+<li>the softmax function prevents the learned weight vectors collapsing to zeros：每类的预测distance都是0是网络比较容易陷入的局部最优解</li>
+</ul>
+</li>
+<li>【in fine-tuning stage？？】</li>
+</ul>
+</li>
+<li>meta-learning algorithms<ul>
+<li>three distance metric based methods：MatchingNet，ProtoNet，RelationNet</li>
+<li>one initialization based method：MAML</li>
+<li>meta-training stage<ul>
+<li>a collection of N-way-K-shot tasks</li>
+<li>使得模型$M(*|S)$学会的是一种学习模式——在有限数据下做预测</li>
+</ul>
+</li>
+<li>meta-testing stage<ul>
+<li>所有的novel data都作为对应类别的support set</li>
+<li>(class mean)</li>
+<li>模型就用这个新的support set来进行预测</li>
+</ul>
+</li>
+<li>Different meta-learning methods主要区别在于如何基于support set做预测，也就是classifier的设计<ul>
+<li>MatchingNet计算的是query和support set的每个cosine distance，然后mean per class</li>
+<li>ProtoNet是先对support features求class mean，然后Euclidean distance</li>
+<li>RelationNet先对support features求class mean，然后将距离计算模块替换成learnable relation module</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>three scenarios</p>
+<ul>
+<li>generic object recognition：mini-ImageNet，100类，600张per class，【64-base，16-val，20-novel】</li>
+<li>fine-grained image classification：CUB-200-2011，200类，总共11,788张，【random 100-base，50-val，50-novel】</li>
+<li>cross-domain adaptation：mini-ImageNet —&gt; CUB，【100-mini-ImageNet-base，50-CUB-val，50-CUB-test】</li>
+</ul>
+</li>
+<li><p>training details</p>
+<ul>
+<li>baseline和baseline++模型：train 400 epochs，batch size 16</li>
+<li>meta learning methods：<ul>
+<li>train 60000 episodes for 5-way-1-shot tasks，train 40000 episodes for 5-way-5-shot tasks</li>
+<li>use validation set to select the training episodes with the best acc</li>
+<li>k-shot for support set，16 instances for query set</li>
+</ul>
+</li>
+<li>Adam with 1e-3 initial lr</li>
+<li>standard data augmentation：crop，left-right flip，color jitter</li>
+</ul>
+</li>
+<li><p>testing stage</p>
+<ul>
+<li>average over 600 experiments</li>
+<li>each experiment randomly choose 5-way-k-shot support set + 16 instances query set</li>
+<li>meta learning methods直接基于support set给出对query set的预测结果</li>
+<li>baseline methods基于support set训练一个新的分类头，100 iterations，batch size 4</li>
+</ul>
+</li>
+<li><p>模型details</p>
+<ul>
+<li>baseline++的similarity乘上了class-wise learnable scalar </li>
+<li>MachingNet用了FCE classification layer without fine-tuning版本，也乘了class-wise learnable scalar </li>
+<li>RelationNet将L2 norm替换成softmax加速训练</li>
+<li>MAML使用了一阶梯度近似for efficiency</li>
+</ul>
+</li>
+<li><p>初步结果</p>
+<ul>
+<li><p>4-layer conv backbone</p>
+</li>
+<li><p>input size 84x84</p>
+</li>
+<li><p>origin和re-implementation的精度对比</p>
+<ul>
+<li>原始的baseline没加data augmentation，所以过拟合了精度差，被underestimated了</li>
+<li>MatchingNet加了那个scalar shift的改进以后精度有显著提升</li>
+<li><p>ProtoNet原论文是20-shot&amp;30-shot，本文主要比较1-shot和5-shot，精度都放出来了</p>
+<p><img src="/2021/06/22/few-shot/re-implement.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>our experiment setting下各模型的精度对比</p>
+<ul>
+<li>baseline++大幅提升精度，已经跟meta learning methods差不多了</li>
+<li>说明few-shot的key factor是reduce intra-class variation</li>
+<li><p>但是要注意的是这是在4-layer-conv的backbone setting下，deeper backbone can inherently reduce intra-class variation</p>
+<p><img src="/2021/06/22/few-shot/cmp.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>增加网络深度</p>
+<ul>
+<li>上面说了，deeper backbone能够隐式地降低类内距离</li>
+<li>deeper models<ul>
+<li>conv4</li>
+<li>conv6：相对于conv4那个模型，加了两层conv blocks without pooling</li>
+<li>resnet10：简化版resnet18，r18里面conv block的两层卷积换成一层</li>
+<li>resnet18：origin paper</li>
+<li>resnet34：origin paper</li>
+</ul>
+</li>
+<li><p>随着网络加深，各方法的精度差异缩小，baseline方法甚至反超了一些meta learning方法</p>
+<p><img src="/2021/06/22/few-shot/tendency.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>effect of domain shift</p>
+<ul>
+<li>一个现实场景：mini-ImageNet —&gt; CUB，收集general class data相对容易，收集fine-grained数据集则更困难</li>
+<li>用resnet18实验</li>
+<li>Baseline outperforms all meta-learning methods under this scenario</li>
+<li>因为meta learning methods的学习完全依赖于base support class，not able to adapt</li>
+<li>随着domain difference get larger，Baseline相对于其他方法的gap也逐渐拉大</li>
+<li><p>说明了在domain shift场景下，adaptation based method的必要性</p>
+<p><img src="/2021/06/22/few-shot/domain shift.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>further adapt meta-learning methods</p>
+<ul>
+<li>MatchingNet &amp; ProtoNet：跟baseline方法一样，fix feature extractor，然后用novel set train a new classifier</li>
+<li>MAML：not feasible to fix the feature，用novel set finetune整个网络</li>
+<li>RelationNet：features是conv maps而不是vector，randomly split一部分novel set作为训练集</li>
+<li><p>MatchingNet &amp; MAML都有大幅精度提升，尤其在domain shift场景下，但是ProtoNet会掉点，说明adaptation是影响精度的key factor，但是还没有完美解决方案</p>
+<p><img src="/2021/06/22/few-shot/adaptation.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/06/17/ATSS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2961,645 +4103,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/15/optimizers优化器/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/15/optimizers优化器/" itemprop="url">optimizers优化器</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-15T10:01:53+08:00">
-                2021-03-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/15/optimizers优化器/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/15/optimizers优化器/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="0-overview"><a href="#0-overview" class="headerlink" title="0. overview"></a>0. overview</h2><p>keywords：SGD, moment, Nesterov, adaptive, ADAM, Weight decay</p>
-<ol>
-<li>优化问题Optimization<ul>
-<li>to minimize目标函数</li>
-<li>grandient decent<ul>
-<li>gradient<ul>
-<li>numerical：数值法，approx，slow</li>
-<li>analytical：解析法，exact，fast</li>
-</ul>
-</li>
-<li>Stochastic<ul>
-<li>用minibatch的梯度来approximate全集</li>
-<li>$\theta_{k+1} = \theta_k - v_{t+1}(x_i,y_i)$</li>
-</ul>
-</li>
-<li>classic optimizers：SGD，Momentum，Nesterov‘s momentum</li>
-<li>adaptive optimizers：AdaGrad，Adadelta，RMSProp，Adam</li>
-</ul>
-</li>
-<li>Newton</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>modern optimizers for large-batch<ul>
-<li>AdamW</li>
-<li>LARS</li>
-<li>LAMB</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>common updating steps</p>
-<p> for current step t：</p>
-<p> step1：计算直接梯度，$g_t = \nabla f(w_t)$</p>
-<p> step2：计算一阶动量和二阶动量，$m_t \&amp; V_t$</p>
-<p> step3：计算当前时刻的下降梯度，$\eta_t = \alpha m_t/\sqrt {V_t}$</p>
-<p> step4：参数更新，$w_{t+1} = w_t - \eta_t$</p>
-<ul>
-<li>各种优化算法的主要差别在step1和step2上</li>
-</ul>
-</li>
-<li><p>滑动平均/指数加权平均/moving average/EMA</p>
-<ul>
-<li>局部均值，与一段时间内的历史相关</li>
-<li>$v_t = \beta v_{t-1}+(1-\beta)\theta_t$，大致等于过去$1/(1-\beta)$个时刻的$\theta$的平均值，但是在起始点附近偏差较大</li>
-<li>$v_{tbiased} = \frac{v_t}{1-\beta^t}$，做了bias correction</li>
-<li>t越大，越不需要修正，两个滑动均值的结果越接近</li>
-<li><p>优缺点：不用保存历史，但是近似</p>
-<p><img src="/2021/03/15/optimizers优化器/moving average.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>SGD</p>
-<ul>
-<li>SGD没有动量的概念，$m_t=g_t$，$V_t=I^2$，$w_{t+1} = w_t - \alpha g_t$</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li>仅依赖当前计算的梯度<ul>
-<li>缺点：下降速度慢，可能陷在local optima上持续震荡</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>SGDW (with weight decay)</p>
-<ul>
-<li>在权重更新的同时进行权重衰减</li>
-<li>$w_{t+1} = (1-\lambda)w_t - \alpha g_t$</li>
-<li>在SGD form的优化器中weight decay等价于在loss上L2 regularization</li>
-<li>但是在adaptive form的优化器中是不等价的！！因为historical func（ERM）中regularizer和gradient一起被downscale了，因此not as much as they would get regularized in SGDW</li>
-</ul>
-</li>
-<li><p>SGD with Momentum</p>
-<ul>
-<li>引入一阶动量，$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$，使用滑动均值，抑制震荡</li>
-<li>梯度下降的主要方向是此前累积的下降方向，略微向当前时刻的方向调整</li>
-</ul>
-</li>
-<li><p>SGD with Nesterov Acceleration</p>
-<ul>
-<li>look ahead SGD-momentum</li>
-<li>在local minima的时候，四周没有下降的方向，但是如果走一步再看，可能就会找到优化方向</li>
-<li>先跟着累积动量走一步，求梯度：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
-<li>用这个点的梯度方向来计算滑动平均，并更新梯度</li>
-</ul>
-</li>
-<li><p>Adagrad</p>
-<ul>
-<li>引入二阶动量，开启“自适应学习率”，$V_t = \sum_0^t g_k^2$，度量历史更新频率</li>
-<li>对于经常更新的参数，我们已经积累了大量关于它的知识，不希望被单个样本影响太大，希望学习速率慢一些；对于偶尔更新的参数，我们了解的信息太少，希望能从每个偶然出现的样本身上多学一些，即学习速率大一些</li>
-<li>$\eta_t = \alpha m_t / \sqrt{V_t}$，本质上为每个参数，对学习率分别rescale</li>
-<li>缺点：二阶动量单调递增，导致学习率单调衰减，可能会使得训练过程提前结束</li>
-</ul>
-</li>
-<li><p>AdaDelta/RMSProp</p>
-<ul>
-<li>参考momentum，对二阶动量也计算滑动平均，$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
-<li>避免了二阶动量持续累积、导致训练过程提前结束</li>
-</ul>
-</li>
-<li><p>Adam</p>
-<ul>
-<li>集大成者：把一阶动量和二阶动量都用起来，Adaptive Momentum<ul>
-<li>SGD-M在SGD基础上增加了一阶动量</li>
-<li>AdaGrad和AdaDelta在SGD基础上增加了二阶动量</li>
-</ul>
-</li>
-<li>一阶动量滑动平均：$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$</li>
-<li>二阶动量滑动平均：$V_t = \beta_2 V_{t-1} + (1-\beta_2)g_t^2$</li>
-</ul>
-</li>
-<li><p>Nadam</p>
-<ul>
-<li>look ahead Adam</li>
-<li>把Nesterov的one step try加上：$g_t = \nabla f(w_t-\alpha m_{t-1}/\sqrt {V_{t-1}})$</li>
-<li>再Adam更新两个动量</li>
-</ul>
-</li>
-<li><p>经验超参</p>
-<ul>
-<li>$momentum=0.9$</li>
-<li>$\beta_1=0.9$</li>
-<li>$\beta_2=0.999$</li>
-<li>$m_0 = 0$</li>
-<li>$V_0 = 0$</li>
-<li>上面的图上可以看出，初期的$m_t$和$V_t$会无限接近于0，此时可以进行误差修正：$factor=\frac{1}{1-\beta^t}$</li>
-</ul>
-</li>
-<li><p>AdamW</p>
-<ul>
-<li>在adaptive methods中，解耦weight-decay和loss-based gradient在ERM过程中的绑定downscale的关系</li>
-<li>实质就是将导数项后移</li>
-</ul>
-<p><img src="/2021/03/15/optimizers优化器/AdamW.png" width="80%;"></p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/11/regnet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/11/regnet/" itemprop="url">regnet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-11T21:10:42+08:00">
-                2021-03-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/11/regnet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/11/regnet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RegNet-Designing-Network-Design-Spaces"><a href="#RegNet-Designing-Network-Design-Spaces" class="headerlink" title="RegNet: Designing Network Design Spaces"></a>RegNet: Designing Network Design Spaces</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>study the network design principles</li>
-<li>design RegNet </li>
-<li>outperforms efficientNet and 5x faster<ul>
-<li>top1 error：20.1 （eff-b5：21.5）</li>
-<li>larger batch size</li>
-<li>1/4 的 train/test latency</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>manual network design<ul>
-<li>AlexNet, ResNet family, DenseNet, MobileNet</li>
-<li>focus on discovering new design choices that improve acc </li>
-</ul>
-</li>
-<li>the recent popular approach NAS<ul>
-<li>search the best in a fixed search space of possible networks</li>
-<li>limitations：generalize to new settings，lack of interpretability  </li>
-</ul>
-</li>
-<li>network scaling<ul>
-<li>上面两个focus on 找出一个basenet for a specific regime</li>
-<li>scaling rules aims at tuning the optimal network in any target regime </li>
-</ul>
-</li>
-<li>comparing networks<ul>
-<li>the reliable comparison metric to guide the design process</li>
-</ul>
-</li>
-<li>our method<ul>
-<li>combines the disadvantages of manual design and NAS</li>
-<li>first AnyNet</li>
-<li>then RegNet</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/09/mongodb/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/09/mongodb/" itemprop="url">mongodb</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-09T12:19:54+08:00">
-                2021-03-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/09/mongodb/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/09/mongodb/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>download：<a href="https://www.mongodb.com/try/download/enterprise" target="_blank" rel="noopener">https://www.mongodb.com/try/download/enterprise</a></p>
-</li>
-<li><p>install</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将解压以后的文件夹放在/usr/<span class="built_in">local</span>下</span></span><br><span class="line">sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/</span><br><span class="line">sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> ENV PATH</span></span><br><span class="line">export PATH=/usr/local/mongodb/bin:$PATH</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建日志及数据存放的目录</span></span><br><span class="line">sudo mkdir -p /usr/local/var/mongodb</span><br><span class="line">sudo mkdir -p /usr/local/var/log/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/log/mongodb</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>configuration</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 后台启动</span></span><br><span class="line">mongod --dbpath /usr/local/var/mongodb --logpath /usr/local/var/log/mongodb/mongo.log --fork</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 控制台启动</span></span><br><span class="line">mongod --config /usr/local/etc/mongod.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看状态</span></span><br><span class="line">ps aux | grep -v grep | grep mongod</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>run</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在db环境下启动一个终端</span></span><br><span class="line">cd /usr/local/mongodb/bin </span><br><span class="line">./mongo</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>original settings</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 显示所有数据的列表</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line"><span class="meta">#</span><span class="bash"> 三个系统保留的特殊数据库</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 连接/创建一个指定的数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use <span class="built_in">local</span></span></span><br><span class="line">switched to db local</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前数据库, 如果没use默认为<span class="built_in">test</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db</span></span><br><span class="line">test</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 【！！重要】关闭服务</span></span><br><span class="line">之前服务器被kill -9强制关闭，数据库丢失了</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use admin</span></span><br><span class="line">switched to db admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.shutdownServer()</span></span><br><span class="line">server should be down...</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>concepts</p>
-<p> <img src="/2021/03/09/mongodb/concepts.png" width="90%;"></p>
-</li>
-<li><p>文档document</p>
-<p> 一组key-value对，如上面左图中的一行记录，如上面右图中的一个dict</p>
-</li>
-<li><p>集合collection</p>
-<p> 一张表，如上面左图和上面右图</p>
-</li>
-<li><p>主键primary key</p>
-<p> 唯一主键，ObjectId类型，自定生成，有标准格式</p>
-</li>
-<li><p>常用命令</p>
-<p>10.1 创建/删除/重命名db</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换至数据库test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 插入一条doc, db.COLLECTION_NAME.insert(document)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> db要包含至少一条文档，才能在show dbs的时候显示（才真正创建）</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet1.insert(&#123;<span class="string">'name'</span>: img0&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前已有数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除指定数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 旧版本(before4.0)重命名：先拷贝一份，在删除旧的</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.copyDatabase(<span class="string">'OLDNAME'</span>, <span class="string">'NEWNAME'</span>);</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use old_name</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 新版本重命名：dump&amp;restore，这个东西在mongodb tools里面，要另外下载，可执行文件放在bin下</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump   <span class="comment"># 将所有数据库导出到bin/dump/以每个db名字命名的文件夹下</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump -h dbhost -d dbname -o dbdirectory</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -h: 服务器地址:端口号</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -d: 需要备份的数据库</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -o: 存放位置（需要已存在）</span></span><br><span class="line">mongodump -d test -o tmp/</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在恢复备份数据库的时候换个名字：mongorestore -h dbhost -d dbname path</span></span><br><span class="line">mongorestore -d test_bkp tmp/test</span><br><span class="line"><span class="meta">#</span><span class="bash"> 这时候可以看到一个新增了一个叫test_bkp的db</span></span><br></pre></td></tr></table></figure>
-<p>10.2 创建/删除/重命名collection</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建：db.createCollection(name, options)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">'case2img'</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有tables</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 不用显示创建，在db insert的时候会自动创建集合</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.insert(&#123;<span class="string">"name"</span> : <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除：db.COLLECTION_NAME.drop()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.drop()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名：db.COLLECTION_NAME.renameCollection(<span class="string">'NEWNAME'</span>)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.renameCollection(<span class="string">'sheet3'</span>)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 复制：db.COLLECTION_NAME.aggregate(&#123;<span class="variable">$out</span>: <span class="string">'NEWNAME'</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.aggregate(&#123; <span class="variable">$out</span> : <span class="string">"sheet3"</span> &#125;)</span></span><br></pre></td></tr></table></figure>
-<p>10.3 插入/显示/更新/删除document</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入</span></span><br><span class="line">db.COLLECTION_NAME.insert(document)</span><br><span class="line">db.COLLECTION_NAME.save(document)</span><br><span class="line">db.COLLECTION_NAME.insertOne()</span><br><span class="line">db.COLLECTION_NAME.insertMany()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有doc</span></span><br><span class="line">db.COLLECTION_NAME.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新doc的部分内容</span></span><br><span class="line">db.COLLECTION_NAME.update(</span><br><span class="line">   &lt;query&gt;,   # 查询条件</span><br><span class="line">   &lt;update&gt;,  # 更新操作</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,     # if true 如果不存在则插入</span><br><span class="line">     multi: &lt;boolean&gt;,      # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">'case'</span>: <span class="string">'s2'</span>, <span class="string">'name'</span>: <span class="string">'img2'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 给doc的某个key重命名</span></span><br><span class="line">db.COLLECTION_NAME.updateMany(</span><br><span class="line">&#123;&#125;,</span><br><span class="line">&#123;'$rename': &#123;"old_key": "new_key"&#125;&#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新整条文档by object_id</span></span><br><span class="line">db.COLLECTION_NAME.save(</span><br><span class="line">   &lt;document&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.save(&#123;<span class="string">"_id"</span>: ObjectId(<span class="string">"60474e4b77e21bad9bd4655a"</span>), <span class="string">"case"</span>:<span class="string">"s3"</span>, <span class="string">"name"</span>:<span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除满足条件的doc</span></span><br><span class="line">db.COLLECTION_NAME.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,   # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除所有doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;&#125;)</span></span><br></pre></td></tr></table></figure>
-<p>10.4 简单查询find</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询表中的doc：db.COLLECTION_NAME.find(&#123;query&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="string">"name"</span>:1&#125;)   <span class="comment"># projection的value在对应的key-value是list的时候有意义</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 格式化显示查询结果：db.COLLECTION_NAME.find(&#123;query&#125;).pretty()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;).pretty()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取指定数量的数据记录：db.COLLECTION_NAME.find(&#123;query&#125;).<span class="built_in">limit</span>(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).<span class="built_in">limit</span>(1)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 跳过指定数量的数据：db.COLLECTION_NAME.find(&#123;query&#125;).skip(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).skip(1)</span></span><br></pre></td></tr></table></figure>
-<p>10.5 条件操作符</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">(&gt;</span><span class="bash">) 大于 - <span class="variable">$gt</span></span></span><br><span class="line">(&lt;) 小于 - $lt</span><br><span class="line"><span class="meta">(&gt;</span><span class="bash">=) 大于等于 - <span class="variable">$gte</span></span></span><br><span class="line">(&lt;=) 小于等于 - $lte</span><br><span class="line">(or) 或 - $or</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img1'</span>, <span class="string">'size'</span>:100&#125;&#125;)</span></span><br><span class="line">WriteResult(&#123; "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s2'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img2'</span>, <span class="string">'size'</span>:200&#125;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询size&gt;150的doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>: 150&#125;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询满足任意一个条件的doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'$or'</span>: [&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;, &#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>: 150&#125;&#125;]&#125;)</span></span><br></pre></td></tr></table></figure>
-<p>10.6 数据类型操作符</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type(KEY)等于 - $type</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 比较对象可以是字符串/对应的reflect NUM</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'0'</span>&#125;&#125;)</span></span><br></pre></td></tr></table></figure>
-<p>10.7 排序find().sort</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 通过指定字段&amp;指定升序/降序来对数据排序：db.COLLECTION_NAME.find().sort(&#123;KEY:1/-1&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find().sort(&#123;<span class="string">'name'</span>:1&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> skip(), limilt(), sort()三个放在一起执行的时候，执行的顺序是先 sort(), 然后是 skip()，最后是显示的 <span class="built_in">limit</span>()。</span></span><br></pre></td></tr></table></figure>
-<p>10.8 索引</p>
-<p>skip</p>
-<p>10.9 聚合aggregate</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 用于统计 db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by group</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:1&#125;&#125;&#125;])</span></span><br><span class="line">group by key value 'case'</span><br><span class="line">count number of items in each group</span><br><span class="line">refer to the number as img_num</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:<span class="string">'$size'</span>&#125;&#125;&#125;])</span></span><br><span class="line">计算每一个group内，size值的总和</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by match</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$match</span>: &#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>:150&#125;&#125;&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br><span class="line">类似shell的管道，match用来筛选条件，符合条件的送入下一步统计</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$skip</span>: 4&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>快速统计distinct</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.case2img.distinct(TAG_NAME)</span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意如果distinct的内容太长，超过16M，会报distinct too big的error，推荐用聚合来做统计</span></span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">12. pymongo</span><br><span class="line"></span><br><span class="line">   用python代码来操作数据库</span><br><span class="line"></span><br><span class="line">   先安装：pip install pymongo</span><br><span class="line"></span><br><span class="line">   11.1 连接client</span><br><span class="line"></span><br><span class="line">   ```python</span><br><span class="line">   from pymongo import MongoClient</span><br><span class="line">   Client = MongoClient()</span><br></pre></td></tr></table></figure>
-<p>   11.2 获取数据库</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db = Client.DB_NAME</span><br><span class="line">db = Client[<span class="string">'DB_NAME'</span>]</span><br></pre></td></tr></table></figure>
-<p>   11.3 获取collection</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">collection = db.COLLECTION_NAME</span><br><span class="line">collection = db[<span class="string">'COLLECTION_NAME'</span>]</span><br></pre></td></tr></table></figure>
-<p>   11.4 插入doc</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># insert one</span></span><br><span class="line">document1 = &#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;</span><br><span class="line">document2 = &#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;</span><br><span class="line">post_1 = collection.insert_one(document1).inserted_id</span><br><span class="line">post_2 = collection.insert_one(document2).inserted_id</span><br><span class="line">print(post_1)</span><br><span class="line"></span><br><span class="line"><span class="comment"># insert many</span></span><br><span class="line">new_document = [&#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;,&#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;]</span><br><span class="line"><span class="comment"># new_document = [document1,document2]  注意doc是神拷贝，只能作为一条doc被插入一次</span></span><br><span class="line">result = collection.insert_many(new_document).inserted_ids</span><br><span class="line">print(result)</span><br></pre></td></tr></table></figure>
-<p>   11.5 查找</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> bson.objectid <span class="keyword">import</span> ObjectId</span><br><span class="line"></span><br><span class="line"><span class="comment"># find one 返回一条doc</span></span><br><span class="line">result = collection.find_one()</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'case'</span>: <span class="string">'s0'</span>&#125;)</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'_id'</span>: ObjectId(<span class="string">'604752f277e21bad9bd46560'</span>)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># find 返回一个迭代器</span></span><br><span class="line"><span class="keyword">for</span> _, item <span class="keyword">in</span> enumerate(collection.find()):</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
-<p>   11.6 更新</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># update one</span></span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$push'</span>:&#123;<span class="string">'add'</span>:<span class="number">1</span>&#125;&#125;)    <span class="comment"># 追加数组内容</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># update many</span></span><br><span class="line">collection.update_many(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
-<p>   11.7 删除</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在mongo shell里面是remove方法，在pymongo里面被deprecated成delete方法</span></span><br><span class="line">collection.delete_one(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>&#125;)</span><br><span class="line">collection.delete_many(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>&#125;)</span><br></pre></td></tr></table></figure>
-<p>   11.8 统计</p>
-   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计数：count方法已经被重构</span></span><br><span class="line">print(collection.count_documents(&#123;<span class="string">'case'</span>:<span class="string">'s0'</span>&#125;))</span><br><span class="line"></span><br><span class="line"><span class="comment"># unique：distinct方法</span></span><br><span class="line">print(collection.distinct(<span class="string">'case'</span>))</span><br></pre></td></tr></table></figure>
-<p>​    11.9 正则</p>
-<p>​    mongo shell命令行里的正则和pymongo脚本里的正则写法是不一样的，因为python里面有封装正则方法，然后通过bson将python的正则转换成数据库的正则</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pymongo</span></span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> bson</span><br><span class="line"></span><br><span class="line">pattern = re.compile(<span class="string">r'(.*)-0[345]-(.*)'</span>)</span><br><span class="line">regex = bson.regex.Regex.from_native(pattern)</span><br><span class="line">result = collection.aggregate([&#123;<span class="string">'$match'</span>: &#123;<span class="string">'date'</span>: regex&#125;&#125;])</span><br><span class="line"></span><br><span class="line"><span class="comment"># mongo shell</span></span><br><span class="line">&gt; db.collection.find(&#123;date:&#123;$regex:<span class="string">"(.*)-0[345]-(.*)"</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3654,7 +4157,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-count">167</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3667,7 +4170,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3714,7 +4217,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

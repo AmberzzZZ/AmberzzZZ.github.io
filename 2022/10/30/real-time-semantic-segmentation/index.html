@@ -79,14 +79,17 @@
 
 
 
-<meta name="description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta name="description" content="cityscape leaderboard:   [PIDNet 2022] PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022]">
 <meta property="og:type" content="article">
 <meta property="og:title" content="real-time semantic segmentation">
 <meta property="og:url" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta property="og:description" content="cityscape leaderboard:   [PIDNet 2022] PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022]">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/leaderboard.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/pp-liteseg.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/UAFM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/SPPM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/FAM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/halve.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/feature%20map.png">
@@ -101,10 +104,10 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/detail%20feature.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/backbone%20cmp.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/backbone%20cmp1.png">
-<meta property="og:updated_time" content="2022-10-30T11:25:59.958Z">
+<meta property="og:updated_time" content="2022-11-07T14:18:20.067Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="real-time semantic segmentation">
-<meta name="twitter:description" content="cityscape leaderboard:   [PIDNet 2022]  [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semanti">
+<meta name="twitter:description" content="cityscape leaderboard:   [PIDNet 2022] PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller [SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing [SFNet v2 2022]">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/leaderboard.png">
 
 
@@ -372,17 +375,98 @@
         <p>cityscape leaderboard:</p>
 <p><img src="/2022/10/30/real-time-semantic-segmentation/leaderboard.png" width="80%;"></p>
 <ul>
-<li>[PIDNet 2022] </li>
+<li>[PIDNet 2022] PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</li>
 <li>[SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing</li>
 <li>[SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</li>
 <li>[PP-LiteSeg 2022] PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</li>
-<li>DDRNet</li>
+<li>[DDRNet 2021] Deep Dual-resolution Networks for Real-time and Accurate Semantic Segmentation of Road Scenes</li>
 <li>[STDC-Seg 2021CVPR] Rethinking BiSeNet For Real-time Semantic Segmentation</li>
 </ul>
-<h2 id="PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller"><a href="#PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller" class="headerlink" title="PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller"></a>PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</h2><ol>
-<li>动机</li>
-<li>论点</li>
-<li>方法</li>
+<h2 id="PP-LiteSeg-A-Superior-Real-Time-Semantic-Segmentation-Model"><a href="#PP-LiteSeg-A-Superior-Real-Time-Semantic-Segmentation-Model" class="headerlink" title="PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model"></a>PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</h2><ol>
+<li><p>main contributions</p>
+<ul>
+<li>propose a Flexible and Lightweight Decoder (FLD)：主要就是FPN的通道数</li>
+<li>propose a Unified Attention Fusion Module (UAFM)：强化特征表达</li>
+<li>propose a Simple Pyramid Pooling Module (SPPM)：简化PPM，low computation cost</li>
+</ul>
+</li>
+<li><p>real-time networks设计思路</p>
+<ul>
+<li>Strengthening feature representations：decoder中low-level和high-level特征的融合方式</li>
+<li>Contextual aggregation：花式PPM</li>
+</ul>
+</li>
+<li><p>overview</p>
+<p> <img src="/2022/10/30/real-time-semantic-segmentation/pp-liteseg.png" width="80%;"></p>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Flexible and Lightweight Decoder</p>
+<ul>
+<li>recent lightweight models中的decoder在恢复resolution的过程中通道数保持不变：cause computation redundancy</li>
+<li>FLD从high-level到low-level逐渐减少通道数</li>
+</ul>
+</li>
+<li><p>Unified Attention Fusion Module</p>
+<ul>
+<li>用一个attention module来产生weight map</li>
+<li><p>然后对不同尺度的特征做加权和</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/UAFM.png" width="40%;"></p>
+</li>
+<li><p>Spatial Attention Module</p>
+<ul>
+<li>实际代码中用的这个</li>
+<li>在channel维度上做mean &amp; max，两个feature共得到4个[1,h,w]的map，concat在一起[4,h,w]</li>
+<li>然后做conv+sigmoid得到weight map [1,h,w]</li>
+<li>然后做element-wise的mul&amp;add</li>
+</ul>
+</li>
+<li>Channel Attention Module<ul>
+<li>在spacial map上做avg pooling和max pooling，两个feature共得到4个[c,1,1]的vector，concat在一起[4c,1,1]</li>
+<li>然后做conv+sigmoid得到channel importance vec [c,1,1]</li>
+<li>然后做channel-wise的mul&amp;add</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Simple Pyramid Pooling Module</p>
+<ul>
+<li>主要改动<ul>
+<li>reduce intermediate and output channels</li>
+<li>remove the short-cut</li>
+<li>replace concat with add</li>
+</ul>
+</li>
+<li>就3个global average pooling，得到1x1、2x2、4x4的map，然后分别conv-bn-relu，然后resize回原来的尺度</li>
+<li><p>然后add &amp; conv</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/SPPM.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>datasets<ul>
+<li>Cityscapes：1+18，5,000（2975/500/1525），原始尺寸是2048x1024</li>
+<li>CamVid：11类，701（367/101/233），原始尺寸是960x720</li>
+</ul>
+</li>
+<li>training settings<ul>
+<li>SGD：momentum=0.9</li>
+<li>lr：warmup，poly，</li>
+<li>Cityscapes训练160k，batchsize=16，baselr=0.005，weight decay=5e-4</li>
+<li>CamVid训练1k，batchsize=24，baselr=0.01，weight decay=1e-4</li>
+<li>dataaug<ul>
+<li>random scale：scale range [0.125, 1.5] / [0.5, 2.5] for Cityscapes/CamVid</li>
+<li>random crop：crop size=[1024,512] / [960,720]</li>
+<li>random horizontal flipping / color jitting / normalization</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ol>
 <h2 id="SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><a href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow" class="headerlink" title="SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow"></a>SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</h2><ol>
 <li><p>动机</p>
@@ -750,7 +834,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-count">167</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -763,7 +847,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -806,7 +890,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PIDNet-A-Real-time-Semantic-Segmentation-Network-Inspired-from-PID-Controller"><span class="nav-number">1.</span> <span class="nav-text">PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><span class="nav-number">2.</span> <span class="nav-text">SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-LiteSeg-A-Superior-Real-Time-Semantic-Segmentation-Model"><span class="nav-number">1.</span> <span class="nav-text">PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><span class="nav-number">2.</span> <span class="nav-text">SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation"><span class="nav-number">3.</span> <span class="nav-text">STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation</span></a></li></ol></div>
             
 
           </div>
@@ -826,7 +910,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

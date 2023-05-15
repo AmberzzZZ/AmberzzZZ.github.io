@@ -276,6 +276,453 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/29/ssh-visualization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/12/29/ssh-visualization/" itemprop="url">ssh visualization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-29T18:33:00+08:00">
+                2018-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/12/29/ssh-visualization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/29/ssh-visualization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>ssh boocax@192.168.1.100</p>
+<p>密码：robot123</p>
+</li>
+<li><p>echo $ROS_MASTER_URI</p>
+<p>查看端口号11311</p>
+</li>
+<li><p>小车端：</p>
+<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
+<p>export ROS_IP=192.168.1.100</p>
+</li>
+<li><p>虚拟机端：</p>
+<p>export ROS_MASTER_URI=<a href="http://192.168.1.100:11311" target="_blank" rel="noopener">http://192.168.1.100:11311</a></p>
+<p>export ROS_IP=172.16.128.142</p>
+</li>
+</ol>
+<h4 id=""><a href="#" class="headerlink" title=" "></a> </h4><h6 id="-1"><a href="#-1" class="headerlink" title="#"></a>#</h6><h4 id="-2"><a href="#-2" class="headerlink" title=" "></a> </h4><ol>
+<li><p>nav远程开启三个终端（代码重构以前）：</p>
+<p>move_base: roslaunch teleop_twist_joy real_nav.launch </p>
+<p>mapserver: rosrun map_server map_server catkin_ws2/src/patrol/map/p1.yaml </p>
+<p>amcl: roslaunch patrol real_loc.launch </p>
+</li>
+<li><p>本地可视化：rviz／rqt_graph / rosservice call /rostopic pub</p>
+<ul>
+<li><p>全局定位：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call /global_localization "&#123;&#125;"</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置导航目标点：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 相对base_link坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "base_link" &#125;, pose: &#123; position: &#123; x: 0.5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br><span class="line"></span><br><span class="line">// 相对map坐标系</span><br><span class="line">rostopic pub -1 /navigation_simple/goal geometry_msgs/PoseStamped '&#123; header: &#123; frame_id: "map" &#125;, pose: &#123; position: &#123; x: 5, y: 0.0, z: 0 &#125;, orientation: &#123; x: 0, y: 0, z: 0, w: 1 &#125; &#125; &#125;'</span><br></pre></td></tr></table></figure>
+<p>注意<strong>-1</strong>，否则循环发布。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="-3"><a href="#-3" class="headerlink" title=" "></a> </h4><h6 id="-4"><a href="#-4" class="headerlink" title="#"></a>#</h6><h4 id="-5"><a href="#-5" class="headerlink" title=" "></a> </h4><p>往回备份：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r boocax@192.168.1.100:/home/boocax/catkin_ws2019 bkp/</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/04/Occupancy-Grid-Map/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/12/04/Occupancy-Grid-Map/" itemprop="url">Occupancy Grid Map</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-04T14:13:01+08:00">
+                2018-12-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/12/04/Occupancy-Grid-Map/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/04/Occupancy-Grid-Map/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>to be completed…</p>
+<ul>
+<li>Inverse Sensor Model</li>
+<li>Incremental Updating</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/12/03/object-tracking/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/12/03/object-tracking/" itemprop="url">object tracking</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-03T14:12:42+08:00">
+                2018-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/12/03/object-tracking/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/12/03/object-tracking/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>范围限定：过滤掉较远范围的点云数据</p>
+</li>
+<li><p>聚类：K-Means／欧式聚类，因为前者需要设定K，故使用后者。</p>
+<script type="math/tex; mode=display">
+D(p_i, p_{i+1}) = \sqrt{r_i^2 + r_{i+1}^2 - 2r_ir_{i+1}cos(\varphi_{i+1} - \varphi_i)}</script><p>如果连续扫描点之间的距离小于一个阈值$D_t$，那么这两个点被认为属于同一个对象。这个阈值是根据当前参考点的距离动态调整的。</p>
+<script type="math/tex; mode=display">
+D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
+<li><p>运动目标特征提取：（中心坐标，长／宽／半径，反射强度）</p>
+</li>
+<li><p>由上一时刻的位置速度设置ROI：</p>
+<ul>
+<li>基于局部匹配：通过相似度计算选取响应值最高的目标</li>
+<li>基于分类器：动态目标已知（人腿），采集正负样本，构造分类器，</li>
+</ul>
+</li>
+<li><p>卡尔曼滤波：</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/29/matplotlib的colormap/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1447,625 +1894,6 @@ dis = D*\sqrt{dx*dx + dy*dy}</script><blockquote>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/13/branch-and-bound/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/13/branch-and-bound/" itemprop="url">branch and bound</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-13T18:21:19+08:00">
-                2018-11-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/13/branch-and-bound/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/13/branch-and-bound/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>一个栗子：整数规划问题欲求$max\ z = 5x_1 + 8x_2$</p>
-<script type="math/tex; mode=display">
-\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\ 
- &   5x_1 + 9x_2 \leq 45 \nonumber\\ 
- & x_1\geq0, x_2\geq0 \nonumber\\ 
- & x_1,x_2为整数 \nonumber
-\end{align}   
-\right.</script><p>根据方程组可以绘制下图：</p>
-<p><img src="/2018/11/13/branch-and-bound/规划.png" alt=""></p>
-<p>于是可以得到实数空间上的最优解：$x_1 = 2.25, x_2 = 3.75, z_0 = 41.25$。——<strong>松弛问题</strong></p>
-<p>由于存在整数限定条件：</p>
-<ol>
-<li>最优解$0 \leq z^{*} \leq 41$，且必为整数</li>
-<li>x_2的最优解不在3和4之间，因为限定为整数</li>
-</ol>
-<p>一、分支</p>
-<p>于是问题可以拆分为：$max\ z = 5x_1 + 8x_2$</p>
-<script type="math/tex; mode=display">
-p1\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
-& x_2\leq 3 \nonumber
-\end{align}   
-\right.\\</script><script type="math/tex; mode=display">
-p2\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><p>问题拆分的实质是将$x_2$在3和4之间的小数部分划掉了，将可行域拆分成$x_2 \leq 3$ 和$x_3 \geq 4$，但是没有排除任何整数可行解。——<strong>分支</strong></p>
-<p>二、定界</p>
-<p>子问题$p1$的最优解为：$x_1 = 3, x_2=3, z^{*}=39$</p>
-<p>子问题$p2$的最优解为：$x_1 = 1.8, x_2=4, z^{*}=41$</p>
-<p>也就是说，子问题$p1$的整个参数空间上，能够取得的最优解为39，子问题$p2$上则为41，显然最优解应该位于子问题$p2$所在的参数空间中，且$39\leq z^{<em>} \leq41$。——<em>*定界</em></em></p>
-<p>三、迭代</p>
-<p>对$p2$参数空间再分支，参数$x_1$可以拆分为$x_1 \leq 1$和$x_1 \geq 2$：</p>
-<script type="math/tex; mode=display">
-p3\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
- & x_1\leq 1 \nonumber\\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><script type="math/tex; mode=display">
-p4\left\{
-\begin{align}
- &   x_1 + x_2 \leq 6 \nonumber\\
- &   5x_1 + 9x_2 \leq 45 \nonumber\\
- & x_1\geq0, x_2\geq0 \nonumber\\
- & x_1\geq 2 \nonumber \\
-& x_2\geq 4 \nonumber
-\end{align}   
-\right.\\</script><p>四、总结</p>
-<p>分支定界算法的总体流程如下：</p>
-<ol>
-<li>先求解相应的松弛问题，得到最优解，检查其是否符合原问题约束，若符合则为最优解，否则进行下一步。</li>
-<li>定界，取各分支中目标函数最大的作为上界$U_z$，取其余分支中目标函数中最大的作为下界$L_z$。$L_z \leq z^{*} \leq U_z$。</li>
-<li>分支，否则选择一个不符合原问题条件的变量，构建子问题。</li>
-<li>对各分支，有序地，进行步骤1。</li>
-</ol>
-<p>在求解对应的松弛问题时，通常会有以下几种情况：</p>
-<ol>
-<li>松弛问题没有可行解，那么原问题也没有可行解。</li>
-<li>松弛问题的最优解也满足原问题约束，那么该解也是原问题的最优解，算法终止。</li>
-<li>松弛问题的最优解小于现有下界，那么应该对该子问题进行剪枝。</li>
-</ol>
-<p>五、DFS</p>
-<p>对一颗搜索树，不用计算每一层全部节点的score（BFS），我们会维护一个优先队列，其中按照score的大小存放节点，然后选择score最大的节点（the most promising child）进行分支。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/30/trifles-with-arduino/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/10/30/trifles-with-arduino/" itemprop="url">trifles with arduino</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-30T17:29:52+08:00">
-                2018-10-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/10/30/trifles-with-arduino/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/30/trifles-with-arduino/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>系统总体的通信架构如下：</p>
-<p><img src="/2018/10/30/trifles-with-arduino/通信.png" alt=""></p>
-<p>底盘驱动板Arduino负责接收上层的运动控制指令，并驱动电机，两块板子通过串口进行通信。</p>
-<p>ROS提供了一个<a href="https://github.com/hbrobotics/ros_arduino_bridge" target="_blank" rel="noopener">ros_arduino_bridge</a>功能包集，它包括了Arduino库（ROSArduinoBridge）以及一系列用来控制Arduino-based robot的ROS功能包，<strong>这个功能包可以实现读取Twist控制信息，以及发布里程计信息等任务</strong>，封装了Raspberry Pi和Arduino之间的底层通信。</p>
-<p>Arduino库（ROSArduinoBridge）位于ros_arduino_firmware/src/libraries/路径下，里面是一些arduino脚本和头文件，将这个文件夹复制到我们Arduino IDE的SKETCHBOOK_PATH下，然后在Arduino IDE中就可以直接打开这个sketch项目。</p>
-<p>ROSArduinoBridge文件下是一些配置选项，另外commands.h文件中给出了一些可用的串口控制指令，如电机控制指令：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">m <span class="number">20</span> <span class="number">20</span>   <span class="comment">// move the robot forward at 20 encoder ticks per second</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/29/skid-steer-drive/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/10/29/skid-steer-drive/" itemprop="url">skid-steer drive</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-29T10:39:44+08:00">
-                2018-10-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/10/29/skid-steer-drive/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/29/skid-steer-drive/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>实验中使用了两种类型的底盘，基于差速驱动的2WD底盘和基于滑动转向的4WD底盘。两种驱动方式原理相似，也有其显著的区别。</p>
-<p><strong>相同点：</strong></p>
-<p>两种底盘都没有显示的转动机制，采用差速驱动的方式通过以不同的方向或速度驱动两边轮子来实现方向控制。</p>
-<p>差速驱动的运动形式通常有一下几种类型：</p>
-<ul>
-<li>第一种是原地旋转，左右轮的速度大小相等，方向相反，这样相当于绕着底盘的形心原地打转。</li>
-<li>第二种是沿着某个方向直线行走，此时左右轮速度相同。</li>
-<li>第三种是沿着某条曲线前行或后退，此时左右轮速度方向相同，大小不同。</li>
-<li>第四种是旋转转弯，此时左右轮速度方向相反。</li>
-</ul>
-<p>两种机构共同的优势是：没有显示的转向机构，极大地简化了运动学模型。</p>
-<p>而两种机构共同的缺点是：由于两侧的轮子是由独立电机分别驱动的，直线运动要求两侧的轮子以相同速度转动，这将很难完成。</p>
-<p><strong>不同点：</strong></p>
-<p>差速驱动底盘通常是由一个两轮系统，每个轮子都带有独立的执行机构（直流电机），以及一个无驱动轮（可以是脚轮或者万向滚珠）组成，<strong>机器人的运动矢量是每个独立车轮运动的总和</strong>。</p>
-<p><img src="/2018/10/29/skid-steer-drive/Diffdrv.jpg" alt="Diffdrv"></p>
-<p>滑动转向底盘通常被用在履带车上，比如坦克和推土机，也被用于某些四轮六轮机构上，相比较于两轮差速底盘，滑动转向的主要区别在于：</p>
-<ul>
-<li>优势：滑动转向使用了两个额外的驱动轮代替了差速驱动的脚轮，增大了牵引力。</li>
-<li>劣势：引入了滑动，在对里程计要求高的场景中，滑动是一个致命的缺陷，因为这会对编码器造成负面影响，滑动的轮子不会跟踪机器人的确切运动。</li>
-</ul>
-<p><img src="/2018/10/29/skid-steer-drive/4WD.png" alt="4WD"></p>
-<p><strong>运动学分析：</strong></p>
-<p>对于差速驱动机构，移动机器人航向角变化了多少角度，它就绕其运动轨迹的圆心旋转了多少角度。这句话很好验证，我们让机器人做圆周运动，从起点出发绕圆心一圈回到起点处，在这过程中机器人累计的航向角为360度，同时它也确实绕轨迹圆心运动了360度。</p>
-<p>机器人的速度是指两个相邻的控制时刻之间的速度，因此小车的行驶轨迹可以分解为连续的圆弧片段，对于每一段圆弧，根据<strong>阿克曼转向几何原理</strong>，在小车转向时，为保证行驶稳定性，两侧轮胎都近似围绕一个中心点旋转。即整个小车底盘都围绕一个中心点旋转，已知小车中心的线速度（上层算法给定），此时小车底盘的运动学模型如下图：</p>
-<p><img src="/2018/10/29/skid-steer-drive/底盘.png" alt=""></p>
-<p>参数说明：</p>
-<blockquote>
-<p>$\alpha_1$是小车前左轮和后左轮的转角。</p>
-<p>$\alpha_2$是小车前右轮和后右轮的转角。</p>
-<p>$2L$是左右轮距离。</p>
-<p>$2K$是前后轮距离。</p>
-<p>$w$是小车转轴的角速度。</p>
-<p>$v$是小车几何中心的线速度。</p>
-<p>$v1, v2, v3, v4$是四个车轮的速度。</p>
-<p>$i$是电机的减速比。</p>
-<p>$r$是车轮半径。</p>
-</blockquote>
-<p>首先可以得到各车轮速度和角速度的关系：</p>
-<script type="math/tex; mode=display">
-V_1 = w * R_1 = w * \frac{K}{sin\alpha_1}\\
-V_2 = w * R_2 = w * \frac{K}{sin\alpha_2}\\
-V_3 = V_1 = w * \frac{K}{sin\alpha_1}\\
-V_4 = V_2 = w * \frac{K}{sin\alpha_2}\\</script><p>其中车轮沿着转动方向（$y$方向）的速度由电机提供，切向速度由地面摩擦提供，车轮沿着$y$方向的速度为：</p>
-<script type="math/tex; mode=display">
-R =\frac{v}{w}\\
-V_{1y} = V_1 * cos\alpha_1 = w * \frac{K}{tan \alpha_1} = w(R-L)\\
-V_{2y} = V_2 * cos\alpha_2 = w * \frac{K}{tan \alpha_2} = w(R+L)\\
-V_{3y} = V_{1y} =  w(R-L)\\
-V_{4y} = V_{2y} = w(R+L)\\</script><p>那么电机的角速度为：</p>
-<script type="math/tex; mode=display">
-w_n= \frac{V_{ny}*i}{r}, n = 1,2,3,4\\</script><p>相应电机的转速（by rpm）为：</p>
-<script type="math/tex; mode=display">
-n  = \frac{w_n*60}{2\pi}</script><p>整理成矩阵表达式为：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-w_1\\
-w_2\\
-w_3\\
-w_4
-\end{bmatrix}=
-\begin{bmatrix}
-1 & - L\\
-1 & L\\
-1 & - L\\
-1 & L
-\end{bmatrix}
-\begin{bmatrix}
-v\\
-w
-\end{bmatrix}</script><p>该表达式反映了机器人关键点速度与主动轮转速之间的关系。给定小车底盘电机转速就可以求出机器人关键点的速度，并由此得到机器人上任意一点的速度（如激光雷达的安装位置的速度），上层算法给出的关键点速度控制信号也可以由此转化成电机的控制量。</p>
-<p><strong>里程计模型 ／ 机器人定位方法</strong></p>
-<p><strong>坐标变换模型：</strong></p>
-<p><img src="/2018/10/29/skid-steer-drive/编码器.png" alt="编码器"></p>
-<p>在一个较短的时间间隔$\Delta t$内，假定机器人左右轮的移动距离分别是$\Delta l$和$\Delta r$，那么在<strong>机器人坐标系下</strong>：机器人中心沿着机器人坐标系的$x$轴方向前进的距离为$\Delta u = (\Delta l + \Delta r)/2$，$y$轴方向前进的距离为$\Delta v = 0$，转过的角度为$\Delta \varphi = (\Delta l - \Delta r)/b$。机器人坐标系到世界坐标系的旋转变换矩阵为$R(\phi)$。</p>
-<p>那么转换到<strong>世界坐标系下</strong>机器人的运动增量为：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-\Delta x\\
-\Delta y\\
-\Delta \phi
-\end{bmatrix} = 
-\begin{bmatrix}
-R(\phi) & 0\\
-0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-\Delta u\\
-\Delta v\\
-\Delta \varphi
-\end{bmatrix} = 
-\begin{bmatrix}
-cos\phi & sin\phi & 0\\
--sin\phi & cos\phi & 0\\
-0 & 0 & 1
-\end{bmatrix}
-\begin{bmatrix}
-(\Delta l + \Delta r)/2\\
-0\\
-(\Delta l - \Delta r)/b
-\end{bmatrix}</script><p>世界坐标系下机器人位姿更新为：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}
-x_t\\
-y_t\\
-\phi_t
-\end{bmatrix} =
-\begin{bmatrix}
-cos\phi_{t-1}(\Delta l + \Delta r)/2\\
-sin\phi_{t-1}(\Delta l + \Delta r)/2\\
-(\Delta l - \Delta r)/b
-\end{bmatrix} +
-\begin{bmatrix}
-x_{t-1}\\
-y_{t-1}\\
-\phi_{t-1}
-\end{bmatrix}</script><p>beside from测量误差，利用坐标变换模型去推算里程计信息是引入了<strong>模型误差</strong>的——在时间间隔$\Delta t$内，为了简化计算，机器人坐标系相对世界坐标系的旋转变换矩阵被假定为起始值$R(\phi)$。在转向运动比较多的情况下，里程计信息会迅速恶化。</p>
-<p><strong>圆弧模型：</strong></p>
-<p>将极小时间间隔内小车运动的轨迹看作是一段圆弧，那么就可以确定该时刻的转动中心$C_{t-1}$，及内侧轮的转动半径为$R_{t-1}$，根据几何关系：</p>
-<p><img src="/2018/10/29/skid-steer-drive/圆弧模型.png" alt="圆弧模型"></p>
-<script type="math/tex; mode=display">
-\left\{ 
-\begin{align}
-&\Delta l = (b + R)\Delta \varphi\\
-&\Delta r = R  \Delta \varphi
-\end{align}
-\right.</script><p>解得：</p>
-<script type="math/tex; mode=display">
-\left\{ 
-\begin{align}
-&R = \frac{b\Delta r}{\Delta l - \Delta r}\\
-&\Delta \varphi = \frac{\Delta l - \Delta r }{b}
-\end{align}
-\right.</script><p>由三角相似得：</p>
-<script type="math/tex; mode=display">
-\frac{Rsin(\Delta \varphi/2)}{D/2} = \frac{R}{R + b/2}</script><p>解得弦$D$的长度为：</p>
-<script type="math/tex; mode=display">
-D = [b(\Delta l + \Delta r)/(\Delta l-\Delta r)]sin[(\Delta l - \Delta r)/2b]</script><p>弦$D$与世界坐标系$x$轴正向的夹角为$\theta = \phi - \Delta \varphi/2$，那么机器人在世界坐标系下的位姿增量为：</p>
-<script type="math/tex; mode=display">
-\left\{
-\begin{align}
-&\Delta x_{t-1} = D_{t-1} cos\theta_{t-1}\\
-&\Delta y_{t-1} = D_{t-1} sin\theta_{t-1}\\
-&\Delta \varphi = (\Delta l - \Delta r )/b
-\end{align}
-\right.</script><p>使用圆弧模型对里程计增量进行推算，完全依照几何关系来计算，计算过程中没有近似，能够有效控制误差累积。</p>
-<p><strong>概率模型：</strong></p>
-<p>不是单纯的基于里程计的估计，而是结合其他传感器的测量值对里程计进行矫正，详见<a href="https://amberzzzz.github.io/2018/11/16/amcl/">滤波算法</a>。</p>
-<p><strong>scan match模型：</strong></p>
-<p>同样也不是单纯的基于里程计的估计，详见<a href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">karto scanMatch</a>。与滤波的区别在于，返回的不是概率分布，而是一个代表最佳估计的值。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2120,7 +1948,7 @@ D = [b(\Delta l + \Delta r)/(\Delta l-\Delta r)]sin[(\Delta l - \Delta r)/2b]</s
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-count">167</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2133,7 +1961,7 @@ D = [b(\Delta l + \Delta r)/(\Delta l-\Delta r)]sin[(\Delta l - \Delta r)/2b]</s
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -2180,7 +2008,7 @@ D = [b(\Delta l + \Delta r)/(\Delta l-\Delta r)]sin[(\Delta l - \Delta r)/2b]</s
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

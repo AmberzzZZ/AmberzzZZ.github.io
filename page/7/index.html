@@ -276,6 +276,889 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/25/ASFF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/25/ASFF/" itemprop="url">ASFF</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-25T17:17:57+08:00">
+                2021-01-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/25/ASFF/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/25/ASFF/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Learning-Spatial-Fusion-for-Single-Shot-Object-Detection"><a href="#Learning-Spatial-Fusion-for-Single-Shot-Object-Detection" class="headerlink" title="Learning Spatial Fusion for Single-Shot Object Detection"></a>Learning Spatial Fusion for Single-Shot Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>inconsistency when fuse across different feature scales</li>
+<li>propose ASFF<ul>
+<li>suppress the inconsistency </li>
+<li>spatially filter conflictive information：想法应该跟SSE-block类似</li>
+</ul>
+</li>
+<li><p>build on yolov3</p>
+<ul>
+<li>introduce a bag of tricks</li>
+<li>anchor-free pipeline</li>
+</ul>
+<p><img src="/2021/01/25/ASFF/ASFF.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li>论点<ul>
+<li>ssd is one of the first to generate pyramidal feature representations<ul>
+<li>deeper layers reuse the formers</li>
+<li>bottom-up path</li>
+<li>small instances suffers low acc because containing insufficient semanic info</li>
+</ul>
+</li>
+<li>FPN use top-down path<ul>
+<li>shares rich semantics at all levels </li>
+<li>improvement：more strengthening feature fusion </li>
+</ul>
+</li>
+<li>在使用FPN时，通常不同scale的目标绑定到不同的level上面<ul>
+<li>inconsistency：其他level的feature map对应位置的信息则为背景</li>
+<li>some methods set ignore region in adjacent features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>introduce advanced techniques  <ul>
+<li>mixup</li>
+<li>cosine learning rate schedule </li>
+<li>sync-bn</li>
+<li>an anchor-free branch to run jointly with anchor-based ones</li>
+<li>L1 loss + IoU loss</li>
+</ul>
+</li>
+<li>fusion<ul>
+<li>全联接而非adjacent merge：三个level的fuse map都来自三个level的feature map</li>
+<li>上采样：<ul>
+<li>1x1 conv：对齐channel</li>
+<li>upsamp with interpolation</li>
+</ul>
+</li>
+<li>下采样：<ul>
+<li>s2：3x3 s2 conv</li>
+<li>s4：maxpooling + 3x3 s2 conv</li>
+</ul>
+</li>
+<li>adaptive fusion<ul>
+<li>pixel level的reweight</li>
+<li>shared across channels：hxwx1</li>
+<li>对来自三个level的feature map，resolution对齐以后，分别1x1conv，channel 1</li>
+<li>norm the weights：softmax</li>
+<li>为啥能suppress inconsistency：三个level的像素点，只激活一个另外两个是0的情况是绝对不harm的，相当于上面ignore那个方法拓展成adaptive</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>training<ul>
+<li>apply mixup on the classification pretraining of D53</li>
+<li>turn off mixup augmentation for the last 30 epochs. </li>
+</ul>
+</li>
+<li>inference<ul>
+<li>the detection header at each level first predicts the shape of anchors？？？这个不太懂</li>
+</ul>
+</li>
+<li>ASFF &amp; ASFF*<ul>
+<li>enhanced version of ASFF by integrating other lightweight modules </li>
+<li>dropblock &amp; RFB</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实现</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ASFF</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, level, activate, rfb=False, vis=False)</span>:</span></span><br><span class="line">        super(ASFF, self).__init__()</span><br><span class="line">        self.level = level</span><br><span class="line">        self.dim = [<span class="number">512</span>, <span class="number">256</span>, <span class="number">128</span>]</span><br><span class="line">        self.inter_dim = self.dim[self.level]</span><br><span class="line">        <span class="keyword">if</span> level == <span class="number">0</span>:</span><br><span class="line">            self.stride_level_1 = conv_bn(<span class="number">256</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">512</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">1</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>)</span><br><span class="line">            self.stride_level_2 = conv_bn(<span class="number">128</span>, self.inter_dim, kernel=<span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">256</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">elif</span> level == <span class="number">2</span>:</span><br><span class="line">            self.compress_level_0 = conv_bn(<span class="number">512</span>, self.inter_dim, kernel=<span class="number">1</span>, stride=<span class="number">1</span>)</span><br><span class="line">            self.compress_level_1= conv_bn(<span class="number">256</span>,self.inter_dim,kernel=<span class="number">1</span>,stride=<span class="number">1</span>)</span><br><span class="line">            self.expand = conv_bn(self.inter_dim, <span class="number">128</span>, kernel=<span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line">        compress_c = <span class="number">8</span> <span class="keyword">if</span> rfb <span class="keyword">else</span> <span class="number">16</span>  </span><br><span class="line">        self.weight_level_0 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_1 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_level_2 = conv_bn(self.inter_dim, compress_c, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line">        self.weight_levels = conv_bias(compress_c * <span class="number">3</span>, <span class="number">3</span>, kernel=<span class="number">1</span>, stride=<span class="number">1</span>, padding=<span class="number">0</span>)</span><br><span class="line">        self.vis = vis</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x_level_0, x_level_1, x_level_2)</span>:</span></span><br><span class="line">      	<span class="comment"># 跟论文描述一样：上采样先1x1conv对齐，再upinterp，下采样3x3 s2 conv</span></span><br><span class="line">        <span class="keyword">if</span> self.level == <span class="number">0</span>:</span><br><span class="line">            level_0_resized = x_level_0</span><br><span class="line">            level_1_resized = self.stride_level_1(x_level_1)</span><br><span class="line">            level_2_downsampled_inter = F.max_pool2d(x_level_2, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="number">1</span>)</span><br><span class="line">            level_2_resized = self.stride_level_2(level_2_downsampled_inter)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">1</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_resized = x_level_1</span><br><span class="line">            level_2_resized = self.stride_level_2(x_level_2)</span><br><span class="line">        <span class="keyword">elif</span> self.level == <span class="number">2</span>:</span><br><span class="line">            level_0_compressed = self.compress_level_0(x_level_0)</span><br><span class="line">            sh = torch.tensor(level_0_compressed.shape[<span class="number">-2</span>:])*<span class="number">4</span></span><br><span class="line">            level_0_resized = F.interpolate(level_0_compressed, tuple(sh), <span class="string">'nearest'</span>)</span><br><span class="line">            level_1_compressed = self.compress_level_1(x_level_1)</span><br><span class="line">            sh = torch.tensor(level_1_compressed.shape[<span class="number">-2</span>:])*<span class="number">2</span></span><br><span class="line">            level_1_resized = F.interpolate(level_1_compressed, tuple(sh),<span class="string">'nearest'</span>)</span><br><span class="line">            level_2_resized = x_level_2</span><br><span class="line">        <span class="comment"># 这里得到的resized特征图不直接转换成一通道的weighting map，</span></span><br><span class="line">        <span class="comment"># 而是先1x1conv降维到8/16，然后concat，然后3x3生成3通道的weighting map</span></span><br><span class="line">        <span class="comment"># weighting map相当于一个prediction head，所以是conv_bias_softmax，无bn</span></span><br><span class="line">        level_0_weight_v = self.weight_level_0(level_0_resized)</span><br><span class="line">        level_1_weight_v = self.weight_level_1(level_1_resized)</span><br><span class="line">        level_2_weight_v = self.weight_level_2(level_2_resized)</span><br><span class="line">        levels_weight_v = torch.cat((level_0_weight_v, level_1_weight_v, level_2_weight_v), <span class="number">1</span>)</span><br><span class="line">        levels_weight = self.weight_levels(levels_weight_v)</span><br><span class="line">        levels_weight = F.softmax(levels_weight, dim=<span class="number">1</span>)</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># reweighting</span></span><br><span class="line">        fused_out_reduced = level_0_resized * levels_weight[:, <span class="number">0</span>:<span class="number">1</span>, :, :] + \</span><br><span class="line">                            level_1_resized * levels_weight[:, <span class="number">1</span>:<span class="number">2</span>, :, :] + \</span><br><span class="line">                            level_2_resized * levels_weight[:, <span class="number">2</span>:, :, :]</span><br><span class="line">				</span><br><span class="line">        <span class="comment"># 3x3的conv，是特征图平滑</span></span><br><span class="line">        out = self.expand(fused_out_reduced)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.vis:</span><br><span class="line">            <span class="keyword">return</span> out, levels_weight, fused_out_reduced.sum(dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/22/VoVNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/22/VoVNet/" itemprop="url">VoVNet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-22T15:12:30+08:00">
+                2021-01-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/22/VoVNet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/22/VoVNet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="An-Energy-and-GPU-Computation-Efficient-Backbone-Network-for-Real-Time-Object-Detection"><a href="#An-Energy-and-GPU-Computation-Efficient-Backbone-Network-for-Real-Time-Object-Detection" class="headerlink" title="An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection"></a>An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>denseNet<ul>
+<li>dense path：diverse receptive fields</li>
+<li>heavy memory cost &amp; low efficiency </li>
+</ul>
+</li>
+<li>we propose a backbone<ul>
+<li>preserve the benefit of concatenation</li>
+<li>improve denseNet efficiency</li>
+<li>VoVNet comprised of One-Shot Aggregation (OSA)</li>
+</ul>
+</li>
+<li>apply to one/two stage object detection tasks<ul>
+<li>outperforms denseNet &amp; resNet based ones</li>
+<li>better small object detection performance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>main difference between resNet &amp; denseNet<ul>
+<li>aggregation：summation &amp; concatenation <ul>
+<li>summation would washed out the early features</li>
+<li>concatenation last as it preserves</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>GPU parallel computation <ul>
+<li>computing utilization is maximized when operand tensor is larger </li>
+<li>many 1x1 convs for reducing dimension</li>
+<li>dense connections in intermediate layers are inducing the inefficiencies </li>
+</ul>
+</li>
+<li><p>VoVNet </p>
+<ul>
+<li>hypothesize that the dense connections are redundant</li>
+<li>OSA：aggregates intermediate features at once</li>
+<li>test as object detection backbone：outperforms DenseNet &amp; ResNet with better energy efficiency and speed</li>
+</ul>
+</li>
+<li><p>factors for efficiency</p>
+<ul>
+<li>FLOPS and model sizes are indirect metrics</li>
+<li>energy per image and frame per second are more practical</li>
+<li>MAC：<ul>
+<li>memory accesses cost，$hw(c_i+c_o) + k^2 c_ic_o$</li>
+<li>memory usage不止跟参数量有关，还跟特征图尺寸相关</li>
+<li>MAC can be minimized when input channel size equals the output</li>
+</ul>
+</li>
+<li>FLOPs/s<ul>
+<li>splitting a large convolution operation into several fragmented smaller operations makes GPU computation inefficient as fewer computations are processed in parallel</li>
+<li>所以depthwise/bottleneck理论上降低了计算量FLOP，但是从GPU并行的角度efficiency降低，并没有显著提速：cause more sequential computations</li>
+<li>以时间为单位的FLOPs才是fair的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>hypothesize </p>
+<ul>
+<li>dense connection makes similar between neighbor layers</li>
+<li>redundant</li>
+</ul>
+</li>
+<li><p>OSA</p>
+<ul>
+<li>dense connection：former features concats in every following features</li>
+<li><p>one-shot connection：former features concats once in the last feature</p>
+<p><img src="/2021/01/22/VoVNet/OSA.png" width="40%;"></p>
+</li>
+<li><p>最开始跟dense block保持参数一致：一个block里面12个layers，channel20，发现深层特征contributes less，所以换成浅层，5个layers，channel43，发现有涨点：implies that building deep intermediate feature via dense connection is less effective than expected </p>
+<p><img src="/2021/01/22/VoVNet/weight_mat.png" width="40%;"></p>
+</li>
+<li><p>in/out channel数相同</p>
+<ul>
+<li>much less MAC：<ul>
+<li>denseNet40：3.7M</li>
+<li>OSA：5layers，channel43，2.5M</li>
+<li>对于higher resolution的detection任务impies more fast and energy efficient </li>
+</ul>
+</li>
+<li>GPU efficiency <ul>
+<li>不需要那好几十个1x1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>architecture</p>
+<ul>
+<li>stem：3个3x3conv</li>
+<li>downsamp：s2的maxpooling</li>
+<li>stages：increasing channels enables more rich semantic high-level information，better feature representation</li>
+<li><p>deeper：makes more modules in stage3/4</p>
+<p><img src="/2021/01/22/VoVNet/VoVNet.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>one-stage：refineDet</li>
+<li>two-stage：Mask-RCNN</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/18/GCN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/18/GCN/" itemprop="url">GCN</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-18T12:24:59+08:00">
+                2021-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/18/GCN/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/18/GCN/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>reference：<a href="https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A</a></p>
+<ol>
+<li><p>图</p>
+<ul>
+<li>$G = (V,E)$：节点 &amp; 边，连通图 &amp; 孤立点</li>
+<li>邻接矩阵A：NxN，有向 &amp; 无向</li>
+<li>度矩阵D：NxN对角矩阵，每个节点连接的节点</li>
+<li>特征矩阵X：NxF，每个1-dim F是每个节点的特征向量</li>
+</ul>
+</li>
+<li><p>特征学习</p>
+<ul>
+<li>可以类比CNN：对其邻域（kernel）内特征进行线性变换（w加权），然后求和，然后激活函数</li>
+<li>$H^{k+1} = f(H^{k},A) = \sigma(AH^{k}W^{k})$<ul>
+<li>H：running updating 特征矩阵，NxFk</li>
+<li>A：0-1邻接矩阵，NxN</li>
+<li>W：权重，$F_k$x$F_{k+1}$</li>
+</ul>
+</li>
+<li>权重所有节点共享</li>
+<li>节点的邻接节点可以看做感受野</li>
+<li>网络加深，感受野增大：节点的特征融合了更多节点的信息</li>
+</ul>
+</li>
+<li><p>图卷积</p>
+<ul>
+<li><p>A中没有考虑自己的特征：添加自连接</p>
+<ul>
+<li>A = A + I</li>
+</ul>
+</li>
+<li><p>加法规则对度大的节点，特征会越来越大：归一化</p>
+<ul>
+<li><p>使得邻接矩阵每行和为1：左乘度矩阵的逆</p>
+</li>
+<li><p>数学实质：求平均</p>
+</li>
+<li><p>one step further：不单对行做平均，对度较大的邻接节点也做punish</p>
+<p>  <img src="/2021/01/18/GCN/graph-conv-layer.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GCN网络</p>
+<p>  <img src="/2021/01/18/GCN/gcn.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>实现</p>
+<ul>
+<li><p>weights：in x out，kaiming_uniform_initialize</p>
+</li>
+<li><p>bias：out，zero_initialize</p>
+</li>
+<li><p>activation：relu</p>
+</li>
+<li><p>A x H x W：左乘是系数矩阵乘法</p>
+</li>
+<li><p>邻接矩阵的结构从输入开始就不变了，和每层的特征矩阵一起作为输入，传入GCN</p>
+</li>
+<li><p>分类头：最后一层预测Nxn_class的特征向量，提取感兴趣节点F(n_class)，然后softmax，对其分类</p>
+</li>
+<li><p>归一化</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对称归一化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalize_adj</span><span class="params">(adj)</span>:</span></span><br><span class="line">    <span class="string">"""compute L=D^-0.5 * (A+I) * D^-0.5"""</span></span><br><span class="line">    adj += sp.eye(adj.shape[<span class="number">0</span>])</span><br><span class="line">    degree = np.array(adj.sum(<span class="number">1</span>))</span><br><span class="line">    d_hat = sp.diags(np.power(degree, <span class="number">-0.5</span>).flatten())</span><br><span class="line">    norm_adj = d_hat.dot(adj).dot(d_hat)</span><br><span class="line">    <span class="keyword">return</span> norm_adj</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"><span class="comment"># 均值归一化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalize_adj</span><span class="params">(adj)</span>:</span></span><br><span class="line">    <span class="string">"""compute L=D^-1 * (A+I)"""</span></span><br><span class="line">    adj += sp.eye(adj.shape[<span class="number">0</span>])</span><br><span class="line">    degree = np.array(adj.sum(<span class="number">1</span>))</span><br><span class="line">    d_hat = sp.diags(np.power(degree, <span class="number">-1</span>).flatten())</span><br><span class="line">    norm_adj = d_hat.dot(adj)</span><br><span class="line">    <span class="keyword">return</span> norm_adj</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>应用场景</p>
+<p> [半监督分类GCN]：SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS，提出GCN</p>
+<p> [skin GCN]：Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks，体素，一个单独的基于图的相关性分支，给feature加权</p>
+<p> [Graph Attention]：Graph Attention Networks，图注意力网络</p>
+</li>
+</ol>
+<h2 id="Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><a href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks" class="headerlink" title="Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks"></a>Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>皮肤病：发病率高，experts少</li>
+<li>differential diagnosis：鉴别诊断，就是从众多疾病类别中跳出正确类别</li>
+<li>still challenging：timely and accurate</li>
+<li>propose a DLS(deep learning system)<ul>
+<li>clinical images</li>
+<li>multi-label classification</li>
+<li>80 conditions，覆盖病种</li>
+<li>labels incompleteness：用GCN建模成Co-occurrence supervision，benefit top5</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>google的DLS<ul>
+<li>26中疾病</li>
+<li>建模成multi-class classification problem：非0即1的多标签表达破坏了类别间的correlation</li>
+</ul>
+</li>
+<li>our DLS：GCN-CNN<ul>
+<li>multi-label classification task over 80 conditions</li>
+<li>incomplete image labels：GCN that characterizes label co-occurrence supervision</li>
+<li>combine the classification network with the GCN</li>
+<li>数据量：136,462 clinical images</li>
+<li>精度：test on 12,378 user taken images，top-5 acc 93.6%</li>
+</ul>
+</li>
+<li>GCN<ul>
+<li>original application：<ul>
+<li>nodes classification，only a small subset of nodes had their labels available：半监督文本分类问题，只有一部分节点用于训练</li>
+<li>the graph structure is contructed from data</li>
+</ul>
+</li>
+<li>ML-GCN：<ul>
+<li>multi-label classification task</li>
+<li>correlation map（图结构）则是通过数据直接建立</li>
+<li>图节点是每个类别的semantic embeddings</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>一个trainable的CNN，将图片转化成feature vector</li>
+<li>一个GCN branch：两层图卷积，都是order-1，图结构是基于训练集计算，无向图，encoding的是图像labels之间的dependency，用它 implicitly supervises the classification task</li>
+<li><p>然后两个feature vector相乘，给出最终结果</p>
+<p><img src="/2021/01/18/GCN/GCN-CNN.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GCN branch </p>
+<ul>
+<li>two graph convolutional (GC) layers</li>
+<li>一种estimated图结构：build co-occurence graph using only training data<ul>
+<li>node embed semantic meaning to labels</li>
+<li>边的值定义有点像类别间的相关性强度：$e_{ij} = 1(\frac{C(i,j)}{C(i)+C(j)} \geq t)$，分子是有两种标签的样本量，分母是各自样本量</li>
+</ul>
+</li>
+<li>一种designed图结构：intial value是基于有经验的专家构建</li>
+<li>node representation<ul>
+<li>graph branch的输入 label embedding</li>
+<li>用了BioSentVec，一个基于生物医学语料库训练的word bag</li>
+</ul>
+</li>
+<li>GCN<ul>
+<li>randomly initialize</li>
+<li>GCN-0：dim 700</li>
+<li>GCN-1：dim 1024</li>
+<li>GCN-2：dim 2048</li>
+<li>最终得到(cls,2048)的node features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>cls branch</p>
+<ul>
+<li>input：downsized to 448x448</li>
+<li>resnet101：执行到FC-2048，作为image features</li>
+<li>先训练300 epochs，lr 0.1，step decay</li>
+</ul>
+</li>
+<li><p>GCN-CNN</p>
+<ul>
+<li>先预训练resnet backbone，</li>
+<li>然后整体一起训练300 epochs，lr 0.0003，</li>
+<li>image feature和node features通过dot product融合，得到(cls, )的cls vec，</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>图结构不能random initialization，会使结果变差</li>
+<li><p>基于数据集估计的graph initialization有显著提升</p>
+<p><img src="/2021/01/18/GCN/acc1.png" width="60%;"></p>
+</li>
+<li><p>基于专家设计的graph initialization有进一步提升，但是不明显，考虑到标注工作繁重不太推荐</p>
+<p><img src="/2021/01/18/GCN/acc2.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS"><a href="#SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS" class="headerlink" title="SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS"></a>SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</h2><ol>
+<li><p>reference</p>
+<ul>
+<li><a href="http://tkipf.github.io/graph-convolutional-networks/，官方博客" target="_blank" rel="noopener">http://tkipf.github.io/graph-convolutional-networks/，官方博客</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/35630785，知乎笔记" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/35630785，知乎笔记</a></li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>场景<ul>
+<li>semi-supervised learning</li>
+<li>on graph-structured data </li>
+<li>比如：在一个citation network，classifying nodes (such as documents)，labels are only available for a small subset of nodes，任务的目标是对大部分未标记的节点预测类别</li>
+</ul>
+</li>
+<li>previous approach<ul>
+<li>Standard Approach<ul>
+<li>loss由两部分组成：单个节点的fitting error，和相邻节点的distance error</li>
+<li>基于一个假设：相邻节点间的label相似</li>
+<li>限制了模型的表达能力</li>
+</ul>
+</li>
+<li>Embedding-based Approach<ul>
+<li>分两步进行：先学习节点的embedding，再基于embedding训练分类器</li>
+<li>不end-to-end，两个task分别执行，不能保证学到的embedding是适合第二个任务的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>思路<ul>
+<li>train on a supervised target for nodes with labels</li>
+<li>然后通过图的连通性，trainable adjacency matrix，传递梯度给unlabeled nodes</li>
+<li>使得全图得到监督信息</li>
+</ul>
+</li>
+<li>contributions<ul>
+<li>introduce a layer-wise propagation rule，使得神经网络能够operate on graph，实现end-to-end的图结构分类器</li>
+<li>use this graph-based neural network model，训练一个semi-supervised classification of nodes的任务</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>fast approximate convolutions on graphs</p>
+<ul>
+<li><p>given：</p>
+<ul>
+<li>layer input：$H^l$</li>
+<li>layer output：$H^{l+1}$</li>
+<li>kernel pattern：$A$，在卷积里面是fixed kxk 方格，在图里面就是自由度更高的邻接矩阵</li>
+<li>kernel weights：$W$</li>
+</ul>
+</li>
+<li><p>general layer form：$H^{l+1}=f(H^l,A)$</p>
+</li>
+<li><p>inspiration：卷积其实是一种特殊的图，每个grid看作一个节点，每个节点都加上其邻居节点的信息，也就是：</p>
+<script type="math/tex; mode=display">
+  H^{l+1}=\sigma(AH^lW)</script><ul>
+<li>W是在对grids加权</li>
+<li><p>A是在对每个grids加上他的邻接节点</p>
+<p><img src="/2021/01/18/GCN/conv.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>details in practice</p>
+<ul>
+<li>自环：保留自身节点信息，$\hat A=A+I$</li>
+<li>正则化：stabilize the scale，$H^{l+1}=\sigma(\hat D^{-\frac{1}{2}}\hat A\hat D^{-\frac{1}{2}}H^lW)$</li>
+<li><p>一个实验：只利用图的邻接矩阵，就能够学得效果不错</p>
+<p><img src="/2021/01/18/GCN/adj.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>semi-supervised node classification</p>
+<p>  <img src="/2021/01/18/GCN/cls.png" width="60%;"></p>
+<ul>
+<li>思路就是在所有有标签节点上计算交叉熵loss</li>
+<li>模型结构<ul>
+<li>input：X，(b,N,D)</li>
+<li>两层图卷积<ul>
+<li>GCN1-relu：hidden F，(b,N,F)</li>
+<li>GCN2-softmax：output Z，(b,N,cls)</li>
+</ul>
+</li>
+<li>计算交叉熵</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>code</p>
+<ul>
+<li>torch/keras/tf官方都有：<ul>
+<li><a href="https://github.com/tkipf/gcn，论文里给的tf这个链接" target="_blank" rel="noopener">https://github.com/tkipf/gcn，论文里给的tf这个链接</a></li>
+<li>torch和keras的readme里面有说明，initialization scheme, dropout scheme, and dataset splits和tf版本不同，不是用来复现论文</li>
+<li>python setup.py bdist_wheel</li>
+</ul>
+</li>
+<li>数据集：Cora dataset，是一个图数据集，用于分类任务，数据集介绍<a href="https://blog.csdn.net/yeziand01/article/details/93374216" target="_blank" rel="noopener">https://blog.csdn.net/yeziand01/article/details/93374216</a><ul>
+<li>cora.content是所有论文的独自的信息，总共2708个样本，每一行都是论文编号+词向量1433-dim+论文类别</li>
+<li>cora.cites是论文之间的引用记录，A to B的reflect pair，5429行，用于创建邻接矩阵</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/18/transformers/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3888,590 +4771,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/21/equlization-loss/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/12/21/equlization-loss/" itemprop="url">equlization loss</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-21T17:28:34+08:00">
-                2020-12-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/12/21/equlization-loss/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/21/equlization-loss/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/18/megDet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/12/18/megDet/" itemprop="url">megDet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-18T17:40:52+08:00">
-                2020-12-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/12/18/megDet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/18/megDet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="MegDet-A-Large-Mini-Batch-Object-Detector"><a href="#MegDet-A-Large-Mini-Batch-Object-Detector" class="headerlink" title="MegDet: A Large Mini-Batch Object Detector"></a>MegDet: A Large Mini-Batch Object Detector</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>past methods mainly come from novel framework or loss design</li>
-<li><p>this paper studies the mini-batch size</p>
-<ul>
-<li>enable training with a large mini-batch size</li>
-<li>warmup learning rate policy</li>
-<li>cross-gpu batch normalization</li>
-</ul>
-</li>
-<li><p>faster &amp; better acc</p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>potential drawbacks with small mini-batch sizes</p>
-<ul>
-<li><p>long training time</p>
-</li>
-<li><p>inaccurate statistics for BN：previous methods use fixed statistics from ImageNet which is a sub-optimal trade-off</p>
-</li>
-<li><p>positive &amp; negative training examples are more likely imblanced</p>
-</li>
-<li><p>加大batch size以后，正负样本比例有提升，所以yolov3会先锁着back开大batchsize做warmup</p>
-<p>  <img src="/2020/12/18/megDet/ratio.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>learning rate dilemma</p>
-<ul>
-<li>large min-batch size usually requires large learning rate </li>
-<li>large learning rate is likely leading to convergence failure</li>
-<li>a smaller learning rate often obtains inferior results </li>
-</ul>
-</li>
-<li><p>solution of the paper</p>
-<ul>
-<li>linear scaling rule </li>
-<li>warmup</li>
-<li>Cross-GPU Batch Normalization (CGBN) </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>warmup</p>
-<ul>
-<li>set up the learning rate small enough at the be- ginning</li>
-<li>then increase the learning rate with a constant speed after every iteration, until fixed</li>
-</ul>
-</li>
-<li><p>Cross-GPU Batch Normalization </p>
-<ul>
-<li>两次同步</li>
-<li><p>tensorpack里面有</p>
-<p><img src="/2020/12/18/megDet/CGBN.png" width="40%;"></p>
-<p><img src="/2020/12/18/megDet/Cross-GPU.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>一次同步</p>
-<ul>
-<li><p>异步BN：batch size 较小时，每张卡计算得到的统计量可能与整体数据样本具有较大差异</p>
-<p> <img src="/2020/12/18/megDet/unsync.png" width="40%;"></p>
-</li>
-<li><p>同步：</p>
-</li>
-<li><p>需要同步的是每张卡上计算的统计量，即BN层用到的均值$\mu$和方差$\sigma^2$</p>
-</li>
-<li><p>这样多卡训练结果才与单卡训练效果相当</p>
-</li>
-<li><p>两次同步：</p>
-</li>
-<li><p>第一次同步均值：计算全局均值</p>
-</li>
-<li><p>第二次同步方差：基于全局均值计算各自方差，再取平均</p>
-</li>
-<li><p>一次同步：</p>
-<ul>
-<li><p>核心在于方差的计算</p>
-</li>
-<li><p>首先均值：$\mu = \frac{1}{m} \sum_{i=1}^m x_i$</p>
-<ul>
-<li>然后是方差：<script type="math/tex; mode=display">
-  \sigma^2 = \frac{1}{m} \sum_{i=1}^m (x_i-\mu)^2 = \frac{1}{m} \sum_{i=1}^m x_i^2 - \mu^2\\
-  =\frac{1}{m} \sum_{i=1}^m x_i^2 - (\frac{1}{m} \sum_{i=1}^m x_i)^2</script></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>  * 计算每张卡的$\sum x_i$和$\sum x_i^2$，就可以一次性算出总均值和总方差
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/12/16/RFB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/12/16/RFB/" itemprop="url">RFB</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-16T20:07:00+08:00">
-                2020-12-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/12/16/RFB/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/16/RFB/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection"><a href="#RFB-Receptive-Field-Block-Net-for-Accurate-and-Fast-Object-Detection" class="headerlink" title="RFB: Receptive Field Block Net for Accurate and Fast Object Detection"></a>RFB: Receptive Field Block Net for Accurate and Fast Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>RF block：Receptive Fields </li>
-<li>strengthen the lightweight features using a hand-crafted mechanism：轻量，特征表达能力强</li>
-<li>assemble RFB to the top of SSD </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>lightweight </p>
-<ul>
-<li>enhance feature representation </li>
-</ul>
-</li>
-<li><p>人类</p>
-<ul>
-<li>群智感受野（pRF）的大小是其视网膜图中偏心率的函数</li>
-<li>感受野随着偏心率而增加</li>
-<li>更靠近中心的区域在识别物体时拥有更高的比重或作用</li>
-<li><p>大脑在对于小的空间变化不敏感</p>
-<p><img src="/2020/12/16/RFB/human.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>fixed sampling grid (conv)</p>
-<ul>
-<li>probably induces some loss in the feature discriminability as well as robustness </li>
-</ul>
-</li>
-<li><p>inception</p>
-<ul>
-<li>RFs of multiple sizes </li>
-<li>but at the same center</li>
-</ul>
-</li>
-<li><p>ASPP</p>
-<ul>
-<li>with different atrous rates </li>
-<li>the resulting feature tends to be less distinctive </li>
-</ul>
-</li>
-<li><p>Deformable CNN </p>
-<ul>
-<li>sampling grid is flexible</li>
-<li><p>but all pixels in an RF contribute equally </p>
-<p><img src="/2020/12/16/RFB/RF.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>RFB</p>
-<ul>
-<li>varying kernel sizes</li>
-<li>applies dilated convolution layers to control their eccentricities </li>
-<li>组合来模拟human visual system </li>
-<li>concat</li>
-<li><p>1x1 conv for fusion</p>
-<p><img src="/2020/12/16/RFB/rfb.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>main contributions </p>
-<ul>
-<li>RFB module: enhance deep features of lightweight CNN networks</li>
-<li>RFB Net: gain on SSD</li>
-<li>assemble on MobileNet </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Receptive Field Block </p>
-<ul>
-<li>类似inception的multi-branch</li>
-<li><p>dilated pooling or convolution layer</p>
-<p><img src="/2020/12/16/RFB/RFBlock.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>RFB Net </p>
-<ul>
-<li><p>SSD-base</p>
-<p>  <img src="/2020/12/16/RFB/ssd.png" width="80%;"></p>
-</li>
-<li><p>头上有较大分辨率的特征图的conv层are replaced by the RFB module</p>
-</li>
-<li><p>特别头上的conv层就保留了，因为their feature maps are too small to apply filters with large kernels like 5 × 5</p>
-<p><img src="/2020/12/16/RFB/rfbnet.png" width="70%;"></p>
-</li>
-<li><p>stride2 module：每个conv stride2，那id path得变成1x1 conv？</p>
-</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4526,7 +4825,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-count">167</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -4539,7 +4838,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">96</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -4586,7 +4885,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
