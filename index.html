@@ -276,6 +276,237 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/16/SSIS-methods/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/05/16/SSIS-methods/" itemprop="url">SSIS methods</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-16T13:00:07+08:00">
+                2023-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/05/16/SSIS-methods/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/16/SSIS-methods/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<p>[M2F] Masked-attention Mask Transformer for Universal Image Segmentation</p>
+<p>[VITA 2022] VITA: Video Instance Segmentation via Object Token Association</p>
+<h2 id="VITA-Video-Instance-Segmentation-via-Object-Token-Association"><a href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association" class="headerlink" title="VITA: Video Instance Segmentation via Object Token Association"></a>VITA: Video Instance Segmentation via Object Token Association</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li><p>explicit object-oriented information can be a strong clue for understanding the context of the entire sequence</p>
+</li>
+<li><p>build video-level understanding through frame-level object tokens</p>
+<ul>
+<li>不是用spatio-temporal structure，efficiency</li>
+<li>也不是用frame-attention，long-term adaptive</li>
+</ul>
+</li>
+<li><p>built on top of an off-the-shelf Transformer-based frame-level detector </p>
+<ul>
+<li>可以用图像预训练一个detector，然后冻结去训练video</li>
+<li>可以handle long and high-resolution videos</li>
+</ul>
+</li>
+<li><p>VIS methods</p>
+<ul>
+<li>onlineVIS：一般是ref和cur通过association的方式，measure the similarities/correspondence</li>
+<li><p>offlineVIS：involve整个video来预测，帧太多spatio-temporal attention太heavy，一般放在decoder上，instance-level的attn</p>
+<p><img src="/2023/05/16/SSIS-methods/VIS.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<p> <img src="/2023/05/16/SSIS-methods/VITA.png" width="80%;"></p>
+<ul>
+<li><p>Frame-level Detector</p>
+<ul>
+<li>m2f</li>
+<li>frame-level predictions<ul>
+<li>dynamic 1×1 convolutional weight from the frame queries  $f \in R^{NC}$</li>
+<li>per-pixel embeddings from the pixel decoder $M \in R^{CHW}$</li>
+</ul>
+</li>
+<li>用frame queries去decode encoder feature，实现classifying&amp;segmenting their matched objects</li>
+</ul>
+</li>
+<li><p>VITA Head</p>
+<ul>
+<li>input：<ul>
+<li>collect the object-level frame queries throughout the whole video，$\{f_t \}^T_{t=1} \in R^{C(TN)}$</li>
+<li>frame features $\{M_t\}_{t=1}^T \in R^{CTHW}$</li>
+</ul>
+</li>
+<li>Object Encoder<ul>
+<li>build video-level information</li>
+<li>window-shifted self-attention along the temporal axis</li>
+<li>这一步是为了将query-level的信息交互聚合成object-level的信息，在temporal上交互</li>
+</ul>
+</li>
+<li>Object Decoder and Output heads<ul>
+<li>假设object tokens can provide sufficient instance-specific information</li>
+<li>引入trainable video queries $v\in R^{CN_v}$作为Q</li>
+<li>前面的T frame queries $tf \in R^{C(TN_f)}$作为KV</li>
+<li>一样的几层cross+self attn block</li>
+<li>final predictions<ul>
+<li>class embedding：$p \in R^{N_v (K+1)}$</li>
+<li>mask embedding：$m \in R^{N_v C}$</li>
+<li>每个query代表的是tracklet of an instance over all frames</li>
+<li>最终的predicted mask logits用mask embedding和frame masks做matmul得到</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Clip-wise losses</p>
+<ul>
+<li><p>similarity loss</p>
+<ul>
+<li>frame-level matching的query id是变化的</li>
+<li>video-level mathcing的query id是绑定到固定instance的</li>
+<li>collect所有match到gt的frame queries和video queries，然后再进行query之间的pairing<ul>
+<li>similarity pred：embed the collected queries by a linear layer，then measure the similarity by matmul</li>
+<li>similarity target：match到同一个gt instance的为1，否则为0，构建similarity matrix</li>
+</ul>
+</li>
+<li><p>用BCE来计算similarity loss</p>
+<p><img src="/2023/05/16/SSIS-methods/similarity.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>total loss<ul>
+<li>首先是single-frame loss：M2F原始那套</li>
+<li>然后是video mask loss：用video query预测的per-frame mask的loss</li>
+<li>最后是similarity loss：用来match video query和frame query的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/15/VIS-methods/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2591,317 +2822,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/08/15/video matting/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/08/15/video matting/" itemprop="url">未命名</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-15T14:35:10+08:00">
-                2022-08-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/08/15/video matting/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/08/15/video matting/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[RVM 2021] Robust High-Resolution Video Matting with Temporal Guidance：字节，temporal（ConvGRU），multi-task</p>
-<p>[SparseInst 2022] Sparse Instance Activation for Real-Time Instance Segmentation：自动化所，overview有点像DETR</p>
-<h2 id="Robust-High-Resolution-Video-Matting-with-Temporal-Guidance"><a href="#Robust-High-Resolution-Video-Matting-with-Temporal-Guidance" class="headerlink" title="Robust High-Resolution Video Matting with Temporal Guidance"></a>Robust High-Resolution Video Matting with Temporal Guidance</h2><ol>
-<li>动机<ul>
-<li>human video matting<ul>
-<li>用于背景替换</li>
-<li>现有技术不稳定，会产生artifacts</li>
-</ul>
-</li>
-<li>performance<ul>
-<li>robust</li>
-<li>real-time<ul>
-<li>4K at 76 FPS and HD at 104 FPS on <em>Nvidia GTX 1080Ti</em></li>
-</ul>
-</li>
-<li>high-resolution</li>
-</ul>
-</li>
-<li>use recurrent structure instead of frame by frame：用时序网络，分割质量更好</li>
-<li>propose a novel training strategy：同时进行matting和segmentation两个任务，模型更鲁邦</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>matting formulation recollect<ul>
-<li>$I = \alpha F + (1-\alpha)B$</li>
-</ul>
-</li>
-<li>matting methods<ul>
-<li>Trimap-based matting：最classical的，需要额外的先验，且通常不分类，只做前景语义分割</li>
-<li>Background-based matting：不要先验证trimap了，改要先验background map</li>
-<li>Segmentation：就是binary的语义分割，人像前景效果还好，但是背景容易出现各种artifacts，比较不稳定</li>
-<li>Auxiliary-free matting：不需要额外输入的架构，MODNet更关注肖像，this paper更关注目标人</li>
-<li>Video matting：<ul>
-<li>MODNet用相邻帧图像的预测结果来相互压制伪影，本质上仍就是image-independent</li>
-<li>BGM用多帧图像作为多通道</li>
-</ul>
-</li>
-<li>Recurrent architecture：ConvLSTM/ConvGRU</li>
-<li>High-resolution matting<ul>
-<li>Patch-based refinement：图像尺寸减小，以获取high resolution task的算力，但是</li>
-<li>Deep guided filter：trainable，模块化，end-to-end将low-reso转换成high-reso</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>use temporal structure <ul>
-<li>temporal information boosts both quality and robustness</li>
-<li>这种overtime的背景变换使得模型对背景信息的学习更加鲁邦和精确</li>
-</ul>
-</li>
-<li>introduce a new training strategy <ul>
-<li>大多数matting数据集都是合成的，包括在数据处理阶段也会做这种前景贴背景的操作，扩充样本量，这种图像太fake了，和实际场景有domain gap，泛化性差</li>
-<li>也有方法尝试先在segmentation任务上做预训练、用真实图像做对抗等方式去解决图像假的问题，这样的缺点是multi step</li>
-<li>同时训练matting &amp; segmentation任务就一步到位了，没有额外的adaptation steps</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>方法<ul>
-<li>model architecture overview<ul>
-<li>encoder：编码individual frame’s features，mobileNetv3/resnet50</li>
-<li>recurrent decoder：aggregates temporal information</li>
-<li>a Deep Guided Filter module：high-resolution upsampling</li>
-</ul>
-</li>
-<li>Feature-Extraction Encoder<ul>
-<li>MobileNetV3-Large + LR-ASPP module</li>
-<li>最后一个block使用了空洞卷积</li>
-</ul>
-</li>
-<li>Recurrent Decoder<ul>
-<li>ConvGRU at multiple scales</li>
-<li>bottleneck block：x16 level上<ul>
-<li>在LR-ASPP之后</li>
-<li>后ConvGRU，with id path（split，一半通道用于id，一半通道用于GRU）</li>
-<li>然后bilinear 2x</li>
-</ul>
-</li>
-<li>Upsampling block：x8/x4/x2 level上<ul>
-<li>每个resolution stage</li>
-<li>先merge（concat）前一个stage的feature</li>
-<li>然后avg pooling，conv-bn-relu，transfer the feature</li>
-<li>然后ConvGRU，with id path</li>
-<li>然后bilinear 2x</li>
-</ul>
-</li>
-<li>Output block：x1 level上<ul>
-<li>去做一个final prediction</li>
-<li>先merge</li>
-<li>然后【conv3x3-bn-relu】x2</li>
-<li>然后conv1x1 head：1-channel alpha/3-channel fg/1-channel segmentation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Deep Guided Filter Module<ul>
-<li>given high- resolution videos such as 4K and HD</li>
-<li>先下采样by a factor s</li>
-<li>然后输入网络</li>
-<li>最后网络的2个输出（alpha &amp; fg）、网络output block的hidden feature、以及HR的原图这四个信息都给到DGF，to produce high-resolution的alpha和foreground</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>实验<ul>
-<li>training details<ul>
-<li>progressive learning：see longer sequences and higher resolution </li>
-<li>loss：<ul>
-<li>matting loss（alpha / fg）：L1 &amp; pyramid Laplacian loss + additional temporal coherence loss</li>
-<li>segmentation loss：BCE</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation"><a href="#Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation" class="headerlink" title="Sparse Instance Activation for Real-Time Instance Segmentation"></a>Sparse Instance Activation for Real-Time Instance Segmentation</h2><ol>
-<li>动机<ul>
-<li>fully convolutional real-time instance segmentation</li>
-<li>former work的实例分割通常与目标检测绑定<ul>
-<li>dense anchors</li>
-<li>fixed reception field by fixed anchors</li>
-<li>multi-level prediction</li>
-<li>ROI-Align对移动端/嵌入式设备不友好</li>
-<li>NMS time-consuming</li>
-</ul>
-</li>
-<li>this paper<ul>
-<li>a sparse set of activation maps：类似detr的100个proposal</li>
-<li>基于attention map得到instance-level的features</li>
-<li>匈牙利算法来匹配proposed instance和gt，从而省略NMS，得到稀疏预测</li>
-<li>40 FPS and 37.9 AP on the COCO benchmark</li>
-<li>repo：<a href="https://github" target="_blank" rel="noopener">https://github</a>. com/hustvl/SparseInst</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>this paper<ul>
-<li>IAM：instance activation  maps，sparse set，motivated by CAM<ul>
-<li>pixel-level：相比较于框里还有bg</li>
-<li>全局context &amp; single-level</li>
-<li>simple op：avoid ROI-Align/NMS这些不可避免的循环操作</li>
-<li>bipartite的稀疏监督：inhibit the redundant predictions, thus avoiding NMS </li>
-</ul>
-</li>
-<li>recognition and segmentation：在IAM的instance feature基础上执行下游任务</li>
-</ul>
-</li>
-<li>overall structure<ul>
-<li>encoder：backbone + PPM，giving x8 fused features</li>
-<li>decoder：multi-branch<ul>
-<li>instance branch：IAM，</li>
-<li>mask branch：语义分割，</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>方法<ul>
-<li>IAM：Instance Activation Maps<ul>
-<li>首先一个基本假设：encoder得到的feature是redundant</li>
-<li>IAM的op<ul>
-<li>一个id分支，传入原始feature，[b,h,w,d]</li>
-<li>一个feature selection分支（conv+sigmoid+norm），[b,h,w,N]</li>
-<li>两个分支做矩阵乘法，[b,N,d]：feature selection分支，给出了基于原始feature的N forms of spatial reweighting方案，作为最终的attention proposals</li>
-</ul>
-</li>
-<li>downstream task：recognition and segmentation <ul>
-<li>kernel</li>
-<li>class</li>
-<li>score</li>
-</ul>
-</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2956,7 +2876,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">168</span>
+                  <span class="site-state-item-count">169</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

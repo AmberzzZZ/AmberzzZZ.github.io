@@ -276,6 +276,317 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/08/15/video matting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/08/15/video matting/" itemprop="url">未命名</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-15T14:35:10+08:00">
+                2022-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/15/video matting/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/08/15/video matting/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[RVM 2021] Robust High-Resolution Video Matting with Temporal Guidance：字节，temporal（ConvGRU），multi-task</p>
+<p>[SparseInst 2022] Sparse Instance Activation for Real-Time Instance Segmentation：自动化所，overview有点像DETR</p>
+<h2 id="Robust-High-Resolution-Video-Matting-with-Temporal-Guidance"><a href="#Robust-High-Resolution-Video-Matting-with-Temporal-Guidance" class="headerlink" title="Robust High-Resolution Video Matting with Temporal Guidance"></a>Robust High-Resolution Video Matting with Temporal Guidance</h2><ol>
+<li>动机<ul>
+<li>human video matting<ul>
+<li>用于背景替换</li>
+<li>现有技术不稳定，会产生artifacts</li>
+</ul>
+</li>
+<li>performance<ul>
+<li>robust</li>
+<li>real-time<ul>
+<li>4K at 76 FPS and HD at 104 FPS on <em>Nvidia GTX 1080Ti</em></li>
+</ul>
+</li>
+<li>high-resolution</li>
+</ul>
+</li>
+<li>use recurrent structure instead of frame by frame：用时序网络，分割质量更好</li>
+<li>propose a novel training strategy：同时进行matting和segmentation两个任务，模型更鲁邦</li>
+</ul>
+</li>
+<li>论点<ul>
+<li>matting formulation recollect<ul>
+<li>$I = \alpha F + (1-\alpha)B$</li>
+</ul>
+</li>
+<li>matting methods<ul>
+<li>Trimap-based matting：最classical的，需要额外的先验，且通常不分类，只做前景语义分割</li>
+<li>Background-based matting：不要先验证trimap了，改要先验background map</li>
+<li>Segmentation：就是binary的语义分割，人像前景效果还好，但是背景容易出现各种artifacts，比较不稳定</li>
+<li>Auxiliary-free matting：不需要额外输入的架构，MODNet更关注肖像，this paper更关注目标人</li>
+<li>Video matting：<ul>
+<li>MODNet用相邻帧图像的预测结果来相互压制伪影，本质上仍就是image-independent</li>
+<li>BGM用多帧图像作为多通道</li>
+</ul>
+</li>
+<li>Recurrent architecture：ConvLSTM/ConvGRU</li>
+<li>High-resolution matting<ul>
+<li>Patch-based refinement：图像尺寸减小，以获取high resolution task的算力，但是</li>
+<li>Deep guided filter：trainable，模块化，end-to-end将low-reso转换成high-reso</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>use temporal structure <ul>
+<li>temporal information boosts both quality and robustness</li>
+<li>这种overtime的背景变换使得模型对背景信息的学习更加鲁邦和精确</li>
+</ul>
+</li>
+<li>introduce a new training strategy <ul>
+<li>大多数matting数据集都是合成的，包括在数据处理阶段也会做这种前景贴背景的操作，扩充样本量，这种图像太fake了，和实际场景有domain gap，泛化性差</li>
+<li>也有方法尝试先在segmentation任务上做预训练、用真实图像做对抗等方式去解决图像假的问题，这样的缺点是multi step</li>
+<li>同时训练matting &amp; segmentation任务就一步到位了，没有额外的adaptation steps</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>方法<ul>
+<li>model architecture overview<ul>
+<li>encoder：编码individual frame’s features，mobileNetv3/resnet50</li>
+<li>recurrent decoder：aggregates temporal information</li>
+<li>a Deep Guided Filter module：high-resolution upsampling</li>
+</ul>
+</li>
+<li>Feature-Extraction Encoder<ul>
+<li>MobileNetV3-Large + LR-ASPP module</li>
+<li>最后一个block使用了空洞卷积</li>
+</ul>
+</li>
+<li>Recurrent Decoder<ul>
+<li>ConvGRU at multiple scales</li>
+<li>bottleneck block：x16 level上<ul>
+<li>在LR-ASPP之后</li>
+<li>后ConvGRU，with id path（split，一半通道用于id，一半通道用于GRU）</li>
+<li>然后bilinear 2x</li>
+</ul>
+</li>
+<li>Upsampling block：x8/x4/x2 level上<ul>
+<li>每个resolution stage</li>
+<li>先merge（concat）前一个stage的feature</li>
+<li>然后avg pooling，conv-bn-relu，transfer the feature</li>
+<li>然后ConvGRU，with id path</li>
+<li>然后bilinear 2x</li>
+</ul>
+</li>
+<li>Output block：x1 level上<ul>
+<li>去做一个final prediction</li>
+<li>先merge</li>
+<li>然后【conv3x3-bn-relu】x2</li>
+<li>然后conv1x1 head：1-channel alpha/3-channel fg/1-channel segmentation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Deep Guided Filter Module<ul>
+<li>given high- resolution videos such as 4K and HD</li>
+<li>先下采样by a factor s</li>
+<li>然后输入网络</li>
+<li>最后网络的2个输出（alpha &amp; fg）、网络output block的hidden feature、以及HR的原图这四个信息都给到DGF，to produce high-resolution的alpha和foreground</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>实验<ul>
+<li>training details<ul>
+<li>progressive learning：see longer sequences and higher resolution </li>
+<li>loss：<ul>
+<li>matting loss（alpha / fg）：L1 &amp; pyramid Laplacian loss + additional temporal coherence loss</li>
+<li>segmentation loss：BCE</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation"><a href="#Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation" class="headerlink" title="Sparse Instance Activation for Real-Time Instance Segmentation"></a>Sparse Instance Activation for Real-Time Instance Segmentation</h2><ol>
+<li>动机<ul>
+<li>fully convolutional real-time instance segmentation</li>
+<li>former work的实例分割通常与目标检测绑定<ul>
+<li>dense anchors</li>
+<li>fixed reception field by fixed anchors</li>
+<li>multi-level prediction</li>
+<li>ROI-Align对移动端/嵌入式设备不友好</li>
+<li>NMS time-consuming</li>
+</ul>
+</li>
+<li>this paper<ul>
+<li>a sparse set of activation maps：类似detr的100个proposal</li>
+<li>基于attention map得到instance-level的features</li>
+<li>匈牙利算法来匹配proposed instance和gt，从而省略NMS，得到稀疏预测</li>
+<li>40 FPS and 37.9 AP on the COCO benchmark</li>
+<li>repo：<a href="https://github" target="_blank" rel="noopener">https://github</a>. com/hustvl/SparseInst</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>论点<ul>
+<li>this paper<ul>
+<li>IAM：instance activation  maps，sparse set，motivated by CAM<ul>
+<li>pixel-level：相比较于框里还有bg</li>
+<li>全局context &amp; single-level</li>
+<li>simple op：avoid ROI-Align/NMS这些不可避免的循环操作</li>
+<li>bipartite的稀疏监督：inhibit the redundant predictions, thus avoiding NMS </li>
+</ul>
+</li>
+<li>recognition and segmentation：在IAM的instance feature基础上执行下游任务</li>
+</ul>
+</li>
+<li>overall structure<ul>
+<li>encoder：backbone + PPM，giving x8 fused features</li>
+<li>decoder：multi-branch<ul>
+<li>instance branch：IAM，</li>
+<li>mask branch：语义分割，</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>方法<ul>
+<li>IAM：Instance Activation Maps<ul>
+<li>首先一个基本假设：encoder得到的feature是redundant</li>
+<li>IAM的op<ul>
+<li>一个id分支，传入原始feature，[b,h,w,d]</li>
+<li>一个feature selection分支（conv+sigmoid+norm），[b,h,w,N]</li>
+<li>两个分支做矩阵乘法，[b,N,d]：feature selection分支，给出了基于原始feature的N forms of spatial reweighting方案，作为最终的attention proposals</li>
+</ul>
+</li>
+<li>downstream task：recognition and segmentation <ul>
+<li>kernel</li>
+<li>class</li>
+<li>score</li>
+</ul>
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/07/12/mediaPipe/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2801,324 +3112,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/03/21/DA-WSOL-object-localization/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/03/21/DA-WSOL-object-localization/" itemprop="url">DA-WSOL: object localization</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-03-21T10:34:32+08:00">
-                2022-03-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/03/21/DA-WSOL-object-localization/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/03/21/DA-WSOL-object-localization/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Weakly-Supervised-Object-Localization-as-Domain-Adaption"><a href="#Weakly-Supervised-Object-Localization-as-Domain-Adaption" class="headerlink" title="Weakly Supervised Object Localization as Domain Adaption"></a>Weakly Supervised Object Localization as Domain Adaption</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Weakly supervised object localization (WSOL)<ul>
-<li>localizing objects only with the supervision of image-level classification label</li>
-<li>previous method use classification structure and CAM to generate the localization score：CAM通常不完全focus在目标上，定位能力weak</li>
-</ul>
-</li>
-<li>our method<ul>
-<li>将任务建模成域迁移任务，domain-adaption(DA) task</li>
-<li>score estimiator用image-level信息来训练，用像素级信息来测试</li>
-<li>a DA-WSOL pipeline<ul>
-<li>a target sampling strategy</li>
-<li>domain adaption localization (DAL) loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>CAM的表现不佳</p>
-<ul>
-<li>核心在于domain shift：用分类架构，训练一个分类任务，是对image-level feature的优化，但是目标却是 localization score，这是pixel-level feature，两者之间没有建立联系</li>
-<li>最终estimator会get overfitting on source domain(也就是image-level target)</li>
-<li>一个直观的想法：引入DA，align the distribution of these two domains，avoid overfitting——activating the discriminative parts of objects</li>
-</ul>
-</li>
-<li><p>mechanisms</p>
-<p>  <img src="/2022/03/21/DA-WSOL-object-localization/pipeline.png" width="55%;"></p>
-<ul>
-<li>B: Multi-instance learning(MIL) based WSOL<ul>
-<li>分类架构</li>
-<li>类别目标驱动</li>
-<li>通过各种data augmentation/cut mix来strengthen</li>
-<li>印象里原论文是先训一个纯分类网络（CNN+fc），然后去掉头，改成CNN+GAP+fc，做finetuning，得到能产生CAM的网络(提取对应类别权重对特征图加权)，因为需要两步训练，后面如果要看cam一半都是用grad-cam(用梯度的平均作为权重，无需重新训练)，performance据说等价</li>
-</ul>
-</li>
-<li>C: Separated-structure based WSOL<ul>
-<li>一个目标分类任务</li>
-<li>一个目标定位任务：伪标签、多阶段</li>
-</ul>
-</li>
-<li>A: Domain Adaption<ul>
-<li>引入DA to better assist WSOL task：align feature distribution between src/tgt domain</li>
-<li>end-to-end</li>
-<li>a target sampling strategy <ul>
-<li>target domain features has a much larger scale than source domain features：显然image-level task下，训练出的特征提取器更多的保留前景特征，但是pixel-level下还包含背景之类的</li>
-<li>sampling旨在选取source-related target samples &amp; source unseen target samples</li>
-</ul>
-</li>
-<li>domain adaption localization (DAL) loss<ul>
-<li>上述的两类samples fed into这个loss</li>
-<li>source-related target samples：to solve the sample imbal- ance between two domains</li>
-<li>source unseen target samples：viewed as the Universum to perceive target cues</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Revisiting the WOSL</p>
-<ul>
-<li>task description：给定$image X\in R^{3 \times N} $，3通道N个pixel，需要分辨任意像素$X_{:,i}$是否属于a certain class 0-k</li>
-<li>a feature extractor f(~)：用来提取pixel-level features $Z = f(X) \in R^{C \times N}$</li>
-<li>a score estimator e(~)：用来估计pixel的localization score $Y=e(Z) \in R^{K \times N}$</li>
-<li>在有监督场景下，pixel-level target Y是直接给定的，但是在无监督场景下，我们只有image-level mask，即$y=(max(Y_{0:}), max(Y_{1:}), …, max(Y_{k:})) \in R^{K \times 1}$，即每个feature map的global max/avg value构成的feature vector</li>
-<li>an additional aggregator g (~)：用来聚合feature map，将pixel-level feature转换成image-level $z=g(Z) \in R^{C\times 1}$，如GAP</li>
-<li>然后再fed into the score estimator above：$y^* = e(z) \in R^{K \times 1}$</li>
-<li>用classification loss来监督$y$和$y^*$，这就是一个分类任务</li>
-<li>but at test time：the estimator is projected back onto the pixel-level feature Z to predict the localization scores，这就是获取CAM</li>
-</ul>
-</li>
-<li><p>Modeling WSOL as Domain Adaption</p>
-<ul>
-<li>对每个sample X，建立两个feature sets S &amp; T<ul>
-<li>source domain：$s = z = (gf)(X)$</li>
-<li>target domain：$\{t_1,t_2,…,t_N\} =\{Z_{1,:},Z{2,:},…,Z{N,:}\}=f(X)$</li>
-</ul>
-</li>
-<li>aim at minimizing the target risk without accessing the target label set (pixel-level mask)，可以转化为：<ul>
-<li>minimizing source risk</li>
-<li>minimizing domain discrepancy</li>
-<li>$L(S,Y^S,T) = L_{cls}(S,Y^S) + L_a(S,T)$</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>L_cls就是常规的分类loss，在image-level上train</li>
-<li>L_a是proposed adaption loss，用来最小化S和T的discrepancy，会force  f(~)和g (~)去学习domain-invariant features</li>
-<li>使得 e(~)在S和在T上的performance相似</li>
-</ul>
-</li>
-<li><p>properties to notice</p>
-<ul>
-<li>some samples在set T中存在，而在set S中不存在，如background，不能强行align两个set</li>
-<li>两个分布的scale比例十分imbalance，1:N——the S set in some degree insufficient</li>
-<li>两个分布的差异是已知的，就是aggregator g (~)，这是个先验知识</li>
-</ul>
-</li>
-<li><p>mechanism as in figure</p>
-<ul>
-<li>起初两个分布并不一致，方框1/2是image level feature，圆圈1/2是pixel level feature，圆圈问号类是pixel map上的bg patches</li>
-<li>用class loss去监督如CAM method，能够区分方框1/2，在一定程度上也能够区分圆圈1/2，但是不能精准定位目标，因为S和T存在discrepancy——bg patches</li>
-<li>引入domain adaption loss，能够tighten两个set，使得两个分布更加align，这样class bound在方框1/2和圆圈1/2上的效果都一样好</li>
-<li><p>引入Universum regularization，推动decision boundary into Universum samples，使得分类边界也有意义</p>
-<p><img src="/2022/03/21/DA-WSOL-object-localization/mechanism.png" width="100%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Domain Adaption Localization Loss $L_a$(~)</p>
-<ul>
-<li>首先进一步切分target set T<ul>
-<li>Universum $T^u$：不包含前景类别/bg样本</li>
-<li>the fake $T^f$：和source domain的sample highly correlated的样本（在GAP时候被保留下来的样本）</li>
-<li>the real $T^t$：aside from above two的样本</li>
-</ul>
-</li>
-<li>recall the properties<ul>
-<li>the fake之所以会highly correlated source domain，就是因为先验知识GAP (property3)，我们知道他就是在GAP阶段被留下来的target sample</li>
-<li>我们可以将其作为source domain的补充样本，以弥补insufficient issue  (property2)</li>
-<li>关于unmatched data space (property1)，T-Universum就与S保持same label space了</li>
-</ul>
-</li>
-<li>based on these subsets，overall的DAL loss包含两个部分<ul>
-<li>domain adaption loss $L_d$：UDA，unsupervised，align the distribution</li>
-<li>Universum regularization $L_u$：feature-based L1 regularization，所有bg像素的绝对值之和，如果他们都在分类边界上，不属于任何一个前景类，localization score的响应值就都是0，那么loss就是0</li>
-<li>$L_a(S,T) = \lambda_1L_d(S \cup T^f, T^t) + \lambda_2 L_u(T^u)$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Target Sampling Strategy （这个有点不太理解）</p>
-<ul>
-<li>a target sample assigner(TSA)</li>
-<li>a cache matrix $M \in R^{C \times (K+1)}$<ul>
-<li>column 0：represents the anchor of $T^u$</li>
-<li>the rest column：represents the anchor of certain class of $T^t$</li>
-<li>感觉就是记录了每类column vec的簇心</li>
-</ul>
-</li>
-<li><p>init</p>
-<ul>
-<li>column 0：zero-init</li>
-<li>the rest：当遇到第一个这一类的样本的时候，用src vec $z+\epsilon$初始化</li>
-</ul>
-</li>
-<li><p>update</p>
-<ul>
-<li>首先基于image-level label得到类别id：$k = argmax(y)$，注意使用ground truth，不是prediction vec</li>
-<li>然后拿到cache matrix中对应的anchor：$a^u = M_{:,0}, \ \ a^t = M_{:,k+1}$</li>
-<li>然后再加上image-level predict作为初始的cluster：$C_{init} = \{a^u, a^t, z\} \in R^{C \times 3}$</li>
-<li>对当前target samples做K-means，得到三类样本，进而计算adaption loss</li>
-<li><p>用聚类得到的新center C，加权平均更新cache matrix，权重$r_k$是对应类images的数目的倒数</p>
-<p><img src="/2022/03/21/DA-WSOL-object-localization/update.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>overall</p>
-<p>  <img src="/2022/03/21/DA-WSOL-object-localization/TSA.png" width="100%;"></p>
-</li>
-</ul>
-</li>
-<li><p>pipeline summary</p>
-<ul>
-<li><p>首先获得S和T，f(~)是classification backbone(resnet/inception)，g(~)是 global average pooling，e(~)是作用在source domain feature vector的 fully-connected layer ，generate the image-level classification score，supervised with cross-entropy</p>
-<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_cls.png" width="50%;"></p>
-</li>
-<li><p>然后通过S、T以及ground truth label id得到3个target subsets</p>
-<ul>
-<li><p>$T^u$用来计算$L_u$</p>
-<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_u.png" width="50%;"></p>
-</li>
-<li><p>$S$和$T^f$和$T^t$用来计算$L_d$：MMD (Maximum Mean Discrepancy)，h(~)是高斯kernel</p>
-<p>  <img src="/2022/03/21/DA-WSOL-object-localization/L_d.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3173,7 +3166,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">168</span>
+                  <span class="site-state-item-count">169</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

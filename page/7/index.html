@@ -276,6 +276,267 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/28/spineNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/28/spineNet/" itemprop="url">spineNet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-28T16:25:17+08:00">
+                2021-01-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/28/spineNet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/28/spineNet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization"><a href="#SpineNet-Learning-Scale-Permuted-Backbone-for-Recognition-and-Localization" class="headerlink" title="SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization"></a>SpineNet: Learning Scale-Permuted Backbone for Recognition and Localization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>object detection task<ul>
+<li>requiring simultaneous recognition and localization</li>
+<li>solely encoder performs not well</li>
+<li>while encoder-decoder architectures are ineffective</li>
+</ul>
+</li>
+<li><p>propose SpineNet</p>
+<ul>
+<li>scale-permuted intermediate features</li>
+<li>cross-scale connections</li>
+<li>searched by NAS on detection COCO</li>
+<li>can transfer to classification tasks</li>
+<li><p>在轻量和重量back的一阶段网络中都涨点领先</p>
+<p><img src="/2021/01/28/spineNet/scale-permuted.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>scale-decreasing backbone <ul>
+<li>throws away the spatial information by down-sampling</li>
+<li>challenging to recover</li>
+<li>接一个轻量的FPN：</li>
+</ul>
+</li>
+<li>scale-permuted model <ul>
+<li>scales of features can increase/decrease anytime：retain the spacial information </li>
+<li>connections go across scales：multi-scale fusion</li>
+<li>searched by NAS</li>
+<li>是一个完整的FPN，不是encoder-decoder那种可分的形式</li>
+<li>directly connect to classification and bounding box regression subnets</li>
+<li>base on ResNet50<ul>
+<li>use bottleneck feature blocks</li>
+<li>two inputs for each feature blocks</li>
+<li>roughly the same computation</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>formulation</p>
+<ul>
+<li>overall architecture<ul>
+<li>stem：scale-decreased architecture </li>
+<li>scale-permuted network</li>
+<li>blocks in the stem network can be candidate inputs for the following scale-permuted network </li>
+</ul>
+</li>
+<li>scale-permuted network<ul>
+<li>building blocks：$B_k$</li>
+<li>feature level：$L_3 - L_7$</li>
+<li>output features：1x1 conv，$P_3 - P_7$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>search space</p>
+<ul>
+<li><p>scale-permuted network：</p>
+<ul>
+<li>block只能从前往后connect</li>
+<li>based on resNet blocks</li>
+<li>channel 256 for $L_5, L_6, L_7$</li>
+</ul>
+</li>
+<li><p>cross-scale connections：</p>
+<ul>
+<li><p>two input connections for each block</p>
+</li>
+<li><p>from lower ordering block / stem</p>
+</li>
+<li><p>resampling</p>
+<ul>
+<li>narrow factor  $\alpha$：1x1 conv</li>
+<li>上采样：interpolation</li>
+<li>下采样：3x3 s2 conv</li>
+<li><p>element-wise add</p>
+<p><img src="/2021/01/28/spineNet/resampling.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>block adjustment</p>
+<ul>
+<li>intermediate blocks can adjust its scale level &amp; type</li>
+<li>level from {-1, 0, 1, 2}</li>
+<li>select from bottleneck / residual block</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>family of models</p>
+<ul>
+<li>R[N] - SP[M]：N feature layers in stem &amp; M feature layers in scale-permuted layers</li>
+<li>gradually shift from stem to SP</li>
+<li><p>with size decreasing </p>
+<p><img src="/2021/01/28/spineNet/shifting.png" width="45%;"></p>
+<p><img src="/2021/01/28/spineNet/family.png" width="75%;"></p>
+</li>
+</ul>
+</li>
+<li><p>spineNet family</p>
+<ul>
+<li>basic：spineNet-49</li>
+<li>spineNet-49S：channel数scaled down by 0.65</li>
+<li>spineNet-96：double the number of blocks</li>
+<li>spineNet-143：repeat 3 times，fusion narrow factor $\alpha=1$</li>
+<li>spineNet-190：repeat 4 times，fusion narrow factor $\alpha=1$，channel数scaled up by 1.3</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>在mid/heavy量级上，比resnet-family-FPN涨出两个点</p>
+<p>  <img src="/2021/01/28/spineNet/heavy.png" width="45%;"></p>
+</li>
+<li><p>在light量级上，比mobileNet-family-FPN涨出一个点</p>
+<p>  <img src="/2021/01/28/spineNet/light.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/27/guided-anchoring/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4262,264 +4523,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/refineNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/05/refineNet/" itemprop="url">refineNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T11:08:15+08:00">
-                2021-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/05/refineNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/refineNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="RefineNet-Multi-Path-Refinement-Networks-for-High-Resolution-Semantic-Segmentation"><a href="#RefineNet-Multi-Path-Refinement-Networks-for-High-Resolution-Semantic-Segmentation" class="headerlink" title="RefineNet: Multi-Path Refinement Networks for High-Resolution Semantic Segmentation"></a>RefineNet: Multi-Path Refinement Networks for High-Resolution Semantic Segmentation</h2><p>引用量1452，但是没有几篇技术博客？？</p>
-<ol>
-<li><p>动机</p>
-<ul>
-<li>语义分割<ul>
-<li>dense classification on every single pixel</li>
-</ul>
-</li>
-<li>refineNet<ul>
-<li>long-range residual connections</li>
-<li>chained residual pooling</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>pooling/conv stride：<ul>
-<li>losing finer image structure</li>
-<li>deconv is not able to recover the lost info</li>
-</ul>
-</li>
-<li>atrous<ul>
-<li>high reso：large computation</li>
-<li>dilated conv：coarse sub-sampling of feature</li>
-</ul>
-</li>
-<li>FCN<ul>
-<li>fuse features from all levels </li>
-<li>stage-wise rather than end-to-end???存疑</li>
-</ul>
-</li>
-<li><p>this paper</p>
-<ul>
-<li>main idea：effectively exploit middle layer features </li>
-<li>RefineNet<ul>
-<li>fuse all level feature</li>
-<li>residual connections with identity skip</li>
-<li>chained residual pooling to capture background context：看描述感觉像inception downsamp</li>
-<li>end-to-end</li>
-<li>是整个分割网络中的一个component</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/01/05/refineNet/dense.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> <img src="/2021/01/05/refineNet/refineNet.png" width="70%;"></p>
-<ul>
-<li>backbone<ul>
-<li>pretrained resnet</li>
-<li>4 blocks：x4 - x32，each block：pool-residual</li>
-<li>connection：每个输出连接一个RefineNet unit</li>
-</ul>
-</li>
-<li>4-cascaded architecture<ul>
-<li>final ouput：<ul>
-<li>high-resolution feature maps</li>
-<li>dense soft-max </li>
-<li>bilinear interpolation to origin resolution</li>
-</ul>
-</li>
-<li>cascade inputs<ul>
-<li>output from backbone block</li>
-<li>ouput from previous refineNet block</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>refineNet block<ul>
-<li>adapt conv：<ul>
-<li>to adapt the dimensionality and refine special task</li>
-<li>BN layers are removed</li>
-<li>channel 512 for R4，channel 256 for the rest</li>
-</ul>
-</li>
-<li>fusion：<ul>
-<li>先用conv to adapt dimension and recale the paths</li>
-<li>然后upsamp</li>
-<li>summation </li>
-<li>如果single input：walk through and stay unchanged</li>
-</ul>
-</li>
-<li>chained residual pooling：<ul>
-<li>aims to capture background context from a large image region </li>
-<li>chained：efficiently pool features with multiple window sizes  </li>
-<li>pooling blocks：s1 maxpooling+conv</li>
-<li>in practice用了两个pooling blocks</li>
-<li>use one ReLU in the chained residual pooling block</li>
-</ul>
-</li>
-<li>output conv：<ul>
-<li>一个residual：to employ non-linearity</li>
-<li>dimension remains unchanged</li>
-<li>final level：two additional RCUs before the final softmax prediction </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>residual identity mappings <ul>
-<li>a clean information path not block by any non-linearity：所有relu都在residual path里面</li>
-<li>只有chained residual pooling模块起始时候有个ReLU：one single ReLU in each RefineNet block does not noticeably reduce the effectiveness of gradient flow </li>
-<li>linear operations：<ul>
-<li>within the fusion block </li>
-<li>dimension reduction operations</li>
-<li>upsamp operations</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>其他结构</p>
-<p> <img src="/2021/01/05/refineNet/vari.png" width="70%;"></p>
-<ul>
-<li>级联的就叫cascaded</li>
-<li>一个block就叫single</li>
-<li>多个input resolution就叫mult-scale</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>4-cascaded works better than 1-cas &amp; 2-cas</li>
-<li>2-scale works better than 1-scale</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4574,7 +4577,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">168</span>
+                  <span class="site-state-item-count">169</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
