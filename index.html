@@ -276,6 +276,553 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/19/GPU-Computing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/05/19/GPU-Computing/" itemprop="url">GPU Computing</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-19T20:02:14+08:00">
+                2023-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/05/19/GPU-Computing/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/19/GPU-Computing/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>background</p>
+<ul>
+<li>GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost</li>
+<li>CUDA：CUDA provides a flexible programming model and C-like language for implementing data-parallel algorithms on the GPU</li>
+<li>FLOPs：每秒所执行的浮点运算次数（floating-point operations per second）<ul>
+<li><a href="https://www.zhihu.com/zvideo/1421421171497304064?playTime=463.3" target="_blank" rel="noopener">https://www.zhihu.com/zvideo/1421421171497304064?playTime=463.3</a></li>
+<li>compute intensity</li>
+<li>memory latency<ul>
+<li>我们的GNPU，0.75V/900M，1个时钟cycle近似于1ns，所以一个10w cycle的softmax的计算latency是1ms</li>
+<li>chip size：做小是为了降低电流传输距离，实现更短的latency</li>
+<li>带宽memory bandwidth：例如传输带宽是131G/sec，clock latency是89ns，可以算出每个cycle最多可以传输11659bytes的数据，如果我们的程序只要求了f64的x和f64的y也就是8 bytes的数据量，那么内存利用率就是0.14%</li>
+</ul>
+</li>
+<li>threads<ul>
+<li>把任务拆解成高并发，比如可以将矩阵乘法拆解成</li>
+<li>GPU的设计核心就是支持超多线程，而且线程切换很快</li>
+</ul>
+</li>
+<li>reg &amp; cache<ul>
+<li>GPU通过设计很多寄存器的方式，维持高效的数据传输效率</li>
+</ul>
+</li>
+<li>Tensor Core<ul>
+<li>不同层次的数据存储</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CUDA kernel：<a href="https://www.youtube.com/watch?v=jYCxVirq4d0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jYCxVirq4d0</a><ul>
+<li>写cuda kernel时候，要manipulate两个层次，1是thread block，thread block内部的threads has shared memory，2是thread block构成的launching grid</li>
+<li>threads使用shared memory的时候要sync：所有thread finish以后整个block才算finish</li>
+<li>parallel的程度取决于具体算子：<ul>
+<li>如果c[i]=f(c[i-1])，比如cumadd，那这种就不好并行化了</li>
+<li>如果是ele-wise的，那就可以高度并行化</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>tensorRT</p>
+<ul>
+<li>NVIDIA TensorRT是一种高性能神经网络推理(Inference)引擎，用于在生产环境中部署深度学习应用，可提供最大的推理吞吐量和效率</li>
+<li>TensorRT有如下功能<ul>
+<li>Quantization<ul>
+<li>QAT：Quantization Aware Training，训练中量化，通过在浮点训练过程中插入虚拟的int8量化节点</li>
+<li>PTQ：Post-Training Quantization，训练后量化，那一些样本图片分析不同激活层的结果分布，在以有模型上添加scale实现量化，tensorRT的PTQ以速度优先，无法控制某一层的精度</li>
+</ul>
+</li>
+<li>Kernel Auto Tuning：比如一个卷积有多种实现方案，tensorRT会根据实际的部署设备、tensor尺寸、batchsize等参数选择最efficient的方案</li>
+<li>Elimination of Redundant Layers and Operations：<ul>
+<li>读写tensor有个memory bandwidth bottleneck，所以layer fusion可以加速</li>
+<li>像concat的这种可以预留一个target output buffers直接把相关结果写进去，这是通过layer elimination来实现加速</li>
+<li>还有一种情况是shared structure but different weights，tensorRT会把它合并成一个宽的层，类似group convolution的原理，一次层推理得到3个path的结果，这也是layer fusion来使用GPU的计算能力</li>
+</ul>
+</li>
+<li>Dynamic Tensor Memory</li>
+</ul>
+</li>
+<li>使用流程<ul>
+<li>given a trained model</li>
+<li>use TensorRT to parse a trained model，做如上优化得到一个plan file，a plan file不仅包含序列化的图，还包含了inference schedule，用什么kernel、什么执行顺序之类的，可以理解为tensorRT Graph</li>
+<li>load and deserialize a saved plan file to create a TensorRT engine object and run inferenc</li>
+</ul>
+</li>
+<li>TensorRT配套周边：<a href="https://github.com/NVIDIA/TensorRT/tree/master/tools" target="_blank" rel="noopener">https://github.com/NVIDIA/TensorRT/tree/master/tools</a><ul>
+<li>ONNX GraphSurgeon：修改ONNX模型，增加或者剪掉某些节点，修改名字或者维度等等</li>
+<li>PyTorch-Quantization：在Pytorch训练或者推理的时候加入模拟量化操作，支持量化训练后的模型导出ONNX和TRT</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>c++ basics recall</p>
+</li>
+<li><p>常见神经网络相关coding题</p>
+<ul>
+<li><p>conv的fp/bp：<a href="https://blog.csdn.net/gaocui883/article/details/116517812" target="_blank" rel="noopener">https://blog.csdn.net/gaocui883/article/details/116517812</a></p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># raw conv forwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(X, W, B, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X: [b,c,h,w]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># B: [out]</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    X_pad = np.pad(X, [[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,pad_h],[<span class="number">0</span>,pad_w]])</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line"></span><br><span class="line">    <span class="comment"># out shape</span></span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)     <span class="comment"># receptive field</span></span><br><span class="line">    out_rows, out_cols = (h_pad + pad_h - k1) // s + <span class="number">1</span>, (w_pad + pad_w - k2) // s + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># tranverse spatial</span></span><br><span class="line">    Y = np.zeros((b,out_channels,out_rows, out_cols))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            Y[:,:,i,j] = X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T) + B  <span class="comment"># [b,out]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># raw conv backwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d_bp</span><span class="params">(X_pad, W, B, Y_grads, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X_pad: [b,c,h_pad,w_pad]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># Y_grads: [b,out,h_out,w_out]</span></span><br><span class="line">    <span class="comment"># return: X_grads, W_grads, B_grads</span></span><br><span class="line"></span><br><span class="line">    b, _, out_rows, out_cols = Y_grads.shape</span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute grads</span></span><br><span class="line">    X_grads = np.zeros_like(X_pad)</span><br><span class="line">    W_grads = np.zeros_like(W)</span><br><span class="line">    B_grads = np.zeros_like(B)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            kernel = Y_grads[:,:,i,j]   <span class="comment"># dL/dY</span></span><br><span class="line">            B_grads += kernel * <span class="number">1</span>       <span class="comment"># dL/dY * dY/dB</span></span><br><span class="line">            W_grads += kernel * X_pad[:,:,i0:i1:d, j0:j1:d]   <span class="comment"># dL/dY * X</span></span><br><span class="line">            X_grads[:,:,i0:i1:d, j0:j1:d] += kernel * W       <span class="comment"># dL/dY * W</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># remove pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line">    X_grads = X_grads[:,:,:h_pad-pad_h, :w_pad-pad_w]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> X_grads, W_grads, B_grads</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+<pre><code>* im2col &amp; col2im
+
+    * conv2d里面X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T)这个做的是patch[b,in,k,k]和filter[out,in,k,k]的点积
+    * im2col可以将循环转化成矩阵乘法
+        * filter转化成[out, in\*k\*k]，X转化成overlap patches[in\*k\*k, b\*n_rows\*n_cols]
+        * 结果得到[out, b\*n_rows\*n_cols]
+    * col2im转换矩阵结果
+        * [b, out, n_rows, n_cols]
+
+* BN/LN/GN/IN
+
+* sgd
+
+* adamw
+
+* regularization
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/17/diffusion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/05/17/diffusion/" itemprop="url">diffusion</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-17T08:34:01+08:00">
+                2023-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/05/17/diffusion/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/17/diffusion/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<p>[survey 2023] Diffusion Models: A Comprehensive Survey of Methods and Applications</p>
+<p>[VAE]</p>
+<p>[DDPM 2020] Denoising Diffusion Probabilistic Models</p>
+<p>[LDMs 2022] High-Resolution Image Synthesis with Latent Diffusion Models</p>
+<p>aigc Text-to-Image 大模型</p>
+<ul>
+<li><p>Stable Diffusion</p>
+</li>
+<li><p>DALLE</p>
+</li>
+<li><p>GLIDE</p>
+</li>
+</ul>
+<p>微调方式</p>
+<ul>
+<li>ControlNet</li>
+<li>Textual Inversion</li>
+<li>Hypernetworks</li>
+<li>Lora</li>
+</ul>
+<p>其他生成模型：</p>
+<ul>
+<li><p>GAN</p>
+</li>
+<li><p>VAE</p>
+</li>
+<li><p>Autoregressive model</p>
+</li>
+<li><p>Normalizing flow</p>
+</li>
+<li><p>Energy-based model</p>
+</li>
+</ul>
+<p>Vision Tasks</p>
+<ul>
+<li>repaint：图像补全修复</li>
+<li>GLIDE：文本到图像的生成</li>
+</ul>
+<p>生成式建模的basic idea：正向扩散来系统地扰动数据中的分布，然后通过学习反向扩散过程恢复数据的分布</p>
+<p><img src="/2023/05/17/diffusion/generative models.png" width="50%;"></p>
+<ul>
+<li><p>有监督的生成模型与判别模型</p>
+<ul>
+<li>有监督学习是根据样本和标签{X,Y}去学习一个模型：$Y=f(X)$ / $p(Y|X)$，根据监督方式又分为判别模型和生成模型</li>
+<li>判别模型：直接对条件概率分布建模，监督给定X预测出的Y的质量，来拟合真实分布，所有的有监督的回归、分类等模型都是判别模型</li>
+<li>生成模型：建模联合概率分布$p(X,Y)$，间接计算后验概率，常见方法有朴素贝叶斯(Naive Bayes)、混合高斯模型(GMM)、隐马尔科夫模型(HMM)、GAN的生成器</li>
+</ul>
+</li>
+<li><p>无监督的生成模型</p>
+<ul>
+<li>对输入样本X的分布建模$p(X)$，希望产生与训练集同分布的新样本</li>
+<li>概率模型的输出接近X的真实分布，就可以从概率模型中采样来“生成”样本了</li>
+</ul>
+</li>
+<li><p>极大似然估计</p>
+<ul>
+<li><p>极大似然估计是对概率模型参数进行估计的一种方法</p>
+</li>
+<li><p>假设训练数据服从$P_{data}(X)$，生成模型的输出分布为$P_g(X,\theta)$，可以得到关于模型参数$\theta$的函数，$L(\theta) = \Pi_i^N p_g(x_i,\theta)$</p>
+<ul>
+<li>最好的$\theta$下产生数据集中的所有样本的概率是最大的，$\theta = argmax L(\theta)$</li>
+<li>为了避免多个概率的乘积发生数值下溢问题，采用对似然函数取对数的形式，$\theta = argmax\ log(L(\theta))$</li>
+<li><p>使用极大似然估计时，每个样本都希望拉高它所对应的模型概率值，但是所有样本的概率密度总和为1，一个样本点的概率密度函数值被拉高将不可避免的使其它点的函数值被拉低，最终达到一个相对平衡的状态</p>
+<p><img src="/2023/05/17/diffusion/极大似然.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>也可以直接建模成预测分布和真实分布的KL散度</p>
+<ul>
+<li>$\theta = argmax\ D_{KL}(p_{data} | p_g) = argmax \ p_g (log\ p_{data}-log\ p_g) = argmax \ log\ p_g $ </li>
+<li>和上面的形式一样</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>VAE：变分自编码器</p>
+<ul>
+<li><p>V：Variational，变分推断</p>
+</li>
+<li><p>AE：Auto-Encoder</p>
+<ul>
+<li>encoder-decoder形式的重建模型<ul>
+<li>encode：从输入x得到Latent Variable z</li>
+<li>decode：从隐变量z重建x</li>
+<li>重建loss就是重构像素点误差，可以用MSE</li>
+</ul>
+</li>
+<li>AE的局限是泛化性，仅根据已有分布重建，latent space太窄了，随机采样的latent code就是乱码了，这种性质其实很适合异常检测（GANomaly）</li>
+<li><p>于是想到在latent code上面添加噪声，扩展latent space，一个直观的做法就是将latent code扩展成一个高斯分布，真实编码附近有一个高的概率值，远的地方概率越来越低，将一个单点扩展到整个空间</p>
+<p><img src="/2023/05/17/diffusion/VAE Gaussian.png" width="35%;"></p>
+</li>
+</ul>
+</li>
+<li><p>VAE</p>
+<ul>
+<li>encoder的输出不再是隐向量z，而是一个概率分布，用均值m和方差v来建模，除此以外还添加额外的高斯噪声e，间接得到latent code $z=exp(v)*e+m$</li>
+<li><p>loss包含重建loss + 一个辅助loss</p>
+<ul>
+<li>辅助loss = $e^v-(1+v) + m^2$，他对v的倒数是$e^v-1$，在v=0时取得minimum</li>
+<li>防止v退化成-inf，使得VAE退化成AE</li>
+</ul>
+<p><img src="/2023/05/17/diffusion/VAE.png" width="45%;"></p>
+</li>
+<li><p>最终我们得到了一个decoder，只要我们在给定input的latent分布周围随机采样，就能得到类似input的样本</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>DDPM</p>
+<ul>
+<li><p>扩散模型包括 <strong>前向扩散过程</strong> 和 <strong>反向去噪过程（采样）</strong>，前向阶段对图像逐步施加噪声，直至图像被破坏变成完全的高斯噪声，然后在反向阶段学习从高斯噪声还原为原始图像的过程，最终我们可以得到一个从纯噪声生成图片的模型</p>
+<p><img src="/2023/05/17/diffusion/DDPM.png" width="50%;"></p>
+</li>
+<li><p>前向过程（扩散）</p>
+<ul>
+<li>逐步向真实图片添加噪声最终得到一个纯噪声</li>
+<li>$x_t = \sqrt {\alpha_t} x_{t-1} + \sqrt {1-\alpha_t} \varepsilon_t$<ul>
+<li>$\varepsilon_t$是满足正态分布的随机噪声</li>
+<li>$\sqrt {\alpha_t}$是图片权重，1-*是噪声权重</li>
+<li>$\alpha_t = 1-\beta_t$是固定的已知函数，可以直接获得的，$\beta$通常很小，accumulate $\alpha$ 逐渐变小</li>
+<li>$\overline \alpha = \Pi_i^t \alpha_i$ 此前所有$\alpha$的累积</li>
+</ul>
+</li>
+<li>$x_t = \sqrt {\overline \alpha_t} x_{0} + \sqrt {1-\overline \alpha_t} \varepsilon_t$</li>
+</ul>
+</li>
+<li><p>反向过程（去噪）</p>
+<ul>
+<li>训练网络去分解每一步的噪声，Unet，得到$\varepsilon_{\theta}(x_t,t)$</li>
+<li>target是使预测噪声与真实噪声接近</li>
+</ul>
+</li>
+<li><p><img src="/2023/05/17/diffusion/DDPM1.png" width="60%;"></p>
+</li>
+<li><p>使用模型</p>
+<ul>
+<li><p>使用一个随机噪声，以及trained Unet噪声模型，逐步还原成一张图片</p>
+<p><img src="/2023/05/17/diffusion/DDPM alg.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>diffusion models的缺点</p>
+<ul>
+<li>去噪过程非常耗时，并且非常消耗内存</li>
+<li>因为训的是原始图片，训练的极其缓慢，LDM的改进办法就是将训练放在latent space，用预训练的大模型将原图投影到latent space</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>Latent Diffusion Models</p>
+<ul>
+<li><p>将训练搬到了latent space</p>
+</li>
+<li><p>支持general consitioning inputs：text / bbox，用cross-attention实现多模态信息的注入</p>
+</li>
+<li><p>overview</p>
+<p>  <img src="/2023/05/17/diffusion/LDMs.png" width="60%;"></p>
+<ul>
+<li>VAE：$E$ 是encoder，用原图编码到latent space，$D$是decoder，将生成的z解码到像素space</li>
+<li>Condition-Encoder：编码多模态信息，text的话就用bert/clip</li>
+<li>UNet with cross attn：cross attn融入condition信息，指导图像生成<ul>
+<li>ResBlock<ul>
+<li>输入是latent feature和timestep_embedding</li>
+<li>timestep_embedding是将timestep用positional embedding类似的编码方式得到的</li>
+</ul>
+</li>
+<li>SpatialTransformer<ul>
+<li>standard transformer block：self attn - cross attn - ffn</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>Stable Diffusion：<a href="https://jalammar.github.io/illustrated-stable-diffusion/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-stable-diffusion/</a></li>
+<li></li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/16/SSIS-methods/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -360,6 +907,7 @@
             <p>papers</p>
 <p>[M2F] Masked-attention Mask Transformer for Universal Image Segmentation</p>
 <p>[VITA 2022] VITA: Video Instance Segmentation via Object Token Association</p>
+<p> [MobileViT v2] Separable Self-attention for Mobile Vision Transformers</p>
 <h2 id="VITA-Video-Instance-Segmentation-via-Object-Token-Association"><a href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association" class="headerlink" title="VITA: Video Instance Segmentation via Object Token Association"></a>VITA: Video Instance Segmentation via Object Token Association</h2><ol>
 <li><p>introduction</p>
 <ul>
@@ -459,6 +1007,52 @@
 </ul>
 </li>
 </ol>
+<h2 id="Separable-Self-attention-for-Mobile-Vision-Transformers"><a href="#Separable-Self-attention-for-Mobile-Vision-Transformers" class="headerlink" title="Separable Self-attention for Mobile Vision Transformers"></a>Separable Self-attention for Mobile Vision Transformers</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li>ViT的efficiency bottleneck是MHA<ul>
+<li>multi-head：costly bmm &amp; mm &amp; softmax</li>
+<li>self-attention：需要O(n^2)的computation cost</li>
+</ul>
+</li>
+<li>this paper propose separable self-attention<ul>
+<li>O(n)</li>
+<li>uses element-wise operations for computing self-attention</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>attention方式对比</p>
+<ul>
+<li>dense mm：两两做内积，然后对每个query指向的所有key的distance做归一化，attention是[b,q,q]</li>
+<li>separate method：对query[b,q,c]先计算一个context score [b,q]，然后对key token [b,q,c]计算加权和[b,q,c]，相当于对所有的key token基于context score做了reweight sum，来融合q &amp; k，最终的attention是[b,q,c]</li>
+<li><p>这样计算复杂度就与q-dim线形相关了</p>
+<p><img src="/2023/05/16/SSIS-methods/separable attention.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>attention block结构对比</p>
+<ul>
+<li>standard MHA的attn有h个k*k的dense dot</li>
+<li>Linformer会压一下key/value token的长度，压到一个固定值，mm的算力下降，但是bmm的串行pipe还在</li>
+<li><p>Separable self-attention</p>
+<ul>
+<li>query：[b,k,d]先fc到[b,k]，然后softmax归一化得到context score</li>
+<li>key：[b,k,d]先fc到[b,k,d]，然后与context score做乘[b,k,q]，融合qk的信息，然后所有key vector相加得到[b,d]，是全局的context vector</li>
+<li>value：[b,k,d]先fc-relu到[b,k,d]，然后与context vector做乘得到[b,k,d]，然后是project layer</li>
+</ul>
+<p><img src="/2023/05/16/SSIS-methods/separable self-attention.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>code</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># https://github.com/apple/ml-cvnets/blob/main/cvnets/layers/linear_attention.py#L16</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">self_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">    <span class="comment"># q=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(q, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">	</span><br><span class="line">    context_vector = k * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line">    </span><br><span class="line">    out = F.relu(v) * context_vector    <span class="comment"># [b,c,hw]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cross_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">	<span class="comment"># q!=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,q] -&gt; [b,c,q]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(k, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">    </span><br><span class="line">    context_vector = v * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line"></span><br><span class="line">    out = F.relu(q) * context_vector    <span class="comment"># [b,c,q]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br></pre></td></tr></table></figure>
 
           
         
@@ -2244,589 +2838,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/22/CLIP系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/22/CLIP系列/" itemprop="url">CLIP系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-22T09:13:20+08:00">
-                2022-10-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/22/CLIP系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/22/CLIP系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[2021 CLIP] Learning Transferable Visual Models From Natural Language Supervision</p>
-<p>[2022 MaskCLIP] Extract Free Dense Labels from CLIP</p>
-<p>[2022 DenseCLIP ]DenseCLIP: Language-Guided Dense Prediction with Context-Aware Prompting</p>
-<h2 id="CLIP-Learning-Transferable-Visual-Models-From-Natural-Language-Supervision"><a href="#CLIP-Learning-Transferable-Visual-Models-From-Natural-Language-Supervision" class="headerlink" title="CLIP:  Learning Transferable Visual Models From Natural Language Supervision"></a>CLIP:  Learning Transferable Visual Models From Natural Language Supervision</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>visual tasks通常建模成给定的图预测成给定类别的任务，大大限制了数据的可用量</li>
-<li>this paper<ul>
-<li>leverage language concepts</li>
-<li>build a simple pretraining task：predicting which caption goes with which image</li>
-<li>use 400 million image-text pairs from internet</li>
-<li>train from scratch</li>
-<li>enable zero-shot  transfer to downstream tasks</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>overview</p>
-<p> <img src="/2022/10/22/CLIP系列/CLIP.png" width="80%;"></p>
-<ul>
-<li>图1是pretraining模型</li>
-<li>图2是获取给定text set，构建prompt，然后encoder得到固定的linear classifier</li>
-<li>图3是zero-shot classification，就是给每个样本的image embedding，用上述linear classifier做logistics regression，得到其匹配不同类别的概率</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>Creating a Sufficiently Large Dataset</p>
-<ul>
-<li>construct a new dataset of 400 million image-text pairs from a variety of publicly available sources on the Internet</li>
-<li>base query：Wikipedia里面出现100次以上的单词，a set of 500,000</li>
-<li>search policy：基于base query的单词表搜索，balancing by 20,000 paris per query</li>
-</ul>
-</li>
-<li><p>Selecting an Efficient Pre-Training Method</p>
-<ul>
-<li><p>第一次尝试：</p>
-<ul>
-<li>jointly train a image CNN &amp; a text transformer</li>
-<li>发现transformer模型对有限的1000类都收敛极慢，对开放词典及其不友好</li>
-</ul>
-</li>
-<li><p>然后建立了a easier task</p>
-<ul>
-<li>只需要预测哪个text和哪个image匹配，而不用预测the exact text</li>
-<li>4x efficiency in zero-shot transfer</li>
-</ul>
-</li>
-<li><p>formulation</p>
-<ul>
-<li>given a batch of N (image, text) pairs</li>
-<li>jointly train an image encoder &amp; a text encoder，将其映射到multi-modal embedding space</li>
-<li>predict NxN pairings</li>
-<li>最大化pairs的cosine similarity，最小化$N^2-N$的incorrect pairings</li>
-<li><p>optimize a symmetric cross entropy loss</p>
-<p><img src="/2022/10/22/CLIP系列/pseudo code.png" width="35%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Choosing and Scaling a Model</p>
-<ul>
-<li>two different structures for Image CNN<ul>
-<li>ResNet &amp; ViT</li>
-<li>ResNet的gloval average pooling改成了transformer-stype的attention pooling</li>
-<li>用global query作为feature representation</li>
-</ul>
-</li>
-<li>text encoder<ul>
-<li>就是一个现成的transformer</li>
-<li>token向量operates on a lower-cased byte pair encoding (BPE)</li>
-<li>sentence最长76，add SOS &amp; EOS</li>
-<li>EOS token作为feature representation，LN &amp; linear projected into embedding space</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Model Zoo</p>
-<ul>
-<li>5 ResNets<ul>
-<li>ResNet-50, ResNet-101</li>
-<li>RN50x4, RN50x16, and RN50x64：4x, 16x, and 64x computation models follow EfficientNet-style model scaling</li>
-</ul>
-</li>
-<li>3 ViTs<ul>
-<li>ViT-B/32, a ViT-B/16, and a ViT-L/14</li>
-<li>ViT-L/14@336px：在224基础上，用336的resolution train one additional epoch </li>
-</ul>
-</li>
-<li><p>temperature parameter</p>
-<ul>
-<li>0.07，clip to prevent scaling the logits by more than 100</li>
-<li>原始的logits/T，但是新logits不超过100</li>
-<li>这是因为cosine similarity的输出在[-1,1]，而一般用于分类预测的logits通常是不限幅的，所以用temperature factor来拉大cos logits之间的差异，提高正样本置信度</li>
-<li>necessary for training stability</li>
-</ul>
-<p><img src="/2022/10/22/CLIP系列/clip hypers.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>Zero-Shot Transfer</p>
-<ul>
-<li>实验发现CLIP对unseen datasets（没有用于训练当前模型的数据集）有很好的zero-shot transfer能力，主要是因为它在互联网上见的太多了</li>
-<li>zero-shot classification pipeline：详见overview的图<ul>
-<li>用目标数据集，所有类别，作为text pairings set，然后预测样本的most probable image-text pair</li>
-<li>首先获得各自的feature embedding，各自L2-norm</li>
-<li>然后计算cosine similarity，scaled by temperature factor</li>
-<li>然后normalized by softmax into probability</li>
-</ul>
-</li>
-<li><p>精度</p>
-<ul>
-<li>leaderboard上ResNet101的精度：top1@80.98%，top5@95.51%</li>
-<li>leaderboard上ResNet50的精度：top1@79.25%，top5@94.65%</li>
-</ul>
-<p><img src="/2022/10/22/CLIP系列/zero-shot.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Representation Learning</p>
-<ul>
-<li><p>linear-probe pipeline</p>
-<ul>
-<li>固定住pretrained model</li>
-<li>fitting一个linear classifier</li>
-<li>这样相比较于finetuning的好处是hyper比较少，同时特征比较general/class-agnostic</li>
-</ul>
-</li>
-<li><p>findings</p>
-<ul>
-<li>small models（RN50/RN101）在ImageNet-21K上打不过对应模型</li>
-<li>small models在同样数据集上也打不过efficientNet家族</li>
-<li>但是大模型（RN50x64）能够打败目前最好的（Noisy Student EfficientNet-L2）</li>
-<li><p>CLIP transformers are 3x more  compute efficient than CLIP ResNets，能够在同样的算力条件下获得更好的performance</p>
-<p><img src="/2022/10/22/CLIP系列/linear probe.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>prompt engineering and ensembling</p>
-<ul>
-<li>图像数据集的类别大多是id/一个单词</li>
-<li>prompt将其构造成一个句子：a photo of {word}  / a {specific} of {word}</li>
-<li>ensemble将多种构造的embedding求mean</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/15/sparseInst/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/15/sparseInst/" itemprop="url">sparseInst</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-15T11:04:17+08:00">
-                2022-10-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/15/sparseInst/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/15/sparseInst/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>主题：query-based instance segmentation</p>
-<h2 id="Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation"><a href="#Sparse-Instance-Activation-for-Real-Time-Instance-Segmentation" class="headerlink" title="Sparse Instance Activation for Real-Time Instance Segmentation"></a>Sparse Instance Activation for Real-Time Instance Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>previous instance methods relies heavily on detection results</li>
-<li>this paper<ul>
-<li>use a sparse set of instance activation maps：稀疏set作为前景目标的ROI</li>
-<li>aggregate the overall mask feature &amp; instance-level feature</li>
-<li>avoid NMS</li>
-</ul>
-</li>
-<li>性能 &amp; 精度<ul>
-<li>40 FPS</li>
-<li>37.9AP on COCO</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>两阶段methods的limitations</p>
-<ul>
-<li>dense anchors make redundant proposals伴随了heavy burden of computation</li>
-<li>multi-scale further aggravate the issue</li>
-<li>ROI-Align没法部署在终端/嵌入式设备上</li>
-<li>后处理排序/NMS也耗时</li>
-</ul>
-</li>
-<li><p>this paper</p>
-<ul>
-<li>propose a sparse set called Instance Activation Maps（IAM）<ul>
-<li>motivated by CAM</li>
-<li>通过instance-aware activation maps对全局特征加权就可以获得instance-level feature</li>
-</ul>
-</li>
-<li>label assignment<ul>
-<li>use DETR‘s bipartitie matching</li>
-<li>avoid NMS</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>object representation对比</p>
-<p>  <img src="/2022/10/15/sparseInst/object representation.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>overview<ul>
-<li><img src="/2022/10/15/sparseInst/sparseInst.png" width="80%;"></li>
-<li>backbone：拿到x8/x16/x32的C3/C4/C5特征</li>
-<li>encoder：feature pyramid，bottleneck用了PPM扩大感受野，然后bottom-up FPN，然后merge multi-scale feature to achieve single-level prediction</li>
-<li>IAM-based decoder：<ul>
-<li>mask branch：provide mask features $M: D \times H \times W$</li>
-<li>instance branch：provide instance activation maps $k: N\times H \times W$ to further acquire recognition kernels $z: N\times D$</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>IAM-based decoder<ul>
-<li>首先两个分支都包含了 a stack of convs<ul>
-<li>3x3 conv</li>
-<li>channel = 256</li>
-<li>stack=4</li>
-</ul>
-</li>
-<li>location-sensitive features<ul>
-<li>$H \times W \times 2$的归一化坐标值</li>
-<li>concat到decoder的输入上</li>
-<li>enhance instance的representation</li>
-</ul>
-</li>
-<li>instance activation maps<ul>
-<li>IAM用3x3conv+sigmoid：region proposal map</li>
-<li>进一步地，还有用GIAM，换成group=4的3x3conv，multiple activations per object</li>
-<li>点乘在输入上，得到instance feature，$N\times D$的vector</li>
-<li>然后是三个linear layer，分别得到classification/objectness score/mask kernel</li>
-</ul>
-</li>
-<li>IOU-aware objectness<ul>
-<li>拟合pred mask和gt mask的IoU，用于评价分割模型的好坏</li>
-<li>主要因为proposal大多是负样本，这种不均衡分布会拉低cls分支的精度，导致cls score和mask分布存在misalignment</li>
-<li>inference阶段，最终使用的fg prob是$p=\sqrt{cls_prob, obj_score}$</li>
-</ul>
-</li>
-<li>mask head<ul>
-<li>given instance features $w_i \in R^{1D}$and mask features $M\in R^{DHW}$</li>
-<li>直接用矩阵乘法：$m_i = w_i \cdot M$</li>
-<li>最后upsample到原始resolution</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>matching loss<ul>
-<li>bipartite matching<ul>
-<li>dice-based cost</li>
-<li>$C(i,k)=p_i[cls_k]^{1-\alpha} * dice(m_i,gt_k)^\alpha$</li>
-<li>$\alpha = 0.8$</li>
-<li>dice用原始形式：$dice(x,y)=\frac{2 \sum x*y}{\sum x^2 + \sum y^2}$</li>
-<li>Hungary algorithm: scipy</li>
-</ul>
-</li>
-<li>weighted sum of<ul>
-<li>loss cls：focal loss</li>
-<li>loss obj：bce</li>
-<li>loss mask：bce + dice</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>dataset</p>
-<ul>
-<li>COCO 2017：118k train / 5k valid / 20k test</li>
-</ul>
-</li>
-<li><p>metric</p>
-<ul>
-<li>AP：mask的average precision</li>
-<li>FPS：frames per second，在Nvidia 2080 Ti上，没有使用TensorRT/FP16加速</li>
-</ul>
-</li>
-<li><p>training details</p>
-<ul>
-<li>8卡训练，总共64 images per-mini-batch</li>
-<li>AdamW：lr=5e-5，wd=1e-4</li>
-<li>train 270k iterations</li>
-<li>learning rate：divided by 10 at 210k &amp; 250k</li>
-<li>backbone：用了ImageNet的预训练权重，同时frozenBN</li>
-<li>data augmentaion：random flip/scale/jitter，shorter side random from [416,640]，longer side&lt;=864</li>
-<li>test/eval：use shorter size 640</li>
-<li>loss weights：cls weight=2，dice weight=2，pixel bce weight=2，obj weight=1，后面实验发现提高pixel bce weight到5会有些精度gain</li>
-<li>proposals：N=100</li>
-</ul>
-</li>
-<li><p>results</p>
-<p>  <img src="/2022/10/15/sparseInst/results.png" width="100%;"></p>
-<ul>
-<li><p>backbone主要是ResNet50</p>
-<ul>
-<li><p>ResNet-d：bag-of-tricks paper里面的一个变种，resnet在stage起始阶段进行下采样，变种将下采样放在block里面，residual path用stride2的3x3 conv，identity path用avg pooling + 1x1 conv</p>
-<p>  <img src="/2022/10/15/sparseInst/resnet-d.png" width="20%;"></p>
-</li>
-<li><p>ResNet-DCN：参考的是deformable conv net v2，将最后一个卷积替换成deformable conv</p>
-</li>
-</ul>
-</li>
-<li><p>在数据处理上，增加了random crop，以及large weight decay（0.05），为了和竞品对齐</p>
-</li>
-<li><p>ablation on coords / dconv</p>
-<p>  <img src="/2022/10/15/sparseInst/ablation1.png" width="50%;"></p>
-</li>
-<li><p>ablation on FIAM：kernel size/n convs/activations / group conv</p>
-<p>  <img src="/2022/10/15/sparseInst/ablation2.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2876,7 +2892,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">169</span>
+                  <span class="site-state-item-count">171</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

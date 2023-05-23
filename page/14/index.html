@@ -276,6 +276,946 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/08/22/Segmentation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/22/Segmentation/" itemprop="url">Segmentation</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-22T15:04:25+08:00">
+                2019-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/08/22/Segmentation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/08/22/Segmentation/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>idea: </p>
+<ol>
+<li>CT图一般是单通道灰度图像，假如我将128张CT图堆叠在一起（即128通道的图像），然后用2D卷积（会考虑通道数128），这样和直接用3D卷积会有结果上的差别吗？</li>
+<li>3d网络可以结合图像层间信息，能够保证隔层图像Mask之间的一个变化连续性，效果会比2d好。层间距大的图像，在预处理中会有插值。</li>
+<li>3d网络因为显存的限制，一种处理方式是裁成3d patch作为输入，导致其感受野有限，通常只能专注于细节和局部特征，适合作为第二级网络用于对细节做精优化。一种处理方式是降采样，分割精度下降。</li>
+<li>2.5D网络。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/08/14/keras-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/14/keras-note/" itemprop="url">keras note</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-14T09:11:21+08:00">
+                2019-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/08/14/keras-note/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/08/14/keras-note/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-keras-Lambda自定义层"><a href="#1-keras-Lambda自定义层" class="headerlink" title="1. keras Lambda自定义层"></a>1. keras Lambda自定义层</h3><p>官方文档：将任意表达式(function)封装为 Layer 对象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keras.layers.Lambda(function, output_shape=<span class="keyword">None</span>, mask=<span class="keyword">None</span>, arguments=<span class="keyword">None</span>)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>function: 需要封装的函数。 将输入张量作为第一个参数。</li>
+<li>output_shape: 预期的函数输出尺寸。(使用 TensorFlow 时，可自动推理得到)</li>
+<li>arguments: 可选的需要传递给函数的关键字参数。<strong>以字典形式传入。</strong></li>
+</ul>
+<p>几个栗子：</p>
+<p>1.1 最简：使用匿名函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model.add(Lambda(<span class="keyword">lambda</span> x: x ** <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">x = Lambda(<span class="keyword">lambda</span> image: K.image.resize_images(image, (target_size, target_size)))(inpt)</span><br></pre></td></tr></table></figure></p>
+<p>其中，<strong>lambda</strong>是python的匿名函数，后面的[xx: xxxx]用来描述函数的表达形式，<br><strong>lambda xx: xxxx</strong>整体作为<strong>Lambda</strong>函数的function参数。</p>
+<p>1.2 中级：通过字典传参，封装自定义函数，实现数据切片<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Input, Lambda, Dense, Activation, Reshape, concatenate</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> plot_model</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Model</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">slice</span><span class="params">(x, index)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> x[:, :, index]</span><br><span class="line"></span><br><span class="line">a = Input(shape=(<span class="number">4</span>,<span class="number">2</span>))</span><br><span class="line">x1 = Lambda(slice,output_shape=(<span class="number">4</span>,<span class="number">1</span>),arguments=&#123;<span class="string">'index'</span>:<span class="number">0</span>&#125;)(a)</span><br><span class="line">x2 = Lambda(slice,output_shape=(<span class="number">4</span>,<span class="number">1</span>),arguments=&#123;<span class="string">'index'</span>:<span class="number">1</span>&#125;)(a)</span><br><span class="line">x1 = Reshape((<span class="number">4</span>,<span class="number">1</span>,<span class="number">1</span>))(x1)</span><br><span class="line">x2 = Reshape((<span class="number">4</span>,<span class="number">1</span>,<span class="number">1</span>))(x2)</span><br><span class="line">output = concatenate([x1,x2])</span><br><span class="line">model = Model(a, output)</span><br><span class="line">plot_model(model, to_file=<span class="string">'model.png'</span>, show_shapes=<span class="keyword">True</span>, show_layer_names=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure></p>
+<p>模型结构图如下：</p>
+<p><img src="/2019/08/14/keras-note/Users/amber/Documents/workspace/blog/gitBlog/source/_posts/keras-note/slice.png" alt="slice img" style="zoom:67%;"></p>
+<p>1.3 高级：自定义损失函数<br>    step 1. 把y_true定义为一个输入<br>    step 2. 把loss写成一个层，作为网络的最终输出<br>    step 3. 在compile的时候，将loss设置为y_pred</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yolov3 train.py create_model:</span></span><br><span class="line">model_loss = Lambda(yolo_loss, output_shape=(<span class="number">1</span>,), name=<span class="string">'yolo_loss'</span>, </span><br><span class="line">                    arguments=&#123;<span class="string">'anchors'</span>: anchors, <span class="string">'num_classes'</span>: num_classes, <span class="string">'ignore_thresh'</span>: <span class="number">0.5</span>&#125;)(</span><br><span class="line">                    [*model_body.output, *y_true])</span><br><span class="line">model = Model([model_body.input, *y_true], model_loss)</span><br><span class="line">model.compile(optimizer=Adam(lr=<span class="number">1e-3</span>), loss=&#123;<span class="string">'yolo_loss'</span>: <span class="keyword">lambda</span> y_true, y_pred: y_pred&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># yolov3 model.py yolo_loss</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">yolo_loss</span><span class="params">(args, anchors, num_classes, ignore_thresh=<span class="number">.5</span>, print_loss=False)</span>:</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
+<h3 id="2-keras-自定义loss"><a href="#2-keras-自定义loss" class="headerlink" title="2. keras 自定义loss"></a>2. keras 自定义loss</h3><p>补充1.3: 也可以不定义为网络层，直接调用自定义loss函数<br>参数：</p>
+<ul>
+<li>y_true: 真实标签，Theano/Tensorflow 张量。</li>
+<li>y_pred: 预测值。和 y_true 相同尺寸的 Theano/TensorFlow 张量。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mycrossentropy</span><span class="params">(y_true, y_pred, e=<span class="number">0.1</span>)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="number">1</span>-e)*K.categorical_crossentropy(y_pred,y_true) + e*K.categorical_crossentropy(y_pred, K.ones_like(y_pred)/num_classes)</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=<span class="string">'rmsprop'</span>,loss=mycrossentropy, metrics=[<span class="string">'accuracy'</span>])</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>带参数的自定义loss：</p>
+<p>有时候我们计算loss的时候不只要用到y_true和y_pred，还想引入一些参数，但是keras限定构造loss函数时只能接收(y_true, y_pred)两个参数，如何优雅的传入参数？</p>
+<p>优雅的解决方案如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># build model</span></span><br><span class="line">model = my_model()</span><br><span class="line"><span class="comment"># define loss func</span></span><br><span class="line">model_loss = dice_loss(smooth=<span class="number">1e-5</span>, thresh=<span class="number">0.5</span>)</span><br><span class="line">model.compile(loss=model_loss)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实现</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dice_loss</span><span class="params">(smooth, thresh)</span>:</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">dice</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>-dice_coef(y_true, y_pred, smooth, thresh)</span><br><span class="line">  <span class="keyword">return</span> dice</span><br></pre></td></tr></table></figure>
+<h3 id="3-keras-自定义metrics"><a href="#3-keras-自定义metrics" class="headerlink" title="3. keras 自定义metrics"></a>3. keras 自定义metrics</h3><p>model.compile里面除了loss还有一个metrics，用于模型性能评估<br>参数：</p>
+<ul>
+<li>y_true: 真实标签，Theano/Tensorflow 张量。</li>
+<li>y_pred: 预测值。和 y_true 相同尺寸的 Theano/TensorFlow 张量。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">precision</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    <span class="comment"># Calculates the precision</span></span><br><span class="line">    true_positives = K.sum(K.round(K.clip(y_true * y_pred, <span class="number">0</span>, <span class="number">1</span>)))</span><br><span class="line">    predicted_positives = K.sum(K.round(K.clip(y_pred, <span class="number">0</span>, <span class="number">1</span>)))</span><br><span class="line">    precision = true_positives / (predicted_positives + K.epsilon())</span><br><span class="line">    <span class="keyword">return</span> precision</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">recall</span><span class="params">(y_true, y_pred)</span>:</span></span><br><span class="line">    <span class="comment"># Calculates the recall</span></span><br><span class="line">    true_positives = K.sum(K.round(K.clip(y_true * y_pred, <span class="number">0</span>, <span class="number">1</span>)))</span><br><span class="line">    possible_positives = K.sum(K.round(K.clip(y_true, <span class="number">0</span>, <span class="number">1</span>)))</span><br><span class="line">    recall = true_positives / (possible_positives + K.epsilon())</span><br><span class="line">    <span class="keyword">return</span> recall</span><br><span class="line"></span><br><span class="line">model.compile(optimizer=<span class="string">'rmsprop'</span>,loss=mycrossentropy, metrics=[<span class="string">'accuracy'</span>, recall, precision])</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="4-keras-自定义Layer"><a href="#4-keras-自定义Layer" class="headerlink" title="4. keras 自定义Layer"></a>4. keras 自定义Layer</h3><p>源代码：<a href="https://github.com/keras-team/keras/blob/master/keras/engine/base_layer.py" target="_blank" rel="noopener">https://github.com/keras-team/keras/blob/master/keras/engine/base_layer.py</a></p>
+<p>自定义layer继承keras的Layer类，需要实现三个方法：</p>
+<ul>
+<li><code>build(input_shape)</code>：定义权重，调用add_weight来创建层的权重矩阵，其中有参数trainable声明该参数的权重是否为可训练权重，若trainable==True，会执行self._trainable_weights.append(weight)将该权重加入到可训练权重的lst中。</li>
+<li><code>call(x)</code>：编写层逻辑</li>
+<li><code>compute_output_shape(input_shape)</code>：定义张量形状的变化逻辑</li>
+<li>get_config：返回一个字典，获取当前层的参数信息</li>
+</ul>
+<p>看了keras一些层的实现，keras中层（如conv、depthwise conv）的call函数基本都是通过调用tf.backend中的方法来实现</p>
+<p>4.1 栗子：CenterLossLayer</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CenterLossLayer</span><span class="params">(Layer)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, alpha=<span class="number">0.5</span>, **kwargs)</span>:</span>     <span class="comment"># alpha：center update的学习率</span></span><br><span class="line">        super().__init__(**kwargs)</span><br><span class="line">        self.alpha = alpha</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">build</span><span class="params">(self, input_shape)</span>:</span></span><br><span class="line">     		<span class="comment"># add_weight：为该层创建一个可训练／不可训练的权重</span></span><br><span class="line">        self.centers = self.add_weight(name=<span class="string">'centers'</span>,</span><br><span class="line">                                       shape=(<span class="number">10</span>, <span class="number">2</span>),</span><br><span class="line">                                       initializer=<span class="string">'uniform'</span>,</span><br><span class="line">                                       trainable=<span class="keyword">False</span>)</span><br><span class="line">        <span class="comment"># 一定要在最后调用它</span></span><br><span class="line">        super().build(input_shape)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, x, mask=None)</span>:</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># x[0] is Nx2, x[1] is Nx10 onehot, self.centers is 10x2</span></span><br><span class="line">        delta_centers = K.dot(K.transpose(x[<span class="number">1</span>]), (K.dot(x[<span class="number">1</span>], self.centers) - x[<span class="number">0</span>]))  <span class="comment"># 10x2</span></span><br><span class="line">        center_counts = K.sum(K.transpose(x[<span class="number">1</span>]), axis=<span class="number">1</span>, keepdims=<span class="keyword">True</span>) + <span class="number">1</span>  <span class="comment"># 10x1</span></span><br><span class="line">        delta_centers /= center_counts</span><br><span class="line">        new_centers = self.centers - self.alpha * delta_centers</span><br><span class="line">        <span class="comment"># add_update：更新层内参数(build中定义的参数)的方法</span></span><br><span class="line">        self.add_update((self.centers, new_centers), x)</span><br><span class="line">        self.result = x[<span class="number">0</span>] - K.dot(x[<span class="number">1</span>], self.centers)</span><br><span class="line">        self.result = K.sum(self.result ** <span class="number">2</span>, axis=<span class="number">1</span>, keepdims=<span class="keyword">True</span>) <span class="comment">#/ K.dot(x[1], center_counts)</span></span><br><span class="line">        <span class="keyword">return</span> self.result <span class="comment"># Nx1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">compute_output_shape</span><span class="params">(self, input_shape)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> K.int_shape(self.result)</span><br></pre></td></tr></table></figure>
+<p>有一些自定义层，有时候会不实现compute_output_shape和get_config</p>
+<ul>
+<li>在call方法中，输出tensor如果发生了shape的变化，keras layer是不会自动推导出输出shape的，所以要显示的自定义compute_output_shape</li>
+<li>不管定不定义get_config方法，都可以使用load_weights方法加载保存的权重</li>
+<li>但是如果要使用load_model方法载入包含自定义层的model，必须要显示自定义get_config方法，否则keras 无法获知 Linear 的配置参数！<ul>
+<li>在 <code>__init__</code> 的最后加上 <code>**kwargs</code> 参数，并用 <code>**kwargs</code> 参数初始化父类。</li>
+<li>实现上述的 <code>get_config</code> 方法，返回自定义的参数配置和默认的参数配置</li>
+</ul>
+</li>
+</ul>
+<p>4.2 补充1.3 &amp; 2: 自定义损失函数除了可以用Lambda层，也可以定义Layer层，这是个没有权重的自定义Layer。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 官方示例：Custom loss layer</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomVariationalLayer</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, **kwargs)</span>:</span></span><br><span class="line">        self.is_placeholder = <span class="keyword">True</span></span><br><span class="line">        super(CustomVariationalLayer, self).__init__(**kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">vae_loss</span><span class="params">(self, x, x_decoded_mean)</span>:</span></span><br><span class="line">        xent_loss = original_dim * metrics.binary_crossentropy(x, x_decoded_mean)<span class="comment">#Square Loss</span></span><br><span class="line">        kl_loss = - <span class="number">0.5</span> * K.sum(<span class="number">1</span> + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=<span class="number">-1</span>)<span class="comment"># KL-Divergence Loss</span></span><br><span class="line">        <span class="keyword">return</span> K.mean(xent_loss + kl_loss)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        x = inputs[<span class="number">0</span>]</span><br><span class="line">        x_decoded_mean = inputs[<span class="number">1</span>]</span><br><span class="line">        loss = self.vae_loss(x, x_decoded_mean)</span><br><span class="line">        self.add_loss(loss, inputs=inputs)</span><br><span class="line">        <span class="comment"># We won't actually use the output.</span></span><br><span class="line">        <span class="keyword">return</span> x</span><br></pre></td></tr></table></figure>
+<p>4.3 补充</p>
+<p>call方法的完整参数：call(self, inputs, <em>args, *</em>kwargs)</p>
+<ul>
+<li>其中inputs就是层输入，tensor/tensors</li>
+<li>除此之外还有两个reserved keyword arguments：training&amp;mask，一个用于bn/dropout这种train/test计算有区别的flag，一个用于RNNlayers约束时序相关关系</li>
+<li><em>args和*</em>kwargs是预留为了以后扩展更多输入参数的</li>
+</ul>
+<p>4.4 更加flexible的自定义层：<a href="https://keras.io/guides/making_new_layers_and_models_via_subclassing/" target="_blank" rel="noopener">https://keras.io/guides/making_new_layers_and_models_via_subclassing/</a></p>
+<p>我们可以将trainable variable直接定义在__init__()里面，省略build，直接call：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># use tf.Variable</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Linear</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, units=<span class="number">32</span>, input_dim=<span class="number">32</span>)</span>:</span></span><br><span class="line">        super(Linear, self).__init__()</span><br><span class="line">        w_init = tf.random_normal_initializer()</span><br><span class="line">        self.w = tf.Variable(</span><br><span class="line">            initial_value=w_init(shape=(input_dim, units), dtype=<span class="string">"float32"</span>),</span><br><span class="line">            trainable=<span class="keyword">True</span>,</span><br><span class="line">        )</span><br><span class="line">        b_init = tf.zeros_initializer()</span><br><span class="line">        self.b = tf.Variable(</span><br><span class="line">            initial_value=b_init(shape=(units,), dtype=<span class="string">"float32"</span>), trainable=<span class="keyword">True</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> tf.matmul(inputs, self.w) + self.b</span><br><span class="line">    </span><br><span class="line"><span class="comment"># use self.add_weight方法</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Linear</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, units=<span class="number">32</span>, input_dim=<span class="number">32</span>)</span>:</span></span><br><span class="line">        super(Linear, self).__init__()</span><br><span class="line">        self.w = self.add_weight(</span><br><span class="line">            shape=(input_dim, units), initializer=<span class="string">"random_normal"</span>, trainable=<span class="keyword">True</span></span><br><span class="line">        )</span><br><span class="line">        self.b = self.add_weight(shape=(units,), initializer=<span class="string">"zeros"</span>, trainable=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> tf.matmul(inputs, self.w) + self.b</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">！！！我实验下来发现对tf1，第一种写法没法创建权重，第二种才能，可能要到tf2才行</span><br></pre></td></tr></table></figure>
+<p>build中add_weight实际上也是调用tf.Variable创建一个varaible</p>
+<p>4.5 Layer内部也可以创建a Layer instance作为其attribute——torch style</p>
+<p>也是放在__init__()里面，如learnable positional embedding</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MLPBlock</span><span class="params">(Layer)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        super(MLPBlock, self).__init__()</span><br><span class="line">        self.linear_1 = Linear(<span class="number">32</span>)</span><br><span class="line">        self.linear_2 = Linear(<span class="number">32</span>)</span><br><span class="line">        self.linear_3 = Linear(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs)</span>:</span></span><br><span class="line">        x = self.linear_1(inputs)</span><br><span class="line">        x = tf.nn.relu(x)</span><br><span class="line">        x = self.linear_2(x)</span><br><span class="line">        x = tf.nn.relu(x)</span><br><span class="line">        <span class="keyword">return</span> self.linear_3(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mlp = MLPBlock()</span><br><span class="line">y = mlp(tf.ones(shape=(<span class="number">3</span>, <span class="number">64</span>)))  <span class="comment"># The first call to the `mlp` will create the weights</span></span><br><span class="line">print(<span class="string">"weights:"</span>, len(mlp.weights))</span><br><span class="line">print(<span class="string">"trainable weights:"</span>, len(mlp.trainable_weights))</span><br><span class="line"></span><br><span class="line">！！！tf2才支持，别瞎搞</span><br></pre></td></tr></table></figure>
+<p><strong>！！！</strong>需要注意的是：用躲避build的方法创建的层，在层被fisrt call的时候才会创建权重，而不是在模型创建阶段</p>
+<h3 id="5-keras-Generator"><a href="#5-keras-Generator" class="headerlink" title="5. keras Generator"></a>5. keras Generator</h3><p>本质上就是python的生成器，每次返回<strong>一个batch</strong>的样本及标签<br>自定义generator的时候要写成死循环（while true），因为model.fit_generator()在使用在个函数的时候，并不会在每一个epoch之后重新调用，那么如果这时候generator自己结束了就会有问题。<br>栗子是我为mixup写的generator：<br>没有显示的while True是因为创建keras自带的generator的时候已经是死循环了（for永不跳出）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Datagen_mixup</span><span class="params">(data_path, img_size, batch_size, is_train=True, mix_prop=<span class="number">0.8</span>, alpha=<span class="number">1.0</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> is_train:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        datagen = ImageDataGenerator()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># using keras库函数</span></span><br><span class="line">    generator = datagen.flow_from_directory(data_path, target_size=(img_size, img_size),</span><br><span class="line">                                            batch_size=batch_size,</span><br><span class="line">                                            color_mode=<span class="string">"grayscale"</span>,</span><br><span class="line">                                            shuffle=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> x,y <span class="keyword">in</span> generator:     <span class="comment"># a batch of &lt;img, label&gt;</span></span><br><span class="line">        <span class="keyword">if</span> alpha &gt; <span class="number">0</span>:</span><br><span class="line">            lam = np.random.beta(alpha, alpha)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lam = <span class="number">1</span></span><br><span class="line">        idx = [i <span class="keyword">for</span> i <span class="keyword">in</span> range(x.shape[<span class="number">0</span>])]</span><br><span class="line">        random.shuffle(idx)</span><br><span class="line">        mixed_x = lam*x + (<span class="number">1</span>-lam)*x[idx]</span><br><span class="line">        mixed_y = lam*y + (<span class="number">1</span>-lam)*y[idx]</span><br><span class="line"></span><br><span class="line">        n_origin = int(batch_size * mix_prop)</span><br><span class="line">        gen_x = np.vstack(x[:n_origin], mixed_x[:(batch_size-n_origin)])</span><br><span class="line">        gen_y = np.vstack(y[:n_origin], mixed_y[:(batch_size-n_origin)])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">yield</span> gen_x, gen_y</span><br></pre></td></tr></table></figure>
+<p>【多进程】fit_generator中有一个参数use_multiprocessing，默认设置为false，因为‘using a generator with use_multiprocessing=True and multiple workers may duplicate your data. Please consider using the`keras.utils.Sequence’ class’</p>
+<p>如果设置多进程use_multiprocessing，代码会把你的数据复制几份，分给不同的workers进行输入，这显然不是我们希望的，我们希望一份数据直接平均分给多个workers帮忙输入，这样才是最快的。而Sequence数据类能完美解决这个问题。</p>
+<p><strong>keras.utils.Sequence()</strong>：</p>
+<ul>
+<li>每一个 <code>Sequence</code> 必须实现 <code>__getitem__</code> 和 <code>__len__</code> 方法</li>
+<li><code>__getitem__</code> 方法应该范围一个完整的批次</li>
+<li><strong>如果你想在迭代之间修改你的数据集，你可以实现 <code>on_epoch_end</code></strong>（会在每个迭代之间被隐式调用）\</li>
+<li>github上有issue反映on_epoch_end不会没调用，解决方案：在__len__方法中显示自行调用</li>
+</ul>
+<p>直接看栗子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.applications <span class="keyword">import</span> ResNet50</span><br><span class="line"><span class="keyword">from</span> keras.optimizers <span class="keyword">import</span> SGD</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DataGenerator</span><span class="params">(keras.utils.Sequence)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, data, batch_size=<span class="number">1</span>, shuffle=True)</span>:</span></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.data = data</span><br><span class="line">        self.indexes = np.arange(len(self.data))</span><br><span class="line">        self.shuffle = shuffle</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 计算每一个epoch的迭代次数</span></span><br><span class="line">        <span class="keyword">return</span> math.ceil(len(self.data) / float(self.batch_size))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, index)</span>:</span></span><br><span class="line">        <span class="comment"># 生成每个batch数据</span></span><br><span class="line">        batch_indices = self.indexes[index*self.batch_size:(index+<span class="number">1</span>)*self.batch_size]</span><br><span class="line">        batch_data = [self.data[k] <span class="keyword">for</span> k <span class="keyword">in</span> batch_indices]</span><br><span class="line"></span><br><span class="line">        x_batch, y_batch = self.data_generation(batch_data)</span><br><span class="line">        <span class="keyword">return</span> x_batch, y_batch</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_epoch_end</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.shuffle == <span class="keyword">True</span>:</span><br><span class="line">            np.random.shuffle(self.indexes)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">data_generation</span><span class="params">(self, batch_data)</span>:</span></span><br><span class="line">        images = []</span><br><span class="line">        labels = []</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 生成数据</span></span><br><span class="line">        <span class="keyword">for</span> i, data <span class="keyword">in</span> enumerate(batch_data):</span><br><span class="line">            image = cv2.imread(data, <span class="number">0</span>)</span><br><span class="line">            image = cv2.resize(image, dsize=(<span class="number">64</span>,<span class="number">64</span>), interpolation=cv2.INTER_LINEAR)</span><br><span class="line">            <span class="keyword">if</span> np.max(image)&gt;<span class="number">1</span>:</span><br><span class="line">                image = image / <span class="number">255.</span></span><br><span class="line">            image = np.expand_dims(image, axis=<span class="number">-1</span>)</span><br><span class="line">            images.append(image)</span><br><span class="line">            <span class="keyword">if</span> <span class="string">'d0'</span> <span class="keyword">in</span> data:</span><br><span class="line">                labels.append([<span class="number">1</span>,<span class="number">0</span>])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                labels.append([<span class="number">0</span>,<span class="number">1</span>])</span><br><span class="line">        <span class="keyword">return</span> np.array(images), np.array(labels)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line"></span><br><span class="line">  	<span class="comment"># data</span></span><br><span class="line">    data_dir = <span class="string">"/Users/amber/dataset/mnist"</span></span><br><span class="line">    data_lst = []</span><br><span class="line">    <span class="keyword">for</span> file <span class="keyword">in</span> os.listdir(data_dir+<span class="string">"/d0"</span>)[:]:</span><br><span class="line">        data_lst.append(os.path.join(data_dir, <span class="string">"d0"</span>, file))</span><br><span class="line">    <span class="keyword">for</span> file <span class="keyword">in</span> os.listdir(data_dir+<span class="string">"/d1"</span>)[:]:</span><br><span class="line">        data_lst.append(os.path.join(data_dir, <span class="string">"d1"</span>, file))</span><br><span class="line">    training_generator = DataGenerator(data_lst, batch_size=<span class="number">128</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># model</span></span><br><span class="line">    model = ResNet50(input_shape=(<span class="number">64</span>,<span class="number">64</span>,<span class="number">1</span>),weights=<span class="keyword">None</span>, classes=<span class="number">2</span>)</span><br><span class="line">    model.compile(optimizer=SGD(<span class="number">1e-3</span>), loss=<span class="string">'categorical_crossentropy'</span>, metrics=[<span class="string">'accuracy'</span>])</span><br><span class="line"></span><br><span class="line">    model.fit_generator(training_generator, epochs=<span class="number">50</span>,max_queue_size=<span class="number">200</span>,workers=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>经验值：</p>
+<ul>
+<li>workers：2/3</li>
+<li>max_queue_size：默认10，具体基于GPU处于空闲状态适量调节</li>
+</ul>
+<p>【附加】实验中还发现一个问题，最开始定义了一个sequential model，然后在调用fit_generator一直报错：model not compile，但是显然model是compile过了的，网上查到的解释：‘Sequential model works with model.fit but not with model.fit_generator’</p>
+<h3 id="6-多GPU"><a href="#6-多GPU" class="headerlink" title="6. 多GPU"></a>6. 多GPU</h3><p>多GPU运行分为两种情况：</p>
+<pre><code>* 数据并行
+* 设备并行
+</code></pre><p>6.1 数据并行</p>
+<p>数据并行将目标模型在多个GPU上各复制一份，使用每个复制品处理数据集的不同部分。</p>
+<p>一个栗子：写tripleNet模型时，取了batch=4，总共15类，那么三元组总共有$(4/2)^2*15=60$个，训练用了224的图像，单张GPU内存会溢出，因此需要单机多卡数据并行。</p>
+<p>​    step1. 在模型定义中，用multi_gpu_model封一层，<strong>需要在model.compile之前</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.util <span class="keyword">import</span> multi_gpu_model</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">triple_model</span><span class="params">(input_shape=<span class="params">(<span class="number">512</span>,<span class="number">512</span>,<span class="number">1</span>)</span>, n_classes=<span class="number">10</span>, multi_gpu=False)</span>:</span></span><br><span class="line">  anchor_input = Input(shape=input_shape)</span><br><span class="line">  positive_input = Input(shape=input_shape)</span><br><span class="line">  negative_input = Input(shape=input_shape)</span><br><span class="line">  </span><br><span class="line">  sharedCNN = base_model(input_shape)</span><br><span class="line">  encoded_anchor = sharedCNN(anchor_input)</span><br><span class="line">  encoded_positive = sharedCNN(positive_input)</span><br><span class="line">  encoded_negative = sharedCNN(negative_input)</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># class branch</span></span><br><span class="line">  x = Dense(n_classses, activation=<span class="string">'softmax'</span>)(encoded_anchor)</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># distance branch</span></span><br><span class="line">  encoded_anchor = Activation(<span class="string">'sigmoid'</span>)(encoded_anchor)</span><br><span class="line">  encoded_positive = Activation(<span class="string">'sigmoid'</span>)(encoded_positive)</span><br><span class="line">  encoded_negative = Activation(<span class="string">'sigmoid'</span>)(encoded_negative)</span><br><span class="line">  merged = concatenate([encoded_anchor, encoded_positive, encoded_negative], axis=<span class="number">-1</span>, name=<span class="string">'tripleLossLayer'</span>)</span><br><span class="line">  </span><br><span class="line">  model = Model(inputs=[anchor_input,positive_input,negative_input], outputs=[x, merged])</span><br><span class="line">  <span class="keyword">if</span> multi_gpu:</span><br><span class="line">    	model = multi_gpu_model(model, GPU_COUNT)</span><br><span class="line">  </span><br><span class="line">  model.compile(optimizer=SGD, loss=[cls_loss, triplet_loss], metrics=[cls_acc])</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> model</span><br></pre></td></tr></table></figure>
+<p>​    step2. 在定义checkpoint时，要用ParallelModelCheckpoint封一层，初始化参数的model要传原始模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.callbacks <span class="keyword">import</span> ModelCheckpoint</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ParallelModelCheckpoint</span><span class="params">(ModelCheckpoint)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,single_model,multi_model, filepath, monitor=<span class="string">'val_loss'</span>, verbose=<span class="number">0</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 save_best_only=False, save_weights_only=False,</span></span></span><br><span class="line"><span class="function"><span class="params">                 mode=<span class="string">'auto'</span>, period=<span class="number">1</span>)</span>:</span></span><br><span class="line">        self.single_model = single_model</span><br><span class="line">        self.multi_model = multi_model</span><br><span class="line">        super(ParallelModelCheckpoint,self).__init__(filepath, monitor, verbose,save_best_only, save_weights_only,mode, period)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set_model</span><span class="params">(self, model)</span>:</span></span><br><span class="line">        self.single_model.optimizer = self.multi_model.optimizer</span><br><span class="line">        super(ParallelModelCheckpoint,self).set_model(self.single_model)</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_epoch_end</span><span class="params">(self, epoch, logs=None)</span>:</span></span><br><span class="line">        <span class="comment"># save optimizer weights</span></span><br><span class="line">        self.single_model.optimizer = self.multi_model.optimizer</span><br><span class="line">        super(ParallelModelCheckpoint, self).on_epoch_end(epoch, logs)</span><br><span class="line"></span><br><span class="line">model = triple_model(multi_gpu=<span class="keyword">True</span>)</span><br><span class="line">single_model = triple_model(multi_gpu=<span class="keyword">False</span>)</span><br><span class="line">filepath = <span class="string">"./tripleNet_&#123;epoch:02d&#125;_val_loss_&#123;val_loss:.3f&#125;.h5"</span></span><br><span class="line">check_point = ParallelModelCheckpoint(single_model, filepath)</span><br></pre></td></tr></table></figure>
+<p>​    step3. 在保存权重时，通过cpu模型来保存。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化基础模型，这样定义模型权重会存储在CPU内存中</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'/cpu:0'</span>):</span><br><span class="line">		model = Resnet50(input_shape=(<span class="number">512</span>,<span class="number">512</span>,<span class="number">3</span>), classes=<span class="number">4</span>, weights=<span class="keyword">None</span>)</span><br><span class="line">		</span><br><span class="line">parallel_model = multi_gpu_model(model, GPU_COUNT)</span><br><span class="line">parallel_model.fit(x,y, epochs=<span class="number">20</span>, batch_size=<span class="number">32</span>)</span><br><span class="line">model.save(<span class="string">'model.h5'</span>)</span><br></pre></td></tr></table></figure>
+<p>​    【attention】同理，在load权重时，也是load单模型的权重，再调用multi_gpu_model将模型复制到多个GPU上：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">model = Model(inputs=[anchor_input,positive_input,negative_input], outputs=[x, merged])</span><br><span class="line"><span class="keyword">if</span> multi_gpu:</span><br><span class="line">		<span class="keyword">if</span> os.path.exists(weight_pt):</span><br><span class="line">		model.load_weights(weight_pt)</span><br><span class="line">  	model = multi_gpu_model(model, GPU_COUNT)</span><br></pre></td></tr></table></figure>
+<p>​    step4. 如果保存成了多GPU权重，可以如下代码解封：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = EfficientV2(input_shape=<span class="number">380</span>, n_classes=<span class="number">2</span>)</span><br><span class="line">model = multi_gpu_model(model, <span class="number">2</span>)</span><br><span class="line">model.load_weigts(<span class="string">'multi.h5'</span>)</span><br><span class="line"></span><br><span class="line">single_model = model.layers[<span class="number">-2</span>]</span><br><span class="line">single_model.save_weights(<span class="string">'single.h5'</span>)</span><br></pre></td></tr></table></figure>
+<p>【ATTENTION】实验中发现一个问题：在有些case中，我们使用了自定义loss作为网络的输出，<strong>此时网络的输出是个标量</strong>，但是在调用multi_gpu_model这个方法时，具体实现在multi_gpu_utils.py中，最后一个步骤要merge几个device的输出，通过axis=0的concat实现，网络输出是标量的话就会报错——list assignment index out of range。</p>
+<p>尝试的解决方案是改成相加：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Merge outputs under expected scope.</span></span><br><span class="line"><span class="keyword">with</span> tf.device(<span class="string">'/cpu:0'</span> <span class="keyword">if</span> cpu_merge <span class="keyword">else</span> <span class="string">'/gpu:%d'</span> % target_gpu_ids[<span class="number">0</span>]):</span><br><span class="line">    merged = []</span><br><span class="line">    <span class="keyword">for</span> name, outputs <span class="keyword">in</span> zip(output_names, all_outputs):</span><br><span class="line">        merged.append(Lambda(<span class="keyword">lambda</span> x: K.sum(x))(outputs)) 	</span><br><span class="line">        <span class="comment"># merged.append(concatenate(outputs, axis=0, name=name))</span></span><br><span class="line">    <span class="keyword">return</span> Model(model.inputs, merged)</span><br></pre></td></tr></table></figure>
+<p>【ATTENTION++】网络的输出不能是标量！！永远会隐藏保留一个batch dim，之前是写错了！！</p>
+<ul>
+<li>model loss是一个标量</li>
+<li>作为输出层的loss是保留batch dim的！！</li>
+</ul>
+<p>6.2 设备并行</p>
+<p>设备并行适用于<strong>多分支结构</strong>，一个分支用一个GPU。通过使用TensorFlow device scopes实现。</p>
+<p>栗子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Model where a shared LSTM is used to encode two different sequences in parallel</span></span><br><span class="line">input_a = keras.Input(shape=(<span class="number">140</span>, <span class="number">256</span>))</span><br><span class="line">input_b = keras.Input(shape=(<span class="number">140</span>, <span class="number">256</span>))</span><br><span class="line"></span><br><span class="line">shared_lstm = keras.layers.LSTM(<span class="number">64</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Process the first sequence on one GPU</span></span><br><span class="line"><span class="keyword">with</span> tf.device_scope(<span class="string">'/gpu:0'</span>):</span><br><span class="line">    encoded_a = shared_lstm(tweet_a)</span><br><span class="line"><span class="comment"># Process the next sequence on another GPU</span></span><br><span class="line"><span class="keyword">with</span> tf.device_scope(<span class="string">'/gpu:1'</span>):</span><br><span class="line">    encoded_b = shared_lstm(tweet_b)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Concatenate results on CPU</span></span><br><span class="line"><span class="keyword">with</span> tf.device_scope(<span class="string">'/cpu:0'</span>):</span><br><span class="line">    merged_vector = keras.layers.concatenate([encoded_a, encoded_b],axis=<span class="number">-1</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="7-库函数讲解"><a href="#7-库函数讲解" class="headerlink" title="7. 库函数讲解"></a>7. 库函数讲解</h3><p>7.1 BatchNormalization(axis=-1)</p>
+<p>用于在每个batch上将前一层的激活值重新规范化，即使得其输出数据的均值接近0，其标准差接近1。</p>
+<p>常用参数axis：指定要规范化的轴，通常为特征轴，如在“channels_first”的data format下，axis=1，反之axis=-1。</p>
+<p>7.2 LSTM</p>
+<p>参数：</p>
+<ul>
+<li>units：输出维度（最后一维），标准输入NxTxD，N for batch，T for time-step，D for vector-dimension。</li>
+<li>activation：激活函数</li>
+<li>recurrent_activation：用于循环时间步的激活函数</li>
+<li>dropout：在 0 和 1 之间的浮点数。 单元的丢弃比例，用于输入的线性转换</li>
+<li>recurrent_dropout：在 0 和 1 之间的浮点数。 单元的丢弃比例，用于循环层状态的线性转换</li>
+<li><strong>return_sequences: </strong>布尔值，默认False。是返回输出序列中的最后一个输出，还是全部序列的输出。即many-to-one还是many-to-many，简单来讲，当我们需要时序输出（many-to-many）的时候，就set True。</li>
+<li><strong>return_state</strong>: 布尔值，默认False。除了输出之外是否返回<strong>最后一个</strong>状态（cell值）</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># return_sequences</span></span><br><span class="line">inputs1 = Input(tensor=(<span class="number">1</span>，<span class="number">3</span>, <span class="number">1</span>))</span><br><span class="line">lstm1 = LSTM(<span class="number">1</span>, return_sequences=<span class="keyword">True</span>)(inputs1)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">输出结果为</span></span><br><span class="line"><span class="string">[[[-0.02243521]</span></span><br><span class="line"><span class="string">[-0.06210149]</span></span><br><span class="line"><span class="string">[-0.11457888]]]</span></span><br><span class="line"><span class="string">表示每个time-step，LSTM cell的输出</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># return_state</span></span><br><span class="line">lstm1, state_h, state_c = LSTM(<span class="number">1</span>, return_state=<span class="keyword">True</span>)(inputs1)</span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">输出结果为</span></span><br><span class="line"><span class="string">[array([[ 0.10951342]], dtype=float32),</span></span><br><span class="line"><span class="string"> array([[ 0.10951342]], dtype=float32),</span></span><br><span class="line"><span class="string"> array([[ 0.24143776]], dtype=float32)]</span></span><br><span class="line"><span class="string"> list中依次为网络输出，最后一个time-step的LSTM cell的输出值和cell值</span></span><br><span class="line"><span class="string">'''</span></span><br></pre></td></tr></table></figure>
+<p>7.2.5 TimeDistributed</p>
+<p>顺便再说下TimeDistributed，当我们使用many-to-many模型，最后一层LSTM的输出维度为k，而我们想要的最终输出维度为n，那么就需要引入Dense层，对于时序模型，我们要对每一个time-step引入dense层，这实质上是多个Dense操作，那么我们就可以用TimeDistributed来包裹Dense层来实现。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line">model.add(LSTM(<span class="number">3</span>, input_shape=(length, <span class="number">1</span>), return_sequences=<span class="keyword">True</span>))</span><br><span class="line">model.add(TimeDistributed(Dense(<span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
+<p>官方文档：这个封装器将一个层应用于输入的每个时间片。</p>
+<ul>
+<li>当该层作为第一层时，应显式说明input_shape</li>
+<li>TimeDistributed可以应用于任意层，如Conv3D：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如我的crnn model</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crnn</span><span class="params">(input_shape, cnn, n_classes=<span class="number">24</span>)</span>:</span></span><br><span class="line"></span><br><span class="line">    inpt = Input(input_shape)</span><br><span class="line"></span><br><span class="line">    x = TimeDistributed(cnn, input_shape=input_shape)(inpt)</span><br><span class="line">    x = LSTM(<span class="number">128</span>, return_sequences=<span class="keyword">True</span>)(x)</span><br><span class="line">    x = LSTM(<span class="number">256</span>, return_sequences=<span class="keyword">True</span>)(x)</span><br><span class="line"></span><br><span class="line">    x = TimeDistributed(Dense(n_classes))(x)</span><br><span class="line"></span><br><span class="line">    model = Model(inpt, x)</span><br><span class="line">    model.summary()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"> </span><br><span class="line">crnn_model = crnn((<span class="number">24</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">128</span>,<span class="number">2</span>), cnn_model)</span><br></pre></td></tr></table></figure>
+<p>7.3 Embedding</p>
+<p>用于将稀疏编码映射为固定尺寸的密集表示。</p>
+<p>输入形如（samples，sequence_length）的2D张量，输出形如(samples, sequence_length, output_dim)的3D张量。</p>
+<p>参数：</p>
+<ul>
+<li>input_dim：字典长度，即输入数据最大下标+1</li>
+<li>output_dim：</li>
+<li>input_length：</li>
+</ul>
+<p>栗子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># centerloss branch</span></span><br><span class="line">lambda_c = <span class="number">1</span></span><br><span class="line">input_ = Input(shape=(<span class="number">1</span>,))</span><br><span class="line">centers = Embedding(<span class="number">10</span>,<span class="number">2</span>)(input_)    <span class="comment"># (None, 1, 2)</span></span><br><span class="line"><span class="comment"># 这里的输入是0-9的枚举（dim=10），然后映射成一个簇心</span></span><br><span class="line">intra_loss = Lambda(<span class="keyword">lambda</span> x:K.sum(K.square(x[<span class="number">0</span>]-x[<span class="number">1</span>][:,<span class="number">0</span>]),<span class="number">1</span>,keepdims=<span class="keyword">True</span>))([out1,centers])</span><br><span class="line">model_center_loss = Model([inputs,input_],[out2,intra_loss])</span><br><span class="line">model_center_loss.compile(optimizer=<span class="string">"sgd"</span>,</span><br><span class="line">                          loss=[<span class="string">"categorical_crossentropy"</span>,<span class="keyword">lambda</span> y_true,y_pred:y_pred],</span><br><span class="line">                          loss_weights=[<span class="number">1</span>,lambda_c/<span class="number">2.</span>],</span><br><span class="line">                          metrics=[<span class="string">"acc"</span>])</span><br><span class="line">model_center_loss.summary()</span><br></pre></td></tr></table></figure>
+<p>7.4 plot_model</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from keras.utils import plot_model</span><br><span class="line">plot_model(model, to_file=&apos;model.png&apos;, show_shapes=False, show_layer_names=True)</span><br></pre></td></tr></table></figure>
+<p>7.5 K.function</p>
+<p>获取模型某层的输出，一种方法是创建一个新的模型，使它的输出是目标层，然后调用predict。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">model = ...    <span class="comment"># the original model</span></span><br><span class="line"></span><br><span class="line">new_model = Model(input=model.input,</span><br><span class="line">                  output=model.get_layer(<span class="string">'my_layer'</span>).output)</span><br><span class="line"></span><br><span class="line">intermediate_output = new_model.predict(input_data）</span><br></pre></td></tr></table></figure>
+<p>也可以创建一个函数来实现：keras.backend.function(inputs, outputs, updates=<strong>None</strong>)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这是写center-loss时写的栗子：</span></span><br><span class="line">func = K.function(inputs=[model.input[<span class="number">0</span>]],          </span><br><span class="line">                  outputs=[model.get_layer(<span class="string">'out1'</span>).output]) </span><br><span class="line"><span class="comment"># model.input[0]: one input of the multi-input model</span></span><br><span class="line"></span><br><span class="line">test_features = func([x_test])[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+<p>7.6 K.gradients(y,x)</p>
+<p>求y关于x的导数，y和x可以是张量／张量列表。返回张量列表，列表长度同x列表，列表中元素shape同x列表中元素。</p>
+<p>对于$y=[y_1, y_2], x=[x_1, x_2, x_3]$，有返回值$[grad_1, grad_2, grad_3]$，真实的计算过程为：</p>
+<script type="math/tex; mode=display">
+grad_1 = \frac{\partial y_1}{\partial x_1} + \frac{\partial y_2}{\partial x_1} \\
+grad_2 = \frac{\partial y_1}{\partial x_2} + \frac{\partial y_2}{\partial x_2} \\
+grad_3 = \frac{\partial y_1}{\partial x_3} + \frac{\partial y_2}{\partial x_3}</script><p>7.7  ModelCheckpoint、ReduceLROnPlateau、EarlyStopping、LearningRateScheduler、Tensorboard</p>
+<ul>
+<li><p>模型检查点ModelCheckpoint</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ModelCheckpoint(filepath, monitor=<span class="string">'val_loss'</span>, verbose=<span class="number">0</span>, save_best_only=<span class="keyword">False</span>, save_weights_only=<span class="keyword">False</span>, mode=<span class="string">'auto'</span>, period=<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>filepath可以由 <code>epoch</code> 的值和 <code>logs</code> 的键来填充，如weights.{epoch:02d}-{val_loss:.2f}.hdf5。</li>
+<li>moniter：被监测的数据</li>
+<li>mode：在 <code>auto</code> 模式中，方向会自动从被监测的数据的<strong>名字</strong>(不靠谱🤷‍♀️)中判断出来。</li>
+</ul>
+</li>
+<li><p>学习率衰减ReduceLROnPlateau</p>
+<p>  学习率的方案相对简单，要么在验证集的损失或准确率开始稳定时调低学习率，要么在固定间隔上调低学习率。</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ReduceLROnPlateau(monitor=<span class="string">'val_loss'</span>, factor=<span class="number">0.1</span>, patience=<span class="number">10</span>, verbose=<span class="number">0</span>, mode=<span class="string">'auto'</span>, min_delta=<span class="number">0.0001</span>, cooldown=<span class="number">0</span>, min_lr=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>  当学习停止时，模型总是会受益于降低 2-10 倍的学习速率。</p>
+<ul>
+<li>moniter：被监测的数据</li>
+<li>factor：新的学习速率 = 学习速率 * factor</li>
+<li>patience：被监测数据没有进步的训练轮数，在这之后训练速率会被降低。</li>
+</ul>
+</li>
+<li><p>更复杂的学习率变化模式定义LearningRateScheduler</p>
+<p>  前提是只需要用到默认参数是epoch</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先定义一个变化模式</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">warmup_scheduler</span><span class="params">(epoch, mode=<span class="string">'power_decay'</span>)</span>:</span></span><br><span class="line">	lr_base = <span class="number">1e-5</span></span><br><span class="line">	lr_stable = <span class="number">1e-4</span></span><br><span class="line">	</span><br><span class="line">	lr = lr_base * math.pow(<span class="number">10</span>, epoch)</span><br><span class="line">	<span class="keyword">if</span> lr&gt;lr_stable:</span><br><span class="line">		<span class="keyword">return</span> lr_stable</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> lr</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 然后调用LearningRateScheduler方法wrapper这个scheduler</span></span><br><span class="line">scheduler = LearningRateScheduler(warmup_scheduler)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在使用的时候放在callbacks的list里面，在每个epoch结束触发</span></span><br><span class="line">callbacks = [checkpoint, reduce_lr, scheduler, early_stopping]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>更更复杂的学习率变化模式定义可以直接继承Callback：<a href="https://kexue.fm/archives/5765" target="_blank" rel="noopener">https://kexue.fm/archives/5765</a></p>
+<ul>
+<li>当我们需要传入更丰富的自定义参数/需要进行by step的参数更新等，可以直接继承Callback，进行更自由的自定义</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以余弦退火算法为例：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CosineAnnealingScheduler</span><span class="params">(Callback)</span>:</span></span><br><span class="line">    <span class="string">"""Cosine annealing scheduler.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, epochs, scale=<span class="number">1.6</span>, shift=<span class="number">0</span>, verbose=<span class="number">0</span>)</span>:</span></span><br><span class="line">        super(CosineAnnealingScheduler, self).__init__()</span><br><span class="line">        self.epochs = epochs</span><br><span class="line">        self.scale = scale</span><br><span class="line">        self.shift = shift</span><br><span class="line">        self.verbose = verbose</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_epoch_begin</span><span class="params">(self, epoch, logs=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> epoch&lt;=<span class="number">6</span>:</span><br><span class="line">            <span class="comment"># linearly increase from 0 to 1.6 in first 5 epochs</span></span><br><span class="line">            lr = <span class="number">1.6</span> / <span class="number">5</span> * (epoch+<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># cosine annealing</span></span><br><span class="line">						lr = self.shift + self.scale * (<span class="number">1</span> + math.cos(math.pi * (epoch+<span class="number">1</span><span class="number">-5</span>) / self.epochs)) / <span class="number">2</span></span><br><span class="line">        K.set_value(self.model.optimizer.lr, lr)</span><br><span class="line">        <span class="keyword">if</span> self.verbose &gt; <span class="number">0</span>:</span><br><span class="line">            print(<span class="string">'\nEpoch %05d: CosineAnnealingScheduler setting learning rate to %s.'</span> % (epoch+<span class="number">1</span>, lr))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_epoch_end</span><span class="params">(self, epoch, logs=None)</span>:</span></span><br><span class="line">        logs = logs <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">        logs[<span class="string">'lr'</span>] = K.get_value(self.model.optimizer.lr)</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line"><span class="comment"># 调用</span></span><br><span class="line">lrscheduler = CosineAnnealingScheduler(epochs=<span class="number">2</span>, verbose=<span class="number">1</span>)</span><br><span class="line">callbacks = [checkpoint, lrscheduler]</span><br><span class="line">model.fit(...,</span><br><span class="line">         callbacks=callbacks)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>有一些计算指标，不好写成张量形式，也可以放在Callback器里面，想咋写就咋写</p>
+<p>  说白了就是on_epoch_end里面的数据是array，而不是tensor，比较好写</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.callbacks <span class="keyword">import</span> Callback</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义Callback器，计算验证集的acc，并保存最优模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Evaluate</span><span class="params">(Callback)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.accs = []</span><br><span class="line">        self.highest = <span class="number">0.</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_epoch_end</span><span class="params">(self, epoch, logs=None)</span>:</span></span><br><span class="line">      	<span class="comment">###### 自由发挥区域</span></span><br><span class="line">        pred = model.predict(x_test)</span><br><span class="line">        acc = np.mean(pred.argmax(axis=<span class="number">1</span>) == y_test)</span><br><span class="line">        <span class="comment">########</span></span><br><span class="line">        self.accs.append(acc)</span><br><span class="line">        <span class="keyword">if</span> acc &gt;= self.highest: <span class="comment"># 保存最优模型权重</span></span><br><span class="line">            self.highest = acc</span><br><span class="line">            model.save_weights(<span class="string">'best_model.weights'</span>)</span><br><span class="line"></span><br><span class="line">        print(<span class="string">'acc: %s, highest: %s'</span> % (acc, self.highest))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">evaluator = Evaluate()</span><br><span class="line">model.fit(x_train,</span><br><span class="line">          y_train,</span><br><span class="line">          epochs=<span class="number">10</span>,</span><br><span class="line">          callbacks=[evaluator])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Callback类共支持六种在不同阶段的执行函数：</p>
+<ul>
+<li>on_epoch_begin：warmup</li>
+<li>on_epoch_end：metrics</li>
+<li>on_batch_begin</li>
+<li>on_batch_end</li>
+<li>on_train_begin</li>
+<li>on_train_end</li>
+</ul>
+</li>
+<li><p>提前停止训练EarlyStopping</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EarlyStopping(monitor=<span class="string">'val_loss'</span>, min_delta=<span class="number">0</span>, patience=<span class="number">0</span>, verbose=<span class="number">0</span>, mode=<span class="string">'auto'</span>, baseline=<span class="keyword">None</span>, restore_best_weights=<span class="keyword">False</span>)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>moniter：被监测的数据</li>
+<li>patience：被监测数据没有进步的训练轮数，在这之后训练速率会被降低。</li>
+<li>min_delta：在被监测的数据中被认为是提升的最小变化，小于 min_delta 的绝对变化会被认为没有提升。</li>
+<li>baseline: 要监控的数量的基准值。</li>
+</ul>
+</li>
+<li><p>以上这四个都是继承自keras.callbacks()</p>
+</li>
+<li><p>可视化工具TensorBoard</p>
+<p>  这个回调函数为 Tensorboard 编写一个日志， 这样你可以可视化测试和训练的标准评估的动态图像， 也可以可视化模型中不同层的激活值直方图。</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TensorBoard(log_dir=<span class="string">'./logs'</span>, histogram_freq=<span class="number">0</span>, batch_size=<span class="number">32</span>, write_graph=<span class="keyword">True</span>, write_grads=<span class="keyword">False</span>, write_images=<span class="keyword">False</span>, embeddings_freq=<span class="number">0</span>, embeddings_layer_names=<span class="keyword">None</span>, embeddings_metadata=<span class="keyword">None</span>, embeddings_data=<span class="keyword">None</span>, update_freq=<span class="string">'epoch'</span>)</span><br></pre></td></tr></table></figure>
+<p>  实际使用时关注第一个参数log_dir就好，查看时通过命令行启动：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tensorboard --logdir=/full_path_to_your_logs</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>这几个回调函数，通通在训练时（model.fit / fit_generator）放在callbacks关键字里面。</strong></p>
+<p>7.8 反卷积 Conv2DTranspose</p>
+<p>三个核心的参数filtes、kernel_size、strides、padding=’valid’</p>
+<ul>
+<li>filtes：输出通道数</li>
+<li>strides：步长</li>
+<li>kernel_size：一般需要通过上面两项计算得到</li>
+</ul>
+<p>反卷积运算和正向卷积运算保持一致，即：</p>
+<script type="math/tex; mode=display">
+(output\_shape - kernel\_size) / stride + 1 = input\_shape</script><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># fcn example: current feature map x (,32,32,32), input_shape (512,512,2), output_shape (,512,512,1)</span></span><br><span class="line">strides = <span class="number">2</span></span><br><span class="line">kernel_size = input_shape[<span class="number">0</span>] - (x.get_shape().as_list()[<span class="number">1</span>] - <span class="number">1</span>)*strides</span><br><span class="line">y = Conv2DTranspose(<span class="number">1</span>, kernel_size, padding=<span class="string">'valid'</span>, strides=strides)</span><br></pre></td></tr></table></figure>
+<p>7.9 K.shape &amp; K.int_shape &amp; tensor._keras_shape</p>
+<ul>
+<li>tensor._keras_shape等价于K.int_shape：张量的shape，返回值是个tuple</li>
+<li>K.shape：返回值是个tensor，tensor是个一维向量，其中每一个元素可以用[i]来访问，是个标量tensor</li>
+</ul>
+<p>两个方法的主要区别是：前者返回值是个常量，只能表征语句执行时刻（如构建图）tensor的状态，后者返回值是个变量，wrapper的方法可以看成一个节点，在graph的作用域内始终有效，在构建图的时候可以是None，在实际流入数据流的时候传值就行，如batch_size！！！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> keras.backend <span class="keyword">as</span> K</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Input</span><br><span class="line"></span><br><span class="line">x = Input((<span class="number">22</span>,<span class="number">22</span>,<span class="number">1</span>))</span><br><span class="line">print(K.shape(x))</span><br><span class="line"><span class="comment"># Tensor("Shape:0", shape=(4,), dtype=int32)</span></span><br><span class="line">print(K.shape(x)[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># Tensor("strided_slice:0", shape=(), dtype=int32)</span></span><br><span class="line"></span><br><span class="line">print(K.int_shape(x))</span><br><span class="line"><span class="comment"># (None, 22, 22, 1)</span></span><br></pre></td></tr></table></figure>
+<p>7.10 binary_crossentropy(y_true, y_pred, from_logits=False, label_smoothing=0)</p>
+<ul>
+<li>from_logits：logits表示网络的直接输出——没经过sigmoid或者softmax的概率化，默认情况下，我们认为y_pred是已经处理过的概率分布</li>
+<li></li>
+</ul>
+<h3 id="8-衍生：一些tf函数"><a href="#8-衍生：一些tf函数" class="headerlink" title="8. 衍生：一些tf函数"></a>8. 衍生：一些tf函数</h3><p>8.1 tf.where(condition, x=None, y=None,name=None)</p>
+<p>两种用法：</p>
+<ul>
+<li>如果x，y为空，返回值是满足condition元素的<strong>索引</strong>，每个索引占一行。</li>
+<li>如果x，y不为空，那么condition、x、y 和返回值相同维度，condition为True的位置替换x中对应元素，condition为False的位置替换y中对应元素。</li>
+</ul>
+<p>关于索引indices：</p>
+<ul>
+<li><p>condition的shape的dim，就是每一行索引vector的shape，例：</p>
+</li>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">condition1 = np.array([[<span class="keyword">True</span>,<span class="keyword">False</span>,<span class="keyword">False</span>],[<span class="keyword">False</span>,<span class="keyword">True</span>,<span class="keyword">True</span>]])</span><br><span class="line">print(condition1.shape)    <span class="comment"># (2,3)</span></span><br><span class="line"><span class="keyword">with</span> tf.compat.v1.Session() <span class="keyword">as</span> sess:</span><br><span class="line">    print(sess.run(tf.where(condition1)))</span><br><span class="line"><span class="comment"># [[0 0]</span></span><br><span class="line"><span class="comment"># [1 1]</span></span><br><span class="line"><span class="comment"># [1 2]]</span></span><br><span class="line"><span class="comment"># condition是2x3的arr，也就是dim=2，那么索引vector的shape就是2，纵轴的shape是满足cond的数量</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>索引通常与tf.gather和tf.gather_nd搭配使用：</p>
+<ul>
+<li>tf.gather(params,indices,axis=0.name=None)：tf.gather只能接受1-D的索引，axis用来指定轴，一个索引取回对应维度的一个向量</li>
+<li>tf.gather_nd(params,indices)：tf.gather_nd可以接受多维的索引，如果索引的dim小于params的dim，则从axis=0开始索引，后面的取全部。</li>
+<li>tf.batch_gather(params,indices,name=None)：对张量的批量索引</li>
+</ul>
+</li>
+</ul>
+<p>8.2 tf.Print()</p>
+<p>相当于一个节点，定义了数据的流入和流出。</p>
+<p>一个error：在模型定义中，直接调用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">intra_distance = tf.Print(intra_distance,</span><br><span class="line">                          [intra_distance],</span><br><span class="line">                          message=<span class="string">'Debug info: '</span>,</span><br><span class="line">                          summarize=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>会报错：AttributeError: ‘Tensor’ object has no attribute ‘_keras_history’</p>
+<p>参考：<a href="https://stackoverflow.com/questions/56096399/creating-model-throws-attributeerror-tensor-object-has-no-attribute-keras" target="_blank" rel="noopener">https://stackoverflow.com/questions/56096399/creating-model-throws-attributeerror-tensor-object-has-no-attribute-keras</a></p>
+<blockquote>
+<p>You cannot use backend functions directly in Keras tensors, every operation in these tensors must be a layer. You need to wrap each custom operation in a Lambda layer and provide the appropriate inputs to the layer.</p>
+</blockquote>
+<p>之前一直没注意到这个问题，凡是调用了tf.XXX的operation，都要wrapper在Lambda层里。</p>
+<p>改写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wrapper function</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(args)</span>:</span></span><br><span class="line">    intra_distance, min_inter_distance = args</span><br><span class="line">    intra_distance = tf.Print(intra_distance,</span><br><span class="line">                              [intra_distance],</span><br><span class="line">                              message=<span class="string">'Debug info: '</span>,</span><br><span class="line">                              summarize=<span class="number">10</span>)</span><br><span class="line">    min_inter_distance = tf.Print(min_inter_distance,</span><br><span class="line">                                  [min_inter_distance],</span><br><span class="line">                                  message=<span class="string">'Debug info: '</span>,</span><br><span class="line">                                  summarize=<span class="number">10</span>)</span><br><span class="line">    <span class="keyword">return</span> [intra_distance, min_inter_distance]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型内</span></span><br><span class="line">intra_distance, min_inter_distance = Lambda(debug)([intra_distance, min_inter_distance])</span><br></pre></td></tr></table></figure>
+<p>【夹带私货】tf.Print同时也可以打印wrapper function内的中间变量，都放在列表里面就可以了。</p>
+<p>8.3 tf.while_loop(cond, body, init_value)</p>
+<p>tensorflow中实现循环的语句</p>
+<ul>
+<li>终止条件cond：是一个函数</li>
+<li>循环体body：是一个函数</li>
+<li>init_value：是一个list，保存循环相关参数</li>
+</ul>
+<ol>
+<li>cond、body的参数是要与init_value列表中变量一一对应的</li>
+<li>body返回值的格式要与init_value变量一致（tensor形状保持不变）</li>
+<li>若非要变怎么办（有时候我们希望在while_loop的过程中，维护一个list）？动态数组TensorArray／高级参数shape_invariants</li>
+</ol>
+<p>8.3.1 动态数组</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义</span></span><br><span class="line">b_boxes = tf.TensorArray(K.dtype(boxes), size=<span class="number">1</span>, dynamic_size=<span class="keyword">True</span>, clear_after_read=<span class="keyword">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入指定位置</span></span><br><span class="line">b_boxes = b_boxes.write(b, boxes_)</span><br></pre></td></tr></table></figure>
+<p>​    tensor array变量中一个位置只能写入一次</p>
+<p>8.3.2 shape_invariants</p>
+<p>​    <a href="https://stackoverflow.com/questions/41233462/tensorflow-while-loop-dealing-with-lists" target="_blank" rel="noopener">reference stackoverflow</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">i = tf.constant(<span class="number">0</span>)</span><br><span class="line">l = tf.Variable([])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">body</span><span class="params">(i, l)</span>:</span>                                               </span><br><span class="line">    temp = tf.gather(array,i)</span><br><span class="line">    l = tf.concat([l, [temp]], <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> i+<span class="number">1</span>, l</span><br><span class="line"></span><br><span class="line">index, list_vals = tf.while_loop(cond, body, [i, l],</span><br><span class="line">                                 shape_invariants=[i.get_shape(), tf.TensorShape([<span class="keyword">None</span>])])</span><br></pre></td></tr></table></figure>
+<p>​    在while_loop中显示地指定参数的shape，上面的例子用了tf.TensorShape([None])令其自动推断，而不是固定检查，因此可以解决变化长度列表。</p>
+<p>一个完整的栗子：第一次见while_loop，在yolo_loss里面</p>
+<ol>
+<li>基于batch维度做遍历</li>
+<li>loop结束后将动态数据stack起来，重获batch dim</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Find ignore mask, iterate over each of batch.</span></span><br><span class="line"><span class="comment"># extract the elements on the mask which has iou &lt; ignore_thresh</span></span><br><span class="line">ignore_mask = tf.TensorArray(K.dtype(y_true[<span class="number">0</span>]), size=<span class="number">1</span>, dynamic_size=<span class="keyword">True</span>)  <span class="comment"># 动态size数组</span></span><br><span class="line">object_mask_bool = K.cast(object_mask, <span class="string">'bool'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loop_body</span><span class="params">(b, ignore_mask)</span>:</span></span><br><span class="line">    true_box = tf.boolean_mask(y_true[l][b,...,<span class="number">0</span>:<span class="number">4</span>], object_mask_bool[b,...,<span class="number">0</span>])   <span class="comment"># (H,W,3,5)</span></span><br><span class="line">    iou = box_iou(pred_box[b], true_box)     <span class="comment"># (H,W,3,1)</span></span><br><span class="line">    best_iou = K.max(iou, axis=<span class="number">-1</span>)</span><br><span class="line">    ignore_mask = ignore_mask.write(b, K.cast(best_iou&lt;ignore_thresh, K.dtype(true_box)))</span><br><span class="line">    <span class="keyword">return</span> b+<span class="number">1</span>, ignore_mask</span><br><span class="line">_, ignore_mask = K.control_flow_ops.while_loop(<span class="keyword">lambda</span> b,*args: b&lt;m, loop_body, [<span class="number">0</span>, ignore_mask])</span><br><span class="line">ignore_mask = ignore_mask.stack()</span><br><span class="line">ignore_mask = K.expand_dims(ignore_mask, <span class="number">-1</span>)     <span class="comment"># （N,H,W,3,1）</span></span><br></pre></td></tr></table></figure>
+<p>8.4 tf.image.non_max_suppression()</p>
+<p>非最大值抑制：贪婪算法，按scores由大到小排序，选定第一个，依次对之后的框求iou，删除那些和选定框iou大于阈值的box。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 返回是被选中边框在参数boxes中的下标位置</span></span><br><span class="line">selected_indices=tf.image.non_max_suppression(boxes, scores, max_output_size, iou_threshold=<span class="number">0.5</span>, name=<span class="keyword">None</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据indices获取边框</span></span><br><span class="line">selected_boxes=tf.gather(boxes,selected_indices)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>boxes：2-D的float类型的，大小为[num_boxes,4]的张量</li>
+<li>scores：1-D的float类型的，大小为[num_boxes]，对应的每一个box的一个score</li>
+<li>max_output_size：标量整数Tensor，输出框的最大数量</li>
+<li>iou_threshold：浮点数，IOU阈值</li>
+<li>selected_indices：1-D的整数张量，大小为[M]，留下来的边框下标，M小于等于max_output_size</li>
+</ul>
+<p>【拓展】还有Multi-class version of NMS——tf.multiclass_non_max_suppression()</p>
+<p>8.5 限制GPU用量</p>
+<ul>
+<li><p>linux下查看GPU使用情况，1秒刷新一次：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch -n 1 nvidia-smi</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>指定显卡号</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">"CUDA_VISIBLE_DEVICES"</span>] = <span class="string">"2"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>限制GPU用量</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> keras.backend <span class="keyword">as</span> K</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置百分比</span></span><br><span class="line">config = tf.ConfigProto()</span><br><span class="line">config.gpu_options.per_process_gpu_memory_fraction = <span class="number">0.3</span></span><br><span class="line">session = tf.Session(config=config)</span><br><span class="line">K.set_session(session)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置动态申请</span></span><br><span class="line">config = tf.ConfigProto()  </span><br><span class="line">config.gpu_options.allow_growth=<span class="keyword">True</span>   <span class="comment">#不全部占满显存, 按需分配</span></span><br><span class="line">session = tf.Session(config=config)</span><br><span class="line">K.set_session(session)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>8.6 tf.boolean_mask()</p>
+<p>tf.boolean_mask(tensor,mask,name=’boolean_mask’,axis=None)</p>
+<p>其中，tensor是N维度的，mask是K维度的，$K \leq N$</p>
+<p>axis表示mask的起始维度，被mask的维度只保留mask为True的数据，同时这部分数据flatten成一维，最终tensor的维度是N-K+1</p>
+<p>栗子：yolov3里面，把特征图上有object的grid提取出来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># y_trues: [b,h,w,a,4]</span></span><br><span class="line"><span class="comment"># conf_gt: [b,h,w,a,1]</span></span><br><span class="line">true_box = tf.boolean_mask(y_trues[i][b,...,<span class="number">0</span>:<span class="number">4</span>], conf_gt[b,...,<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>8.7 tf.clip</p>
+<p>梯度阶段，用来在optmizer之前修正梯度，主要有以下4个方法：</p>
+<p>— tf.clip_by_value</p>
+<p>— tf.clip_by_norm</p>
+<p>— tf.clip_by_global_norm</p>
+<p>— tf.clip_by_average_norm</p>
+<ul>
+<li>tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>t中任意大于或者小于相应阈值的value都被截断</li>
+<li>然后返回这个截断后的t</li>
+</ul>
+</li>
+<li>tf.clip_by_norm(t, clip_norm, axes=None, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>首先计算它的l2norm</li>
+<li>如果l2norm(t)&gt;clip_norm，计算t * clip_norm / l2norm(t)，否则不改变t</li>
+<li>不指定axes默认计算all dimension的l2 norm（得到一个标量），指定的话计算对应维度（对应维度的dim变为1）</li>
+<li>返回这个修正后的t</li>
+</ul>
+</li>
+<li>tf.clip_by_global_norm(t_list, clip_norm, use_norm=None, name=None)<ul>
+<li>输入是一组tensors：t_list，当list里面只有一个元素的时候，就退化成了tf.clip_by_norm</li>
+<li>首先计算global norm：sqrt(sum([l2norm(t)**2 for t in t_list]))，所有梯度的l2norm的平方和的平方根</li>
+<li>对每个t，如果l2norm(t)&gt;global_norm，计算t * clip_norm / l2norm(t)，否则不改变t</li>
+<li>返回修正后的t_list，以及global_norm</li>
+</ul>
+</li>
+<li>tf.clip_by_average_norm(t, clip_norm, name=None)<ul>
+<li>输入single tensor：t</li>
+<li>首先计算它的平均L2范数：l2norm_avg，【这是个啥？】</li>
+<li>如果l2norm_avg(t)&gt;clip_norm，计算t * clip_norm / l2norm_avg(t)，否则不改变t</li>
+<li>返回这个修正后的t</li>
+</ul>
+</li>
+</ul>
+<h2 id="9-keras自定义优化器optimizer"><a href="#9-keras自定义优化器optimizer" class="headerlink" title="9. keras自定义优化器optimizer"></a>9. keras自定义优化器optimizer</h2><p>9.1 关于梯度的优化器公共参数，用于梯度裁剪</p>
+<ul>
+<li>clipnorm：对所有梯度进行downscale，使得梯度vector中l2范数最大为1（g * 1 / max(1, l2_norm)）</li>
+<li>clipvalue：对绝对值进行上下限截断</li>
+</ul>
+<p>9.2 keras的Optimizier对象</p>
+<ul>
+<li>keras的官方代码有optimizier_v1和optimizier_v2两版，分别面向tf1和tf2，v1的看起来简洁一些</li>
+<li><a href="https://stackoverflow.com/questions/56806419/keras-how-to-reset-optimizer-state/56807007#56807007" target="_blank" rel="noopener">self.updates &amp; self.weights</a><ul>
+<li>self.updates：stores the variables that will be updated with every batch that is processed by the model in training<ul>
+<li>用来保存与模型训练相关的参数（iterations、params、moments、accumulators，etc）</li>
+<li>symbolic graph variable，通过K.update_add方法说明图的operation</li>
+</ul>
+</li>
+<li>self.weights：the functions that save and load optimizers will save and load this property<ul>
+<li>用来保存与优化器相关的参数</li>
+<li>model.save()方法中涉及include_optimizer=False，决定优化器的保存和重载</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Optimizer</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="comment"># - 抽象类，所有真实的优化器继承自Optimizer对象</span></span><br><span class="line">	<span class="comment"># - 提供两个用于梯度截断的公共参数</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, **kwargs)</span>:</span></span><br><span class="line">    allowed_kwargs = &#123;<span class="string">'clipnorm'</span>, <span class="string">'clipvalue'</span>&#125;</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> kwargs:</span><br><span class="line">      <span class="keyword">if</span> k <span class="keyword">not</span> <span class="keyword">in</span> allowed_kwargs:</span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">'Unexpected keyword argument passed to optimizer: '</span> + str(k))</span><br><span class="line">      <span class="comment"># checks that clipnorm &gt;= 0 and clipvalue &gt;= 0</span></span><br><span class="line">      <span class="keyword">if</span> kwargs[k] &lt; <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">'Expected &#123;&#125; &gt;= 0, received: &#123;&#125;'</span>.format(k, kwargs[k]))</span><br><span class="line">    self.__dict__.update(kwargs)</span><br><span class="line">    self.updates = []   <span class="comment"># 计算更新的参数</span></span><br><span class="line">    self.weights = []   <span class="comment"># 优化器带来的权重，在get_updates以后才有元素，在保存模型时会被保存</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Set this to False, indicating `apply_gradients` does not take the</span></span><br><span class="line">  <span class="comment"># `experimental_aggregate_gradients` argument.</span></span><br><span class="line">  _HAS_AGGREGATE_GRAD = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">_create_all_weights</span><span class="params">(self, params)</span>:</span></span><br><span class="line">    <span class="comment"># 声明除了grads以外用于梯度更新的参数，创建内存空间，在get_updates方法中使用</span></span><br><span class="line">    <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_updates</span><span class="params">(self, loss, params)</span>:</span></span><br><span class="line">    <span class="comment"># 定义梯度更新的计算方法, 更新self.updates</span></span><br><span class="line">    <span class="keyword">raise</span> NotImplementedError</span><br><span class="line">   </span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">get_config</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># config里面是优化器相关的参数，默认只有两个梯度截断的参数，需要根据实际优化器添加（lr、decay ...）</span></span><br><span class="line">    config = &#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> hasattr(self, <span class="string">'clipnorm'</span>):</span><br><span class="line">      config[<span class="string">'clipnorm'</span>] = self.clipnorm</span><br><span class="line">    <span class="keyword">if</span> hasattr(self, <span class="string">'clipvalue'</span>):</span><br><span class="line">      config[<span class="string">'clipvalue'</span>] = self.clipvalue</span><br><span class="line">    <span class="keyword">return</span> config</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_gradients</span><span class="params">(self, loss, params)</span>:</span></span><br><span class="line">    <span class="comment"># 计算梯度值，并在有必要时进行梯度截断</span></span><br><span class="line">    grads = K.gradients(loss, params)</span><br><span class="line">    <span class="keyword">if</span> any(g <span class="keyword">is</span> <span class="keyword">None</span> <span class="keyword">for</span> g <span class="keyword">in</span> grads):</span><br><span class="line">      <span class="keyword">raise</span> ValueError(<span class="string">'An operation has `None` for gradient. '</span></span><br><span class="line">                       <span class="string">'Please make sure that all of your ops have a '</span></span><br><span class="line">                       <span class="string">'gradient defined (i.e. are differentiable). '</span></span><br><span class="line">                       <span class="string">'Common ops without gradient: '</span></span><br><span class="line">                       <span class="string">'K.argmax, K.round, K.eval.'</span>)</span><br><span class="line">    <span class="keyword">if</span> hasattr(self, <span class="string">'clipnorm'</span>):</span><br><span class="line">      grads = [tf.clip_by_norm(g, self.clipnorm) <span class="keyword">for</span> g <span class="keyword">in</span> grads]</span><br><span class="line">    <span class="keyword">if</span> hasattr(self, <span class="string">'clipvalue'</span>):</span><br><span class="line">      grads = [</span><br><span class="line">          tf.clip_by_value(g, -self.clipvalue, self.clipvalue)</span><br><span class="line">          <span class="keyword">for</span> g <span class="keyword">in</span> grads</span><br><span class="line">      ]</span><br><span class="line">    <span class="keyword">return</span> grads</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">set_weights</span><span class="params">(self, weights)</span>:</span></span><br><span class="line">		<span class="comment"># 给optimizer的weights用一系列np array赋值</span></span><br><span class="line">    <span class="comment"># 没看到有调用，省略code： K.batch_set_value()</span></span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">get_weights</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 获取weights的np array值</span></span><br><span class="line">    <span class="comment"># 没看到有调用，省略code： K.batch_get_value()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">  @classmethod</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">from_config</span><span class="params">(cls, config)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> cls(**config)</span><br></pre></td></tr></table></figure>
+<p>9.3 实例化一个优化器</p>
+<ul>
+<li>based on keras.Optimizer对象</li>
+<li>主要需要重写get_updates和get_config方法<ul>
+<li>get_updates用来定义梯度更新的计算方法</li>
+<li>get_config用来定义实例用到的参数</li>
+</ul>
+</li>
+<li>以SoftSGD为例：<ul>
+<li>每隔一定的batch才更新一次参数，不更新梯度的step梯度不清空，执行累加，从而实现batchsize的变相扩大</li>
+<li>建议搭配间隔更新参数的BN层来使用，否则BN还是基于小batchsize来更新均值和方差</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SoftSGD</span><span class="params">(Optimizer)</span>:</span></span><br><span class="line">    <span class="comment"># [new arg] steps_per_update: how many batch to update gradient</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, lr=<span class="number">0.01</span>, momentum=<span class="number">0.</span>, decay=<span class="number">0.</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 nesterov=False, steps_per_update=<span class="number">2</span>, **kwargs)</span>:</span></span><br><span class="line">        super(SoftSGD, self).__init__(**kwargs)</span><br><span class="line">        <span class="keyword">with</span> K.name_scope(self.__class__.__name__):</span><br><span class="line">            self.iterations = K.variable(<span class="number">0</span>, dtype=<span class="string">'int64'</span>, name=<span class="string">'iterations'</span>)</span><br><span class="line">            self.lr = K.variable(lr, name=<span class="string">'lr'</span>)</span><br><span class="line">            self.steps_per_update = steps_per_update  <span class="comment"># 多少batch才更新一次</span></span><br><span class="line">            self.momentum = K.variable(momentum, name=<span class="string">'momentum'</span>)</span><br><span class="line">            self.decay = K.variable(decay, name=<span class="string">'decay'</span>)</span><br><span class="line">        self.initial_decay = decay</span><br><span class="line">        self.nesterov = nesterov</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_updates</span><span class="params">(self, loss, params)</span>:</span></span><br><span class="line">        <span class="comment"># learning rate decay</span></span><br><span class="line">        lr = self.lr</span><br><span class="line">        <span class="keyword">if</span> self.initial_decay &gt; <span class="number">0</span>:</span><br><span class="line">            lr = lr * (<span class="number">1.</span> / (<span class="number">1.</span> + self.decay * K.cast(self.iterations, K.dtype(self.decay))))</span><br><span class="line"> </span><br><span class="line">        shapes = [K.int_shape(p) <span class="keyword">for</span> p <span class="keyword">in</span> params]</span><br><span class="line">        sum_grads = [K.zeros(shape) <span class="keyword">for</span> shape <span class="keyword">in</span> shapes]  <span class="comment"># 平均梯度，用来梯度下降</span></span><br><span class="line">        grads = self.get_gradients(loss, params)  <span class="comment"># 当前batch梯度</span></span><br><span class="line">        self.updates = [K.update_add(self.iterations, <span class="number">1</span>)]</span><br><span class="line">        self.weights = [self.iterations] + sum_grads</span><br><span class="line">        <span class="keyword">for</span> p, g, sg <span class="keyword">in</span> zip(params, grads, sum_grads):</span><br><span class="line">            <span class="comment"># momentum 梯度下降</span></span><br><span class="line">            v = self.momentum * sg / float(self.steps_per_update) - lr * g  <span class="comment"># velocity</span></span><br><span class="line">            <span class="keyword">if</span> self.nesterov:</span><br><span class="line">                new_p = p + self.momentum * v - lr * sg / float(self.steps_per_update)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                new_p = p + v</span><br><span class="line"> </span><br><span class="line">            <span class="comment"># 如果有约束，对参数加上约束</span></span><br><span class="line">            <span class="keyword">if</span> getattr(p, <span class="string">'constraint'</span>, <span class="keyword">None</span>) <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">                new_p = p.constraint(new_p)</span><br><span class="line"> </span><br><span class="line">            <span class="comment"># 满足条件才更新参数</span></span><br><span class="line">            cond = K.equal(self.iterations % self.steps_per_update, <span class="number">0</span>)</span><br><span class="line">            self.updates.append(K.switch(cond, K.update(p, new_p), p))</span><br><span class="line">            self.updates.append(K.switch(cond, K.update(sg, g), K.update(sg, sg + g)))</span><br><span class="line">        <span class="keyword">return</span> self.updates</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_config</span><span class="params">(self)</span>:</span></span><br><span class="line">        config = &#123;<span class="string">'lr'</span>: float(K.get_value(self.lr)),</span><br><span class="line">                  <span class="string">'steps_per_update'</span>: self.steps_per_update,</span><br><span class="line">                  <span class="string">'momentum'</span>: float(K.get_value(self.momentum)),</span><br><span class="line">                  <span class="string">'decay'</span>: float(K.get_value(self.decay)),</span><br><span class="line">                  <span class="string">'nesterov'</span>: self.nesterov</span><br><span class="line">                  &#125;</span><br><span class="line">        base_config = super(SoftSGD, self).get_config()</span><br><span class="line">        <span class="keyword">return</span> dict(list(base_config.items()) + list(config.items()))</span><br></pre></td></tr></table></figure>
+<h2 id="10-keras自定义激活函数activation"><a href="#10-keras自定义激活函数activation" class="headerlink" title="10. keras自定义激活函数activation"></a>10. keras自定义激活函数activation</h2><p>10.1 定义激活函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gelu</span><span class="params">(x)</span>:</span></span><br><span class="line">    cdf = <span class="number">0.5</span> * (<span class="number">1.0</span> + tf.erf(x / tf.sqrt(<span class="number">2.0</span>)))</span><br><span class="line">    <span class="keyword">return</span> x*cdf</span><br></pre></td></tr></table></figure>
+<p>10.2 使用自定义激活函数</p>
+<ul>
+<li><p>使用Activation方法</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x = Activation(gelu)(x)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>不能整合进带有activation参数的层（如Conv2D），因为Conv基类的get_config()方法从keras.activations里面读取相应的激活函数，其中带参数的激活函数如PReLU（Advanced activations）、以及自定义的激活函数都不在这个字典中，否则会报错：</p>
+<p>  AttributeError: ‘Activation’ object has no attribute ‘<strong>name</strong>‘</p>
+</li>
+</ul>
+<p>10.3 checkpoint issue</p>
+<p>网上还有另一种写法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Activation</span><br><span class="line"><span class="keyword">from</span> keras.utils.generic_utils <span class="keyword">import</span> get_custom_objects</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gelu</span><span class="params">(x)</span>:</span></span><br><span class="line">    cdf = <span class="number">0.5</span> * (<span class="number">1.0</span> + tf.erf(x / tf.sqrt(<span class="number">2.0</span>)))</span><br><span class="line">    <span class="keyword">return</span> x*cdf</span><br><span class="line">  </span><br><span class="line">get_custom_objects().update(&#123;<span class="string">'gelu'</span>: Activation(gelu)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 后面可以通过名字调用激活函数</span></span><br><span class="line">x = Activation(<span class="string">'gelu'</span>)(x)</span><br></pre></td></tr></table></figure>
+<p>这种写法在使用ModelCheckpoints方法保存权重时会报错：</p>
+<p>AttributeError: ‘Activation’ object has no attribute ‘<strong>name</strong>‘</p>
+<p>看log发现当使用名字代表激活层的时候，在保存模型的时候，又会有一个get_config()函数从keras.activations中查表</p>
+<h2 id="11-keras自定义正则化器regularizers"><a href="#11-keras自定义正则化器regularizers" class="headerlink" title="11. keras自定义正则化器regularizers"></a>11. keras自定义正则化器regularizers</h2><p>11.1 使用封装好的regularizers</p>
+<ul>
+<li><p>keras的正则化器没有global的一键添加方法，要layer-wise为每一层添加</p>
+</li>
+<li><p>keras的层share 3 common参数接口：</p>
+<ul>
+<li>kernel_regularizer</li>
+<li>bias_regularizer</li>
+<li>activity_regularizer</li>
+</ul>
+</li>
+<li><p>可选用的正则化器</p>
+<ul>
+<li>keras.regularizers.l1(0.01) </li>
+<li>keras.regularizers.l2(0.01) </li>
+<li>keras.regularizers.l1_l2(l1=0.01, l2=0.01)</li>
+</ul>
+</li>
+<li><p>使用</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">layer = tf.keras.layers.Dense(<span class="number">5</span>, kernel_initializer=<span class="string">'ones'</span>,</span><br><span class="line">                              kernel_regularizer=tf.keras.regularizers.l1(<span class="number">0.01</span>),</span><br><span class="line">                              activity_regularizer=tf.keras.regularizers.l2(<span class="number">0.01</span>))</span><br><span class="line">tensor = tf.ones(shape=(<span class="number">5</span>, <span class="number">5</span>)) * <span class="number">2.0</span></span><br><span class="line">out = layer(tensor)</span><br><span class="line"><span class="comment"># The kernel regularization term is 0.25</span></span><br><span class="line"><span class="comment"># The activity regularization term (after dividing by the batch size) is 5</span></span><br><span class="line">print(tf.math.reduce_sum(layer.losses))  <span class="comment"># 5.25 (= 5 + 0.25)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>11.2 custom regularizer</p>
+<p>一般不会自定义这个东西，硬要custom的话，两种方式</p>
+<ul>
+<li>简单版，接口参数是weight_matrix，无额外参数，层直接调用</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_regularizer</span><span class="params">(x)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1e-3</span> * tf.reduce_sum(tf.square(x))</span><br><span class="line"></span><br><span class="line">layer = tf.keras.layers.Dense(<span class="number">5</span>, kernel_initializer=<span class="string">'ones'</span>, kernel_regularizer=my_regularizer)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>子类继承版，可以加额外参数，需要补充get_config方法，支持读写权重时的串行化</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyRegularizer</span><span class="params">(regularizers.Regularizer)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, strength)</span>:</span></span><br><span class="line">        self.strength = strength</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.strength * tf.reduce_sum(tf.square(x))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_config</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">'strength'</span>: self.strength&#125;</span><br><span class="line"></span><br><span class="line">layer = tf.keras.layers.Dense(<span class="number">5</span>, kernel_initializer=<span class="string">'ones'</span>, kernel_regularizer=MyRegularizer(<span class="number">0.01</span>))</span><br></pre></td></tr></table></figure>
+<p>11.3 强行global</p>
+<ul>
+<li>每层加起来太烦了，批量加的实质也是逐层加，只不过写成循环</li>
+<li>核心是layer的add_loss方法</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">model = keras.applications.ResNet50(include_top=<span class="keyword">True</span>, weights=<span class="string">'imagenet'</span>)</span><br><span class="line">alpha = <span class="number">0.00002</span>  <span class="comment"># weight decay coefficient</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> layer <span class="keyword">in</span> model.layers:</span><br><span class="line">    <span class="keyword">if</span> isinstance(layer, keras.layers.Conv2D) <span class="keyword">or</span> isinstance(layer, keras.layers.Dense):</span><br><span class="line">        layer.add_loss(<span class="keyword">lambda</span>: keras.regularizers.l2(alpha)(layer.kernel))</span><br><span class="line">    <span class="keyword">if</span> hasattr(layer, <span class="string">'bias_regularizer'</span>) <span class="keyword">and</span> layer.use_bias:</span><br><span class="line">        layer.add_loss(<span class="keyword">lambda</span>: keras.regularizers.l2(alpha)(layer.bias))</span><br></pre></td></tr></table></figure>
+<h2 id="12-keras查看梯度-amp-权重"><a href="#12-keras查看梯度-amp-权重" class="headerlink" title="12. keras查看梯度&amp;权重"></a>12. keras查看梯度&amp;权重</h2><p>12.1 easiest way</p>
+<ul>
+<li>查看梯度最简单的方法：通过K.gradients方法定义一个求梯度的func，然后给定输入，得到梯度（CAM就是这么干的）</li>
+<li>查看权重最简单的方法：存在h5文件，然后花式h5py解析</li>
+</ul>
+<p>12.2 dig deeper</p>
+<ul>
+<li>一个思路：将梯度保存在optimizer的self.weights中，并在model.save得到的模型中解析</li>
+</ul>
+<h2 id="13-keras实现权重滑动平均"><a href="#13-keras实现权重滑动平均" class="headerlink" title="13. keras实现权重滑动平均"></a>13. keras实现权重滑动平均</h2><p>13.1 why EMA on weights</p>
+<ul>
+<li><p>[reference1][<a href="https://www.jiqizhixin.com/articles/2019-05-07-18]：权重滑动平均是提供训练稳定性的有效方法，要么在优化器里面实现，要么外嵌在训练代码里" target="_blank" rel="noopener">https://www.jiqizhixin.com/articles/2019-05-07-18]：权重滑动平均是提供训练稳定性的有效方法，要么在优化器里面实现，要么外嵌在训练代码里</a></p>
+</li>
+<li><p>[reference2][<a href="https://cloud.tencent.com/developer/article/1636781]：这里面举的例子很清晰了，就是为了权重每个step前后变化不大" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1636781]：这里面举的例子很清晰了，就是为了权重每个step前后变化不大</a></p>
+</li>
+</ul>
+<p>权重EMA的计算方式有点类似于BN的running mean&amp;var：</p>
+<ul>
+<li>在训练阶段：它不改变每个training step的优化方向，而是从initial weights开始，另外维护一组shadow weights，用每次的updating weights来进行滑动更新</li>
+<li>在inference阶段，我们要用shadow weights来替换当前权重文件保存的weights（current step下计算的新权重）</li>
+<li>如果要继续训练，要将替换的权重在换回来，因为【EMA不影响模型的优化轨迹】</li>
+</ul>
+<p>13.2 who uses EMA</p>
+<ul>
+<li>很多GAN的论文都用了EMA，</li>
+<li>还有NLP阅读理解模型QANet，</li>
+<li>还有Google的efficientNet、resnet_rs</li>
+</ul>
+<p>13.3 how to implement outside</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExponentialMovingAverage</span>:</span></span><br><span class="line">    <span class="string">"""对模型权重进行指数滑动平均。</span></span><br><span class="line"><span class="string">    用法：在model.compile之后、第一次训练之前使用；</span></span><br><span class="line"><span class="string">    先初始化对象，然后执行inject方法。</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model, momentum=<span class="number">0.9999</span>)</span>:</span></span><br><span class="line">        self.momentum = momentum</span><br><span class="line">        self.model = model</span><br><span class="line">        self.ema_weights = [K.zeros(K.shape(w)) <span class="keyword">for</span> w <span class="keyword">in</span> model.weights]</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">inject</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""添加更新算子到model.metrics_updates。</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.initialize()</span><br><span class="line">        <span class="keyword">for</span> w1, w2 <span class="keyword">in</span> zip(self.ema_weights, self.model.weights):</span><br><span class="line">            op = K.moving_average_update(w1, w2, self.momentum)</span><br><span class="line">            self.model.metrics_updates.append(op)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""ema_weights初始化跟原模型初始化一致。</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.old_weights = K.batch_get_value(self.model.weights)</span><br><span class="line">        K.batch_set_value(zip(self.ema_weights, self.old_weights))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">apply_ema_weights</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""备份原模型权重，然后将平均权重应用到模型上去。</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.old_weights = K.batch_get_value(self.model.weights)</span><br><span class="line">        ema_weights = K.batch_get_value(self.ema_weights)</span><br><span class="line">        K.batch_set_value(zip(self.model.weights, ema_weights))</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">reset_old_weights</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""恢复模型到旧权重。</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        K.batch_set_value(zip(self.model.weights, self.old_weights))</span><br></pre></td></tr></table></figure>
+<ul>
+<li>then train</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">EMAer = ExponentialMovingAverage(model) <span class="comment"># 在模型compile之后执行</span></span><br><span class="line">EMAer.inject() <span class="comment"># 在模型compile之后执行</span></span><br><span class="line"></span><br><span class="line">model.fit(x_train, y_train) <span class="comment"># 训练模型</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>then inference</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MAer.apply_ema_weights() <span class="comment"># 将EMA的权重应用到模型中</span></span><br><span class="line">model.predict(x_test) <span class="comment"># 进行预测、验证、保存等操作</span></span><br><span class="line"></span><br><span class="line">EMAer.reset_old_weights() <span class="comment"># 继续训练之前，要恢复模型旧权重。还是那句话，EMA不影响模型的优化轨迹。</span></span><br><span class="line">model.fit(x_train, y_train) <span class="comment"># 继续训练</span></span><br></pre></td></tr></table></figure>
+<h2 id="14-keras的Model类继承"><a href="#14-keras的Model类继承" class="headerlink" title="14. keras的Model类继承"></a>14. keras的Model类继承</h2><p>14.1 定义模型的方式</p>
+<ul>
+<li>Sequential：最简单，但是不能表示复杂拓扑结构</li>
+<li>函数式 API：和Sequential用法基本一致，输入张量和输出张量用于定义 tf.keras.Model实例</li>
+<li>模型子类化：引入于 Keras 2.2.0</li>
+<li>keras源代码定义在：<a href="https://github.com/keras-team/keras/blob/master/keras/engine/training.py" target="_blank" rel="noopener">https://github.com/keras-team/keras/blob/master/keras/engine/training.py</a></li>
+</ul>
+<p>14.2 模型子类化overview</p>
+<ul>
+<li>既可以用来定义一个model，也可以用来定义一个复杂的网络层，为实现复杂模型提供更大的灵活性</li>
+<li>有点类似于torch的语法<ul>
+<li>网络层定义在 <code>__init__(self, ...)</code> 中：跟torch语法的主要区别在于层不能复用，torch同一个层在forward中每调用一次能够创建一个实例，keras每个层应该是在init中声明并创建，所以不能复用</li>
+<li>前向传播在 <code>call(self, inputs)</code> 中，这里面也可以添加loss</li>
+<li>compute_output_shape计算模型输出的形状</li>
+</ul>
+</li>
+<li>和keras自定义层的语法也很相似<ul>
+<li>build(input_shape)：主要区别就在于build，因为自定义层有build，显式声明了数据流的shape，能够构造出静态图</li>
+<li>call(x)：</li>
+<li>compute_output_shape(input_shape)：</li>
+</ul>
+</li>
+<li>【以下方法和属性不适用于类继承模型】，所以还是推荐优先使用函数式 API<ul>
+<li>model.inputs &amp; model.outputs</li>
+<li>model.to_yaml() &amp; model.to_json()</li>
+<li>model.get_config() &amp; model.save()：！！！只能save_weights！！！</li>
+</ul>
+</li>
+</ul>
+<p>14.3 栗子</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SimpleMLP</span><span class="params">(keras.Model)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num_classes=<span class="number">10</span>)</span>:</span></span><br><span class="line">        super(SimpleMLP, self).__init__(name=<span class="string">'mlp'</span>)</span><br><span class="line">        self.num_classes = num_classes</span><br><span class="line">        self.dense1 = keras.layers.Dense(<span class="number">32</span>, activation=<span class="string">'relu'</span>)</span><br><span class="line">        self.dense2 = keras.layers.Dense(num_classes, activation=<span class="string">'softmax'</span>)</span><br><span class="line">        self.dp = keras.layers.Dropout(<span class="number">0.5</span>)</span><br><span class="line">        self.bn = keras.layers.BatchNormalization(axis=<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs, training=None, mask=None)</span>:</span></span><br><span class="line">        x = self.dense1(inputs)</span><br><span class="line">        x = self.dp(x)</span><br><span class="line">        x = self.bn(x, training=training)</span><br><span class="line">        <span class="keyword">return</span> self.dense2(x)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">compute_output_shape</span><span class="params">(self, input_shape)</span>:</span></span><br><span class="line">        batch, dim = input_shape</span><br><span class="line">        <span class="keyword">return</span> (batch, self.num_classes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = SimpleMLP()</span><br><span class="line">model.compile(<span class="string">'adam'</span>, loss=<span class="string">'categorical_crossentropy'</span>)</span><br><span class="line">x = np.random.uniform(<span class="number">0</span>,<span class="number">1</span>,(<span class="number">32</span>,<span class="number">100</span>))</span><br><span class="line">y = np.random.randint(<span class="number">0</span>, <span class="number">2</span>, (<span class="number">32</span>,<span class="number">10</span>))</span><br><span class="line">model.fit(x, y)</span><br><span class="line">model.summary()</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可以看到，类继承模型是没有指明input_shape的，所以也就不存在静态图，要在有真正数据流以后，model才被build，才能够调用summay方法，查看图结构</li>
+<li>第二个是，call方法的默认参数：def call(self, inputs, training=None, mask=None)，<ul>
+<li>子类继承模型不支持显式的多输入定义，所有的输入构成inputs</li>
+<li>需要手工管理training参数，bn/dropout等在train/inference mode下计算不一样的情况，要显式传入training参数</li>
+<li>mask在构建Attention机制或者序列模型时会使用到，如果previous layer生成了掩码（embedding的mask_zero参数为True），前两种构建模型的方法中，mask会自动传入当前层的call方法中</li>
+</ul>
+</li>
+</ul>
+<p>14.4 get layer output</p>
+<ul>
+<li>有时候我们用Model类去定义一个层，以便获得更自由的表达能力，但是在inference阶段用get_layer(xxx).output去获取这个层的输出的时候会报错：multi-node… get_output_at…</li>
+<li>说这个层含有多个输出节点，需要用get_output_at来声明<ul>
+<li>get_output_at(0)是当前模型level的节点</li>
+<li>get_output_at(1)是当前模型作为层对象的输出节点</li>
+<li>这俩本质是一样的，但是Model类就是会创建这样的副本，这可能就是目前keras复现版本的显存占用要高于pytorch版的原因</li>
+</ul>
+</li>
+</ul>
+<h2 id="15-low-level-training-amp-evaluation-loops"><a href="#15-low-level-training-amp-evaluation-loops" class="headerlink" title="15. low-level training &amp; evaluation loops"></a>15. low-level training &amp; evaluation loops</h2><p>15.1 keras的Model类提供了build-in的train/eval方法</p>
+<pre><code>* fit()
+* evaluate()
+* predict()
+* reference: https://keras.io/api/models/model_training_apis/
+* reference: https://keras.io/guides/training_with_built_in_methods/
+</code></pre><p>15.2 如果你想修改模型的训练过程，但仍旧通过fit()方法进行训练，Model类中提供了train_step()可以继承和重载</p>
+<ul>
+<li><p>reference: <a href="https://keras.io/guides/customizing_what_happens_in_fit/" target="_blank" rel="noopener">https://keras.io/guides/customizing_what_happens_in_fit/</a></p>
+</li>
+<li><p>Model类中有一个train_step()方法，fit每个batch的时候都会调用一次</p>
+</li>
+<li><p>在重写这个train_step()方法时</p>
+<ul>
+<li>传入参数data：取决于fit()方法传入的参数形式，tuple(x,y) / tf.data.Dataset</li>
+<li>forward pass：self(model)</li>
+<li>计算loss：self.compiled_loss</li>
+<li>计算梯度：tf.GradientTape()</li>
+<li>更新权重：self.optimizer</li>
+<li>更新metrics：self.compiled_metrics</li>
+<li>返回值a dictionary mapping metric names</li>
+</ul>
+</li>
+<li><p>栗子🌰</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomModel</span><span class="params">(keras.Model)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">train_step</span><span class="params">(self, data)</span>:</span></span><br><span class="line">        <span class="comment"># Unpack the data</span></span><br><span class="line">        x, y = data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">            y_pred = self(x, training=<span class="keyword">True</span>)  <span class="comment"># Forward pass</span></span><br><span class="line">            <span class="comment"># Compute the loss value</span></span><br><span class="line">            <span class="comment"># (the loss function is configured in `compile()`)</span></span><br><span class="line">            loss = self.compiled_loss(y, y_pred, regularization_losses=self.losses)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Compute gradients</span></span><br><span class="line">        trainable_vars = self.trainable_variables</span><br><span class="line">        gradients = tape.gradient(loss, trainable_vars)</span><br><span class="line">        <span class="comment"># Update weights</span></span><br><span class="line">        self.optimizer.apply_gradients(zip(gradients, trainable_vars))</span><br><span class="line">        <span class="comment"># Update metrics (includes the metric that tracks the loss)</span></span><br><span class="line">        self.compiled_metrics.update_state(y, y_pred)</span><br><span class="line">        <span class="comment"># Return a dict mapping metric names to current value</span></span><br><span class="line">        <span class="keyword">return</span> &#123;m.name: m.result() <span class="keyword">for</span> m <span class="keyword">in</span> self.metrics&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># Construct and compile an instance of CustomModel</span></span><br><span class="line">inputs = keras.Input(shape=(<span class="number">32</span>,))</span><br><span class="line">outputs = keras.layers.Dense(<span class="number">1</span>)(inputs)</span><br><span class="line">model = CustomModel(inputs, outputs)</span><br><span class="line">model.compile(optimizer=<span class="string">"adam"</span>, loss=<span class="string">"mse"</span>, metrics=[<span class="string">"mae"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Just use `fit` as usual</span></span><br><span class="line">x = np.random.random((<span class="number">1000</span>, <span class="number">32</span>))</span><br><span class="line">y = np.random.random((<span class="number">1000</span>, <span class="number">1</span>))</span><br><span class="line">model.fit(x, y, epochs=<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<pre><code>  * 注意到这里面我们调用了self.compiled_loss和self.compiled_metrics，这就是在调用compile()方法的时候传入的loss和metrics参数
+</code></pre></li>
+<li><p>get lower</p>
+<ul>
+<li>loss和metrics也可以不传，直接在CustomModel里面声明和定义</li>
+<li>声明：重载metrics()方法，创建metric instances，用于计算loss和metrics，把他们放在这里模型会在fit()/evaluate()方法的每个epoch起始阶段调用reset_states()方法，确保loss和metrics的states都是per epoch的，而不是avg from the beginning</li>
+<li><p>更新：调用update_state()方法更新他们的状态参数，调用result()方法拿到他们的current value</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">loss_tracker = keras.metrics.Mean(name=<span class="string">"loss"</span>)</span><br><span class="line">mae_metric = keras.metrics.MeanAbsoluteError(name=<span class="string">"mae"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomModel</span><span class="params">(keras.Model)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">train_step</span><span class="params">(self, data)</span>:</span></span><br><span class="line">        x, y = data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">            y_pred = self(x, training=<span class="keyword">True</span>)  <span class="comment"># Forward pass</span></span><br><span class="line">            <span class="comment"># Compute our own loss</span></span><br><span class="line">            loss = keras.losses.mean_squared_error(y, y_pred)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Compute gradients</span></span><br><span class="line">        trainable_vars = self.trainable_variables</span><br><span class="line">        gradients = tape.gradient(loss, trainable_vars)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Update weights</span></span><br><span class="line">        self.optimizer.apply_gradients(zip(gradients, trainable_vars))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Compute our own metrics</span></span><br><span class="line">        loss_tracker.update_state(loss)</span><br><span class="line">        mae_metric.update_state(y, y_pred)</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">"loss"</span>: loss_tracker.result(), <span class="string">"mae"</span>: mae_metric.result()&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">metrics</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># We list our `Metric` objects here so that `reset_states()` can be called automatically per epoch</span></span><br><span class="line">        <span class="keyword">return</span> [loss_tracker, mae_metric]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Construct an instance of CustomModel</span></span><br><span class="line">inputs = keras.Input(shape=(<span class="number">32</span>,))</span><br><span class="line">outputs = keras.layers.Dense(<span class="number">1</span>)(inputs)</span><br><span class="line">model = CustomModel(inputs, outputs)</span><br><span class="line"></span><br><span class="line"><span class="comment"># We don't passs a loss or metrics here.</span></span><br><span class="line">model.compile(optimizer=<span class="string">"adam"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Just use `fit` as usual -- you can use callbacks, etc.</span></span><br><span class="line">x = np.random.random((<span class="number">1000</span>, <span class="number">32</span>))</span><br><span class="line">y = np.random.random((<span class="number">1000</span>, <span class="number">1</span>))</span><br><span class="line">model.fit(x, y, epochs=<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>相对应地，也可以定制model.evaluate()的计算过程——override test_step()方法</p>
+<ul>
+<li>传入参数data：取决于fit()方法传入的参数形式，tuple(x,y) / tf.data.Dataset</li>
+<li>forward pass：self(model)</li>
+<li>计算loss：self.compiled_loss</li>
+<li>计算metrics：self.compiled_metrics</li>
+<li><p>返回值a dictionary mapping metric names</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomModel</span><span class="params">(keras.Model)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">test_step</span><span class="params">(self, data)</span>:</span></span><br><span class="line">        <span class="comment"># Unpack the data</span></span><br><span class="line">        x, y = data</span><br><span class="line">        <span class="comment"># Compute predictions</span></span><br><span class="line">        y_pred = self(x, training=<span class="keyword">False</span>)</span><br><span class="line">        <span class="comment"># Updates the metrics tracking the loss</span></span><br><span class="line">        self.compiled_loss(y, y_pred, regularization_losses=self.losses)</span><br><span class="line">        <span class="comment"># Update the metrics.</span></span><br><span class="line">        self.compiled_metrics.update_state(y, y_pred)</span><br><span class="line">        <span class="comment"># Return a dict mapping metric names to current value.</span></span><br><span class="line">        <span class="comment"># Note that it will include the loss (tracked in self.metrics).</span></span><br><span class="line">        <span class="keyword">return</span> &#123;m.name: m.result() <span class="keyword">for</span> m <span class="keyword">in</span> self.metrics&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Construct an instance of CustomModel</span></span><br><span class="line">inputs = keras.Input(shape=(<span class="number">32</span>,))</span><br><span class="line">outputs = keras.layers.Dense(<span class="number">1</span>)(inputs)</span><br><span class="line">model = CustomModel(inputs, outputs)</span><br><span class="line">model.compile(loss=<span class="string">"mse"</span>, metrics=[<span class="string">"mae"</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Evaluate with our custom test_step</span></span><br><span class="line">x = np.random.random((<span class="number">1000</span>, <span class="number">32</span>))</span><br><span class="line">y = np.random.random((<span class="number">1000</span>, <span class="number">1</span>))</span><br><span class="line">model.evaluate(x, y)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>15.3 实现完整的train loops</p>
+<ul>
+<li><p>reference: <a href="https://keras.io/guides/writing_a_training_loop_from_scratch/" target="_blank" rel="noopener">https://keras.io/guides/writing_a_training_loop_from_scratch/</a></p>
+<ul>
+<li><p>a train loop</p>
+<ul>
+<li>a for loop：iter for each epoch<ul>
+<li>a for loop：iter over the dataset<pre><code> * open a `GradientTape()` scope：tensorflow的梯度API，用于给定loss计算梯度
+ * Inside this scope：forward pass，compute loss
+ * Outside the scope：retrieve the gradients 
+ * use optimizer to update the gradients：`optimizer.apply_gradients`，使用计算得到的梯度来更新对应的variable
+</code></pre></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>栗子🌰</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># model</span></span><br><span class="line">model = keras.Model(inputs=inputs, outputs=outputs)</span><br><span class="line">optimizer = keras.optimizers.SGD(learning_rate=<span class="number">1e-3</span>)</span><br><span class="line">loss_fn = keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))</span><br><span class="line">train_dataset = train_dataset.shuffle(buffer_size=<span class="number">1024</span>).batch(batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># iter epochs</span></span><br><span class="line">epochs = <span class="number">2</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> range(epochs):</span><br><span class="line">    print(<span class="string">"\nStart of epoch %d"</span> % (epoch,))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># iter batches</span></span><br><span class="line">    <span class="keyword">for</span> step, (x_batch_train, y_batch_train) <span class="keyword">in</span> enumerate(train_dataset):</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Open a GradientTape to record the operations run</span></span><br><span class="line">        <span class="comment"># during the forward pass, which enables auto-differentiation.</span></span><br><span class="line">        <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Run the forward pass of the layer.</span></span><br><span class="line">            logits = model(x_batch_train, training=<span class="keyword">True</span>)  <span class="comment"># Logits for this minibatch</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># Compute the loss value for this minibatch.</span></span><br><span class="line">            loss_value = loss_fn(y_batch_train, logits)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># automatically retrieve the gradients of the trainable variables with respect to the loss</span></span><br><span class="line">        grads = tape.gradient(loss_value, model.trainable_weights)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Run one step of gradient descent by updating the value of the variables to minimize the loss.</span></span><br><span class="line">        optimizer.apply_gradients(zip(grads, model.trainable_weights))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Log every 200 batches.</span></span><br><span class="line">        <span class="keyword">if</span> step % <span class="number">200</span> == <span class="number">0</span>:</span><br><span class="line">            print(</span><br><span class="line">                <span class="string">"Training loss (for one batch) at step %d: %.4f"</span></span><br><span class="line">                % (step, float(loss_value))</span><br><span class="line">            )</span><br><span class="line">            print(<span class="string">"Seen so far: %s samples"</span> % ((step + <span class="number">1</span>) * <span class="number">64</span>))</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="16-keras自定义初始化initializers"><a href="#16-keras自定义初始化initializers" class="headerlink" title="16. keras自定义初始化initializers"></a>16. keras自定义初始化initializers</h2><p>16.1 基类：keras.initializers.Initializer()，用于给层参数kernel_initializer和bias_initializer传入初始化方法</p>
+<p>内置初始化器：</p>
+<ul>
+<li>keras.initializers.Zeros()：全0</li>
+<li>keras.initializers.Ones()：全1</li>
+<li>keras.initializers.Constant(value=0)：全赋值为指定常量</li>
+<li>keras.initializers.RandomNormal(mean=0.0, stddev=0.05, seed=<strong>None</strong>)：正态分布</li>
+<li>keras.initializers.RandomUniform(minval=-0.05, maxval=0.05, seed=<strong>None</strong>)：均匀分布</li>
+<li>keras.initializers.VarianceScaling(scale=1.0, mode=’fan_in’, distribution=’normal’, seed=<strong>None</strong>)：根据层属性决定分布的参数，如果distribution=’normal’，那么正态分布的stddev=sqrt(scale/n)，如果distribution=”uniform”，那么均匀分布的limit=sqrt(3 * scale/n)，n决定于mode，可以是层输入单元数/输出单元数/两者平均</li>
+<li>keras.initializers.Orthogonal(gain=1.0, seed=<strong>None</strong>)：随机正交矩阵</li>
+<li>keras.initializers.Identity(gain=1.0)：单位矩阵</li>
+<li>keras.initializers.glorot_normal(seed=<strong>None</strong>)： Xavier 正态分布，0为中心，stddev=sqrt(2 / (fan_in + fan_out))</li>
+<li>keras.initializers.glorot_uniform(seed=<strong>None</strong>)： Xavier 均匀分布，limit=sqrt(6 / (fan_in + fan_out))</li>
+<li>keras.initializers.he_normal(seed=<strong>None</strong>)：Kaiming正态分布，0为中心，stddev=sqrt(2 / fan_in)</li>
+<li>keras.initializers.he_uniform(seed=<strong>None</strong>)：Kaiming均匀分布，limit=sqrt(6/fan_in)</li>
+</ul>
+<p>传入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用名字字符串</span></span><br><span class="line">model.add(Dense(<span class="number">64</span>,kernel_initializer=<span class="string">'random_uniform'</span>, bias_initializer=<span class="string">'zeros'</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用初始化器的实例</span></span><br><span class="line">model.add(Dense(<span class="number">64</span>,kernel_initializer=keras.initializers.Constant(value=<span class="number">3.0</span>), </span><br><span class="line">								bias_initializer=keras.initializers.RandomNormal(mean=<span class="number">0.</span>,stddev=<span class="number">.05</span>)))</span><br><span class="line"></span><br><span class="line"><span class="comment"># use config_dict，这个是在efficientDet源码里面看到的</span></span><br><span class="line">DENSE_KERNEL_INITIALIZER = &#123;</span><br><span class="line">    <span class="string">'class_name'</span>: <span class="string">'VarianceScaling'</span>,</span><br><span class="line">    <span class="string">'config'</span>: &#123;</span><br><span class="line">        <span class="string">'scale'</span>: <span class="number">1.</span> / <span class="number">3.</span>,</span><br><span class="line">        <span class="string">'mode'</span>: <span class="string">'fan_out'</span>,</span><br><span class="line">        <span class="string">'distribution'</span>: <span class="string">'uniform'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">x = Dense(n_classes, activation=<span class="string">'softmax'</span>, kernel_initializer=DENSE_KERNEL_INITIALIZER)(x)</span><br></pre></td></tr></table></figure>
+<p>16.2 自定义初始化器：</p>
+<p>必须使用参数shape和dtype</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras <span class="keyword">import</span> backend <span class="keyword">as</span> K</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_init</span><span class="params">(shape, dtype=None)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> K.random_normal(shape, dtype=dtype)</span><br><span class="line"></span><br><span class="line">model.add(Dense(<span class="number">64</span>, kernel_initializer=my_init))</span><br></pre></td></tr></table></figure>
+<h2 id="17-keras的model-save-amp-model-save-weights"><a href="#17-keras的model-save-amp-model-save-weights" class="headerlink" title="17. keras的model.save() &amp; model.save_weights()"></a>17. keras的model.save() &amp; model.save_weights()</h2><p>17.1 首先明确包含内容</p>
+<ul>
+<li>model.save()<ul>
+<li>模型结构，能够基于这个信息rebuild模型</li>
+<li>模型权重</li>
+<li>训练设置（loss，metric，optmizer），也就是compile的信息</li>
+<li>优化器状态，to exactly resume the training state</li>
+</ul>
+</li>
+<li>model.save_weights()<ul>
+<li>只有模型权重</li>
+</ul>
+</li>
+</ul>
+<p>17.2 一些特殊情况</p>
+<ul>
+<li>使用类继承模型时，因为没有model.get_config方法，所以没法调用model.save()，只能save_weights，如果同时也想保存优化器状态，需要手动保存：<ul>
+<li>Optimizer类的get_weights()方法：Returns the current weights of the optimizer as a list of Numpy arrays</li>
+<li>Optimizer类的set_weights()方法：Pass a list of Numpy arrays to set the new state of the optimizer</li>
+</ul>
+</li>
+</ul>
+<h2 id="18-keras-logger"><a href="#18-keras-logger" class="headerlink" title="18. keras logger"></a>18. keras logger</h2><p>18.1 主要有如下方式</p>
+<pre><code>* 原生：fit /fit_generator 都会返回一个history(Callback)对象，这里面记录了loss &amp; metrics (train &amp; val)
+* nohup log：保存打印日志，print什么就记录什么
+* Logger：同上
+</code></pre><p>18.2 查看</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">history = model.fit_generator(train_gen,</span><br><span class="line">							  steps_per_epoch=<span class="number">32</span>,</span><br><span class="line">							  epochs=<span class="number">3</span>,</span><br><span class="line">							  validation_data=val_gen,</span><br><span class="line">							  validation_steps=<span class="number">8</span>,</span><br><span class="line">)</span><br><span class="line">print(history.history)</span><br><span class="line">print(history.epoch)</span><br><span class="line">print(history.history[<span class="string">'val_loss'</span>])</span><br></pre></td></tr></table></figure>
+<p>18.3 保存：就是保存字典</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	pickle.dump(history.history, f)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'xxx_hist.pkl'</span>, <span class="string">'rb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	history = pickle.load(f)</span><br></pre></td></tr></table></figure>
+<h2 id="19-keras-分层学习率"><a href="#19-keras-分层学习率" class="headerlink" title="19. keras 分层学习率"></a>19. keras 分层学习率</h2><p>19.1 包装层，添加层参数</p>
+<p>19.2 写在optmizer里面</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2019/08/11/opencv库函数/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1417,410 +2357,11 @@ D_t = D_0 + a*r_i*sin(\Delta \varphi)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/16/amcl/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/16/amcl/" itemprop="url">amcl</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-16T15:04:41+08:00">
-                2018-11-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/16/amcl/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/16/amcl/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="滤波："><a href="#滤波：" class="headerlink" title="滤波："></a>滤波：</h4><p>机器人从已知点$x_0$开始运动，里程计误差逐渐累积，位置不确定性将越来越大（$x_1, x_2$）。因此需要借助外部环境信息对自己进行定位，于是引入测量值$d$，计算出当前位置$x_2^{‘}$，再结合预测值$x_2$，得到一个矫正位置$x_2^{‘’}$，使其<strong>不确定性降到最小</strong>。</p>
-<p><img src="/2018/11/16/amcl/filter.png" alt=""></p>
-<h4 id="贝叶斯滤波：-p-x-z-frac-p-z-x-p-x-p-z"><a href="#贝叶斯滤波：-p-x-z-frac-p-z-x-p-x-p-z" class="headerlink" title="贝叶斯滤波：$p(x|z) = \frac{p(z|x)p(x)}{p(z)}$"></a>贝叶斯滤波：$p(x|z) = \frac{p(z|x)p(x)}{p(z)}$</h4><p>先验：$p(x_t|u_t, x_{t-1})$，通过预测方程得到</p>
-<p>似然：$p(z_t| x_t)$，通过测量方程得到</p>
-<p>后验：$p(x_t|z_t)$，通过贝叶斯方程得到</p>
-<p>对于一般的非线性、非高斯系统，很难通过上述方法得到后验概率的解析解。</p>
-<h4 id="蒙特卡洛采样："><a href="#蒙特卡洛采样：" class="headerlink" title="蒙特卡洛采样："></a>蒙特卡洛采样：</h4><p>假设能从一个目标分布$p(x)$获得一系列样本$x_1, x2, …, x_N$，那么就能利用这些样本去估计这个分布的某些函数的期望值。</p>
-<script type="math/tex; mode=display">
-E(f(x)) = \int_a^{b}f(x)p(x)dx \approx\frac{f(x_1) + f(x_2) + ... + f(x_N)}{N}</script><p>蒙特卡洛采样的核心思想就是用均值来代替积分。</p>
-<p>假设可以从后验概率中采样到N个样本，那么后验概率可以表示为：</p>
-<script type="math/tex; mode=display">
-\hat p(x_t|z_{1:t}) = \frac{1}{N} \sum_{i=1}^{N}\delta(x_n - x_n^{i}) \approx p(x_t|z_{1:t})</script><h4 id="粒子滤波："><a href="#粒子滤波：" class="headerlink" title="粒子滤波："></a>粒子滤波：</h4><script type="math/tex; mode=display">
-\begin{align}
-E(f(x)) & \approx \int f(x_n) \hat p(x_t|z_{1:t}) dx \nonumber\\
-& = \frac{1}{N}\sum_N f(x_n) \delta(x_n - x_n^{i})\nonumber\\
-& = \frac{1}{N}\sum_N f(x_n^{i}) \nonumber
-\end{align}</script><p>用采样粒子（服从后验概率）的状态值直接平均作为期望值，这就是粒子滤波。</p>
-<h4 id="MCL：蒙特卡洛定位／粒子滤波定位"><a href="#MCL：蒙特卡洛定位／粒子滤波定位" class="headerlink" title="MCL：蒙特卡洛定位／粒子滤波定位"></a><a href="https://en.wikipedia.org/wiki/Monte_Carlo_localization" target="_blank" rel="noopener">MCL</a>：蒙特卡洛定位／粒子滤波定位</h4><ol>
-<li><p>Randomly generate a bunch of particles</p>
-</li>
-<li><p>Predict next state of the particles</p>
-</li>
-<li><p>Update the weighting of the particles based on the measurement. </p>
-</li>
-<li><p>Resample：Discard highly improbable particle and replace them with copies of the more probable particles. </p>
-<blockquote>
-<p>This leads to a new particle set with uniform importance weights, but with an increased number of particles near the three likely places. </p>
-</blockquote>
-</li>
-<li><p>Compute the weighted mean and covariance of the set of particles to get a state estimate.</p>
-</li>
-</ol>
-<p><strong>权值退化：</strong>如果任由粒子权值增长，只有少数粒子的权值较大，其余粒子的权值可以忽略不计，变成无效粒子，因此需要引入<strong>重采样</strong>。采用$N_{eff}$衡量粒子权值的退化程度。</p>
-<script type="math/tex; mode=display">
-N_{eff} \approx \hat{N_{eff}} = \frac{1}{\sum_N (w_k^{i})^2}</script><p><strong>粒子多样性：</strong>通常我们会舍弃权值较小的粒子，代之以权值较大的粒子。这样会导致权值小的粒子逐渐绝种，粒子群多样性减弱，从而不足以近似表征后验密度。</p>
-<h4 id="重要性采样"><a href="#重要性采样" class="headerlink" title="重要性采样"></a>重要性采样</h4><p>实际上后验概率并不知道，谈何采样（$x_n^i$）。我们可以从一个已知的分布$q(x|z)$里来采样，间接得到滤波值。</p>
-<script type="math/tex; mode=display">
-\begin{align}
-E(f(x_k))&  = \int f(x) \frac{p(x|z)}{q(x|z)} q(x|z) dx \nonumber\\
-& = \frac{E_{q(x|z)}W_k(x_k)f(x_k)}{E_{q(x|z)}W_k(x_k)}\nonumber\\
-& \approx \frac{\frac{1}{N} \sum_{i=1}^N W_k({x_k^{i})f(x_k^{i})}}{\frac{1}{N} \sum_{i=1}^N W_k({x_k^{i}})}\nonumber\\
-& = \sum_N \hat W_k(x_k^i)f(x_k^i) \nonumber
-\end{align}</script><p>相比较于原始的均值表示，变成了加权平均值。不同粒子拥有了不同的权重。</p>
-<script type="math/tex; mode=display">
-\hat W_k(x_k^i) = \frac{W_k(x_k^i)}{\sum_N W_k(x_k^i)}\\
-W_k (x_k) \propto \frac{p(x_k|z_{1:k})}{q(x_k|z_{1:k})}</script><p>已知的$q$分布叫做<strong>重要性概率密度函数</strong>。</p>
-<h4 id="递推算法：序贯重要性采样"><a href="#递推算法：序贯重要性采样" class="headerlink" title="递推算法：序贯重要性采样"></a>递推算法：序贯重要性采样</h4><script type="math/tex; mode=display">
-\{x_k^i, w_k^i\} = SIS(\{x_{k-1}, w_{k-1}\})_{i=1}^N, y_k)</script><p>首先假设重要性分布$q(x|z)$满足：</p>
-<script type="math/tex; mode=display">
-q(x_k | x_{0:k-1}, y_{1:k}) = q(x_k|x_{k-1}, y_k)</script><p>即只和前一时刻的状态$x_{k-1}$和测量$y_k$有关。于是有：</p>
-<script type="math/tex; mode=display">
-w_k^i \approx w_{k-1}^i \frac{p(y_k|x_k^i)p(x_k^i|x_{k-1}^i)}{q(x_k^i|x_{k-1}^i, y_k)}</script><p>伪代码：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">For i=<span class="number">1</span>:N</span><br><span class="line">	(<span class="number">1</span>)采样：式<span class="number">1</span></span><br><span class="line">	(<span class="number">2</span>)权值更新：式<span class="number">2</span></span><br><span class="line">End For</span><br><span class="line">权值归一化</span><br><span class="line">加权平均得到粒子滤波值，也就是当前状态的估计值</span><br><span class="line">重采样</span><br></pre></td></tr></table></figure>
-<h4 id="重采样"><a href="#重采样" class="headerlink" title="重采样"></a>重采样</h4><p>既然权重小的那些粒子不起作用了，那就不要了。为了保持粒子数目不变，就要补充新粒子，最简单的办法就是复制权重大的粒子。用$x_k^i$表示k时刻的粒子，$x_k^j$表示重采样以后的粒子，那么：</p>
-<script type="math/tex; mode=display">
-\tilde p (x_k|y_{1:k}) = \sum_N \frac{1}{N}\delta(x_k - x_k^j) = \sum_N \frac{n_i}{N}\delta(x_k - x_i^j)</script><p>总的来说，新粒子按照权重比例来补充，算法流程为：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">计算概率累积和wcum(N)</span><br><span class="line">用[<span class="number">0</span>,<span class="number">1</span>]之间的均匀分布随机采样N个值u(N)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="number">1</span>:N:</span><br><span class="line">	k = <span class="number">1</span></span><br><span class="line">	<span class="keyword">while</span> u(i)&lt;wcum(k):</span><br><span class="line">		k += <span class="number">1</span></span><br><span class="line">	end <span class="keyword">while</span></span><br><span class="line">	resample(i) = k</span><br></pre></td></tr></table></figure>
-<p><img src="/2018/11/16/amcl/resample.png" alt=""></p>
-<h4 id="SIR滤波器（Sampling-Importance-Resampling-Filter-）"><a href="#SIR滤波器（Sampling-Importance-Resampling-Filter-）" class="headerlink" title="SIR滤波器（Sampling Importance Resampling Filter ）"></a>SIR滤波器（Sampling Importance Resampling Filter ）</h4><p>选取特定的重要性概率密度函数：</p>
-<script type="math/tex; mode=display">
-q(x_k^i|x_{k-1}^i, y_k) = p(x_k^i|x_{k-1}^i)</script><p>于是权重更新公式可以简化：</p>
-<script type="math/tex; mode=display">
-w_k^i \propto w_{k-1}^i \frac{p(z|x)p(x|x_{k-1})}{q(x|x_{k-1})}</script><p>由于重采样以后，粒子分布更新，权值统一为$\frac{1}{N}$，于是权重更新公式进一步简化：</p>
-<script type="math/tex; mode=display">
-w_k^i \propto p(z_k|x_k^i)</script><p>根据测量方程可知，上面这个概率就是以真实测量值为均值，以噪声方差为方差的高斯分布。</p>
-<p>此算法中的采样，并没有加入测量$z_k$，只凭先验知识$p(x_k|x_{k-1})$，虽然简单易用，但是存在效率不高和对奇异点(outliers)敏感的问题。 </p>
-<h4 id="AMCL"><a href="#AMCL" class="headerlink" title="AMCL"></a>AMCL</h4><p>MCL算法能够用于全局定位，但是无法从<strong>机器人绑架</strong>或<strong>全局定位失败</strong>中恢复过来，因为随着位置被获取，其他地方的不正确粒子会逐渐消失。稳定状态下，粒子只“生存”在一个单一的姿态附近，如果这个姿态恰好不正确（在重采样步骤中可能意外的丢弃所有正确位姿附近的粒子），算法就无法恢复。</p>
-<p>AMCL就是为了解决上述问题：结合了自适应（Augmented_MCL）和库尔贝克-莱不勒散度采样（KLD_Sampling_MCL）</p>
-<ul>
-<li>Augmented_MCL：在机器人遭到绑架的时候，它会在发现粒子们的平均分数突然降低了，这意味着正确的粒子在某次迭代中被抛弃了，此时会随机的全局注入粒子（injection of random particles）。</li>
-<li>KLD_Sampling_MCL：动态调整粒子数，当机器人定位差不多得到了的时候，粒子都集中在一块了，就没必要维持这么多的粒子了——在栅格地图中，看粒子占了多少栅格。占得多，说明粒子很分散，在每次迭代重采样的时候，允许粒子数量的上限高一些。占得少，说明粒子都已经集中了，那就将上限设低。</li>
-</ul>
-<p><img src="/2018/11/16/amcl/mcl&amp;amcl.png" alt="mcl&amp;amcl"></p>
-<p>算法流程上看，augmented_MCL算法最显著的区别就是引入了四个参数用于失效恢复：</p>
-<ul>
-<li>$w_{slow}$：长期似然平均估计</li>
-<li>$w_{fast}$：短期似然平均估计</li>
-<li>$\alpha_{slow}$：长期指数滤波器衰减率</li>
-<li>$\alpha_{fast}$：短期指数滤波器衰减率</li>
-</ul>
-<p>失效恢复的核心思想是：测量似然的一个突然衰减（短期似然劣于长期似然）象征着粒子质量的下降，这将引起随机采样数目的增加。</p>
-<p>$w_{avg}$计算了粒子的平均权重，当粒子质量下降时，平均权重随之下降，$w_{slow}、w_{fast}$也会随之下降，但是显然$w_{fast}$下降的速度要快于$w_{slow}$——这由衰减率决定，因此随机概率$p = 1 - \frac{w_{fast}}{w_{slow}}$会增大，随机粒子数目增加。而当粒子质量提高时，粒子短期权重要好于长期，随机概率小于0，不生成随机粒子。</p>
-<p><img src="/2018/11/16/amcl/重定位.png" alt="重定位"></p>
-<h4 id="ROS-amcl参数解析"><a href="#ROS-amcl参数解析" class="headerlink" title="ROS amcl参数解析"></a>ROS amcl<a href="https://www.cnblogs.com/dyan1024/p/7825988.html" target="_blank" rel="noopener">参数解析</a></h4><p>Augmented_MCL：</p>
-<ul>
-<li><code>&lt;param name=&quot;recovery_alpha_slow&quot; value=&quot;0.0&quot;/&gt;</code>：默认0（MCL），我的0.001。</li>
-<li><code>&lt;param name=&quot;recovery_alpha_fast&quot; value=&quot;0.0&quot;/&gt;</code>：默认0（MCL），我的0.8。</li>
-<li>在rviz里通过2D Pose Estimate按钮移动机器人来触发，机器人位置突变后要过一会儿才注入随机粒子，因为概率是渐变的。</li>
-</ul>
-<p>KLD：</p>
-<ul>
-<li><code>&lt;param name=&quot;kld_z&quot; value=&quot;0.99&quot;/&gt;</code>： KLD采样以概率$1-\delta（kld_z）$确定样本数。</li>
-<li><code>&lt;param name=&quot;kld_err&quot; value=&quot;0.05&quot;/&gt;</code>： 真实的后验与基于采样的近似之间的误差。</li>
-</ul>
-<p>动态障碍物：环境中的动态物体总是会获得比静态障碍物更短的读数，因此可以根据这样的不对称性去除异常值。</p>
-<ul>
-<li>静态障碍物应该服从稳定的高斯分布，以距离传感器的真实距离为均值。</li>
-<li>扫描到动态目标的beam则服从衰减分布，$-\eta e ^{-\lambda z}$。</li>
-<li><code>laser_model_type</code>：使用beam model时会用到四个<strong>混合权重</strong>参数z_hit，z_short，z_max和z_rand，使用likelihood_field model时使用两个z_hit和z_rand。<ul>
-<li><code>laser_z_hit</code>：default=0.95，以真实值为均值的噪声高斯分布</li>
-<li><code>laser_z_rand</code>：defualt=0.05，随机测量权重，均匀分布</li>
-<li><code>laser_z_short</code>：default=0.1，意外对象权重，衰减分布</li>
-<li><code>laser_z_max</code>：default=0.05，测量失败权重，0/1分布</li>
-</ul>
-</li>
-</ul>
-<p>初始位姿：</p>
-<ul>
-<li><p>可以在rviz里通过2D Pose Estimate按钮设定（rviz会发布initialPose话题）。</p>
-</li>
-<li><p>或者写在launch文件中：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_pose_x"</span>            <span class="attr">value</span>=<span class="string">"0.0"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_pose_y"</span>            <span class="attr">value</span>=<span class="string">"0.0"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_pose_a"</span>            <span class="attr">value</span>=<span class="string">"0.0"</span>/&gt;</span>      </span><br><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_cov_xx"</span>            <span class="attr">value</span>=<span class="string">"0.25"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_cov_yy"</span>            <span class="attr">value</span>=<span class="string">"0.25"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span>=<span class="string">"initial_cov_aa"</span>            <span class="attr">value</span>=<span class="string">"(pi/12)*(pi/12)"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><a href="http://wiki.ros.org/Robots/TIAGo/Tutorials/Navigation/Localization" target="_blank" rel="noopener">调用全局定位服务</a>：</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call /global_localization <span class="string">"&#123;&#125;"</span></span><br></pre></td></tr></table></figure>
-<p>位姿随机初始化，粒子洒满地图：</p>
-<p><img src="/2018/11/16/amcl/global.png" alt=""></p>
-</li>
-</ul>
-<p>transform_tolerance：</p>
-<ul>
-<li>默认是0.1seconds，官方定义是Time with which to post-date the transform that is published, to indicate that this transform is valid into the future. tf变换发布推迟的时间，意思是tf变换在未来这段时间内是可用的。</li>
-<li>【存疑】我个人理解tf的更新频率应该越快越准确，launch文件中最开始设定为0.5，但是实际上机器人移动速度调快时，会报错<code>Costmap2DROS transform timeout...Could not get robot pose, cancelling reconfiguration</code>，然后我调整为1.5就不报错了。</li>
-<li>目前设定为1.0，仿真里观测不出差异。</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/11/16/recovery-behavior/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/11/16/recovery-behavior/" itemprop="url">recovery behavior</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-16T11:25:19+08:00">
-                2018-11-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/11/16/recovery-behavior/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/16/recovery-behavior/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>navigation stack的move_base包中一个插件。<a href="https://amberzzzz.github.io/2018/11/15/dynamic-window-approach/">DWA</a>的速度空间中如果没有可行的采样点，那么机器人get stuck，触发recovery行为。</p>
-<p>recovery行为的实质是clear out space——试图搞清楚自己的处境：</p>
-<ol>
-<li>首先机器人会清扫地图——conservative reset</li>
-<li>然后原地旋转360度，刷新处境——clearing rotation</li>
-<li>如果还是导航失败，机器人会更加激进的清扫地图——aggressive reset</li>
-<li>然后原地旋转360度，刷新处境——clearing rotation</li>
-<li>如果仍旧失败——mission impossible</li>
-</ol>
-<p><img src="/2018/11/16/recovery-behavior/recovery_behaviors.png" alt=""></p>
-<p>源代码在move_base.cpp里面，继承了nav_core的接口，设置在move_base_params.yaml配置文件中。</p>
-<ul>
-<li>nav_core的recovery_behavior.h封装了RecoveryBehavior类。</li>
-<li>move_base中创建了名为”clear_costmap_recovery/ClearCostmapRecovery”、”rotate_recovery/RotateRecovery”、”clear_costmap_recovery/ClearCostmapRecovery”的默认对象。</li>
-<li>move_base的主程序是一个状态机，case CLEARING就调用RecoveryBehavior的runBehavior()。</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/13/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/15/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/13/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/15/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1870,7 +2411,7 @@ w_k^i \propto p(z_k|x_k^i)</script><p>根据测量方程可知，上面这个概
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">169</span>
+                  <span class="site-state-item-count">171</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

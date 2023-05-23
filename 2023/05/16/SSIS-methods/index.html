@@ -79,20 +79,22 @@
 
 
 
-<meta name="description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association VITA: Video Instance Segmentation via Object">
+<meta name="description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association  [MobileViT v2] Separable Self-attention for">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SSIS methods">
 <meta property="og:url" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association VITA: Video Instance Segmentation via Object">
+<meta property="og:description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association  [MobileViT v2] Separable Self-attention for">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/VIS.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/VITA.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/similarity.png">
-<meta property="og:updated_time" content="2023-05-16T06:48:53.134Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/separable%20attention.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/separable%20self-attention.png">
+<meta property="og:updated_time" content="2023-05-23T04:42:07.893Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SSIS methods">
-<meta name="twitter:description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association VITA: Video Instance Segmentation via Object">
+<meta name="twitter:description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association  [MobileViT v2] Separable Self-attention for">
 <meta name="twitter:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/VIS.png">
 
 
@@ -360,6 +362,7 @@
         <p>papers</p>
 <p>[M2F] Masked-attention Mask Transformer for Universal Image Segmentation</p>
 <p>[VITA 2022] VITA: Video Instance Segmentation via Object Token Association</p>
+<p> [MobileViT v2] Separable Self-attention for Mobile Vision Transformers</p>
 <h2 id="VITA-Video-Instance-Segmentation-via-Object-Token-Association"><a href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association" class="headerlink" title="VITA: Video Instance Segmentation via Object Token Association"></a>VITA: Video Instance Segmentation via Object Token Association</h2><ol>
 <li><p>introduction</p>
 <ul>
@@ -459,6 +462,52 @@
 </ul>
 </li>
 </ol>
+<h2 id="Separable-Self-attention-for-Mobile-Vision-Transformers"><a href="#Separable-Self-attention-for-Mobile-Vision-Transformers" class="headerlink" title="Separable Self-attention for Mobile Vision Transformers"></a>Separable Self-attention for Mobile Vision Transformers</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li>ViT的efficiency bottleneck是MHA<ul>
+<li>multi-head：costly bmm &amp; mm &amp; softmax</li>
+<li>self-attention：需要O(n^2)的computation cost</li>
+</ul>
+</li>
+<li>this paper propose separable self-attention<ul>
+<li>O(n)</li>
+<li>uses element-wise operations for computing self-attention</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>attention方式对比</p>
+<ul>
+<li>dense mm：两两做内积，然后对每个query指向的所有key的distance做归一化，attention是[b,q,q]</li>
+<li>separate method：对query[b,q,c]先计算一个context score [b,q]，然后对key token [b,q,c]计算加权和[b,q,c]，相当于对所有的key token基于context score做了reweight sum，来融合q &amp; k，最终的attention是[b,q,c]</li>
+<li><p>这样计算复杂度就与q-dim线形相关了</p>
+<p><img src="/2023/05/16/SSIS-methods/separable attention.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>attention block结构对比</p>
+<ul>
+<li>standard MHA的attn有h个k*k的dense dot</li>
+<li>Linformer会压一下key/value token的长度，压到一个固定值，mm的算力下降，但是bmm的串行pipe还在</li>
+<li><p>Separable self-attention</p>
+<ul>
+<li>query：[b,k,d]先fc到[b,k]，然后softmax归一化得到context score</li>
+<li>key：[b,k,d]先fc到[b,k,d]，然后与context score做乘[b,k,q]，融合qk的信息，然后所有key vector相加得到[b,d]，是全局的context vector</li>
+<li>value：[b,k,d]先fc-relu到[b,k,d]，然后与context vector做乘得到[b,k,d]，然后是project layer</li>
+</ul>
+<p><img src="/2023/05/16/SSIS-methods/separable self-attention.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>code</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># https://github.com/apple/ml-cvnets/blob/main/cvnets/layers/linear_attention.py#L16</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">self_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">    <span class="comment"># q=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(q, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">	</span><br><span class="line">    context_vector = k * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line">    </span><br><span class="line">    out = F.relu(v) * context_vector    <span class="comment"># [b,c,hw]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cross_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">	<span class="comment"># q!=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,q] -&gt; [b,c,q]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(k, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">    </span><br><span class="line">    context_vector = v * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line"></span><br><span class="line">    out = F.relu(q) * context_vector    <span class="comment"># [b,c,q]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -492,6 +541,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/05/17/diffusion/" rel="prev" title="diffusion">
+                diffusion <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -575,7 +628,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">169</span>
+                  <span class="site-state-item-count">171</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -631,7 +684,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association"><span class="nav-number">1.</span> <span class="nav-text">VITA: Video Instance Segmentation via Object Token Association</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association"><span class="nav-number">1.</span> <span class="nav-text">VITA: Video Instance Segmentation via Object Token Association</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Separable-Self-attention-for-Mobile-Vision-Transformers"><span class="nav-number">2.</span> <span class="nav-text">Separable Self-attention for Mobile Vision Transformers</span></a></li></ol></div>
             
 
           </div>

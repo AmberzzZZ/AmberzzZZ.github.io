@@ -276,6 +276,415 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/08/refineDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/08/refineDet/" itemprop="url">refineDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-08T16:03:40+08:00">
+                2021-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/08/refineDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/08/refineDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>和refineNet没有任何关系</p>
+<h2 id="RefineDet-Single-Shot-Refinement-Neural-Network-for-Object-Detectio"><a href="#RefineDet-Single-Shot-Refinement-Neural-Network-for-Object-Detectio" class="headerlink" title="RefineDet: Single-Shot Refinement Neural Network for Object Detectio"></a>RefineDet: Single-Shot Refinement Neural Network for Object Detectio</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>inherit the merits of both two-stage and one-stage：accuracy and efficiency</li>
+<li>single-shot</li>
+<li>multi-task</li>
+<li>refineDet<ul>
+<li>anchor refinement module (ARM)  </li>
+<li>object detection module (ODM)</li>
+<li>transfer connection block (TCB) </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>three advantages that two-stage superior than one-stage<ul>
+<li>RPN：handle class imbalance</li>
+<li>two step regress：coarse to refine</li>
+<li>two stage feature：RPN任务和regression任务有各自的feature</li>
+</ul>
+</li>
+<li>模拟二阶段检测的RPN，把classifier任务中的大量阴性框先排掉，但不是以两个阶段的形式，而是multi-task并行</li>
+<li>将一阶段检测的objectness和box regression任务解耦，两个任务通过transfer block连接</li>
+<li>ARM<ul>
+<li>remove negative anchors to reduce search space for the classifier </li>
+<li>coarsely adjust the locations and sizes of anchors to provide better initialization for regression</li>
+</ul>
+</li>
+<li>ODM <ul>
+<li>further improve the regression </li>
+<li>predict multi labels</li>
+</ul>
+</li>
+<li><p>TCB </p>
+<ul>
+<li>transfer the features in the ARM to handle the more challenging tasks in the ODM </li>
+</ul>
+<p><img src="/2021/01/08/refineDet/refineDet.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Transfer Connection Block</p>
+<ul>
+<li><p>没什么新的东西，上采样用了deconv，conv-relu，element-wise add</p>
+<p><img src="/2021/01/08/refineDet/TCB.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Two-Step Cascaded Regression </p>
+<ul>
+<li>fisrt step ARM prediction <ul>
+<li>for each cell，for each predefined anchor boxes，predict 4 offsets and 2 scores</li>
+<li>obtain refined anchor boxes </li>
+</ul>
+</li>
+<li>second step ODM prediction<ul>
+<li>with justified feature map，with refined anchor boxes </li>
+<li>generate accurate boxes offset to refined boxes and multi-class scores，c+4</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Negative Anchor Filtering </p>
+<ul>
+<li>reject well-classified negative anchors </li>
+<li>if the negative confidence is larger than 0.99，discard it in training the ODM </li>
+<li>ODM接收所有pred positive和hard negative</li>
+</ul>
+</li>
+<li><p>Training and Inference details</p>
+<ul>
+<li>back：VGG16 &amp; resnet101<ul>
+<li>fc6 &amp; fc7变成两个conv</li>
+<li>different feature scales </li>
+<li>L2 norm</li>
+<li>two extra convolution layers and one extra residual block </li>
+</ul>
+</li>
+<li>4 feature strides<ul>
+<li>each level：1 scale &amp; 3 ratios</li>
+<li>ensures that different scales of anchors have the same tiling density on the image</li>
+</ul>
+</li>
+<li>matching<ul>
+<li>每个GT box match一个score最高的anchor box</li>
+<li>为每个anchor box找到最匹配的iou大于0.5的gt box</li>
+<li>相当于把ignore那部分也作为正样本了</li>
+</ul>
+</li>
+<li>Hard Negative Mining<ul>
+<li>select negative anchor boxes with top loss values </li>
+<li>n &amp; p ratio：3:1</li>
+</ul>
+</li>
+<li>Loss Function<ul>
+<li>ARM loss<ul>
+<li>binary class：只计算正样本？？？</li>
+<li>box：只计算正样本</li>
+</ul>
+</li>
+<li>ODM loss<ul>
+<li>pass the refined anchors with the negative confidence less than the threshold </li>
+<li>multi-class：计算均衡的正负样本</li>
+<li>box：只计算正样本</li>
+</ul>
+</li>
+<li>正样本数为0的时候，loss均为0：纯阴性样本无效？？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/CPNDet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/05/CPNDet/" itemprop="url">CPNDet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-05T14:14:30+08:00">
+                2021-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/05/CPNDet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/05/CPNDet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection"><a href="#Corner-Proposal-Network-for-Anchor-free-Two-stage-Object-Detection" class="headerlink" title="Corner Proposal Network for Anchor-free, Two-stage Object Detection"></a>Corner Proposal Network for Anchor-free, Two-stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>anchor-free</li>
+<li>two-stage<ul>
+<li>先找potential corner keypoints</li>
+<li>classify each proposal</li>
+</ul>
+</li>
+<li>corner-based方法：对于objects of various scales有效，在训练中避免产生过多的冗余false-positive proposals，但是在结果上会出现更多的fp</li>
+<li>得到的是competitive results</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>anchor-based methods对形状奇怪的目标容易漏检</li>
+<li><p>anchor-free methods容易引入假阳caused by mistakely grouping</p>
+<ul>
+<li>thus an individual classifier is strongly required  </li>
+</ul>
+</li>
+<li><p>Corner Proposal Network (CPN) </p>
+<ul>
+<li>use key-point detection in CornerNet</li>
+<li>但是group阶段不再用embedding distance衡量，而是用a binary classifier </li>
+<li>然后是multi-class classifier，operate on the survived objects</li>
+<li>最后soft-NMS</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/05/refineNet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2407,564 +2816,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/14/MimicDet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/10/14/MimicDet/" itemprop="url">MimicDet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-14T14:43:49+08:00">
-                2020-10-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/10/14/MimicDet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/MimicDet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[MimicDet] ResNeXt-101 backbone on the COCO: 46.1 mAP </p>
-<h2 id="MimicDet-Bridging-the-Gap-Between-One-Stage-and-Two-Stage-Object-Detection"><a href="#MimicDet-Bridging-the-Gap-Between-One-Stage-and-Two-Stage-Object-Detection" class="headerlink" title="MimicDet: Bridging the Gap Between One-Stage and Two-Stage Object Detection"></a>MimicDet: Bridging the Gap Between One-Stage and Two-Stage Object Detection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>mimic task：knowledge distillation </li>
-<li>mimic the two-stage features <ul>
-<li>a shared backbone </li>
-<li>two heads for mimicking </li>
-</ul>
-</li>
-<li>end-to-end training</li>
-<li>specialized designs to facilitate mimicking <ul>
-<li>dual-path mimicking</li>
-<li>staggered feature pyramid </li>
-</ul>
-</li>
-<li>reach two-stage accuracy </li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>one-stage detectors adopt a straightforward fully convolutional architecture </li>
-<li>two-stage detectors use RPN + R-CNN</li>
-<li>advantages of two-stage detectors <ul>
-<li>avoid class imbalance </li>
-<li>less proposals enables larger cls net and richer features </li>
-<li>RoIAlign extracts location consistent feature -&gt; better represenation</li>
-<li>regress the object location twice -&gt; better refined</li>
-</ul>
-</li>
-<li>one-stage detectors’ imitation<ul>
-<li>RefineDet：cascade detection flow  </li>
-<li>AlignDet：RoIConv layer </li>
-<li>still leaves a big gap </li>
-</ul>
-</li>
-<li>network mimicking<ul>
-<li>knowledge distillation </li>
-<li>use a well-trained large teacher model to supervise </li>
-<li>difference<ul>
-<li>mimic in heads instead of backbones </li>
-<li>teacher branch instead of model</li>
-<li>trained jointly </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>this method<ul>
-<li>not only mimic the structure design, but also imitate in the feature level</li>
-<li>contains both one-stage detection head and two-stage detection head during training <ul>
-<li>share the same backbone </li>
-<li>two-stage detection head, called T-head </li>
-<li>one-stage detection head, called S-head </li>
-<li>similarity loss for matching feature：guided deformable conv layer </li>
-<li>together with detection losses </li>
-</ul>
-</li>
-<li>specialized designs <ul>
-<li>decomposed detection heads</li>
-<li>conduct mimicking in classification and regression branches individually</li>
-<li>staggered feature pyramid  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2020/10/14/MimicDet/mimicdet.png" width="70%;"></p>
-</li>
-<li><p>back &amp; fpn</p>
-<ul>
-<li>RetinaNet fpn：with P6 &amp; P7</li>
-<li>crucial modification：P2 ～ P7</li>
-<li>staggered feature pyramid <ul>
-<li>high-res set {P2 to P6}：for T-head &amp; accuray</li>
-<li>low-res set {P3 to P7}：for S-head &amp; computation speed</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>refinement module</p>
-<ul>
-<li>filter out easy negatives：mitigate the class imbalance issue </li>
-<li>adjust the location and size of pre-defined anchor boxes：anchor initialization  </li>
-<li>module<ul>
-<li>on top of the feature pyramid </li>
-<li>one 3x3 conv</li>
-<li>two sibling 1x1 convs<ul>
-<li>binary classification：bce loss</li>
-<li>bounding box regression：the same as Faster R-CNN，L1 loss</li>
-</ul>
-</li>
-<li>top-ranked boxes transferred to T-head and S-head </li>
-</ul>
-</li>
-<li>one anchor on each position：avoid feature sharing among proposals</li>
-<li>assign the objects to feature pyramid according to their scale </li>
-<li>positive area：0.3 times shrinking of gt boxes from center</li>
-<li>positive sample：<ul>
-<li>valid scale range：gt target belongs to this level</li>
-<li>central point of anchor lies in the positive area</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>detection heads</p>
-<ul>
-<li>T-head<ul>
-<li>heavy head </li>
-<li>run on a sparse set of anchor boxes </li>
-<li>use the staggered feature pyramid </li>
-<li>generate 7x7 location-sensitive features for each anchor box </li>
-<li>cls branch<ul>
-<li>two 1024-d fc layers</li>
-<li><strong>one 81-d fc layer</strong> + softmax：ce loss</li>
-</ul>
-</li>
-<li>reg branch<ul>
-<li>four 3x3 convs，ch256</li>
-<li>flatten</li>
-<li><strong>1024-d fc</strong></li>
-<li>4-d fc：L1 loss</li>
-</ul>
-</li>
-<li>mimicking target <ul>
-<li>81-d classification logits </li>
-<li>1024-d regression feature </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>S-head<ul>
-<li>light-weight  </li>
-<li>directly dense detection on fpn</li>
-<li>【不太理解】introducing the refinement module will break the location consistency between the anchor box and its corresponding features：我的理解是refine以后的anchor和原始anchor对应的特征图misalign了，T-head用的是refined anchor，S-head用的是original grid，所以misalign</li>
-<li>use deformable convolution to capture the misaligned feature <ul>
-<li>deformation offset is computed by a micro-network </li>
-<li>takes the regression output of the refinement module as input </li>
-<li>three 1x1 convs，ch64/128／18(50)</li>
-<li>3x3 Dconv for P3 and 5x5 for others，ch256</li>
-</ul>
-</li>
-<li>two sibling 1x1 convs，ch1024<ul>
-<li>cls branch：1x1 conv，ch80</li>
-<li>reg branch：1x1 conv，ch4</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><img src="/2020/10/14/MimicDet/heads.png" width="70%;"></li>
-</ul>
-</li>
-<li><p>head mimicking</p>
-<ul>
-<li>cosine similarity </li>
-<li>cls logits &amp; refine params</li>
-<li>To get the S-head feature of an adjusted anchor box <ul>
-<li>trace back to its initial position </li>
-<li>extract the pixel at that position in the feature map </li>
-</ul>
-</li>
-<li>loss：$L_{mimic} = 1 - cosine(F_i^T, F_i^S)$</li>
-</ul>
-</li>
-<li>multi-task training loss  <ul>
-<li>$L = L_R + L_S + L_T + L_{mimic}$</li>
-<li>$L_R$：refine module loss，bce+L1</li>
-<li>$L_S$：S-head loss，ce+L1</li>
-<li>$L_T$：T-head loss，ce+L1</li>
-<li>$L_{mimic}$：mimic loss </li>
-</ul>
-</li>
-<li>training details<ul>
-<li>network：resnet50/101，resize image with shorter side 800</li>
-<li>refinement module<ul>
-<li>run NMS with 0.8 IoU threshold on anchor boxes </li>
-<li>select top 2000 boxes </li>
-</ul>
-</li>
-<li>T-head<ul>
-<li>sample 128 boxes from proposal</li>
-<li>p／n：1/3</li>
-</ul>
-</li>
-<li>S-head<ul>
-<li>hard mining：select 128 boxes with top loss value </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>inference<ul>
-<li>take top 1000 boxes from refine module</li>
-<li>NMS with 0.6 IoU threshold and 0.005 score threshold </li>
-<li>【？？】finally top 100 scoring boxes：这块不太理解，最后应该不是结构化输出了啊，应该是一阶段检测头的re-refine输出啊</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/09/metrics/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/10/09/metrics/" itemprop="url">metrics</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-09T15:45:31+08:00">
-                2020-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/10/09/metrics/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/09/metrics/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="分类指标"><a href="#分类指标" class="headerlink" title="分类指标"></a>分类指标</h2><ul>
-<li>recall：召回率</li>
-<li>precision：准确率</li>
-<li>accuracy：正确率</li>
-<li>F-Measure</li>
-<li>sensitivity：灵敏度</li>
-<li>specificity：特异度</li>
-<li>TPR</li>
-<li>FPR</li>
-<li>ROC</li>
-<li>AUC</li>
-</ul>
-<ol>
-<li><p>混淆矩阵</p>
-<p> |           |  gt is p   |   gt is n    |<br> | :———-: | :————: | :—————: |<br> | pred is p |     tp     | fp（假阳性） |<br> | pred is n | fn（漏检） |      tn      |</p>
-<ul>
-<li>注意区分fp和fn</li>
-<li>fp：被错误地划分为正例的个数，即实际为负例但被分类器划分为正例的实例数</li>
-<li>fn：被错误地划分为负例的个数，即实际为正例但被分类器划分为负例的实例数</li>
-</ul>
-</li>
-<li><p>recall</p>
-<ul>
-<li>衡量查全率</li>
-<li>对gt is p做统计</li>
-<li>$recall = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>precision</p>
-<ul>
-<li>衡量查准率</li>
-<li>对pred is p做统计</li>
-<li>$precision = \frac{tp}{tp+fp}$</li>
-</ul>
-</li>
-<li><p>accuracy</p>
-<ul>
-<li>对的除以所有</li>
-<li>$accuracy = \frac{tp+tn}{p+n}$</li>
-</ul>
-</li>
-<li><p>sensitivity</p>
-<ul>
-<li>衡量分类器对正例的识别能力</li>
-<li>对gt is p做统计</li>
-<li>$sensitivity = \frac{tp}{p}=\frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>specificity</p>
-<ul>
-<li>衡量分类器对负例的识别能力</li>
-<li>对gt is n做统计</li>
-<li>$specificity =\frac{tn}{n}= \frac{tn}{fp+tn}$</li>
-</ul>
-</li>
-<li><p>F-measure</p>
-<ul>
-<li>综合考虑P和R，是Precision和Recall加权调和平均</li>
-<li>$F = \frac{(a^2+1)<em>P</em>R}{a^2*P+R}$</li>
-<li>$F_1 = \frac{2PR}{P+R}$</li>
-</ul>
-</li>
-<li><p>TPR</p>
-<ul>
-<li>将正例分对的概率</li>
-<li>对gt is t做统计</li>
-<li>$TPR = \frac{tp}{tp+fn}$</li>
-</ul>
-</li>
-<li><p>FPR</p>
-<ul>
-<li>将负例错分为正例的概率</li>
-<li>对gt is n做统计</li>
-<li>$FPR = \frac{fp}{fp+tn}$</li>
-<li>FPR = 1 - 特异度</li>
-</ul>
-</li>
-<li><p>ROC</p>
-<ul>
-<li>每个点的横坐标是FPR，纵坐标是TPR</li>
-<li>描绘了分类器在TP（真正的正例）和FP（错误的正例）间的trade-off</li>
-<li>通过变化阈值，得到不同的分类统计结果，连接这些点就形成ROC curve</li>
-<li>曲线在对角线左上方，离得越远说明分类效果好</li>
-<li>P/R和ROC是两个不同的评价指标和计算方式，一般情况下，检索用前者，分类、识别等用后者</li>
-</ul>
-</li>
-<li><p>AUC</p>
-<ul>
-<li>AUC的值就是处于ROC curve下方的那部分面积的大小</li>
-<li>通常，AUC的值介于0.5到1.0之间</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/7/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/9/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3014,7 +2870,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">169</span>
+                  <span class="site-state-item-count">171</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -276,6 +276,617 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/07/regression-loss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/07/regression-loss/" itemprop="url">regression loss</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-07T15:04:32+08:00">
+                2020-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/07/regression-loss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/07/regression-loss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>损失函数用来评价模型预测值和真实值的不一样程度</p>
+<p> 两系损失函数：</p>
+<p> <img src="/2020/09/07/regression-loss/loss.png" width="30%;"></p>
+</li>
+</ol>
+<ol>
+<li><p>绝对值loss</p>
+<ul>
+<li>$L(Y,f(x))=|Y-f(x)|$</li>
+<li><img src="/2020/09/07/regression-loss/L1.png" width="30%;"></li>
+<li>平均绝对值损失，MAE，L1</li>
+<li>对异常点有更好的鲁棒性</li>
+<li>更新的梯度始终相同，对于很小的损失值，梯度也很大，不利于模型学习——手动衰减学习率</li>
+</ul>
+</li>
+<li><p>平方差loss</p>
+<ul>
+<li>$L(Y, f(x)) = (Y-f(x))^2$</li>
+<li><img src="/2020/09/07/regression-loss/L2.png" width="30%;"></li>
+<li>均方误差损失，MSE，L2</li>
+<li>因为取了平方，会赋予异常点更大的权重，会以牺牲其他样本的误差为代价，朝着减小异常点误差的方向更新，降低模型的整体性能</li>
+</ul>
+</li>
+<li><p>Huber loss</p>
+<ul>
+<li>$L = \begin{cases} \frac{1}{2}(y-f(x))^2,\text{   for }|y-f(x)|&lt;\delta,\\ \delta |y-f(x)|-\frac{1}{2}\delta^2,  \text{  otherwise} \end{cases} $</li>
+<li><img src="/2020/09/07/regression-loss/huber.png" width="30%;"></li>
+<li>超参决定了对与异常点的定义，只对较小的异常值敏感</li>
+</ul>
+</li>
+<li><p>对数loss</p>
+<script type="math/tex; mode=display">
+ L(Y, P(Y|X)) = -log(P(Y|X))</script></li>
+<li><p>cross-entropy loss</p>
+<p> 二分类双边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna</script></li>
+</ol>
+<ol>
+<li><p>指数loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = exp[-yf(x)]</script></li>
+<li><p>Hinge loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = max(0, 1-yf(x))</script></li>
+<li><p>perceptron loss</p>
+<script type="math/tex; mode=display">
+ L(Y, f(x)) = max(0, -yf(x))</script></li>
+<li><p>cross-entropy loss</p>
+<p> 二分类双边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna + (1-y)ln(1-a)</script><p> 多分类单边计算：</p>
+<script type="math/tex; mode=display">
+ L = ylna</script></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/02/pseudo-3d/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/02/pseudo-3d/" itemprop="url">pseudo-3d</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-02T15:55:00+08:00">
+                2020-09-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/02/pseudo-3d/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/02/pseudo-3d/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[3d resnet] Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition：真3d，for comparison，分类</p>
+<p>[C3d] Learning Spatiotemporal Features with 3D Convolutional Networks：真3d，for comparison，分类</p>
+<p>[Pseudo-3D resnet] Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks：伪3d，resblock，S和T花式连接，分类</p>
+<p>[2.5d Unet] Automatic Segmentation of Vestibular Schwannoma from T2-Weighted MRI by Deep Spatial Attention with Hardness-Weighted Loss：patch输入，先2d后3d，针对各向异性，分割</p>
+<p>[two-pathway U-Net] Combining analysis of multi-parametric MR images into a convolutional neural network: Precise target delineation for vestibular schwannoma treatment planning：patch输入，3d网络，xy和z平面分别conv &amp; concat，分割</p>
+<p>[Projection-Based 2.5D U-net] Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation：mip，2d网络，分割，重建</p>
+<p>[New 2.5D Representation] A New 2.5D Representation for Lymph Node Detection using Random Sets of Deep Convolutional Neural Network Observations：横冠矢三个平面作为三个channel输入，2d网络，检测</p>
+<h2 id="Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks"><a href="#Learning-Spatio-Temporal-Representation-with-Pseudo-3D-Residual-Networks" class="headerlink" title="Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks"></a>Learning Spatio-Temporal Representation with Pseudo-3D Residual Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>spatio-temporal video</li>
+<li>the development of a very deep 3D CNN from scratch results in expensive computational cost and memory demand</li>
+<li>new framework<ul>
+<li>1x3x3 &amp; 3x1x1</li>
+<li>Pseudo-3D Residual Net which exploits all the variants of blocks</li>
+</ul>
+</li>
+<li>outperforms 3D CNN and frame-based 2D CNN</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3d CNN的model size：making it extremely difficult to train a very deep model</li>
+<li>fine-tuning 2d 好于 train from scrach 3d</li>
+<li>RNN builds only the temporal connections on the high-level features，leaving the correlations in the low-level forms not fully exploited</li>
+<li>we propose<ul>
+<li>1x3x3 &amp; 3x1x1 in parallel or cascaded </li>
+<li>其中的3x3 conv可以用2d conv来初始化</li>
+<li>a family of bottleneck building blocks：enhance the structural diversity  </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>P3D Blocks  </p>
+<ul>
+<li>direct／indirect influence：S和T之间是串联还是并联</li>
+<li><p>direct／indirect connected to the final output：S和T的输出是否直接与identity path相加</p>
+<p><img src="/2020/09/02/pseudo-3d/P3D Blocks.png" width="40%"></p>
+</li>
+<li><p>bottleneck：</p>
+<ul>
+<li>头尾各接一个1x1x1的conv</li>
+<li>头用来narrow channel，尾用来widen back</li>
+<li><p>头有relu，尾没有relu</p>
+<p><img src="/2020/09/02/pseudo-3d/bottlenecks.png" width="80%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Pseudo-3D ResNet </p>
+<ul>
+<li>mixing blocks：循环ABC</li>
+<li><p>better performance &amp; small increase in model size</p>
+<p><img src="/2020/09/02/pseudo-3d/cmp.png" width="45%"></p>
+</li>
+<li><p>fine-tuning resnet50：</p>
+<ul>
+<li>randomly cropped 224x224</li>
+<li>freeze all BN except for the first one</li>
+<li>add an extra dropout layer with 0.9 dropout rate </li>
+</ul>
+</li>
+<li>further fine-tuning P3D resnet：<ul>
+<li>initialize with r50 in last step</li>
+<li>randomly cropped 16x160x160</li>
+<li>horizontally flipped </li>
+<li>mini-batch as 128 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>future work</p>
+<ul>
+<li>attention mechanism will be incorporated </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation"><a href="#Projection-Based-2-5D-U-net-Architecture-for-Fast-Volumetric-Segmentation" class="headerlink" title="Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation"></a>Projection-Based 2.5D U-net Architecture for Fast Volumetric Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>MIP：2D images containing information of the full 3D image </p>
+</li>
+<li><p>faster, less memory, accurate</p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>2d unet</p>
+<ul>
+<li>MIP：$\alpha=36$</li>
+<li>3x3 conv, s2 pooling, transpose conv, concat, BN, relu, </li>
+<li>filters：begin with 32, end with 512</li>
+<li><p>dropout：0.5 in the deepest convolutional block and 0.2 in the second deepest blocks</p>
+<p><img src="/2020/09/02/pseudo-3d/mra.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>3d unet</p>
+<ul>
+<li>overfitting &amp; memory space</li>
+<li>filters：begin with 4, end with 16</li>
+<li>dropout：0.5 in the deepest convolutional block and 0.4 in the second deepest blocks</li>
+</ul>
+</li>
+<li><p>Projection-Based 2.5D U-net </p>
+<ul>
+<li><p>2d slice：loss of connection </p>
+</li>
+<li><p>2d mip：disappointing results </p>
+</li>
+<li><p>2d volume：long training time</p>
+</li>
+<li><p>the proposed 2.5D U-net：</p>
+<script type="math/tex; mode=display">
+  N(x) = T R_p F_p 
+  \left[
+   \begin{matrix}
+     U M_{\alpha_1}(x) \\
+     ... \\
+     U M_{\alpha_p}(x)
+    \end{matrix}
+    \right]</script><ul>
+<li><p>$M_{i}$：MIP，p=12</p>
+</li>
+<li><p>$U$：2d-Unet like above</p>
+</li>
+<li><p>$F_p$：learnable filtration，1x3 conv，for each projection，抑制重建伪影</p>
+</li>
+<li><p>$R_p$：reconstruction operator</p>
+<p>  <img src="/2020/09/02/pseudo-3d/recon.png" width="40%"></p>
+</li>
+<li><p>$T$：fine-tuning operator，shift &amp; scale back to 0-1 mask</p>
+</li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/cmp2.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition"><a href="#Learning-Spatio-Temporal-Features-with-3D-Residual-Networks-for-Action-Recognition" class="headerlink" title="Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition"></a>Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>3D kernels tend to overfit</li>
+<li>3D CNNs is relatively shallow</li>
+<li>propose a 3D CNNs based on ResNets<ul>
+<li>better performance</li>
+<li>not overfit</li>
+<li>deeper than C3D</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>two-stream architecture：consists of RGB and optical flow streams is often used to represent spatio-temporal information </li>
+<li>3D CNNs：trained on relatively small video datasets performs worse than 2D CNNs pretrained on large datasets </li>
+<li>Very deep 3D CNNs：not explored yet due to training difficulty  </li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Network Architecture</p>
+<ul>
+<li>main difference：kernel dimensions</li>
+<li>stem：stride2 for S，stride1 for T</li>
+<li>resblock：conv_bn_relu&amp;conv + id</li>
+<li>identity shortcuts：use zero-padding for increasing dimensions，to avoid increasing the number of parameters</li>
+<li>stride2 conv：conv3_1、 conv4_1、 conv5_1</li>
+<li>input clips：3x16x112x112</li>
+<li><strong>large learning rate</strong> and batch size was important </li>
+</ul>
+<p><img src="/2020/09/02/pseudo-3d/3d res.png" width="50%"></p>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>在小数据集上3d-r18不如C3D，overfit了：shallow architecture of the C3D and pretraining on the Sports-1M dataset prevent the C3D from overfitting </li>
+<li>在大数据集上3d-r34好于C3D，同时C3D的val acc明显高于train acc——太shallow欠拟合了，r34则表现更好，而且不需要预训练</li>
+<li>RGB-I3D achieved the best performance <ul>
+<li>3d-r34是更deeper的</li>
+<li>RGB-I3D用了更大的batch size：Large batch size is important to train good models with batch normalization </li>
+<li>High resolutions：3x64x224x224</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks"><a href="#Learning-Spatiotemporal-Features-with-3D-Convolutional-Networks" class="headerlink" title="Learning Spatiotemporal Features with 3D Convolutional Networks"></a>Learning Spatiotemporal Features with 3D Convolutional Networks</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>generic </li>
+<li>efficient </li>
+<li>simple </li>
+<li>3d ConvNet with 3x3x3 conv &amp; a simple linear classifier</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>3D ConvNets are more suitable for spatiotemporal feature learning compared to 2D ConvNets</li>
+<li>2D ConvNets lose temporal information of the input signal right after every convolution operation </li>
+<li><p>2d conv在channel维度上权重都是一样的，相当于temporal dims上没有重要性特征提取</p>
+<p><img src="/2020/09/02/pseudo-3d/2d3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>basic network settings</p>
+<ul>
+<li>5 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>filters：[64，128，256，256，256]</li>
+<li>fc dims：[2048，2048]</li>
+<li>conv kernel：dx3x3</li>
+<li>pooling kernel：2x2x2，s2 except for the first layer <ul>
+<li>with the intention of not to merge the temporal signal too early </li>
+<li>also to satisfy the clip length of 16 frames </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>varing settings</p>
+<ul>
+<li>temporal kernel depth<ul>
+<li>homogeneous：depth-1/3/5/7 throughout</li>
+<li>varying：increasing-3-3-5-5-7 &amp; decreasing-7- 5-5-3-3  </li>
+</ul>
+</li>
+<li><p>depth-3 throughout performs the best</p>
+<p><img src="/2020/09/02/pseudo-3d/depth.png" width="60%"></p>
+</li>
+<li><p>depth-1 is significantly worse  </p>
+</li>
+<li>We also verify that 3D ConvNet consistently performs better than 2D ConvNet <strong>on a large-scale internal dataset</strong></li>
+</ul>
+</li>
+<li><p>C3D</p>
+<ul>
+<li>8 conv layers + 5 pooling layers + 2 fc layers + softmax</li>
+<li>homogeneous：3x3x3 s1 conv thtoughout</li>
+<li>pool1：1x2x2 kernel size &amp; stride，rest 2x2x2</li>
+<li><p>fc dims：4096</p>
+<p><img src="/2020/09/02/pseudo-3d/c3d.png" width="80%"></p>
+</li>
+</ul>
+</li>
+<li><p>C3D video descriptor：fc6 activations + L2-norm</p>
+</li>
+<li><p>deconvolution visualizing：</p>
+<ul>
+<li>conv5b feature maps</li>
+<li>starts by focusing on appearance in the first few frames </li>
+<li>tracks the salient motion in the subsequent frames </li>
+</ul>
+</li>
+<li><p>compactness </p>
+<ul>
+<li>PCA</li>
+<li>压缩到50-100dim不太损失acc</li>
+<li><p>压缩到10dim仍旧是最高acc</p>
+<p><img src="/2020/09/02/pseudo-3d/PCA.png" width="60%"></p>
+</li>
+<li><p>projected to 2-dimensional space using t-SNE </p>
+<ul>
+<li>C3D features are semantically separable compared to Imagenet  </li>
+<li><p>quantitatively observe that C3D is better than Imagenet</p>
+<p><img src="/2020/09/02/pseudo-3d/2dvec.png" width="60%"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Action Similarity Labeling </p>
+<ul>
+<li>predicting action similarity  </li>
+<li>extract C3D features: prob, fc7, fc6, pool5 for each clip </li>
+<li>L2 normalization</li>
+<li>compute the 12 different distances for each feature：48 in total</li>
+<li>linear SVM is trained on these 48-dim feature vectors </li>
+<li><p>C3D significantly outperforms the others</p>
+<p><img src="/2020/09/02/pseudo-3d/similarity.png" width="50%"></p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/08/13/SSD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2644,492 +3255,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/22/FCIS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/22/FCIS/" itemprop="url">FCIS</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-22T15:19:55+08:00">
-                2020-06-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/22/FCIS/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/22/FCIS/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="Fully-Convolutional-Instance-aware-Semantic-Segmentation"><a href="#Fully-Convolutional-Instance-aware-Semantic-Segmentation" class="headerlink" title="Fully Convolutional Instance-aware Semantic Segmentation"></a>Fully Convolutional Instance-aware Semantic Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>instance segmentation：<ul>
-<li>实例分割比起检测，需要得到目标更精确的边界信息</li>
-<li>比起语义分割，需要区分不同的物体</li>
-</ul>
-</li>
-<li>detects and segments simultanously</li>
-<li>FCN + instance mask proposal</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>FCNs do not work for the instance-aware semantic segmentation task <ul>
-<li>convolution is translation invariant：权值共享，一个像素值对应一个响应值，与位置无关</li>
-</ul>
-</li>
-<li>instance segmentation operates on region level <ul>
-<li>the same pixel can have different semantics in different regions </li>
-<li>Certain translation-variant property is required </li>
-</ul>
-</li>
-<li>prevalent method<ul>
-<li>step1: an FCN is applied on the whole image to generate shared feature maps </li>
-<li>step2: a pooling layer warps each region of interest into fixed-size per-ROI feature maps </li>
-<li>step3: use fc layers to convert the per-ROI feature maps to per-ROI masks </li>
-<li><strong>the translation-variant property is introduced in the fc layer(s) in the last step</strong></li>
-<li>drawbacks <ul>
-<li>the ROI pooling step losses spatial details </li>
-<li>the fc layers over-parametrize the task </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>InstanceFCN<ul>
-<li>position-sensitive score maps</li>
-<li>sliding windows </li>
-<li>sub-tasks are separated and the solution is not end-to-end </li>
-<li>blind to the object categories：前背景分割</li>
-</ul>
-</li>
-<li><p>In this work</p>
-<ul>
-<li>extends InstanceFCN</li>
-<li>end-to-end </li>
-<li>fully convolutional </li>
-<li>operates on box proposals instead of sliding windows</li>
-<li>per-ROI computation does not involve any warping or resizing operations</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/FCIS.png" width="60%"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>position-sensitive score map</p>
-<ul>
-<li>FCN<ul>
-<li>predict a single score map</li>
-<li>predict each pixel’s likelihood score of belonging to each category</li>
-</ul>
-</li>
-<li>at instance level<ul>
-<li>the same pixel can be foreground on one object but background on another </li>
-<li>a single score map per-category is insufficient to distinguish these two cases</li>
-</ul>
-</li>
-<li>a fully convolutional solution for instance mask proposal <ul>
-<li>k x k evenly partitioned cells of object </li>
-<li>thus obtain k x k position-sensitive score maps </li>
-<li>Each score represents 当前像素在<strong>当前位置（score map在cells中的位置）</strong>上属于某个物体实例的似然得分</li>
-<li>assembling (copy-paste) </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>jointly and simultaneously</p>
-<ul>
-<li>The same set of score maps are shared for the two sub-tasks </li>
-<li>For each pixel in a ROI, there are two tasks:  <ul>
-<li>detection：whether it belongs to an object bounding box </li>
-<li>segmentation：whether it is inside an object instance’s boundary </li>
-<li>separate：two 1x1 conv heads</li>
-<li>fuse：inside and outside <ul>
-<li>high inside score and low outside score：detection+, segmentation+</li>
-<li>low inside score and high outside score：detection+, segmentation-</li>
-<li>low inside score and low outside score：detection-, segmentation-</li>
-<li>detection score<ul>
-<li>average pooling over all pixels‘ likelihoods for each class</li>
-<li>max(detection score) represent the object</li>
-</ul>
-</li>
-<li>segmentation <ul>
-<li>softmax(inside, outside) for each pixel to distinguish fg／bg</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>All the per-ROI components are implemented through convs</p>
-<ul>
-<li>local weight sharing property：a regularization mechanism </li>
-<li>without involving any feature warping, resizing or fc layers </li>
-<li>the per-ROI computation cost is negligible</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/fuse.png" width="70%"></p>
-</li>
-</ul>
-</li>
-<li><p>architecture </p>
-<ul>
-<li>ResNet back produce features with 2048 channels</li>
-<li>a 1x1 conv reduces the dimension to 1024</li>
-<li>x16 output stride：conv5 stride is decreased from 2 to 1, the dilation is increased from 1 to 2</li>
-<li>head1：joint det conf &amp; segmentation<ul>
-<li>1x1 conv，generates $2k^2(C+1)$ score maps</li>
-<li>2 for inside／outside</li>
-<li>$k^2$ for $k^2$个position</li>
-<li>$(C+1)$ for fg／bg</li>
-</ul>
-</li>
-<li>head2：bbox regression <ul>
-<li>1x1 conv，$4k^2$ channels</li>
-</ul>
-</li>
-<li>RPN to generate ROIs</li>
-<li>inference<ul>
-<li>300 ROIs </li>
-<li>pass through the bbox regression obtaining another 300 ROIs </li>
-<li>pass through joint head to obtain detection score&amp;fg mask for all categories </li>
-<li>mask voting：每个ROI (with max det score) 只包含当前类别的前景，还要补上框内其他类别背景<ul>
-<li>for current ROI, find all the ROIs (from the 600) with IoU scores higher than 0.5 </li>
-<li>their fg masks are averaged per-pixel and weighted by the classification score </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>ROI positive／negative：IoU&gt;0.5</li>
-<li>loss<ul>
-<li>softmax detection loss over C+1 categories</li>
-<li>softmax segmentation loss over the gt fg mask, on positive ROIs</li>
-<li>bbox regression loss, , on positive ROIs</li>
-</ul>
-</li>
-<li>OHEM：among the 300 proposed ROIs on one image, 128 ROIs with the highest losses are selected to back-propagate their error gradients</li>
-<li>RPN：<ul>
-<li>9 anchors  </li>
-<li>sharing feature between FCIS and RPN </li>
-</ul>
-</li>
-</ul>
-<p><img src="/2020/06/22/FCIS/architecture.png" width="70%"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>metric：mAP</p>
-</li>
-<li><p>FCIS (translation invariant)：</p>
-<ul>
-<li>set k=1，achieve the worst mAP</li>
-<li>indicating the position sensitive score map is vital for this method</li>
-</ul>
-</li>
-<li><p>back</p>
-<ul>
-<li>50-101：increase</li>
-<li>101-152：saturate</li>
-</ul>
-</li>
-<li><p>tricks</p>
-<p>  <img src="/2020/06/22/FCIS/tricks.png" width="40%"></p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>* r
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/11/天池脊柱MRI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/11/天池脊柱MRI/" itemprop="url">天池脊柱MRI</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-11T22:26:59+08:00">
-                2020-06-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/11/天池脊柱MRI/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/11/天池脊柱MRI/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>MRI</p>
-<p> T1加权相上面密度高的骨头会比较亮(就是高信号)，还有脂肪和甲状腺也是高信号，水份一般都是无信号，<br> T2加权相里水是高信号所以水比较亮，因为很多的病变有水肿，所以T2加权相通俗可以说是看病变(毕竟比较明显)，</p>
-<p> 视觉直观上来看，T1看解剖，T2看病变</p>
-<p> ——怎么fusion一个case（标注只有一张）</p>
-</li>
-<li><p>数据集</p>
-<p> T1、T2矢状位，T2轴状位，</p>
-<p> 关键点：基于T2矢状位的中间帧，</p>
-<p> 标注范围：从胸12（T12）腰1（L1）间的椎间盘开始，到腰5（L5）骶1（S1）间的椎间盘结束</p>
-<p> 类别：椎块有编号（T12到L5），间盘通过上下椎块的编号表示（T12-L1到L5-S1）</p>
-<p> 病灶：</p>
-<pre><code> * 椎块有两类：正常V1和退行性病变V2，
- * 椎间盘有7类：正常V1，退行性改变V2，弥漫性膨出，非对称性膨出，突出，脱出，疝出V7
-</code></pre><p> json结构：</p>
-<ul>
-<li>uid，dim，spacing等一些header info</li>
-<li>annotation：<ul>
-<li>slice：难道不是T2矢状位的中间帧吗？</li>
-<li>point：关键点坐标，病灶类别，关键点类别</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>评估指标</p>
-<ul>
-<li><p>distance&lt;8mm</p>
-</li>
-<li><p>TP：多个命中取最近的，其余忽略</p>
-</li>
-<li>FP：假阳性，distance超出所有gt的8mm圈圈／落进圈圈但是类别错了</li>
-<li>FN：假阴性，gt点没有被TP</li>
-<li>precision：TP/(TP+FP)</li>
-<li>recall：TP/(TP+FN)</li>
-<li>AP</li>
-<li>MAP</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3179,7 +3309,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">169</span>
+                  <span class="site-state-item-count">171</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
