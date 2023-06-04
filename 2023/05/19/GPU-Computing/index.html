@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost CUDA：CUDA provides a flexible programming model and C-like language f">
+<meta name="description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GPU Computing">
 <meta property="og:url" content="https://amberzzzz.github.io/2023/05/19/GPU-Computing/index.html">
 <meta property="og:site_name" content="Less is More">
-<meta property="og:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost CUDA：CUDA provides a flexible programming model and C-like language f">
+<meta property="og:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2023-05-21T08:17:47.227Z">
+<meta property="og:updated_time" content="2023-06-04T04:29:14.388Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GPU Computing">
-<meta name="twitter:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost CUDA：CUDA provides a flexible programming model and C-like language f">
+<meta name="twitter:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
 
 
 
@@ -356,9 +356,12 @@
         <ol>
 <li><p>background</p>
 <ul>
-<li>GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost</li>
-<li>CUDA：CUDA provides a flexible programming model and C-like language for implementing data-parallel algorithms on the GPU</li>
-<li>FLOPs：每秒所执行的浮点运算次数（floating-point operations per second）<ul>
+<li><p>GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost</p>
+</li>
+<li><p>CUDA：CUDA provides a flexible programming model and C-like language for implementing data-parallel algorithms on the GPU</p>
+</li>
+<li><p>FLOPs：每秒所执行的浮点运算次数（floating-point operations per second）</p>
+<ul>
 <li><a href="https://www.zhihu.com/zvideo/1421421171497304064?playTime=463.3" target="_blank" rel="noopener">https://www.zhihu.com/zvideo/1421421171497304064?playTime=463.3</a></li>
 <li>compute intensity</li>
 <li>memory latency<ul>
@@ -382,8 +385,11 @@
 </li>
 </ul>
 </li>
-<li>CUDA kernel：<a href="https://www.youtube.com/watch?v=jYCxVirq4d0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jYCxVirq4d0</a><ul>
-<li>写cuda kernel时候，要manipulate两个层次，1是thread block，thread block内部的threads has shared memory，2是thread block构成的launching grid</li>
+<li><p>CUDA kernel：<a href="https://www.youtube.com/watch?v=jYCxVirq4d0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jYCxVirq4d0</a></p>
+<ul>
+<li>cuda kernel的code写的是1个thread要做的事</li>
+<li>但是它manipulate两个层次，1是thread block，thread block内部的threads has shared memory，2是thread block构成的launching grid，对应地，GPU的memory hierarchy也分为两级，每个thread的私有mem叫local registers，每个block的mem叫shared memory，除此以外tensor.cuda()放的地方叫global memory</li>
+<li>a kernel executes a grid</li>
 <li>threads使用shared memory的时候要sync：所有thread finish以后整个block才算finish</li>
 <li>parallel的程度取决于具体算子：<ul>
 <li>如果c[i]=f(c[i-1])，比如cumadd，那这种就不好并行化了</li>
@@ -391,9 +397,21 @@
 </ul>
 </li>
 </ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// implement cuda kernel of C=A+B</span></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">VecAddKernel</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">	<span class="keyword">if</span> (i&lt;n)</span><br><span class="line">    	C[i] = A[i] + B[i]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 </li>
+</ol>
+<ul>
+<li><p>CPU host</p>
+<ul>
+<li>在cpu上要运行code，to launch the CUDA kernel</li>
+<li>指定/计算threads和blocks数量</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VecAddCPU</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> threads_per_block = <span class="number">512</span>;</span><br><span class="line">    <span class="keyword">int</span> nblocks = <span class="built_in">ceil</span>(n/threads_per_block);</span><br><span class="line">    VecAddKernel&lt;&lt;&lt;nblocks, threads_per_block&gt;&gt;&gt;(A, B, C, n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol>
 <li><p>tensorRT</p>
 <ul>
 <li>NVIDIA TensorRT是一种高性能神经网络推理(Inference)引擎，用于在生产环境中部署深度学习应用，可提供最大的推理吞吐量和效率</li>
@@ -426,33 +444,166 @@
 </li>
 </ul>
 </li>
-<li><p>c++ basics recall</p>
-</li>
-<li><p>常见神经网络相关coding题</p>
+<li><p>Jetson</p>
 <ul>
-<li><p>conv的fp/bp：<a href="https://blog.csdn.net/gaocui883/article/details/116517812" target="_blank" rel="noopener">https://blog.csdn.net/gaocui883/article/details/116517812</a></p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># raw conv forwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(X, W, B, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X: [b,c,h,w]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># B: [out]</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    X_pad = np.pad(X, [[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,pad_h],[<span class="number">0</span>,pad_w]])</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line"></span><br><span class="line">    <span class="comment"># out shape</span></span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)     <span class="comment"># receptive field</span></span><br><span class="line">    out_rows, out_cols = (h_pad + pad_h - k1) // s + <span class="number">1</span>, (w_pad + pad_w - k2) // s + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># tranverse spatial</span></span><br><span class="line">    Y = np.zeros((b,out_channels,out_rows, out_cols))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            Y[:,:,i,j] = X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T) + B  <span class="comment"># [b,out]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># raw conv backwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d_bp</span><span class="params">(X_pad, W, B, Y_grads, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X_pad: [b,c,h_pad,w_pad]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># Y_grads: [b,out,h_out,w_out]</span></span><br><span class="line">    <span class="comment"># return: X_grads, W_grads, B_grads</span></span><br><span class="line"></span><br><span class="line">    b, _, out_rows, out_cols = Y_grads.shape</span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute grads</span></span><br><span class="line">    X_grads = np.zeros_like(X_pad)</span><br><span class="line">    W_grads = np.zeros_like(W)</span><br><span class="line">    B_grads = np.zeros_like(B)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            kernel = Y_grads[:,:,i,j]   <span class="comment"># dL/dY</span></span><br><span class="line">            B_grads += kernel * <span class="number">1</span>       <span class="comment"># dL/dY * dY/dB</span></span><br><span class="line">            W_grads += kernel * X_pad[:,:,i0:i1:d, j0:j1:d]   <span class="comment"># dL/dY * X</span></span><br><span class="line">            X_grads[:,:,i0:i1:d, j0:j1:d] += kernel * W       <span class="comment"># dL/dY * W</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># remove pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line">    X_grads = X_grads[:,:,:h_pad-pad_h, :w_pad-pad_w]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> X_grads, W_grads, B_grads</span><br></pre></td></tr></table></figure>
+<li>NVIDIA将TensorRT、cuDNN、CUDA等功能整合到Jetson平台，通过一体化软件包JetPack按需提供给开发者们</li>
+</ul>
+</li>
+<li><p>pytorch custom cuda op</p>
+<ul>
+<li><p>custom add</p>
+</li>
+<li><p>deformable conv</p>
+<ul>
+<li>torch已经有官方版本了：<a href="https://pytorch.org/vision/stable/_modules/torchvision/ops/deform_conv.html" target="_blank" rel="noopener">https://pytorch.org/vision/stable/_modules/torchvision/ops/deform_conv.html</a></li>
+<li>民间版本：<a href="https://github.com/chengdazhi/Deformable-Convolution-V2-PyTorch/tree/pytorch_1.0.0" target="_blank" rel="noopener">https://github.com/chengdazhi/Deformable-Convolution-V2-PyTorch/tree/pytorch_1.0.0</a></li>
+<li>也是weighted bilinear这部分需要cuda kernel实现</li>
+<li>src下面是cuda files</li>
+<li>functions下面是pytorch的function封装，相当于torch.nn.functional.conv2d这样使用</li>
+<li>modules下面是pytorch的module封装，相当于torch.nn.Conv2d这样使用</li>
+</ul>
+</li>
+<li><p>MSDeformAttn</p>
+<ul>
+<li>kernel forward &amp; backward在ops/src/cuda/ms_deform_attn_cuda.cu中</li>
+<li>打包在ops/src/vision.cpp中</li>
+<li>编译在setup.py中</li>
+<li>torch op封装在ops/functions中MSDeformAttnFunction，用静态方法定义pytorch op的forward &amp; backward</li>
+</ul>
+</li>
+<li><p>python bindings</p>
+<ul>
+<li><p>从 Python 调用 C 或 C++，以及将数据从 Python 传递到 C 或 C++</p>
+</li>
+<li><p>ctypes直接加载dll/so</p>
+</li>
+<li><p>PyBind11</p>
+<ul>
+<li><p>PyBind11 生成的 Python 绑定是一个完整的 Python 模块，可以直接导入和使用</p>
+</li>
+<li><p>step1：在c++侧编写方法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cmult.h</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cmult.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">float</span> return_value = int_param * float_param;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"    In cmult : int: %d float %.1f returning  %.1f\n"</span>, int_param,</span><br><span class="line">            float_param, return_value);</span><br><span class="line">    <span class="keyword">return</span> return_value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
 </ol>
-<pre><code>* im2col &amp; col2im
+<pre><code>  * step2：pybind module编写绑定
 
-    * conv2d里面X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T)这个做的是patch[b,in,k,k]和filter[out,in,k,k]的点积
-    * im2col可以将循环转化成矩阵乘法
-        * filter转化成[out, in\*k\*k]，X转化成overlap patches[in\*k\*k, b\*n_rows\*n_cols]
-        * 结果得到[out, b\*n_rows\*n_cols]
-    * col2im转换矩阵结果
-        * [b, out, n_rows, n_cols]
+    <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pybind11_wrapper.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmult.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(cmult_example, m) &#123;</span><br><span class="line">    m.def(<span class="string">"cmult"</span>, &amp;cmult, <span class="string">"A function that multiplies two numbers"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-* BN/LN/GN/IN
 
-* sgd
+    PYBIND11_MODULE宏是python解释器导入扩展模块的入口，当调用自定义的python库函数cmult时，cmult的函数地址的将被调用
 
-* adamw
+  * step3：setup编译并添加python module
 
-* regularization
-</code></pre>
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setup.py</span></span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> pybind11.setup_helpers <span class="keyword">import</span> Pybind11Extension, build_ext</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">example_module = Pybind11Extension(</span><br><span class="line">    <span class="string">'cmult_example'</span>,</span><br><span class="line">    [str(fname) <span class="keyword">for</span> fname <span class="keyword">in</span> Path(<span class="string">'src'</span>).glob(<span class="string">'*.cpp'</span>)],</span><br><span class="line">    include_dirs=[<span class="string">'./'</span>],</span><br><span class="line">    extra_compile_args=[<span class="string">'-O3'</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'cmult_example'</span>,</span><br><span class="line">    description=<span class="string">'pybind11+setup.py example'</span>,</span><br><span class="line">    ext_modules=[example_module],</span><br><span class="line">    cmdclass=&#123;<span class="string">"build_ext"</span>: build_ext&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+
+    安装：python setup install，就会添加名为cmult_example的python module
+
+  * step4：python脚本中调用module以及cmult函数
+
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cmult_example <span class="keyword">import</span> cmult</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span></span><br><span class="line">b = <span class="number">1.25</span></span><br><span class="line">print(cmult(a, b))</span><br></pre></td></tr></table></figure>
+
+
+* Cython
+</code></pre><ol>
+<li><p>c++ basics recall</p>
+<ul>
+<li>cmake</li>
+<li>编译原理</li>
+<li>堆栈</li>
+<li>L1/L2 cache</li>
+<li>深浅拷贝、传变量/传引用</li>
+<li>重载：函数名相同，用参数和功能来自动区分</li>
+<li>类和对象<ul>
+<li>类：抽象，定义属性，默认private，protected只能被子类访问，public可以被访问</li>
+<li>对象：类的实例，具有类的所有变量和属性</li>
+</ul>
+</li>
+<li>继承<ul>
+<li>class derive_cls：public parent_cls1, public parent_cls2</li>
+<li>多态：重新实现父类的方法，来实现不同功能</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>自动驾驶 basics</p>
+<ul>
+<li>bev：BEVFormer</li>
+<li>3D det：PETR</li>
+<li>多模态：lidar+camera</li>
+</ul>
+</li>
+<li><p>常见神经网络相关coding题</p>
+<ul>
+<li><p>conv的fp/bp：<a href="https://blog.csdn.net/gaocui883/article/details/116517812" target="_blank" rel="noopener">https://blog.csdn.net/gaocui883/article/details/116517812</a></p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># raw conv forwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d</span><span class="params">(X, W, B, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X: [b,c,h,w]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># B: [out]</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    X_pad = np.pad(X, [[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,pad_h],[<span class="number">0</span>,pad_w]])</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line"></span><br><span class="line">    <span class="comment"># out shape</span></span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)     <span class="comment"># receptive field</span></span><br><span class="line">    out_rows, out_cols = (h_pad + pad_h - k1) // s + <span class="number">1</span>, (w_pad + pad_w - k2) // s + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># tranverse spatial</span></span><br><span class="line">    Y = np.zeros((b,out_channels,out_rows, out_cols))</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            Y[:,:,i,j] = X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T) + B  <span class="comment"># [b,out]</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> Y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># raw conv backwards</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">conv2d_bp</span><span class="params">(X_pad, W, B, Y_grads, stride, pad, dilation=<span class="number">1</span>)</span>:</span></span><br><span class="line">    <span class="comment"># X_pad: [b,c,h_pad,w_pad]</span></span><br><span class="line">    <span class="comment"># W: [k1,k2,in,out]</span></span><br><span class="line">    <span class="comment"># Y_grads: [b,out,h_out,w_out]</span></span><br><span class="line">    <span class="comment"># return: X_grads, W_grads, B_grads</span></span><br><span class="line"></span><br><span class="line">    b, _, out_rows, out_cols = Y_grads.shape</span><br><span class="line">    s, d = stride, dilation</span><br><span class="line">    k1, k2, _, out_channels = W.shape</span><br><span class="line">    k1, k2 = k1+(k1<span class="number">-1</span>)*(d<span class="number">-1</span>), k1+(k2<span class="number">-1</span>)*(d<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute grads</span></span><br><span class="line">    X_grads = np.zeros_like(X_pad)</span><br><span class="line">    W_grads = np.zeros_like(W)</span><br><span class="line">    B_grads = np.zeros_like(B)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(out_rows):</span><br><span class="line">        <span class="keyword">for</span> j <span class="keyword">in</span> range(out_cols):</span><br><span class="line">            i0,i1 = i*s, i*s + k1</span><br><span class="line">            j0,j1 = j*s, j*s + k2</span><br><span class="line">            kernel = Y_grads[:,:,i,j]   <span class="comment"># dL/dY</span></span><br><span class="line">            B_grads += kernel * <span class="number">1</span>       <span class="comment"># dL/dY * dY/dB</span></span><br><span class="line">            W_grads += kernel * X_pad[:,:,i0:i1:d, j0:j1:d]   <span class="comment"># dL/dY * X</span></span><br><span class="line">            X_grads[:,:,i0:i1:d, j0:j1:d] += kernel * W       <span class="comment"># dL/dY * W</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># remove pad</span></span><br><span class="line">    pad_h, pad_w = pad</span><br><span class="line">    b, _, h_pad, w_pad = X_pad.shape</span><br><span class="line">    X_grads = X_grads[:,:,:h_pad-pad_h, :w_pad-pad_w]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> X_grads, W_grads, B_grads</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>im2col &amp; col2im</p>
+<ul>
+<li>conv2d里面X_pad[:,:,i0:i1:d,j0:j1:d].dot(W.T)这个做的是patch[b,in,k,k]和filter[out,in,k,k]的点积</li>
+<li>im2col可以将循环转化成矩阵乘法<ul>
+<li>filter转化成[out, in*k*k]，X转化成overlap patches[in*k*k, b*n_rows*n_cols]</li>
+<li>结果得到[out, b*n_rows*n_cols]</li>
+</ul>
+</li>
+<li>col2im转换矩阵结果<ul>
+<li>[b, out, n_rows, n_cols]</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>BN/LN/GN/IN</p>
+</li>
+<li><p>sgd</p>
+</li>
+<li><p>adamw</p>
+</li>
+<li><p>regularization</p>
+</li>
+</ul>
+</li>
+<li><p>bit hacks：<a href="https://zhuanlan.zhihu.com/p/37014715" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/37014715</a></p>
+<ul>
+<li><p>判断奇偶：与1做交</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">isOdd</span><span class="params">(n)</span>:</span></span><br><span class="line">	<span class="keyword">return</span> n &amp; <span class="number">1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>交换两个数字：</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">swap1</span><span class="params">(a,b)</span>:</span></span><br><span class="line">    a = a + b       <span class="comment"># a+b</span></span><br><span class="line">    b = a - b       <span class="comment"># a</span></span><br><span class="line">    a = a - b       <span class="comment"># b</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">swap2</span><span class="params">(a,b)</span>:</span></span><br><span class="line">    a = a^b</span><br><span class="line">    b = a^b         <span class="comment"># b=(a^b)^b=a^(b^b)=a^0=a</span></span><br><span class="line">    a = a^b         <span class="comment"># a=(a^b)^a=b^(a^a)=b^0=b</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将比特序列反向：一个右移弹出，一个左移加入</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">inverse</span><span class="params">(n)</span>:</span></span><br><span class="line">    result = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        tmp = n &amp; <span class="number">1</span></span><br><span class="line">        n &gt;&gt;= <span class="number">1</span></span><br><span class="line">        result += tmp</span><br><span class="line">        result &lt;&lt;= <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对2的幂数取余</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># d=1&lt;&lt;s, &#123;1,2,4,...&#125;</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">residual</span><span class="params">(n, d)</span>:</span></span><br><span class="line">	<span class="keyword">return</span> n&amp;(d<span class="number">-1</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>计算log2：寻找最高位</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">log2</span><span class="params">(n)</span>:</span></span><br><span class="line">    cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n&gt;&gt;<span class="number">1</span>:</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span></span><br><span class="line">        cnt += <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> cnt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>计算log10：换底数，log10(x) = log2(x) / log2(10)， log2(10)=1233/4096</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">log10</span><span class="params">(n)</span>:</span></span><br><span class="line">    PowersOf10 = [<span class="number">1</span>, <span class="number">10</span>, <span class="number">100</span>, <span class="number">1000</span>, <span class="number">10000</span>, <span class="number">100000</span>, <span class="number">1000000</span>, <span class="number">10000000</span>, <span class="number">100000000</span>, <span class="number">1000000000</span>]</span><br><span class="line">	t = (log2(n)+<span class="number">1</span>) * <span class="number">1233</span> &gt;&gt; <span class="number">12</span></span><br><span class="line">    r = t - (v &lt; PowersOf10[t])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>判断正负（零）</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sign = -(v &lt; <span class="number">0</span>)</span><br><span class="line">sign = (v &gt; <span class="number">0</span>) - (v &lt; <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>判断两数异号</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sign = ((x ^ y) &lt; <span class="number">0</span>)     // 有且仅有一个负数flag</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>判断是否是2的幂数</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sign = n &amp; (n &amp; n(n<span class="number">-1</span>))==<span class="number">0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>计算bit数中1的个数</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算效率与n的bit位数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        tmp = n&amp;<span class="number">1</span></span><br><span class="line">        cnt += tmp</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算效率与n中1的个数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        cnt += <span class="number">1</span></span><br><span class="line">        n &amp;= n<span class="number">-1</span>       <span class="comment"># remove the highest 1</span></span><br><span class="line">	<span class="keyword">return</span> cnt</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+
       
     </div>
     
@@ -485,6 +636,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/06/02/FQ-ViT/" rel="prev" title="FQ-ViT">
+                FQ-ViT <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -559,7 +714,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

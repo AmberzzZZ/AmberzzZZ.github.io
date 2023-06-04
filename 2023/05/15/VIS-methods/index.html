@@ -88,7 +88,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/15/VIS-methods/RVM.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/15/VIS-methods/SparseInst.png">
-<meta property="og:updated_time" content="2023-05-16T03:34:12.132Z">
+<meta property="og:updated_time" content="2023-05-28T15:04:22.058Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="VIS methods">
 <meta name="twitter:description" content="papers [RVM 2021]: Robust High-Resolution Video Matting with Temporal Guidance  [SparseInst 2022]: Sparse Instance Activation for Real-Time Instance Segmentation [GMA 2021]: Learning to Estimate Hidde">
@@ -467,6 +467,35 @@
 </ul>
 </li>
 </ol>
+<h2 id="grid-sample"><a href="#grid-sample" class="headerlink" title="grid sample"></a>grid sample</h2><ol>
+<li><p>optical flow</p>
+<p> 光流是一个HxWx2的per-pixel矢量(u,v)，表示img1到img2的偏移量：img1(x,y) = img2(x+u, y+u)</p>
+</li>
+<li><p>warp</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">warp</span><span class="params">(x, flow)</span>:</span></span><br><span class="line">    <span class="comment"># x: [b,c,h,w]</span></span><br><span class="line">    <span class="comment"># flow: [b,2,h,w]</span></span><br><span class="line">    h,w = x.shape[<span class="number">-2</span>:]</span><br><span class="line">    grid_y, grid_x = torch.meshgrid(torch.arange(h), torch.arange(w))</span><br><span class="line">    grid_xy = torch.stack([grid_x, grid_y], dim=<span class="number">-1</span>).unsqueeze(<span class="number">0</span>) + flow.permute(<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">    grid_xy[...,<span class="number">0</span>] = <span class="number">2</span> * grid_xy[...,<span class="number">0</span>] / (w<span class="number">-1</span>) - <span class="number">1</span></span><br><span class="line">    grid_xy[...,<span class="number">1</span>] = <span class="number">2</span> * grid_xy[...,<span class="number">1</span>] / (h<span class="number">-1</span>) - <span class="number">1</span>    <span class="comment"># norm to [-1,1]</span></span><br><span class="line">    warp_x = F.grid_sample(x, grid=grid_xy, mode=<span class="string">'bilinear'</span>, padding_mode=<span class="string">'border'</span>, align_corners=<span class="keyword">True</span>)</span><br><span class="line">	<span class="keyword">return</span> warp_x</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>grid sample</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.nn.functional.grid_sample(input, grid, mode=&apos;bilinear&apos;, padding_mode=&apos;zeros&apos;, align_corners=None)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>input：BCHW</li>
+<li>grid：BHW2，取值范围在[-1,1]之间</li>
+<li>return：BCHW</li>
+<li>mode：[‘nearest’, ‘bilinear’]</li>
+<li>padding_mode：[‘zeros’, ‘border’, ‘reflection’]</li>
+</ul>
+</li>
+<li><p>deformable conv</p>
+<ul>
+<li><p>采样点的值也可以用grid sample来实现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DeformConv2d</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, in_channels, out_channels, kernel_size)</span>:</span></span><br><span class="line">        self.conv1 = nn.Conv2d(in_channels, kernel_size*kernel_size*<span class="number">2</span>, kernel_size, padding=kernel_size//<span class="number">2</span>)</span><br><span class="line">        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel_size, stride=kernel_size, padding=kernel_size//<span class="number">2</span>)</span><br><span class="line">        self.k = kernel_size</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        b, c, h, w = x.shape</span><br><span class="line">        offsets = torch.split(self.conv1(x), [self.k*self.k*<span class="number">2</span>, self.k], dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        grid_y, grid_x = torch.meshgrid(torch.arange(h), torch.arange(w))</span><br><span class="line">        grid_xy = torch.stack([grid_x, grid_y], dim=<span class="number">1</span>).unsqueeze(<span class="number">0</span>)</span><br><span class="line">		kernel_feats = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.k*self.k):</span><br><span class="line">            loc = grid_xy + offsets[:,k]</span><br><span class="line">            loc[:,<span class="number">0</span>] = <span class="number">2</span> * loc[:,<span class="number">0</span>] / (w<span class="number">-1</span>) - <span class="number">1</span>            </span><br><span class="line">            loc[:,<span class="number">1</span>] = <span class="number">2</span> * loc[:,<span class="number">1</span>] / (h<span class="number">-1</span>) - <span class="number">1</span></span><br><span class="line">            kernel_feats.append(F.grid_sample(x, grid=loc, mode=<span class="string">'bilinear'</span>, padding_mode=<span class="string">'border'</span>, align_corners=<span class="keyword">True</span>))  <span class="comment"># bchw</span></span><br><span class="line">        feats = torch.stack(kernel_feats, dim=<span class="number">-1</span>).reshape(b,c,h,w,k,k)</span><br><span class="line">        feats = feats.permute(<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">5</span>).shape(b,c,h*k,w*k)</span><br><span class="line">        feats = slef.conv2(feats)  <span class="comment"># bchw</span></span><br><span class="line">        <span class="keyword">return</span> feats</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>1x1的deformable conv可以理解为对feature学习learnable flow</p>
+</li>
+</ul>
+</li>
+<li><p>feature align</p>
+</li>
+</ol>
 
       
     </div>
@@ -587,7 +616,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -643,7 +672,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Robust-High-Resolution-Video-Matting-with-Temporal-Guidance"><span class="nav-number">1.</span> <span class="nav-text">Robust High-Resolution Video Matting with Temporal Guidance</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Robust-High-Resolution-Video-Matting-with-Temporal-Guidance"><span class="nav-number">1.</span> <span class="nav-text">Robust High-Resolution Video Matting with Temporal Guidance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grid-sample"><span class="nav-number">2.</span> <span class="nav-text">grid sample</span></a></li></ol></div>
             
 
           </div>

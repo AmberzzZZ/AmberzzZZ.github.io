@@ -87,10 +87,12 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="lc79挂一道很猥琐的题，二维网格中搜索单词，同一单元格不能重复使用： 12345678910board =[  [&amp;apos;A&amp;apos;,&amp;apos;B&amp;apos;,&amp;apos;C&amp;apos;,&amp;apos;E&amp;apos;],  [&amp;apos;S&amp;apos;,&amp;apos;F&amp;apos;,&amp;apos;C&amp;apos;,&amp;apos;S&amp;apos;],  [&amp;apos;A&amp;apos;,&amp;apos;D&amp;">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2022-01-24T13:10:33.733Z">
+<meta property="og:image" content="https://amberzzzz.github.io/2018/06/04/leetcode/sort.png">
+<meta property="og:updated_time" content="2023-05-26T06:56:53.522Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="leetcode">
 <meta name="twitter:description" content="lc79挂一道很猥琐的题，二维网格中搜索单词，同一单元格不能重复使用： 12345678910board =[  [&amp;apos;A&amp;apos;,&amp;apos;B&amp;apos;,&amp;apos;C&amp;apos;,&amp;apos;E&amp;apos;],  [&amp;apos;S&amp;apos;,&amp;apos;F&amp;apos;,&amp;apos;C&amp;apos;,&amp;apos;S&amp;apos;],  [&amp;apos;A&amp;apos;,&amp;apos;D&amp;">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2018/06/04/leetcode/sort.png">
 
 
 
@@ -394,6 +396,49 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">next = [<span class="number">0</span>] * len(needle)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,len(needle)):</span><br><span class="line">	j = next[i<span class="number">-1</span>]</span><br><span class="line">	<span class="keyword">while</span> j&gt;<span class="number">0</span> <span class="keyword">and</span> needle[i]!=needle[j]:</span><br><span class="line">		j = next[j<span class="number">-1</span>]</span><br><span class="line">        </span><br><span class="line">	<span class="keyword">if</span> needle[i]==needle[j]:</span><br><span class="line">		next[i] = j+<span class="number">1</span></span><br><span class="line"></span><br><span class="line">print(<span class="string">'next'</span>, next)</span><br></pre></td></tr></table></figure>
 <p>【再分析查找阶段，对于给定字符串haystack，暴力解法是从头开始匹配，遇到mismatch就回溯到起始点下一位重新开始匹配，这样的时间复杂度是O(nm)，之所以能够做到无回溯匹配，就是因为有了前缀数组，当我们匹配到needle的一半遇到mismatch了，对于已经匹配上的子串，不需要回溯到起始位置，而是可以从共享前/后缀开始匹配，</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">needle_idx = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(haystack)):</span><br><span class="line">	<span class="keyword">while</span> needle_idx <span class="keyword">and</span> haystack[i]!=needle[needle_idx]:</span><br><span class="line">		needle_idx = next[max(<span class="number">0</span>,needle_idx<span class="number">-1</span>)]</span><br><span class="line">	<span class="keyword">if</span> haystack[i]==needle[needle_idx]:</span><br><span class="line">		needle_idx += <span class="number">1</span></span><br><span class="line">	<span class="keyword">if</span> needle_idx&gt;=len(needle):</span><br><span class="line">		<span class="keyword">return</span> i-len(needle)+<span class="number">1</span></span><br><span class="line"><span class="keyword">return</span> <span class="number">-1</span></span><br></pre></td></tr></table></figure>
+<h2 id="lc215"><a href="#lc215" class="headerlink" title="lc215"></a>lc215</h2><p>求无序数组中第k个最大元素，题目里的O(n)比较有迷惑性，本来想保留一个含k个大元素的动态数组，一次遍历，但每次插值要O(klogk)，总体的复杂度是O(nklogk)，整个数组排序的复杂度是O(nlogn)，所以直接排序：</p>
+<p><img src="/2018/06/04/leetcode/sort.png" width="90%;"></p>
+<ol>
+<li><p>快排</p>
+<p> 算法：随机挑选一个基点pivot，把所有小于它的数都放在它左边，所有大于它的数都放在它右边，对左右两个partition递归进行上述操作，算法复杂度是O(nlogn)</p>
+<p> 稳定性：不是稳定排序，每次放置的位置并不是严格有序的</p>
+<p> 优化：partition的过程是原地的，求第K个数的时候可以early stop，不需要严格排序所有segment</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">findKthLargest</span><span class="params">(self, nums: List[int], k: int)</span> -&gt; int:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">sort_partition</span><span class="params">(left, right)</span>:</span></span><br><span class="line"></span><br><span class="line">    	<span class="keyword">if</span> left&gt;=right<span class="number">-1</span>:</span><br><span class="line">    		<span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        i, j = left, right<span class="number">-1</span></span><br><span class="line">        <span class="keyword">while</span> i&lt;j:</span><br><span class="line">            <span class="comment"># pivot at i: move right ptr</span></span><br><span class="line">            <span class="keyword">while</span> i&lt;j <span class="keyword">and</span> nums[i]&lt;=nums[j]:</span><br><span class="line">        		j -= <span class="number">1</span></span><br><span class="line">            nums[i], nums[j] = nums[j], nums[i]</span><br><span class="line">            <span class="comment"># pivot at j: move left ptr</span></span><br><span class="line">            <span class="keyword">while</span> i&lt;j <span class="keyword">and</span> nums[i]&lt;=nums[j]:</span><br><span class="line">        		i += <span class="number">1</span></span><br><span class="line">        	nums[i], nums[j] = nums[j], nums[i]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># early stop in this case</span></span><br><span class="line">        <span class="keyword">if</span> i==len(nums)-k:</span><br><span class="line">        	<span class="keyword">return</span> nums[i]</span><br><span class="line">        <span class="keyword">if</span> i&gt;len(nums)-k:</span><br><span class="line">        	sort_partition(left, i)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">        	sort_partition(i+<span class="number">1</span>, right)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># quick sort</span></span><br><span class="line">    sort_partition(<span class="number">0</span>, len(nums))</span><br><span class="line">    <span class="comment"># return the k-th</span></span><br><span class="line">    <span class="keyword">return</span> nums[-k]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>堆排序</p>
+<p> 堆是完全二叉树：除了最底层之外，每一层都是满的，因此可以推算给定节点的父结点和子结点</p>
+<ul>
+<li>given node i：下标从0开始</li>
+<li>parent id =(i-1)//2</li>
+<li>children id = [2i+1, 2i+2] </li>
+<li>最大堆：每个parent node的值都大于其children node</li>
+<li><p>最小堆：每个parent node的值都小于其children node</p>
+<p>算法：依次提取堆顶元素，然后重组剩余节点</p>
+<p>稳定性：不稳定</p>
+</li>
+<li><p>给定一个无序数组，如何建立为堆？从队尾开始遍历每个非叶子节点，递归调整树结构</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">maxHeapify</span><span class="params">(lst, i, heap_size)</span>:</span></span><br><span class="line">    left, right = i*<span class="number">2</span>+<span class="number">1</span>, i*<span class="number">2</span>+<span class="number">2</span></span><br><span class="line">    largest = i</span><br><span class="line">    <span class="keyword">if</span> left&lt;heap_size <span class="keyword">and</span> lst[left]&gt;lst[largest]:</span><br><span class="line">        largest = left</span><br><span class="line">    <span class="keyword">if</span> right&lt;heap_size <span class="keyword">and</span> lst[right]&gt;lst[largest]:</span><br><span class="line">        largest = right</span><br><span class="line">        <span class="keyword">if</span> largest!=i:</span><br><span class="line">            <span class="comment"># swap</span></span><br><span class="line">            lst[i], lst[largest] = lst[largest], lst[i]</span><br><span class="line">            maxHeapify(lst, largest, heap_size)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">build</span><span class="params">(lst)</span>:</span></span><br><span class="line">    <span class="comment"># build heap from the last parent node</span></span><br><span class="line">    n = len(lst)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n//<span class="number">2</span>, <span class="number">-1</span>, <span class="number">-1</span>):</span><br><span class="line">        maxHeapify(lst, i, n)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除堆顶元素后，如何调整数组成为新堆？用堆尾元素替换堆顶元素，然后逐渐下沉</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">heap_sort</span><span class="params">(lst)</span>:</span></span><br><span class="line">    <span class="comment"># take top &amp; ajust the rest</span></span><br><span class="line">    current_idx = n<span class="number">-1</span></span><br><span class="line">    <span class="keyword">while</span> current_idx&gt;<span class="number">0</span>:</span><br><span class="line">        lst[<span class="number">0</span>], lst[current_idx] = lst[current_idx], lst[<span class="number">0</span>]</span><br><span class="line">        maxHeapify(lst, <span class="number">0</span>, current_idx)</span><br><span class="line">        current_idx -= <span class="number">1</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>归并排序</p>
+<p> 算法：依次合并有序的子序列得到有序数组，有递归和迭代两种实现方式，需要额外的空间来合并子序列，不是原地排序，算法复杂度为O(nlogn)，空间复杂度为O(n)+O(logn)</p>
+<p> 稳定性：子序列永远升序，是稳定排序</p>
+</li>
+<li><p>冒泡排序</p>
+<p> 算法：依次比较相邻元素，如果左&gt;右，就交换，每轮参与比较的最大值会放在最尾部</p>
+<p> 稳定性：在相邻元素相等时，它们不会交换位置，所以，冒泡排序是稳定排序</p>
+<p> 优化：early stop，当检测到本轮比较已经没有需要swap的元素时，排序可以提前停止，此时升序数组复杂度为O(n)，倒序数组为O(n^2)</p>
+</li>
+<li><p>插入排序</p>
+<p> 算法：维护一个sorted lst和一个unsorted lst，每次从unsorted lst中拿一个元素插入进sorted lst相应位置</p>
+<p> 稳定性：插入新元素不会打乱已有排序，是稳定排序</p>
+<p> 优化：查找insert idx时候可以用二分查找减少查找次数，查找次数在logn～n之间，总体的时间复杂度还是O(n^2)</p>
+</li>
+</ol>
 
       
     </div>
@@ -520,7 +565,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -576,7 +621,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#lc79"><span class="nav-number">1.</span> <span class="nav-text">lc79</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc81"><span class="nav-number">2.</span> <span class="nav-text">lc81</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc95"><span class="nav-number">3.</span> <span class="nav-text">lc95</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc28"><span class="nav-number">4.</span> <span class="nav-text">lc28</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#lc79"><span class="nav-number">1.</span> <span class="nav-text">lc79</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc81"><span class="nav-number">2.</span> <span class="nav-text">lc81</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc95"><span class="nav-number">3.</span> <span class="nav-text">lc95</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc28"><span class="nav-number">4.</span> <span class="nav-text">lc28</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lc215"><span class="nav-number">5.</span> <span class="nav-text">lc215</span></a></li></ol></div>
             
 
           </div>

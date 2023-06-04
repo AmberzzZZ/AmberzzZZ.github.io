@@ -276,6 +276,304 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/01/MuST/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/01/MuST/" itemprop="url">MuST谷歌多任务自训练</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-01T15:35:24+08:00">
+                2021-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/01/MuST/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/01/MuST/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li><p>recollect</p>
+<p>  [SimCLR]</p>
+<p>  [MoCo]</p>
+</li>
+</ul>
+<h2 id="Multi-Task-Self-Training-for-Learning-General-Representations"><a href="#Multi-Task-Self-Training-for-Learning-General-Representations" class="headerlink" title="Multi-Task Self-Training for Learning General Representations"></a>Multi-Task Self-Training for Learning General Representations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>learning general feature representations</li>
+<li>expect a single general model<ul>
+<li>相比较于training specialized models for various tasks</li>
+<li>harness from independent specialized teacher models</li>
+<li>with a multi-task pseudo dataset</li>
+<li>trained with multi-task learning</li>
+</ul>
+</li>
+<li>evalutate on 6 vision tasks<ul>
+<li>image recognition (classification, detection, segmentation)</li>
+<li>3D geometry estimation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>pretraining &amp; transfer learning</p>
+<ul>
+<li>transformer一般都是这个套路，BiT&amp;ViT</li>
+<li>pretraining<ul>
+<li>supervised / unsupervised</li>
+<li>learn feature representations</li>
+</ul>
+</li>
+<li>transfer learning<ul>
+<li>on downstream tasks</li>
+<li>the features may not necessarily be useful</li>
+<li>最典型的就是ImageNet pre-training并不能improve COCO segmentation，但是Objects365能够大幅提升</li>
+</ul>
+</li>
+<li>pretraining tasks必须要和downstream task align，learn specialized features，不然白费</li>
+</ul>
+</li>
+<li><p>learning general features</p>
+<ul>
+<li>a model simultaneously do well on multiple tasks</li>
+<li>NLP的bert是一个典型用多任务提升general ability的</li>
+<li>CV比较难这样做是因为标签variety，没有这样的大型multi-task dataset</li>
+</ul>
+</li>
+<li><p>multi-task learning</p>
+<ul>
+<li>shared backbone (如ResNet-FPN)</li>
+<li>small task-specific heads</li>
+</ul>
+</li>
+<li><p>self-training</p>
+<ul>
+<li>use a supervised model to generate pseudo labels on unlabeled data</li>
+<li>then a student model is trained on the pseudo labeled data</li>
+<li>在各类任务上都proved涨点</li>
+<li>但是迄今为止都是focused on a single task</li>
+</ul>
+</li>
+<li><p>in this work</p>
+<ul>
+<li><p>lack of large scale multi-task dataset的issue，通过self-training to fix，用pseudo label</p>
+</li>
+<li><p>specialized/general issue，通过多任务，训练目标就是六边形战士，absorb the knowledge of different tasks in the shared backbone</p>
+</li>
+<li><p>three steps</p>
+<ul>
+<li>trains specialized teachers independently on labeled datasets （分类、分割、检测、深度估计）</li>
+<li>the specialized teachers are then used to label a larger unlabeled dataset（ImageNet） to create a multi- task pseudo labeled dataset</li>
+<li><p>train a student model with multi-task learning</p>
+<p><img src="/2021/09/01/MuST/MuST.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>MuST的特质</p>
+<ul>
+<li>improve with more unlabeled data，数据越多general feature越好</li>
+<li>can improve upon already strong checkpoints，在海量监督高精度模型基础上fine-tune，仍旧能在downstream tasks涨点</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Specialized Teacher Models</p>
+<ul>
+<li>4 teacher models<ul>
+<li>classification：train from scratch，ImageNet</li>
+<li>detection：train from scratch，Object365</li>
+<li>segmentation：train from scratch，COCO</li>
+<li>depth estimation：fine-tuning from pre-trained checkpoint</li>
+</ul>
+</li>
+<li>pseudo labeling<ul>
+<li>unlabeled / partially labeled datasets</li>
+<li>for detection：hard score threshold of 0.5</li>
+<li>for segmentation：hard score threshold of 0.5</li>
+<li>for classification：soft labels——probs distribution</li>
+<li>for depth：直接用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Multi-Task Student Model</p>
+<ul>
+<li><p>模型结构</p>
+<p>  <img src="/2021/09/01/MuST/student.png" width="50%;"></p>
+<ul>
+<li>shared back<ul>
+<li>C5：for classification</li>
+<li>feature pyramids {P3,P4,P5,P6,P7}：for detection</li>
+<li>fused P2：for pixel-wise prediction，把feature pyramids rescale到level2然后sum</li>
+</ul>
+</li>
+<li>heads<ul>
+<li>classification head：ResNet design，GAP C5 + 线性层</li>
+<li>object detection task：Mask R-CNN design，RPN是2 hidden convs，Fast R-CNN是4 hidden convs + 1 fc</li>
+<li>pixel-wise prediction heads：3 hiddent convs + 1 linear conv head，分割和深度估计任务independent，不share heads</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Teacher-student training</p>
+<ul>
+<li>using the same architecture </li>
+<li>same data augmentation</li>
+<li>teacher和student的main difference就是dataset和labels</li>
+</ul>
+</li>
+<li><p>Learning From Multiple Teachers</p>
+<ul>
+<li>every image has supervision for all tasks</li>
+<li>labels may come from supervised or pseudo labels</li>
+<li>如果使用ImageNet数据集，classification就是真标签，det/seg/depth supervision则是伪标签</li>
+<li>balance the loss contribution<ul>
+<li>加权和，task-specific weights</li>
+<li>for ImageNet，use $w_i = \frac{b_slr_{it}}{b_{it}lr_{s}}$</li>
+<li>follow the scaling rule：lr和batch size成正比</li>
+<li>except for depth loss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Cross Dataset Training</p>
+<ul>
+<li>training across ImageNet, object365 and COCO</li>
+<li>有标签的就用原标签，没有的用伪标签，supervised labels and pseudo labels are treated equally，而不是分别采样和训练</li>
+<li>balance the datasets：合在一起然后均匀采样</li>
+</ul>
+</li>
+<li><p>Transfer Learning</p>
+<ul>
+<li>得到general student model以后，fine-tune on 一系列downstream tasks</li>
+<li>这些downstream datasets与MuST model的训练数据都是not align的</li>
+<li>这个实验要证明的是supervised model（如teacher model）和self-supervised model（如用pseudo label训练出来的student model），在downstream tasks上迁移学习能performance是差不多的，【注意⚠️：如果迁移datasets前后align就不是这样了，pretrain显然会更好！！！】</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/08/31/GHM/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3288,324 +3586,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/05/27/mlp系列/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/05/27/mlp系列/" itemprop="url">mlp系列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T14:39:20+08:00">
-                2021-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/05/27/mlp系列/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/05/27/mlp系列/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>[papers]</p>
-<ul>
-<li>[MLP-Mixer] MLP-Mixer: An all-MLP Architecture for Vision，Google</li>
-<li>[ResMLP] ResMLP: Feedforward networks for image classification with data-efficient training，Facebook</li>
-</ul>
-<p>[references]</p>
-<p><a href="https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzUyMjE2MTE0Mw==&amp;mid=2247493478&amp;idx=1&amp;sn=2be608d776b2469b3357da30c42d9770&amp;chksm=f9d2b9fecea530e8cbf07847c2029a1dabb131dbc1d6bd91ed227e41a396dd333afc83b64cf8&amp;scene=21#wechat_redirect</a></p>
-<p><a href="https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/8f9yC2P3n3HYygsOo_5zww</a></p>
-<h2 id="MLP-Mixer-An-all-MLP-Architecture-for-Vision"><a href="#MLP-Mixer-An-all-MLP-Architecture-for-Vision" class="headerlink" title="MLP-Mixer: An all-MLP Architecture for Vision"></a>MLP-Mixer: An all-MLP Architecture for Vision</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>image classification task</li>
-<li>neither of [CNN, attention] are necessary</li>
-<li>our proposed MLP-Mixer<ul>
-<li>仅包含multi-layer-perceptrons</li>
-<li>independently to image patches</li>
-<li>repeated applied across either spatial locations or feature channels</li>
-<li>two types<ul>
-<li>applied independently to image patches</li>
-<li>applied across patches</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/mixer.png" width="70%;"></p>
-<ul>
-<li>输入是token sequences<ul>
-<li>non-overlapping image patches</li>
-<li>linear projected to dimension C</li>
-</ul>
-</li>
-<li>Mixer Layer<ul>
-<li>maintain the input dimension</li>
-<li>channel-mixing MLP<ul>
-<li>operate on each token independently</li>
-<li>可以看作是1x1的conv</li>
-</ul>
-</li>
-<li>token-mixing MLP<ul>
-<li>operate on each channel independently</li>
-<li>take each spatial vectors (hxw)x1 as inputs</li>
-<li>可以看作是一个global depth-wise conv，s1，same pad，kernel size是(h,w)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>最后对token embedding做GAP，提取sequence vec，然后进行类别预测</li>
-</ul>
-</li>
-<li><p>idea behind Mixer</p>
-<ul>
-<li>clearly separate the per-location operations &amp; cross-location operations </li>
-<li>CNN是同时进行这俩的</li>
-<li>transformer的MSA同时进行这俩，MLP只进行per-location operations</li>
-</ul>
-</li>
-<li><p>Mixer Layer</p>
-<ul>
-<li><p>two MLP blocks</p>
-</li>
-<li><p>given input $X\in R^{SC}$，S for spatial dim，C for channel dim</p>
-<p>  <img src="/2021/05/27/mlp系列/blocks.png" width="70%;"></p>
-</li>
-<li><p>先是token-mixing MLP</p>
-<ul>
-<li>acts on S dim</li>
-<li>maps $R^S$ to $R^S$</li>
-<li>share across C-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>然后是channel-mixing MLP</p>
-<ul>
-<li>acts on C dim</li>
-<li>maps $R^C$ to $R^C$</li>
-<li>share across S-axis</li>
-<li>LN-FC-GELU-FC-residual</li>
-</ul>
-</li>
-<li><p>fixed width，更接近transformer/RNN，而不是CNN那种金字塔结构</p>
-</li>
-<li><p>不使用positional embeddings</p>
-<ul>
-<li>the token-mixing MLPs are sensitive to the order of the input tokens</li>
-<li>may learn to represent locations</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-</li>
-</ol>
-<h2 id="ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training"><a href="#ResMLP-Feedforward-networks-for-image-classification-with-data-efficient-training" class="headerlink" title="ResMLP: Feedforward networks for image classification with data-efficient training"></a>ResMLP: Feedforward networks for image classification with data-efficient training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>entirely build upon MLP</li>
-<li>alternates from a simple residual network<ul>
-<li>a linear layer to interact with image patches</li>
-<li>a two-layer FFN to interact independently with each patch</li>
-<li>affine transform替代LN是一个特别之处</li>
-</ul>
-</li>
-<li>trained with modern strategy<ul>
-<li>heavy data-augmentation </li>
-<li>optionally distillation</li>
-</ul>
-</li>
-<li>show good performace on ImageNet classification</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>strongly inspired by ViT but simpler<ul>
-<li>没有attention层，只有fc层+gelu</li>
-<li>没有norm层，因为much more stable to train，但是用了affine transformation</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/05/27/mlp系列/ResMLP.png" width="70%;"></p>
-<ul>
-<li>takes flattened patches as inputs<ul>
-<li>typically N=16：16x16</li>
-</ul>
-</li>
-<li>linear project the patches into embeddings<ul>
-<li>form $N^2$ d-dim embeddings</li>
-</ul>
-</li>
-<li>ResMLP Layer<ul>
-<li>main the dim throughout $[N^2,d]$</li>
-<li>a simple linear layer<ul>
-<li>interaction between the patches</li>
-<li>applied to all channels independently</li>
-<li>类似depth-wise conv with global kernel的东西，线性！！</li>
-</ul>
-</li>
-<li>a two-layer-mlp<ul>
-<li>fc-GELU-fc</li>
-<li>independently applied to all patches</li>
-<li>非线性！！</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>average pooled $[d-dim]$ + linear classifier $cls-dim$</li>
-</ul>
-</li>
-<li><p>Residual Multi-Layer Perceptron Layer</p>
-<ul>
-<li>a linear layer + a FFN layer</li>
-<li>each layer is paralleled with a skip-connection</li>
-<li><p>没用LN，但是用了learnable affine transformation</p>
-<ul>
-<li>$Aff_{\alpha, \beta} (x) = Diag(\alpha) x + \beta$</li>
-<li>rescale and shifts the input component-wise：对每个patch，分别做affine变换</li>
-<li>在推理阶段可以与上一层线性层合并：no cost</li>
-<li>用了两次<ul>
-<li>第一个用在main path上用来替代LN：初值为identity transform(1,0)</li>
-<li>第二个在residual path里面，down scale to boost，用一个small value初始化</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>given input： $d\times N^2$ matrix $X$</p>
-<p>  <img src="/2021/05/27/mlp系列/mlp1.png" width="50%;"></p>
-<ul>
-<li>affine在d-dim上做</li>
-<li>第一个Linear layer在$N^2-dim$上做：参数量$N^2 \times N^2$</li>
-<li><p>第二、三个Linear layer在$d-dim$上做：参数量$d \times 4d$ &amp; $4d \times d$</p>
-<p><img src="/2021/05/27/mlp系列/mlp2.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3660,7 +3640,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

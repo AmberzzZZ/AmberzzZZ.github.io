@@ -276,6 +276,302 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/23/FCOS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/23/FCOS/" itemprop="url">FCOS</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-23T10:33:41+08:00">
+                2020-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/23/FCOS/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/23/FCOS/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="FCOS-Fully-Convolutional-One-Stage-Object-Detection"><a href="#FCOS-Fully-Convolutional-One-Stage-Object-Detection" class="headerlink" title="FCOS: Fully Convolutional One-Stage Object Detection"></a>FCOS: Fully Convolutional One-Stage Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>anchor free</li>
+<li>proposal free</li>
+<li>avoids the complicated computation related to anchor boxes<ul>
+<li>calculating overlapping during training</li>
+</ul>
+</li>
+<li>avoid all hyper-parameters related to anchor boxes<ul>
+<li>size &amp; shape</li>
+<li>positive／ignored／negative </li>
+</ul>
+</li>
+<li>leverage as many foreground samples as possible</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>anchor-based detectors</p>
+<ul>
+<li>detection performance is sensitive to anchor settings</li>
+<li>encounter difficulties in cases with large shape variations</li>
+<li>hamper the generalization ability of detectors </li>
+<li>dense propose：the excessive number of negative samples aggravates the imbalance </li>
+<li>involve complicated computation：such as calculating the IoU with gt boxes</li>
+</ul>
+</li>
+<li><p>FCN-based detector</p>
+<ul>
+<li>predict a 4D vector plus a class category at each spatial location on a level of feature maps</li>
+<li>do not work well when applied to overlapped bounding boxes</li>
+<li><p><strong>with FPN this ambiguity can be largely eliminated</strong></p>
+<p><img src="/2020/06/23/FCOS/fcn-based.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>anchor-free detector</p>
+<ul>
+<li>yolov1：only the points near the center are used，low recall  </li>
+<li>CornerNet：complicated post-processing to match the pairs of corners</li>
+<li>DenseBox：difficulty in handling overlapping bounding boxes </li>
+</ul>
+</li>
+<li><p>this methos</p>
+<ul>
+<li>use FPN to deal with ambiguity</li>
+<li>dense predict：<strong>use all points in a ground truth bounding box</strong> to predict the bounding box</li>
+<li>introduce “center-ness” branch to predict the deviation of a pixel to the center of its corresponding bounding box</li>
+<li>can be used as a RPN in two-stage detectors and can achieve significantly better performance</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>ground truth boxes，$B_i=(x_0, y_0, x_1, y_1, c)$，corners + cls</p>
+</li>
+<li><p>anchor-free：each location (x,y)，map into abs input image (xs+[s/2], ys+[s/2])</p>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p>positive sample：if a location falls into any ground-truth box</p>
+</li>
+<li><p>ambiguous sample：location falls into multiple gt boxes，<strong>choose the box with minimal area</strong></p>
+</li>
+<li><p>regression target：l t r b distance，location to the four sides</p>
+<ul>
+<li><p>cls branch</p>
+<ul>
+<li>C binary classifiers </li>
+<li>C-dims vector p</li>
+</ul>
+</li>
+<li>focal loss<ul>
+<li>$\frac{1}{N_{pos}} \sum_{x,y}L_{cls}(p_{x,y}, c_{x,y}^*)$</li>
+</ul>
+</li>
+<li><p>calculate on both positive/negative samples</p>
+</li>
+<li><p>box reg branch</p>
+<ul>
+<li>4-dims vector t</li>
+</ul>
+</li>
+<li>IOU loss<ul>
+<li>$\frac{1}{N_{pos}} \sum_{x,y}1_{\{c_{x,y}^<em>&gt;0\}}L_{reg}(t_{x,y}, t_{x,y}^</em>)$</li>
+</ul>
+</li>
+<li>calculate on positive samples</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li><p>choose the location with p &gt; 0.05 as positive samples</p>
+</li>
+<li><p>two possible issues  </p>
+<ul>
+<li>large stride makes BPR low, which is actually not a problem in FCOS</li>
+</ul>
+</li>
+<li><p>overlaps gt boxes cause ambiguity, which can be greatly resolved with multi-level prediction </p>
+</li>
+<li><p>FPN</p>
+<ul>
+<li>P3, P4, P5：1x1 conv from C3, C4, C5, top-down connections</li>
+</ul>
+</li>
+<li><p>P6, P7: stride2 conv from P5, P6</p>
+</li>
+<li><p>limit the bbox regression for each level</p>
+<ul>
+<li>$m_i$：maximum distance for each level</li>
+</ul>
+</li>
+<li>if a location’s gt bbox satifies：$max(l^<em>,t^</em>,r^<em>,b^</em>)&gt;m_i$ or $max(l^<em>,t^</em>,r^<em>,b^</em>)&lt;m_{i-1}$，it is set as a negative sample，not regress at current level<ul>
+<li>objects with different sizes are assigned to different feature levels：largely alleviate一部分box overlapping问题</li>
+</ul>
+</li>
+<li><p>for other overlapping cases：simply choose the gt box with minimal area</p>
+</li>
+<li><p>sharing heads between different feature levels </p>
+</li>
+<li><p>to regress different size range：use $exp(s_ix)$</p>
+<ul>
+<li>trainable scalar $s_i$</li>
+</ul>
+</li>
+<li>slightly improve</li>
+</ul>
+</li>
+<li><p>center-ness</p>
+<ul>
+<li><p>low-quality predicted bounding boxes are produced by locations far away from the center of an object</p>
+<ul>
+<li><p>predict the “center-ness” of a location </p>
+</li>
+<li><p>normalized distance </p>
+<script type="math/tex; mode=display">
+  centerness^* = \sqrt {\frac{min(l^*,r^*)}{max(l^*,r^*)}* \frac{min(t^*,b^*)}{max(t^*,b^*)}}</script></li>
+</ul>
+</li>
+<li><p>sqrt to slow down the decay</p>
+</li>
+<li><p>[0,1] use bce loss</p>
+</li>
+<li><p>when inference center-ness is mutiplied with the class score：can down-weight the scores of bounding boxes far from the center of an object, then filtered out by NMS</p>
+<ul>
+<li>an alternative of the center-ness：use of only the central portion of ground-truth bounding box as positive samples，实验证明两种方法结合效果最好</li>
+</ul>
+</li>
+<li><p>architecture</p>
+<ul>
+<li>two minor differences from the standard RetinaNet<ul>
+<li>use <strong>Group Normalization</strong> in the <strong>newly added convolutional layers</strong> except for the last prediction layers </li>
+<li>use P5 instead of C5 to produce P6&amp;P7</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/06/23/FCOS/architecture.png" width="70%;"></p>
+<p>​    </p>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/22/FCIS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3162,234 +3458,6 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/18/Receptive-Field/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/18/Receptive-Field/" itemprop="url">Receptive Field</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-18T18:49:40+08:00">
-                2020-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/18/Receptive-Field/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/18/Receptive-Field/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ul>
-<li><p>感受野</p>
-<p>  除了卷积和池化，其他层并不影响感受野大小</p>
-<p>  感受野与卷积核尺寸kernel_size和步长stride有关</p>
-<p>  递归计算：</p>
-<script type="math/tex; mode=display">
-  N\_RF = kernel\_size + (cur\_RF-1)*stride</script><p>  其中$cur_RF$是当前层（start from 1），$kernel_size$、$stride$是当前层参数，$N_RF$是上一层的感受野。</p>
-</li>
-</ul>
-<ul>
-<li><p>感受野计算器</p>
-<p>  <a href="https://fomoro.com/research/article/receptive-field-calculator" target="_blank" rel="noopener">https://fomoro.com/research/article/receptive-field-calculator</a></p>
-</li>
-</ul>
-<h2 id="Understanding-the-Effective-Receptive-Field-in-Deep-Convolutional-Neural-Networks"><a href="#Understanding-the-Effective-Receptive-Field-in-Deep-Convolutional-Neural-Networks" class="headerlink" title="Understanding the Effective Receptive Field in Deep Convolutional Neural Networks"></a>Understanding the Effective Receptive Field in Deep Convolutional Neural Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li><p>effective receptive field </p>
-</li>
-<li><p>the effect of nonlinear activations, dropout, sub-sampling and skip connections on it </p>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>it is critical for each output pixel to have a big receptive field, such that no important information is left out when making the prediction</li>
-<li>deeper network：increase the receptive field size linearly  </li>
-<li>Sub-sampling：increases the receptive field size multiplicatively</li>
-<li>it is easy to see that pixels at the center of a receptive field have a much larger impact on an output：前向传播的时候，中间位置的像素点有更多条path通向output</li>
-</ul>
-</li>
-<li><p>方法看不懂直接看结论</p>
-<ul>
-<li><p><strong>dropout</strong> does not change the Gaussian ERF shape </p>
-</li>
-<li><p><strong>Subsampling</strong> and dilated convolutions turn out to be effective ways to increase receptive field size quickly </p>
-</li>
-<li><p><strong>Skip-connections</strong> make ERFs smaller </p>
-</li>
-<li><p>ERFs are Gaussian distributed</p>
-<ul>
-<li>uniformly和随机初始化都是perfect Gaus- sian shapes </li>
-<li><p>加上非线性激活函数以后是near Gaussian shapes </p>
-<p><img src="/2020/05/18/Receptive-Field/gaussian.png" width="50%;"></p>
-</li>
-<li><p>with different nonlinearities </p>
-<p><img src="/2020/05/18/Receptive-Field/activation.png" width="25%;"></p>
-</li>
-</ul>
-</li>
-<li><p>$\sqrt n$ absolute growth and $1/\sqrt n$ relative shrinkage：RF是随着layer线性增长的，ERF在log上0.56的斜率，约等于$\sqrt n$ </p>
-<p>  <img src="/2020/05/18/Receptive-Field/growth.png" width="50%;"></p>
-</li>
-<li><p>Subsampling &amp; dilated convolution increases receptive field</p>
-<ul>
-<li>The reference baseline is a convnet with 15 dense convolution layers </li>
-<li>Subsampling：replace 3 of the 15 convolutional layers with stride-2 convolution </li>
-<li><p>dilated：replace them with dilated convolution with factor 2,4 and 8，rectangular ERF shape </p>
-<p><img src="/2020/05/18/Receptive-Field/subsamp.png" width="25%;"></p>
-</li>
-</ul>
-</li>
-<li><p>evolves during training </p>
-<ul>
-<li>as the networks learns, the ERF gets bigger, and at the end of training is significantly larger than the initial ERF</li>
-<li>classification<ul>
-<li>32*32 cifar 10</li>
-<li>theoretical receptive field of our network is actually 74 × 74 </li>
-</ul>
-</li>
-<li>segmentation<ul>
-<li>CamVid dataset  </li>
-<li>the theoretical receptive field of the top convolutional layer units is quite big at 505 × 505</li>
-</ul>
-</li>
-<li><p>实际的ERF都很小，都没到原图大小</p>
-<p><img src="/2020/05/18/Receptive-Field/evolve.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-<li><p>increase the effective receptive field  </p>
-<ul>
-<li>New Initialization：<ul>
-<li>makes the weights at the center of the convolution kernel to have a smaller scale, and the weights on the outside to be larger</li>
-<li>30% speed-up of training </li>
-<li>其他效果不明显</li>
-</ul>
-</li>
-<li>Architecturalchanges<ul>
-<li>sparsely connect each unit to a larger area </li>
-<li>dilated convolution or even not grid-like </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<p>g</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3444,7 +3512,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

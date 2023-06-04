@@ -276,6 +276,298 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/29/nms/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/10/29/nms/" itemprop="url">nms</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-29T15:42:37+08:00">
+                2020-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/10/29/nms/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/29/nms/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Non-maximum suppression：非极大值抑制算法，本质是搜索局部极大值，抑制非极大值元素</p>
+<p>[nms]：standard nms，当目标比较密集、存在遮挡时，漏检率高</p>
+<p>[soft nms]：改变nms的hard threshold，用较低的分数替代0，提升recall</p>
+<p>[softer nms]：引入box position confidence，通过后处理提高定位精度</p>
+<p>[DIoU nms]：采用DIoU的计算方式替换IoU，因为DIoU的计算考虑到了两框中心点位置的信息，效果更优</p>
+<p>[fast nms]：YOLOACT引入矩阵三角化，会比Traditional NMS抑制更多的框，性能略微下降</p>
+<p>[cluster nms]：<a href="https://github.com/Zzh-tju/CIoU" target="_blank" rel="noopener">CIoU提出</a>，弥补Fast NMS的性能下降，运算效率比Fast NMS下降了一些</p>
+<p>[mask nms]：mask iou计算有不可忽略的延迟，因此比box nms更耗时</p>
+<p>[matrix nms]：SOLO将mask IoU并行化，比FAST-NMS还快，思路和FAST-NMS一样从上三角IoU矩阵出发，可能造成过多抑制。</p>
+<p>[WBF]：加权框融合，Kaggle胸片异物比赛claim有用，速度慢，大概比标准NMS慢3倍，WBF实验中是在已经完成NMS的模型上进行的</p>
+<ol>
+<li>nms<ul>
+<li>过滤+迭代+遍历+消除<ul>
+<li>首先过滤掉大量置信度较低的框，大于confidence thresh的box保留</li>
+<li>将所有框的得分排序，选中最高分的框</li>
+<li>遍历其余的框，如果和当前最高分框的IOU大于一定阈值(nms thresh)，就将框删除(score=0)</li>
+<li>从未处理的框中继续选一个得分最高的，重复上述过程</li>
+</ul>
+</li>
+<li>when evaluation<ul>
+<li>iou thresh：留下的box里面，与gt box的iou大于iou thresh的box作为正例，用于计算出AP和mAP，通过调整confidence thresh可以画出PR曲线</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>softnms</p>
+<ul>
+<li><p>基本流程还是nms的贪婪思路，过滤+迭代+遍历+衰减</p>
+<p>  <img src="/2020/10/29/nms/softnms.png" width="40%;"></p>
+</li>
+<li><p>re-score function：high overlap decays more</p>
+<ul>
+<li>linear：<ul>
+<li>for each $iou(M,b_i)&gt;th$， $s_i=s_i(1-iou)$</li>
+<li>not continuous，sudden penalty </li>
+</ul>
+</li>
+<li>gaussian：<ul>
+<li>for all remaining detection boxes，$s_i=s_i e^{-\frac{iou(M,b_i)}{\sigma}}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>算法流程上未做优化，是针对精度的优化</p>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>softer nms</p>
+<ul>
+<li>跟soft nms没关系</li>
+<li>具有高分类置信度的边框其位置并不是最精准的</li>
+<li>新增加了一个定位置信度的预测，使其服从高斯分布</li>
+<li>infer阶段边框的标准差可以被看做边框的位置置信度，与分类置信度做加权平均，作为total score</li>
+<li>算法流程上未做优化，完全是精度的优化</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>DIoU nms</p>
+<ul>
+<li><p>也是为了解决hard nms在密集场景中漏检率高的问题</p>
+</li>
+<li><p>但是不同于soft nms的是，D的改进在iou计算上，而不是在score</p>
+</li>
+<li><p>diou的计算：$diou = iou-\frac{\rho^2(b_1, b_2)}{c^2}$</p>
+<p>  <img src="/2020/10/29/nms/diou.png" width="60%;"></p>
+</li>
+<li><p>算法流程上未做优化，仍旧是精度的优化</p>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>fast nms</p>
+<ul>
+<li><p>yoloact提出</p>
+</li>
+<li><p>主要效率提升在于用矩阵操作替换遍历，所有框同时被filter掉，而非依次遍历删除</p>
+</li>
+<li><p>iou上三角矩阵</p>
+<ul>
+<li>iou上三角矩阵的每一个元素都是行号小于列号</li>
+<li>iou上三角矩阵的每一个行，对应一个bnd box，与其他所有score小于它的bnd box的iou</li>
+<li>iou上三角矩阵的每一个列，对应一个bnd box，与其他所有score大于它的bnd box的iou</li>
+<li>fast nms在iou矩阵每一列上求最大值，如果这个最大值大于iou thresh，说明当前列对应的bnd box，存在一个score大于它，且和它重叠度较高的bnd box，因此要把这个box过滤掉</li>
+</ul>
+</li>
+<li><p>有精度损失</p>
+<ul>
+<li><p>场景：</p>
+<p><img src="/2020/10/29/nms/fastnms1.jpg" width="60%;"></p>
+</li>
+<li><p>如果是hard nms的话，首先遍历b1的其他box，b2就被删除了，这是b3就不存在高重叠框了，b3就会被留下，但是在fast nms场景下，所有框被同时删除，因此b2、b3都没了。</p>
+<p><img src="/2020/10/29/nms/fastnms2.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>cluster nms</p>
+<ul>
+<li><p>针对fast nms性能下降的弥补</p>
+</li>
+<li><p>fast nms性能下降，主要问题在于过度抑制，并行操作无法及时消除high score框抹掉对后续low score框判断的影响</p>
+</li>
+<li><p>算法流程上，将fast nms的一次阈值操作，转换成少数几次的迭代操作，每次都是一个fast nms</p>
+<p>  <img src="/2020/10/29/nms/clusternms.png" width="80%;"></p>
+<ul>
+<li>图中X表示iou矩阵，b表示nms阈值二值化以后的向量，也就是fast nms里面那个保留／抑制向量</li>
+<li>每次迭代，算法将b展开成一个对角矩阵，然后左乘iou矩阵</li>
+<li>直到出现某两次迭代后， b保持不变了，那么这就是最终的b</li>
+</ul>
+</li>
+<li><p>cluster nms的迭代操作，其实就是在省略上一次Fast NMS迭代中被抑制的框对其他框的影响</p>
+</li>
+<li><p>数学归纳法证明，cluster nms的结果与hard nms完全一致，运算效率比fast nms下降了一些，但是比hard nms快得多</p>
+</li>
+<li><p>cluster nms的运算效率不与cluster数量有关，只与需要迭代次数最多的那一个cluster有关</p>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>mask nms</p>
+<ul>
+<li>从检测框形状的角度拓展出来，包括但不限于mask nms、polygon nms以及inclined nms</li>
+<li>iou的计算方式有一种是mmi：$mmi=max(\frac{I}{I_A}, \frac{I}{I_B})$</li>
+</ul>
+</li>
+</ol>
+<ol>
+<li><p>matrix nms</p>
+<ul>
+<li><p>学习soft nms：decay factor</p>
+</li>
+<li><p>one step further：迭代改并行</p>
+</li>
+<li><p>对于某个object $m_j$的score进行penalty的时候考虑两部分影响</p>
+<ul>
+<li>迭代某个$m_i$时，对后续lower score的$m_j$的影响</li>
+<li>一是正面影响$f(iou_{i,j})\ linear/guassian$：这个框保留，那么后续框都要基于与其的iou做decay</li>
+<li>二是反向影响$f(iou_{*,i})=max_{\forall s_k&gt;s_i}f(iou_{k,i})$：如果这个框不保留，那么对于后续框来讲，应该消除这个框对其的decay，选最大值的意义是当前mask被抑制最有可能就是和他重叠度最大的那个mask干的（因为对应的正面影响1-iou最小）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><p>final decay factor：$decay_j=min_{\forall s_i &gt; s_j}\frac{f(iou_{i,j})}{f(iou_{*,i})}$</p>
+</li>
+<li><p>算法流程</p>
+<pre><code>  &lt;img src=&quot;nms/matrixnms.png&quot; width=&quot;50%;&quot; /&gt;
+</code></pre></li>
+</ul>
+<pre><code>* 按照原论文的实现，decay永远大于等于1，因为每一列的iou_cmax永远大于等于iou，从论文的思路来看，每个mask的decay是它之前所有mask的影响叠加在一起，所以应该是乘积而不是min：
+
+    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原论文实现</span></span><br><span class="line"><span class="keyword">if</span> method==<span class="string">'gaussian'</span>:</span><br><span class="line">    decay = np.exp(-(np.square(iou)-np.square(iou_cmax))/sigma)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    decay = (<span class="number">1</span>-iou)/(<span class="number">1</span>-iou_cmax)</span><br><span class="line">decay = np.min(decay, axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改进实现</span></span><br><span class="line"><span class="keyword">if</span> method==<span class="string">'gaussian'</span>:</span><br><span class="line">    decay = np.exp(-(np.sum(np.square(iou),axis=<span class="number">0</span>)-np.square(iou_cmax))/sigma)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    decay = np.prod(<span class="number">1</span>-iou)/(<span class="number">1</span>-iou_cmax)</span><br></pre></td></tr></table></figure>
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/10/14/MimicDet/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3464,243 +3756,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/08/complement-cross-entropy/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/09/08/complement-cross-entropy/" itemprop="url">complement cross entropy</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-08T17:19:18+08:00">
-                2020-09-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/09/08/complement-cross-entropy/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/08/complement-cross-entropy/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li>summary<ul>
-<li>使用complement loss的主要动机是one-hot的label下，ce只关注拉高正样本概率，丧失掉了其他incorrect类别的信息</li>
-<li>事实上对于incorrect类别，可以让其输出概率值分布的熵尽可能的大——也就是将这个分布尽可能推向均匀分布，让它们之间互相遏制从而凸显出ground truth的概率</li>
-<li>但这是建立在“各个标签之间相互独立”这个假设上，如果类别间有hierarchical的关系／multi-label，就不行了。</li>
-<li>在数学表达上，<ul>
-<li>首先仍然是用ce作用于correct label，希望正样本概率gt_pred尽可能提高，接近真实值</li>
-<li>然后是作用于incorrect label的cce，在除了正例pred possibility以外的几个概率上，计算交叉熵，希望这几个概率尽可能服从均匀分布，概率接近$\frac{1-gt_pred}{K-1}$</li>
-<li>我感觉这就是label smoothing，主要区别就是cce上有个norm项，label smoothin在计算ce的时候，vector中每一个incorrect label的熵都与correct label等权重，cce对整个incorrect vector的权重与correct label等同，且可以调整。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Imbalanced-Image-Classification-with-Complement-Cross-Entropy"><a href="#Imbalanced-Image-Classification-with-Complement-Cross-Entropy" class="headerlink" title="Imbalanced Image Classification with Complement Cross Entropy"></a>Imbalanced Image Classification with Complement Cross Entropy</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>class-balanced datasets</li>
-<li>motivated by COT(complement objective training)<ul>
-<li>suppressing softmax probabilities on incorrect classes during training  </li>
-</ul>
-</li>
-<li>propose cce<ul>
-<li>keep ground truth probability overwhelm the other classes</li>
-<li>neutralizing predicted probabilities on incorrect classes</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>class imbalace<ul>
-<li>limits generalization </li>
-<li>resample<ul>
-<li>oversampling on minority classes </li>
-<li>undersampling on majority classes  </li>
-</ul>
-</li>
-<li>reweight<ul>
-<li><strong>neglect the fact that samples on minority classes may have noise or false annotations</strong></li>
-<li>might cause poor generalization </li>
-</ul>
-</li>
-</ul>
-</li>
-<li>observed degradation in imbalanced datasets using CE<ul>
-<li>cross entropy mostly ignores output scores on wrong classes</li>
-<li>neutralizing predicted probabilities on incorrect classes helps improve accuracy of prediction for imbalanced image classification </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>complement entropy</p>
-<ul>
-<li>calculated on incorrect classes </li>
-<li>N samples，K-dims class vector</li>
-<li>$C(y,\hat y)=-\frac{1}{N}\sum_{i=1}^N\sum_{j=1,j \neq g}^K \frac{\hat y^j}{1-\hat y^g}log\frac{\hat y^j}{1-\hat y^g} $</li>
-<li>the purpose is to encourage larger gap between ground truth and other classes —— when the incorrect classes obey normal distribution it reaches optimal</li>
-<li><img src="/2020/09/08/complement-cross-entropy/complement.png" width="40%;"></li>
-</ul>
-</li>
-<li><p>balanced complement entropy</p>
-<ul>
-<li>add balancing factor</li>
-<li>$C^{‘}(y,\hat y) = \frac{1}{K-1}C(y,\hat y)$</li>
-</ul>
-</li>
-<li><p>forming COT：</p>
-<p>  <img src="/2020/09/08/complement-cross-entropy/COT.png" width="45%;"></p>
-<ul>
-<li>twice back-propagation per each iteration <ul>
-<li>first cross entropy </li>
-<li>second complement entropy</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>CCE (Complement Cross Entropy)</p>
-<ul>
-<li>add modulating factor：$\tilde C(y, \hat y) = \frac{\gamma}{K-1}C(y, \hat y)$，$\gamma=-1$</li>
-<li>combination：CE+CCE</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ol>
-<li><p>实验</p>
-<ul>
-<li><p>dataset：</p>
-<ul>
-<li>cifar</li>
-<li>class-balanced originally</li>
-<li>construct imbalanced variants with imbalance ratio $\frac{N_{min}}{N_{max}}$</li>
-<li><img src="/2020/09/08/complement-cross-entropy/imbalance.png" width="40%;"></li>
-</ul>
-</li>
-<li><p>test acc</p>
-<ul>
-<li>论文的实验结果都是在cifar上cce好于cot好于focal loss，在road上cce好于cot，没放fl</li>
-<li>咱也不知道。。。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3755,7 +3810,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

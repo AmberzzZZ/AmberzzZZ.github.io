@@ -91,7 +91,7 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/similarity.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/separable%20attention.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2023/05/16/SSIS-methods/separable%20self-attention.png">
-<meta property="og:updated_time" content="2023-05-23T04:42:07.893Z">
+<meta property="og:updated_time" content="2023-05-23T06:33:26.499Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SSIS methods">
 <meta name="twitter:description" content="papers [M2F] Masked-attention Mask Transformer for Universal Image Segmentation [VITA 2022] VITA: Video Instance Segmentation via Object Token Association  [MobileViT v2] Separable Self-attention for">
@@ -494,9 +494,9 @@
 <li>Linformer会压一下key/value token的长度，压到一个固定值，mm的算力下降，但是bmm的串行pipe还在</li>
 <li><p>Separable self-attention</p>
 <ul>
-<li>query：[b,k,d]先fc到[b,k]，然后softmax归一化得到context score</li>
-<li>key：[b,k,d]先fc到[b,k,d]，然后与context score做乘[b,k,q]，融合qk的信息，然后所有key vector相加得到[b,d]，是全局的context vector</li>
-<li>value：[b,k,d]先fc-relu到[b,k,d]，然后与context vector做乘得到[b,k,d]，然后是project layer</li>
+<li>query：[b,k,d]先fc到[b,k,1]，然后softmax归一化得到context score，可以理解为各个query在整张图上的响应值高低</li>
+<li>key：[b,k,d]先fc到[b,k,d]，然后与context score做broadcast乘得到[b,k,d]，可以理解为基于query响应值高低对key做rescale来融合qk的信息，然后所有key vector相加得到[b,1,d]，是全局的context vector</li>
+<li>value：[b,k,d]先fc-relu到[b,k,d]，然后与context vector做broadcast乘得到[b,k,d]，然后是project layer</li>
 </ul>
 <p><img src="/2023/05/16/SSIS-methods/separable self-attention.png" width="70%;"></p>
 </li>
@@ -628,7 +628,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">171</span>
+                  <span class="site-state-item-count">172</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
