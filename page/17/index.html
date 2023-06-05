@@ -276,6 +276,239 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/05/karto-key-concepts/" itemprop="url">karto key concepts</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-05T13:17:58+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/karto-key-concepts/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/05/karto-key-concepts/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>基于极其标准的图优化SLAM框架来实现：</p>
+<p><img src="/2018/06/05/karto-key-concepts/1.png" alt="framework"></p>
+<p>提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。</p>
+<p>scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！</p>
+<h4 id="key-concepts："><a href="#key-concepts：" class="headerlink" title="key concepts："></a>key concepts：</h4><ul>
+<li><p>keyScan：机器人运动一定的距离或角度（关键帧），储存在sensorManager，无地图缓存。</p>
+</li>
+<li><p>look-up table查找表：查找表的意义就是相比于暴力匹配，不需要每次都重新计算每个激光数据信息，<strong>相同角度不同位置</strong>的激光数据信息只需要被索引一次。</p>
+</li>
+<li><p>response响应值：将查找表以一定的位移投到子图上，总共有n个点被查找表击中（hit），击中的每个点得分不同（score），累加得分并除以可以达到的最高分。</p>
+<script type="math/tex; mode=display">
+response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
+<li><p>协方差：文献专门用了一节计算协方差，但是没看到用在哪，是为了后面求误差做准备吗？？？</p>
+</li>
+<li><p>addScans添加顶点和边：边是误差值，添加的边约束来自两部分，</p>
+<p>（1）link to running scans，距当前帧一定范围内的激光数据链（RunningScan chain）。</p>
+<p>（2）link to other near chains，从当前节点开始广度优先遍历一定距离范围内所有节点，依据当前id从sensorManager中分别递增和递减寻找一定范围内的chain（不一定直接相连）。</p>
+</li>
+<li><p>回环检测：操作与添加边约束类似，位姿图上要<strong>去除那些和当前节点的时间相邻的节点</strong>。</p>
+<p>（1）找到一定距离范围内（near）和相连（adjacent）的节点添加进nearLinkedScans。</p>
+<p>（2）<code>MapperGraph::FindPossibleLoopClosure</code>：从sensorManager中从前到后，依据序号挑选与当前节点在一定距离范围内，且不在nearLinkedScans中的candidate。返回潜在chain。其中涉及两个参数：</p>
+<ul>
+<li>LoopSearchMaximumDistance：candidateScan与当前scan的距离必须在可容许的距离内。</li>
+<li>LoopMatchMinimumChainSize：chain中的节点数必须不小于限定值。</li>
+</ul>
+<p>（3）<code>MapperGraph::TryCloseLoop</code>：scan2map匹配，当response和covariance达到一定要求认为闭环检测到，得到correct pose（也就是认为candidateScan的pose才是当前帧的实际pose）。</p>
+<p>（4）add link to loop，构成全局闭环。</p>
+<p>（5）触发correctPose，进行spa优化。</p>
+</li>
+</ul>
+<p><img src="/2018/06/05/karto-key-concepts/graph opti.jpeg" alt=""></p>
+<h4 id="代码随手记："><a href="#代码随手记：" class="headerlink" title="代码随手记："></a>代码随手记：</h4><ol>
+<li><p>ROS上面提供三个开源包：nav2d_karto, open_karto, slam_karto。</p>
+<p>ROS Wiki上这么描述nav2d_karto这个package：Graph-based Simultaneous Localization and Mapping module. Includes OpenKarto GraphSLAM library by “SRI International”.</p>
+<p>open_karto：开源的karto包，实现底层的kartoslam</p>
+<p>slam_karto：ros层，应用层的kartoslam接口</p>
+</li>
+<li><p>The LaserRangeFinder contains parameters for physical laser sensor used by the mapper for scan matching Also contains information about the maximum range of the sensor and provides a threshold for limiting the range of readings.</p>
+<p>The optimal value for the range threshold depends on the angular resolution of the scan and the desired map resolution.</p>
+</li>
+<li><p>resolution：0.25 &amp; 0.5 &amp; 1 degree</p>
+<p>number of range readings (beams)：（maximumAngle - minimumAngle）／angularResolution + 1</p>
+</li>
+<li><p>GridStates：0 for Unknown，100 for Occupied， 255 for Free。</p>
+</li>
+<li><p>flipY：最开始机器人应该处在世界坐标系的原点，传感器坐标系与机器人baselink存在一个坐标变换，原始的传感器坐标系位置应该与地图坐标系重合，这就是world和grid之间的offset。flip是啥呢？？</p>
+</li>
+<li><p>LookupArray[index]：Create lookup tables for point readings <strong>at varying angles</strong> in grid. This is to speed up finding best angle/position for a localized range scan</p>
+</li>
+<li><p>MapperGraph：花式构造位姿图</p>
+</li>
+<li><p>CorrelationGrid：Implementation of a <strong>correlation</strong> grid used for scan matching</p>
+</li>
+<li><p>Region of Interest ROI：</p>
+</li>
+<li><p>smear：The point readings are smeared by this value in X and Y to create a smoother response. 个人理解这句话是说点容易生成突变，用以点为中心的一小片区域平滑一点。</p>
+</li>
+<li><p>ScanMatch：返回响应值response</p>
+<p>   前端匹配调用<code>m_pSequentialScanMatcher-&gt;MatchScan</code></p>
+<p>   闭环检测调用<code>m_pLoopScanMatcher-&gt;MatchScan</code></p>
+<p>   两个函数继承于<code>ScanMatcher::MatchScan</code>：</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::MatchScan(</span><br><span class="line">	LocalizedRangeScan* pScan, </span><br><span class="line">    <span class="keyword">const</span> LocalizedRangeScanVector&amp; rBaseScans, </span><br><span class="line">    Pose2&amp; rMean, </span><br><span class="line">    Matrix3&amp; rCovariance, </span><br><span class="line">    kt_bool doPenalize, </span><br><span class="line">    kt_bool doRefineMatch)    <span class="comment">// default is True, 决定是否做精匹配</span></span><br><span class="line"><span class="comment">// @return: strength of response (best response)</span></span><br></pre></td></tr></table></figure>
+<p>   其中会调用<code>ScanMatcher::CorrelateScan</code>方法。<code>ScanMatcher::CorrelateScan</code>方法中调用<code>ScanMatcher::GetResponse</code>方法计算响应值。</p>
+   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::GetResponse(</span><br><span class="line">	kt_int32u angleIndex, </span><br><span class="line">	kt_int32s gridPositionIndex) <span class="keyword">const</span></span><br></pre></td></tr></table></figure>
+<p>   <code>GetResponse</code>的核心在<code>kt_int8u* pByte</code>和<code>const LookupArray* pOffsets</code>两个数据结构：</p>
+<ul>
+<li>前者是在correlationGrid范围内的real sensed占据情况。</li>
+<li><p>后者是lookup-table中（已知地图）读取的栅格占据情况，只包含占据的栅格，key是angular。</p>
+<p>计算response只要看地图上的占据点是否在观测中是否也是占据的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (kt_int32u i = <span class="number">0</span>; i &lt; pOffsets-&gt;GetSize(); i++)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ignore points that fall off the grid</span></span><br><span class="line">  kt_int32s pointGridIndex = gridPositionIndex + pAngleIndexPointer[i];</span><br><span class="line">  <span class="keyword">if</span> (!math::IsUpTo(pointGridIndex, m_pCorrelationGrid-&gt;GetDataSize()) || pAngleIndexPointer[i] == INVALID_SCAN)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uses index offsets to efficiently find location of point in the grid</span></span><br><span class="line">  response += pByte[pAngleIndexPointer[i]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终的response要normalize：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// normalize response</span></span><br><span class="line">response /= (nPoints * GridStates_Occupied);   <span class="comment">// GridStates_Occupied = 100,</span></span><br><span class="line">assert(<span class="built_in">fabs</span>(response) &lt;= <span class="number">1.0</span>);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>karto只在闭环的时候触发后端优化<code>CorrectPoses()</code>，ScanSolver的实现在Samples路径下的SpaSolver，调用了现有的BA求解器<a href="http://users.ics.forth.gr/~lourakis/sba/" target="_blank" rel="noopener">sba(A Generic Sparse Bundle Adjustment C/C++ Package Based on the Levenberg-Marquardt Algorithm)</a>。</p>
+</li>
+</ol>
+<h4 id="参数-amp-优化方向"><a href="#参数-amp-优化方向" class="headerlink" title="参数&amp;优化方向"></a><a href="http://docs.ros.org/jade/api/nav2d_karto/html/classkarto_1_1OpenMapper.html" target="_blank" rel="noopener">参数</a>&amp;优化方向</h4><ol>
+<li>闭环中candidate数量的调整：<ul>
+<li>减小LoopSearchMaximumDistance，进入candidate范围的节点数据减少</li>
+<li>减小LoopMatchMinimumChainSize，用来计算优化的candidate数量减少</li>
+<li>增大minimum_travel_distance和minimum_travel_heading，这样总体的节点数减少</li>
+</ul>
+</li>
+<li>Map_update_interval：发布地图的间隔，其主要过程是遍历当前所有节点数据，对每个栅格的占有状态进行判定，生成栅格地图。</li>
+<li>ScanBufferSize和ScanBufferMaximumScanDistance：控制buffer也就是chain的大小。chain不能太大也不能太小，太小会造成前端误差累积，太大会导致构建闭环的节点数不足。推荐值是ScanBufferMaximumScanDistance／minimum_travel_distance。</li>
+<li>位姿纠正中：<ul>
+<li>CorrelationSearchSpaceDimension：The size of the <strong>search grid</strong></li>
+<li>CorrelationSearchSpaceResolution：The size of the <strong>correlation grid</strong></li>
+</ul>
+</li>
+<li>回环检测中：<ul>
+<li>LoopSearchMaximumDistance：闭环检测的搜索距离，数值越大能越早发现闭环，也能容忍更大的偏离误差。</li>
+<li>LoopMatchMinimumResponseCoarse和LoopMatchMinimumResponseFine：粗匹配和精匹配的响应阈值，与闭环中candidate数量相关。阈值过低会导致candidate迅速被填满，真正好的点还没找到。阈值过高会导致回环失败（一直找不到回环点），地图上出现重影。</li>
+</ul>
+</li>
+</ol>
+<h4 id="CPU-Usage"><a href="#CPU-Usage" class="headerlink" title="CPU Usage"></a>CPU Usage</h4><p>算法资源占用的主要压力来源：</p>
+<ol>
+<li>地图更新</li>
+<li>回环检测</li>
+<li>SPA优化</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/04/leetcode/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2679,203 +2912,6 @@ H_{[jj]} += B_{ij}^T\Omega_{ij}B_{ij}</script>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/29/关联分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/29/关联分析/" itemprop="url">关联分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-29T23:57:01+08:00">
-                2018-04-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/04/29/关联分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/29/关联分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h4><p><strong>频繁项集</strong>：集合，${a, b, c}$</p>
-<p><strong>关联规则</strong>：映射，$a\to b$</p>
-<p><strong>支持度</strong>：针对某个频繁项集，$support(频繁项集a) = \frac{freq(频繁项集a)}{freq(所有项集)}$</p>
-<p><strong>可信度</strong>：衡量某条关联规则，$confidence(a\to b) = \frac{support(a|b)}{support(a)}$</p>
-<p>对于包含N个元素的数据集，可能的集合有$2^N - 1$种，暴力遍历显然药丸，因此引入Apriori原理。</p>
-<p><strong>Apriori原理</strong>：减少可能的项集，避免指数增长。</p>
-<ul>
-<li>backwards：如果某个项集是频繁的，那么它的所有子集也是频繁的。</li>
-<li>forwards：如果一个项集是非频繁项集，那么它的所有超集也是非频繁的。</li>
-</ul>
-<h4 id="2-Apriori算法"><a href="#2-Apriori算法" class="headerlink" title="2 Apriori算法"></a>2 Apriori算法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori</span><span class="params">(dataSet, minSupport=<span class="number">0.5</span>)</span>:</span></span><br></pre></td></tr></table></figure>
-<p>算法思路：从单个项集开始检查，去掉那些不满足最小支持度的项集，然后对剩下的集合进行组合，得到包含两个元素的项集，重复扫描，然后将剩余项集组合成包含三个元素的集合，依次类推，直到所有项集都被去掉。</p>
-<ul>
-<li>为啥最后会得到空集：因为包含所有元素的项集一定不是频繁项集，否则根据Apriori原理，它的全部子集都是频繁项集。</li>
-<li>如何从包含k个元素的项集集合生成包含k+1个元素的项集集合：从k个元素的项集到k+1个元素项集的扩充，<strong>只允许有一个元素的不同</strong>，算法中为了避免重复结果，<strong>只对前k-1个元素相同的两个项集求并集</strong>。</li>
-</ul>
-<p>代码实现过程中发现了几个知识记录一下：</p>
-<ul>
-<li>map函数的返回值：python2下直接返回列表，python3下返回的是迭代器：</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">map(frozenset, C1)</span><br><span class="line"><span class="comment"># 返回 &lt;map object at 0x101e78940&gt; </span></span><br><span class="line"></span><br><span class="line">list(map(frozenset, C1))</span><br><span class="line"><span class="comment"># 返回 list[frozenset1(), frozenset2(), ...]</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>字典的update方法：</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 将dict2的键值添加到dict1中，在涉及迭代操作时可以省略传递中间值</span><br><span class="line">dict1.update(dict2)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>set &amp; frozenset：set<strong>无排序</strong>且不重复，并且可变，因此unhashable。frozenset不可变，可以用作字典的key。</li>
-</ul>
-<h4 id="3-关联规则"><a href="#3-关联规则" class="headerlink" title="3 关联规则"></a>3 关联规则</h4><p>对一个包含k个元素的频繁项集，其中可能的关联规则有：</p>
-<script type="math/tex; mode=display">
-C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此延续Apriori的思路，关联规则也有一条类似的属性：</p>
-<ul>
-<li>如果某条规则的前件不满足最小可信度要求，那么它的所有子集也不满足最小可信度要求。</li>
-<li>对应的，如果某条规则的后件不满足最小可信度要求，那么它的所有超集也不满足。</li>
-</ul>
-<p>算法思路：对每个至少包含两个元素的频繁项集，从后部只包含一个元素的规则开始，对这些规则进行测试，接下来对所有剩余规则的后件进行组合，得到包含两个元素的后件（对应的补集就是前件），依次类推，直到测试完所有可能的后件。</p>
-<ul>
-<li>为啥只检查<strong>前后件互补</strong>的规则：因为一个频繁项集的所有子集也都是频繁项集，所以一个频繁项集中不互补的规则将是该频繁项集的某个子集的互补规则。</li>
-</ul>
-<h4 id="4-FP-growth算法"><a href="#4-FP-growth算法" class="headerlink" title="4 FP-growth算法"></a>4 FP-growth算法</h4><p>Apriori算法避免了暴力遍历子项集的指数式增长，但是对每一个新生成的频繁项集，都要扫描整个数据集，当数据集很大时，这种抛物线式增长的时间复杂度也不太令人满意。</p>
-<p>FP-growth算法借助一种称为<strong>FP树</strong>的数据结构存储数据，来抽象原始数据集：</p>
-<ul>
-<li><strong>项集</strong>以路径的方式存储在树中</li>
-<li><strong>相似项</strong>之间相连接成链表</li>
-</ul>
-<ul>
-<li>一个元素项可以在FP树中出现多次</li>
-<li>FP树存储的是元素的出现频率</li>
-<li>项集完全不同时，树才会分叉，否则会有复用路径</li>
-</ul>
-<p>​算法思路：首先遍历一遍原始数据集，记录元素的出现频率，去掉不满足最小支持度的元素。然后再遍历一遍剩下的集合元素，<strong>构建FP树</strong>。然后就可以通过FP树挖掘频繁项集。</p>
-<p>构建FP树：依次遍历每一个项集，首先将其中的非频繁项移除，并按照元素出现频率对过滤后的元素进行重排序。<strong>对过滤、排序后的集合</strong>，如果树中已存在现有元素，则增加现有元素的计数值，如果不存在，则向树中添加一个分支，新增节点的同时还要更新链表元素。主要就涉及两个数据结构：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义节点数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">treeNode</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, nameValue, numOccur, parentNode)</span>:</span></span><br><span class="line">        self.name</span><br><span class="line">        self.count</span><br><span class="line">        self.nodeLink   <span class="comment"># 链表信息，指向下一个相似项</span></span><br><span class="line">        self.parent</span><br><span class="line">        self.children</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line"><span class="comment"># 用于存储元素frequency以及链接相似项的字典数据结构</span></span><br><span class="line">freq = &#123;&#125;</span><br><span class="line">freq[node_name] = [frequency, node1, node2, ...]</span><br></pre></td></tr></table></figure>
-<ul>
-<li>因为集合中元素的出现频率可能相等，因此过滤排序的结果不唯一，生成的树结构也会有差异。</li>
-<li>第一次遍历删除非频繁元素时，发现字典在迭代过程中不能删除item，我转化成list暴力解决了，不知道有没有什么优雅的方式。</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">del</span> freq[item]</span><br><span class="line"><span class="comment"># 返回 RuntimeError: dictionary changed size during iteration</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> list(freq.keys()):</span><br><span class="line">    <span class="keyword">if</span> freq[item] &lt; minSupport:</span><br><span class="line">        <span class="keyword">del</span>(freq[item])</span><br></pre></td></tr></table></figure>
-<p>挖掘频繁项集：首先创建条件模式基，然后利用条件模式基，构建条件FP树。</p>
-<p><strong>1 条件模式基</strong>：以所查找元素项为结尾的<strong>前缀路径</strong>集合，并且每条前缀路径都与<strong>起始元素项</strong>的计数值相关联。（这里面用到了前面定义的parent和nodeLink属性）</p>
-<p><strong>2 构造条件FP树</strong>：与构造树的过程相同，使用的dataSet换成了条件模式基而已，函数参数count就是预留彩蛋。这样得到的就是<strong>指定频繁项的条件FP树</strong>。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">updateTree</span><span class="params">(cond_set, myTree, freq_header, count)</span>:</span></span><br><span class="line"><span class="comment"># cond_set: 一条path</span></span><br><span class="line"><span class="comment"># myTree: 根节点</span></span><br><span class="line"><span class="comment"># freq_header: dict[node_name] = [frequency, head_node]</span></span><br><span class="line"><span class="comment"># count: path对应的count</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>构造的条件FP树过滤掉了条件模式基中的一些元素：这些元素本身是频繁项，但是与指定元素组合的集合不是频繁的。</li>
-<li>相应地，条件树中剩余元素与指定频繁项组合的集合是频繁的。</li>
-</ul>
-<p><strong>3 迭代</strong>：从生成的条件FP树中，可以得到更复杂的频繁项。求解复杂频繁项的条件模式基，进而生成对应的条件FP树，就能得到更复杂的频繁项，依次类推进行迭代，直到FP树为空。</p>
-<p>​    </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2930,7 +2966,7 @@ C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

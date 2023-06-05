@@ -276,6 +276,203 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/29/关联分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/29/关联分析/" itemprop="url">关联分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-29T23:57:01+08:00">
+                2018-04-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/29/关联分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/04/29/关联分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-引言"><a href="#1-引言" class="headerlink" title="1 引言"></a>1 引言</h4><p><strong>频繁项集</strong>：集合，${a, b, c}$</p>
+<p><strong>关联规则</strong>：映射，$a\to b$</p>
+<p><strong>支持度</strong>：针对某个频繁项集，$support(频繁项集a) = \frac{freq(频繁项集a)}{freq(所有项集)}$</p>
+<p><strong>可信度</strong>：衡量某条关联规则，$confidence(a\to b) = \frac{support(a|b)}{support(a)}$</p>
+<p>对于包含N个元素的数据集，可能的集合有$2^N - 1$种，暴力遍历显然药丸，因此引入Apriori原理。</p>
+<p><strong>Apriori原理</strong>：减少可能的项集，避免指数增长。</p>
+<ul>
+<li>backwards：如果某个项集是频繁的，那么它的所有子集也是频繁的。</li>
+<li>forwards：如果一个项集是非频繁项集，那么它的所有超集也是非频繁的。</li>
+</ul>
+<h4 id="2-Apriori算法"><a href="#2-Apriori算法" class="headerlink" title="2 Apriori算法"></a>2 Apriori算法</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apriori</span><span class="params">(dataSet, minSupport=<span class="number">0.5</span>)</span>:</span></span><br></pre></td></tr></table></figure>
+<p>算法思路：从单个项集开始检查，去掉那些不满足最小支持度的项集，然后对剩下的集合进行组合，得到包含两个元素的项集，重复扫描，然后将剩余项集组合成包含三个元素的集合，依次类推，直到所有项集都被去掉。</p>
+<ul>
+<li>为啥最后会得到空集：因为包含所有元素的项集一定不是频繁项集，否则根据Apriori原理，它的全部子集都是频繁项集。</li>
+<li>如何从包含k个元素的项集集合生成包含k+1个元素的项集集合：从k个元素的项集到k+1个元素项集的扩充，<strong>只允许有一个元素的不同</strong>，算法中为了避免重复结果，<strong>只对前k-1个元素相同的两个项集求并集</strong>。</li>
+</ul>
+<p>代码实现过程中发现了几个知识记录一下：</p>
+<ul>
+<li>map函数的返回值：python2下直接返回列表，python3下返回的是迭代器：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">map(frozenset, C1)</span><br><span class="line"><span class="comment"># 返回 &lt;map object at 0x101e78940&gt; </span></span><br><span class="line"></span><br><span class="line">list(map(frozenset, C1))</span><br><span class="line"><span class="comment"># 返回 list[frozenset1(), frozenset2(), ...]</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>字典的update方法：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 将dict2的键值添加到dict1中，在涉及迭代操作时可以省略传递中间值</span><br><span class="line">dict1.update(dict2)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>set &amp; frozenset：set<strong>无排序</strong>且不重复，并且可变，因此unhashable。frozenset不可变，可以用作字典的key。</li>
+</ul>
+<h4 id="3-关联规则"><a href="#3-关联规则" class="headerlink" title="3 关联规则"></a>3 关联规则</h4><p>对一个包含k个元素的频繁项集，其中可能的关联规则有：</p>
+<script type="math/tex; mode=display">
+C_N^1 + C_N^2 + ... + C_N^{N-1}</script><p>暴力遍历肯定又药丸，因此延续Apriori的思路，关联规则也有一条类似的属性：</p>
+<ul>
+<li>如果某条规则的前件不满足最小可信度要求，那么它的所有子集也不满足最小可信度要求。</li>
+<li>对应的，如果某条规则的后件不满足最小可信度要求，那么它的所有超集也不满足。</li>
+</ul>
+<p>算法思路：对每个至少包含两个元素的频繁项集，从后部只包含一个元素的规则开始，对这些规则进行测试，接下来对所有剩余规则的后件进行组合，得到包含两个元素的后件（对应的补集就是前件），依次类推，直到测试完所有可能的后件。</p>
+<ul>
+<li>为啥只检查<strong>前后件互补</strong>的规则：因为一个频繁项集的所有子集也都是频繁项集，所以一个频繁项集中不互补的规则将是该频繁项集的某个子集的互补规则。</li>
+</ul>
+<h4 id="4-FP-growth算法"><a href="#4-FP-growth算法" class="headerlink" title="4 FP-growth算法"></a>4 FP-growth算法</h4><p>Apriori算法避免了暴力遍历子项集的指数式增长，但是对每一个新生成的频繁项集，都要扫描整个数据集，当数据集很大时，这种抛物线式增长的时间复杂度也不太令人满意。</p>
+<p>FP-growth算法借助一种称为<strong>FP树</strong>的数据结构存储数据，来抽象原始数据集：</p>
+<ul>
+<li><strong>项集</strong>以路径的方式存储在树中</li>
+<li><strong>相似项</strong>之间相连接成链表</li>
+</ul>
+<ul>
+<li>一个元素项可以在FP树中出现多次</li>
+<li>FP树存储的是元素的出现频率</li>
+<li>项集完全不同时，树才会分叉，否则会有复用路径</li>
+</ul>
+<p>​算法思路：首先遍历一遍原始数据集，记录元素的出现频率，去掉不满足最小支持度的元素。然后再遍历一遍剩下的集合元素，<strong>构建FP树</strong>。然后就可以通过FP树挖掘频繁项集。</p>
+<p>构建FP树：依次遍历每一个项集，首先将其中的非频繁项移除，并按照元素出现频率对过滤后的元素进行重排序。<strong>对过滤、排序后的集合</strong>，如果树中已存在现有元素，则增加现有元素的计数值，如果不存在，则向树中添加一个分支，新增节点的同时还要更新链表元素。主要就涉及两个数据结构：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 自定义节点数据结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">treeNode</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, nameValue, numOccur, parentNode)</span>:</span></span><br><span class="line">        self.name</span><br><span class="line">        self.count</span><br><span class="line">        self.nodeLink   <span class="comment"># 链表信息，指向下一个相似项</span></span><br><span class="line">        self.parent</span><br><span class="line">        self.children</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line"><span class="comment"># 用于存储元素frequency以及链接相似项的字典数据结构</span></span><br><span class="line">freq = &#123;&#125;</span><br><span class="line">freq[node_name] = [frequency, node1, node2, ...]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>因为集合中元素的出现频率可能相等，因此过滤排序的结果不唯一，生成的树结构也会有差异。</li>
+<li>第一次遍历删除非频繁元素时，发现字典在迭代过程中不能删除item，我转化成list暴力解决了，不知道有没有什么优雅的方式。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">del</span> freq[item]</span><br><span class="line"><span class="comment"># 返回 RuntimeError: dictionary changed size during iteration</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> list(freq.keys()):</span><br><span class="line">    <span class="keyword">if</span> freq[item] &lt; minSupport:</span><br><span class="line">        <span class="keyword">del</span>(freq[item])</span><br></pre></td></tr></table></figure>
+<p>挖掘频繁项集：首先创建条件模式基，然后利用条件模式基，构建条件FP树。</p>
+<p><strong>1 条件模式基</strong>：以所查找元素项为结尾的<strong>前缀路径</strong>集合，并且每条前缀路径都与<strong>起始元素项</strong>的计数值相关联。（这里面用到了前面定义的parent和nodeLink属性）</p>
+<p><strong>2 构造条件FP树</strong>：与构造树的过程相同，使用的dataSet换成了条件模式基而已，函数参数count就是预留彩蛋。这样得到的就是<strong>指定频繁项的条件FP树</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">updateTree</span><span class="params">(cond_set, myTree, freq_header, count)</span>:</span></span><br><span class="line"><span class="comment"># cond_set: 一条path</span></span><br><span class="line"><span class="comment"># myTree: 根节点</span></span><br><span class="line"><span class="comment"># freq_header: dict[node_name] = [frequency, head_node]</span></span><br><span class="line"><span class="comment"># count: path对应的count</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>构造的条件FP树过滤掉了条件模式基中的一些元素：这些元素本身是频繁项，但是与指定元素组合的集合不是频繁的。</li>
+<li>相应地，条件树中剩余元素与指定频繁项组合的集合是频繁的。</li>
+</ul>
+<p><strong>3 迭代</strong>：从生成的条件FP树中，可以得到更复杂的频繁项。求解复杂频繁项的条件模式基，进而生成对应的条件FP树，就能得到更复杂的频繁项，依次类推进行迭代，直到FP树为空。</p>
+<p>​    </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/04/25/sublime注册码被无限次移除/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -583,7 +780,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

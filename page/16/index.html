@@ -276,6 +276,204 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/23/navigation-stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/23/navigation-stack/" itemprop="url">navigation stack</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T11:05:08+08:00">
+                2018-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/23/navigation-stack/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/23/navigation-stack/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="part0"><a href="#part0" class="headerlink" title="part0"></a>part0</h4><p>现实中想要移动平台移动到指定地点，机器人运动控制系统架构包括了如下几个层次：</p>
+<p><img src="/2018/10/23/navigation-stack/navi.png" alt=""></p>
+<p>最底层是机器人的底盘控制部分，驱动器接收的是机器人的期望速度（Twist），将速度解算为左右轮的期望速度，并根据期望速度对左右轮分别进行PID驱控速，输出电机的转速。</p>
+<blockquote>
+<p>这部分ROS社区已经有针对Arduino封装好的Package——rosserial_arduino。</p>
+</blockquote>
+<p>中间层是通信层，电脑端发布速度指令给平台，同时接收平台发布的当前速度，然后发布/odom topic，让其他节点订阅。</p>
+<p>最上层是决策层，也就是导航规划层，goal、localization（matching&amp;里程计）、path planner以及最终输出速度指令，这一部分都在navigation stack里面。</p>
+<h4 id="part1-packages"><a href="#part1-packages" class="headerlink" title="part1 packages"></a>part1 packages</h4><p>navigation stack是ROS提供的导航方案，内部集成了很多个package，模块之间完全解耦，可以个性化选择提供的方法。</p>
+<p><img src="/2018/10/23/navigation-stack/navigation%20stack.png" alt=""></p>
+<p>官网上给出了导航栈宏观的结构描述：</p>
+<p><img src="/2018/10/23/navigation-stack/module.png" alt=""></p>
+<p>move_base中主要包含三个部分，global_plan、local_plan以及recovery behavior。对应的插件有：</p>
+<ul>
+<li>global_plan：global_planner（实现了dijkstra和A*算法），carrot_planner，navfn</li>
+<li>local_plan：base_local_planner（实现了Trajectory Rollout和DWA算法），dwa_local_planner</li>
+<li>recovery：clear_costmap_recovery，move_slow_and_clear，rotate_recovery</li>
+</ul>
+<p>nav_core是一个接口插件，包含了以上插件基类的头文件，move_base中的方法都是在其规则上扩展的。</p>
+<p>两个灰色的插件map_server和amcl表示可选可不选：</p>
+<ul>
+<li>可以使用meta package提供的map_server节点来进行<strong>代价地图</strong>管理，也可以使用其他节点（例如直接使用gmapping的输出）。</li>
+<li>可以使用meta package提供的amcl节点来进行自定位，也可以使用其他算法包（例如ROS里面还有一个robot_pose_ekf节点）。</li>
+</ul>
+<p>costmap_2d将不同传感器的输入处理成统一的栅格地图格式。以层的概念来组织图层，用户可以根据需要自己配置（通过Social Costmap Layer、Range Sensor Layer等开源插件），默认的层有：</p>
+<ul>
+<li>static_layer：静态地图层，（通过订阅map_server的/map主题）来生成。</li>
+<li>obstacle_layer：障碍地图层，根据动态的传感器信息来生成。</li>
+<li>inflation_layer：膨胀层，将前两个图层的信息综合进行缓冲区扩展。</li>
+</ul>
+<p>voxel_grid是三维代价地图。</p>
+<p>fake_localization用来做定位仿真，内含/base_pose_ground_truth话题。</p>
+<h4 id="part2-params"><a href="#part2-params" class="headerlink" title="part2 params"></a>part2 params</h4><ol>
+<li>move_base_params.yaml：<ul>
+<li>planner_frequency：<strong>全局规划</strong>的执行频率，如果设置为0.0则全局规划器仅在接受到新目标点或者局部规划器报告路径堵塞时才会重新执行。</li>
+</ul>
+</li>
+<li>global_planner_params.yaml：<ul>
+<li>default_tolerance：当设置的目的地被占据时，以该参数为半径的范围内选取最近的点作为新目标点。</li>
+</ul>
+</li>
+<li>dwa_local_planner_params.yaml：<ul>
+<li>latch_xy_goal_tolerance：如果设置为true，达到xy_goal_tolerance以内机器人就会原地旋转，即使会转出容错圈外。</li>
+<li>sim_granularity：间隔尺寸，轨迹上采样点步长。</li>
+<li>scaling_speed：启动机器人底盘的速度。</li>
+</ul>
+</li>
+<li><p>global_costmap_params.yaml：</p>
+<ul>
+<li>raytrace_range：实时清除代价地图上障碍物的最大范围，清除的是obstacle_layer的数据。</li>
+</ul>
+</li>
+</ol>
+<h4 id="part3-topics"><a href="#part3-topics" class="headerlink" title="part3 topics"></a>part3 topics</h4><ol>
+<li><p>move_base &amp; move_base_simple：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ros::<span class="function">NodeHandle <span class="title">action_nh</span><span class="params">(<span class="string">"move_base"</span>)</span></span>;</span><br><span class="line">action_goal_pub_ = action_nh.advertise&lt;move_base_msgs::MoveBaseActionGoal&gt;(<span class="string">"goal"</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//we'll provide a mechanism for some people to send goals as PoseStamped messages over a topic</span></span><br><span class="line"><span class="comment">//they won't get any useful information back about its status, but this is useful for tools</span></span><br><span class="line"><span class="comment">//like nav_view and rviz</span></span><br><span class="line">ros::<span class="function">NodeHandle <span class="title">simple_nh</span><span class="params">(<span class="string">"move_base_simple"</span>)</span></span>;</span><br><span class="line">goal_sub_ = simple_nh.subscribe&lt;geometry_msgs::PoseStamped&gt;(<span class="string">"goal"</span>, <span class="number">1</span>, boost::bind(&amp;MoveBase::goalCB, <span class="keyword">this</span>, _1));</span><br></pre></td></tr></table></figure>
+<p>之前查看节点图的时候发现这两个节点都提供goal，一直没想通两者的关系，发现代码注释里面有，move_base继承了actionlib，有状态反馈（<a href="http://wiki.ros.org/move_base" target="_blank" rel="noopener">详见wiki 1.1.2 ActionAPI</a>），move_base_simple就是一个publisher（topic可以来自rviz／cmd line）。</p>
+<p><img src="/2018/10/23/navigation-stack/rostopic.png" alt=""></p>
+<p>/result 记录了Goal reached</p>
+<p>/feedback 记录了每个时刻机器人的位姿</p>
+<p>/status 记录了任务进程（goal accepted、failed、aborting）</p>
+<p>/cancel 没echo出信息，应该与上层对接</p>
+<p>【定点巡航】另外，定点巡航的时候将global_path的buffer设置为n就可以显示多条路径了。</p>
+</li>
+<li><p>DWAPlanner的global_plan &amp; local_plan：</p>
+<p>local_plan就是DWA算法每个时刻计算的最优预期路径。global_plan是整个局部代价地图上的路径，它是全局路径的crop，因为局部动态环境不会影响全局路径，我们只研究落在localmap以内这一段路径是否需要矫正。</p>
+<p><img src="/2018/10/23/navigation-stack/path.png" alt=""></p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/15/autolabor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1914,239 +2112,6 @@ P^{'} = exp(\xi^{\wedge})P = RP +t\\
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/05/karto-key-concepts/" itemprop="url">karto key concepts</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-05T13:17:58+08:00">
-                2018-06-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/05/karto-key-concepts/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/05/karto-key-concepts/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>基于极其标准的图优化SLAM框架来实现：</p>
-<p><img src="/2018/06/05/karto-key-concepts/1.png" alt="framework"></p>
-<p>提出了采用稀疏点调整（SPA）的方法来高效求解位姿图优化问题，针对本算法的文献为《Efficient Sparse Pose Adjustment for 2D Mapping》。</p>
-<p>scan matching部分的参考文献为《Real-time correlative scan matching》，M3RSM的前身！</p>
-<h4 id="key-concepts："><a href="#key-concepts：" class="headerlink" title="key concepts："></a>key concepts：</h4><ul>
-<li><p>keyScan：机器人运动一定的距离或角度（关键帧），储存在sensorManager，无地图缓存。</p>
-</li>
-<li><p>look-up table查找表：查找表的意义就是相比于暴力匹配，不需要每次都重新计算每个激光数据信息，<strong>相同角度不同位置</strong>的激光数据信息只需要被索引一次。</p>
-</li>
-<li><p>response响应值：将查找表以一定的位移投到子图上，总共有n个点被查找表击中（hit），击中的每个点得分不同（score），累加得分并除以可以达到的最高分。</p>
-<script type="math/tex; mode=display">
-response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
-<li><p>协方差：文献专门用了一节计算协方差，但是没看到用在哪，是为了后面求误差做准备吗？？？</p>
-</li>
-<li><p>addScans添加顶点和边：边是误差值，添加的边约束来自两部分，</p>
-<p>（1）link to running scans，距当前帧一定范围内的激光数据链（RunningScan chain）。</p>
-<p>（2）link to other near chains，从当前节点开始广度优先遍历一定距离范围内所有节点，依据当前id从sensorManager中分别递增和递减寻找一定范围内的chain（不一定直接相连）。</p>
-</li>
-<li><p>回环检测：操作与添加边约束类似，位姿图上要<strong>去除那些和当前节点的时间相邻的节点</strong>。</p>
-<p>（1）找到一定距离范围内（near）和相连（adjacent）的节点添加进nearLinkedScans。</p>
-<p>（2）<code>MapperGraph::FindPossibleLoopClosure</code>：从sensorManager中从前到后，依据序号挑选与当前节点在一定距离范围内，且不在nearLinkedScans中的candidate。返回潜在chain。其中涉及两个参数：</p>
-<ul>
-<li>LoopSearchMaximumDistance：candidateScan与当前scan的距离必须在可容许的距离内。</li>
-<li>LoopMatchMinimumChainSize：chain中的节点数必须不小于限定值。</li>
-</ul>
-<p>（3）<code>MapperGraph::TryCloseLoop</code>：scan2map匹配，当response和covariance达到一定要求认为闭环检测到，得到correct pose（也就是认为candidateScan的pose才是当前帧的实际pose）。</p>
-<p>（4）add link to loop，构成全局闭环。</p>
-<p>（5）触发correctPose，进行spa优化。</p>
-</li>
-</ul>
-<p><img src="/2018/06/05/karto-key-concepts/graph opti.jpeg" alt=""></p>
-<h4 id="代码随手记："><a href="#代码随手记：" class="headerlink" title="代码随手记："></a>代码随手记：</h4><ol>
-<li><p>ROS上面提供三个开源包：nav2d_karto, open_karto, slam_karto。</p>
-<p>ROS Wiki上这么描述nav2d_karto这个package：Graph-based Simultaneous Localization and Mapping module. Includes OpenKarto GraphSLAM library by “SRI International”.</p>
-<p>open_karto：开源的karto包，实现底层的kartoslam</p>
-<p>slam_karto：ros层，应用层的kartoslam接口</p>
-</li>
-<li><p>The LaserRangeFinder contains parameters for physical laser sensor used by the mapper for scan matching Also contains information about the maximum range of the sensor and provides a threshold for limiting the range of readings.</p>
-<p>The optimal value for the range threshold depends on the angular resolution of the scan and the desired map resolution.</p>
-</li>
-<li><p>resolution：0.25 &amp; 0.5 &amp; 1 degree</p>
-<p>number of range readings (beams)：（maximumAngle - minimumAngle）／angularResolution + 1</p>
-</li>
-<li><p>GridStates：0 for Unknown，100 for Occupied， 255 for Free。</p>
-</li>
-<li><p>flipY：最开始机器人应该处在世界坐标系的原点，传感器坐标系与机器人baselink存在一个坐标变换，原始的传感器坐标系位置应该与地图坐标系重合，这就是world和grid之间的offset。flip是啥呢？？</p>
-</li>
-<li><p>LookupArray[index]：Create lookup tables for point readings <strong>at varying angles</strong> in grid. This is to speed up finding best angle/position for a localized range scan</p>
-</li>
-<li><p>MapperGraph：花式构造位姿图</p>
-</li>
-<li><p>CorrelationGrid：Implementation of a <strong>correlation</strong> grid used for scan matching</p>
-</li>
-<li><p>Region of Interest ROI：</p>
-</li>
-<li><p>smear：The point readings are smeared by this value in X and Y to create a smoother response. 个人理解这句话是说点容易生成突变，用以点为中心的一小片区域平滑一点。</p>
-</li>
-<li><p>ScanMatch：返回响应值response</p>
-<p>   前端匹配调用<code>m_pSequentialScanMatcher-&gt;MatchScan</code></p>
-<p>   闭环检测调用<code>m_pLoopScanMatcher-&gt;MatchScan</code></p>
-<p>   两个函数继承于<code>ScanMatcher::MatchScan</code>：</p>
-   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::MatchScan(</span><br><span class="line">	LocalizedRangeScan* pScan, </span><br><span class="line">    <span class="keyword">const</span> LocalizedRangeScanVector&amp; rBaseScans, </span><br><span class="line">    Pose2&amp; rMean, </span><br><span class="line">    Matrix3&amp; rCovariance, </span><br><span class="line">    kt_bool doPenalize, </span><br><span class="line">    kt_bool doRefineMatch)    <span class="comment">// default is True, 决定是否做精匹配</span></span><br><span class="line"><span class="comment">// @return: strength of response (best response)</span></span><br></pre></td></tr></table></figure>
-<p>   其中会调用<code>ScanMatcher::CorrelateScan</code>方法。<code>ScanMatcher::CorrelateScan</code>方法中调用<code>ScanMatcher::GetResponse</code>方法计算响应值。</p>
-   <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kt_double ScanMatcher::GetResponse(</span><br><span class="line">	kt_int32u angleIndex, </span><br><span class="line">	kt_int32s gridPositionIndex) <span class="keyword">const</span></span><br></pre></td></tr></table></figure>
-<p>   <code>GetResponse</code>的核心在<code>kt_int8u* pByte</code>和<code>const LookupArray* pOffsets</code>两个数据结构：</p>
-<ul>
-<li>前者是在correlationGrid范围内的real sensed占据情况。</li>
-<li><p>后者是lookup-table中（已知地图）读取的栅格占据情况，只包含占据的栅格，key是angular。</p>
-<p>计算response只要看地图上的占据点是否在观测中是否也是占据的：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (kt_int32u i = <span class="number">0</span>; i &lt; pOffsets-&gt;GetSize(); i++)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ignore points that fall off the grid</span></span><br><span class="line">  kt_int32s pointGridIndex = gridPositionIndex + pAngleIndexPointer[i];</span><br><span class="line">  <span class="keyword">if</span> (!math::IsUpTo(pointGridIndex, m_pCorrelationGrid-&gt;GetDataSize()) || pAngleIndexPointer[i] == INVALID_SCAN)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uses index offsets to efficiently find location of point in the grid</span></span><br><span class="line">  response += pByte[pAngleIndexPointer[i]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>最终的response要normalize：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// normalize response</span></span><br><span class="line">response /= (nPoints * GridStates_Occupied);   <span class="comment">// GridStates_Occupied = 100,</span></span><br><span class="line">assert(<span class="built_in">fabs</span>(response) &lt;= <span class="number">1.0</span>);</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>karto只在闭环的时候触发后端优化<code>CorrectPoses()</code>，ScanSolver的实现在Samples路径下的SpaSolver，调用了现有的BA求解器<a href="http://users.ics.forth.gr/~lourakis/sba/" target="_blank" rel="noopener">sba(A Generic Sparse Bundle Adjustment C/C++ Package Based on the Levenberg-Marquardt Algorithm)</a>。</p>
-</li>
-</ol>
-<h4 id="参数-amp-优化方向"><a href="#参数-amp-优化方向" class="headerlink" title="参数&amp;优化方向"></a><a href="http://docs.ros.org/jade/api/nav2d_karto/html/classkarto_1_1OpenMapper.html" target="_blank" rel="noopener">参数</a>&amp;优化方向</h4><ol>
-<li>闭环中candidate数量的调整：<ul>
-<li>减小LoopSearchMaximumDistance，进入candidate范围的节点数据减少</li>
-<li>减小LoopMatchMinimumChainSize，用来计算优化的candidate数量减少</li>
-<li>增大minimum_travel_distance和minimum_travel_heading，这样总体的节点数减少</li>
-</ul>
-</li>
-<li>Map_update_interval：发布地图的间隔，其主要过程是遍历当前所有节点数据，对每个栅格的占有状态进行判定，生成栅格地图。</li>
-<li>ScanBufferSize和ScanBufferMaximumScanDistance：控制buffer也就是chain的大小。chain不能太大也不能太小，太小会造成前端误差累积，太大会导致构建闭环的节点数不足。推荐值是ScanBufferMaximumScanDistance／minimum_travel_distance。</li>
-<li>位姿纠正中：<ul>
-<li>CorrelationSearchSpaceDimension：The size of the <strong>search grid</strong></li>
-<li>CorrelationSearchSpaceResolution：The size of the <strong>correlation grid</strong></li>
-</ul>
-</li>
-<li>回环检测中：<ul>
-<li>LoopSearchMaximumDistance：闭环检测的搜索距离，数值越大能越早发现闭环，也能容忍更大的偏离误差。</li>
-<li>LoopMatchMinimumResponseCoarse和LoopMatchMinimumResponseFine：粗匹配和精匹配的响应阈值，与闭环中candidate数量相关。阈值过低会导致candidate迅速被填满，真正好的点还没找到。阈值过高会导致回环失败（一直找不到回环点），地图上出现重影。</li>
-</ul>
-</li>
-</ol>
-<h4 id="CPU-Usage"><a href="#CPU-Usage" class="headerlink" title="CPU Usage"></a>CPU Usage</h4><p>算法资源占用的主要压力来源：</p>
-<ol>
-<li>地图更新</li>
-<li>回环检测</li>
-<li>SPA优化</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2201,7 +2166,7 @@ response = \frac{\sum_{i=0}^n goal_i}{goalmax}</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

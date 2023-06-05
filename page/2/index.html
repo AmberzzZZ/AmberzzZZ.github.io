@@ -276,6 +276,477 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/10/30/real-time-semantic-segmentation/" itemprop="url">real-time semantic segmentation</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-30T10:02:35+08:00">
+                2022-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/10/30/real-time-semantic-segmentation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/30/real-time-semantic-segmentation/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>cityscape leaderboard:</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/leaderboard.png" width="80%;"></p>
+<ul>
+<li>[PIDNet 2022] PIDNet: A Real-time Semantic Segmentation Network Inspired from PID Controller</li>
+<li>[SFNet v1 2020] Semantic Flow for Fast and Accurate Scene Parsing</li>
+<li>[SFNet v2 2022] SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</li>
+<li>[PP-LiteSeg 2022] PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</li>
+<li>[DDRNet 2021] Deep Dual-resolution Networks for Real-time and Accurate Semantic Segmentation of Road Scenes</li>
+<li>[STDC-Seg 2021CVPR] Rethinking BiSeNet For Real-time Semantic Segmentation</li>
+</ul>
+<h2 id="PP-LiteSeg-A-Superior-Real-Time-Semantic-Segmentation-Model"><a href="#PP-LiteSeg-A-Superior-Real-Time-Semantic-Segmentation-Model" class="headerlink" title="PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model"></a>PP-LiteSeg: A Superior Real-Time Semantic Segmentation Model</h2><ol>
+<li><p>main contributions</p>
+<ul>
+<li>propose a Flexible and Lightweight Decoder (FLD)：主要就是FPN的通道数</li>
+<li>propose a Unified Attention Fusion Module (UAFM)：强化特征表达</li>
+<li>propose a Simple Pyramid Pooling Module (SPPM)：简化PPM，low computation cost</li>
+</ul>
+</li>
+<li><p>real-time networks设计思路</p>
+<ul>
+<li>Strengthening feature representations：decoder中low-level和high-level特征的融合方式</li>
+<li>Contextual aggregation：花式PPM</li>
+</ul>
+</li>
+<li><p>overview</p>
+<p> <img src="/2022/10/30/real-time-semantic-segmentation/pp-liteseg.png" width="80%;"></p>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Flexible and Lightweight Decoder</p>
+<ul>
+<li>recent lightweight models中的decoder在恢复resolution的过程中通道数保持不变：cause computation redundancy</li>
+<li>FLD从high-level到low-level逐渐减少通道数</li>
+</ul>
+</li>
+<li><p>Unified Attention Fusion Module</p>
+<ul>
+<li>用一个attention module来产生weight map</li>
+<li><p>然后对不同尺度的特征做加权和</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/UAFM.png" width="40%;"></p>
+</li>
+<li><p>Spatial Attention Module</p>
+<ul>
+<li>实际代码中用的这个</li>
+<li>在channel维度上做mean &amp; max，两个feature共得到4个[1,h,w]的map，concat在一起[4,h,w]</li>
+<li>然后做conv+sigmoid得到weight map [1,h,w]</li>
+<li>然后做element-wise的mul&amp;add</li>
+</ul>
+</li>
+<li>Channel Attention Module<ul>
+<li>在spacial map上做avg pooling和max pooling，两个feature共得到4个[c,1,1]的vector，concat在一起[4c,1,1]</li>
+<li>然后做conv+sigmoid得到channel importance vec [c,1,1]</li>
+<li>然后做channel-wise的mul&amp;add</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Simple Pyramid Pooling Module</p>
+<ul>
+<li>主要改动<ul>
+<li>reduce intermediate and output channels</li>
+<li>remove the short-cut</li>
+<li>replace concat with add</li>
+</ul>
+</li>
+<li>就3个global average pooling，得到1x1、2x2、4x4的map，然后分别conv-bn-relu，然后resize回原来的尺度</li>
+<li><p>然后add &amp; conv</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/SPPM.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>datasets<ul>
+<li>Cityscapes：1+18，5,000（2975/500/1525），原始尺寸是2048x1024</li>
+<li>CamVid：11类，701（367/101/233），原始尺寸是960x720</li>
+</ul>
+</li>
+<li>training settings<ul>
+<li>SGD：momentum=0.9</li>
+<li>lr：warmup，poly，</li>
+<li>Cityscapes训练160k，batchsize=16，baselr=0.005，weight decay=5e-4</li>
+<li>CamVid训练1k，batchsize=24，baselr=0.01，weight decay=1e-4</li>
+<li>dataaug<ul>
+<li>random scale：scale range [0.125, 1.5] / [0.5, 2.5] for Cityscapes/CamVid</li>
+<li>random crop：crop size=[1024,512] / [960,720]</li>
+<li>random horizontal flipping / color jitting / normalization</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow"><a href="#SFNet-Faster-Accurate-and-Domain-Agnostic-Semantic-Segmentation-via-Semantic-Flow" class="headerlink" title="SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow"></a>SFNet: Faster, Accurate, and Domain Agnostic Semantic Segmentation via Semantic Flow</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>widely used atrous convolution &amp; feaature pyramid: computation intensive or ineffective</li>
+<li>we propose SFNet &amp; SFNet-Lite<ul>
+<li>Flow Alignment Module (FAM) to learn sematic flow</li>
+<li>Gated Dual Flow Alignment Module (GD-FAM): directly align the highest &amp; lowest resolution feature maps</li>
+</ul>
+</li>
+<li>speed &amp; accuracy <ul>
+<li>verified on 4 driving datasets (Cityscapes, Mapillary, IDD and BDD)</li>
+<li>SFNet-Lite-R18 back: 80.1 mIoU / 60 FPS </li>
+<li>SFNet-Lite-STDC back: 78.8 mIoU / 120 FPS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>previous methods</p>
+<ul>
+<li>FCN<ul>
+<li>开创性的工作</li>
+<li>lack of detailed object boundary information due to down-sampling</li>
+</ul>
+</li>
+<li>deeplab<ul>
+<li>atrous convolutions （last 4/5 stage）</li>
+<li>multiscale feature representation （ASPP）</li>
+</ul>
+</li>
+<li>vision transformer<ul>
+<li>建模成query-based per-segment prediction</li>
+<li>strong performance but real time inference speed不理想</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>trade-off</p>
+<ul>
+<li>maintain detailed resolution：空洞卷积，resolution大计算量就大，很难实时</li>
+<li>get features that exhibit strong semantic representation：biFPN style feature merge，有一定提升，但还是不如those hold large feature maps</li>
+<li>本文的推测是：ineffective propagation of semantics from deep layers to shallow layers，across level的semantics are not well aligned，粗暴的downsample再upsample，无法恢复细节边缘信息</li>
+</ul>
+</li>
+<li><p>this paper</p>
+<ul>
+<li>propose FAM &amp; SFNet<ul>
+<li>不同stage的feature之间，先做alignment，warp low level feature之后再merge</li>
+<li>R18-back： 79.8% mIoU / 33 FPS on cityscape</li>
+<li>DF2-back：77.8% mIoU / 103 FPS </li>
+</ul>
+</li>
+<li><p>propose GD-FAM &amp; SFNet-Lite</p>
+<ul>
+<li>为了更快，把密集的FAM换成只做一次的GD-FAM</li>
+<li>只merge this highest &amp; lowest尺度的features</li>
+<li>ResNet-18 back：80.1% mIoU / 49 FPS on cityscape</li>
+<li>STDCv1-back： 78.7 mIoU / 120 FPS</li>
+</ul>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/FAM.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>出发点： the misalignment between feature maps caused by residual connection, repeated downsampling and up- sampling operations</p>
+</li>
+<li><p>inspiration：dynamic upsampling interpolation </p>
+</li>
+<li><p>FAM</p>
+<ul>
+<li><p>build in the FPN framework</p>
+</li>
+<li><p>define Semantic Flow：between different levels in a feature pyramid</p>
+</li>
+<li><p>pipeline</p>
+<ul>
+<li>首先通道对齐</li>
+<li>然后上采样，尺度对齐，$F \in R^{H\times W \times C}$</li>
+<li>然后concat两个level的特征，（但是没有像真正的光流对齐FlowNet一样再concat上grid coordinates）</li>
+<li>然后用两层3x3的卷积做semantic flow field的预测，$\Delta_{low-level} \in R^{H\times W\times 2}$</li>
+<li>然后warp low-level feature</li>
+<li><p>然后add &amp; halve</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/halve.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>和deformable conv的区别</p>
+<ul>
+<li>首先这个offset是通过融合两个尺度特征得到的，DCN是特征自己预测的</li>
+<li>其次DCN是为了得到更大的/更自由的reception field，more like attention，本文是为了align feature</li>
+</ul>
+</li>
+<li><p>可以看到warp &amp; add以后的feature map相比较于直接上采样然后add，更加structurally neat，目标可以有更consistent的representation</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/feature map.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>the whole network</p>
+<ul>
+<li>backbone<ul>
+<li>ImageNet pretrained ResNet / DF series</li>
+<li>4 stages</li>
+<li>stride2 in the first place per stage</li>
+<li>Pyramid Pooling Module (PPM)，ASPP/NL is also experimented，后面实验部分说精度不如PPM</li>
+</ul>
+</li>
+<li>Aligned FPN decoder<ul>
+<li>encoder那边过来的stage2/3/4的low-level feature，被FAM aligned，然后fused into their bottom levels</li>
+<li>最终的x4的prediction feature，concat来自所有尺度的特征，考虑到也存在mis-alignment，本文也实验性的添加了PPM，但是在real-time application中没加</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Gated Dual Flow Alignment Module and SFNet-Lite</p>
+<ul>
+<li><p>上述版本的SFNet，在speed上是比BiSegNet慢的，thus we explore more compact decoder</p>
+</li>
+<li><p>takes F1 &amp; F4 as inputs</p>
+</li>
+<li><p>outputs a refined high-resolution map</p>
+</li>
+<li><p>pipeline</p>
+<ul>
+<li>首先将F4上采样的F1的resolution</li>
+<li>然后concat，然后3x3convs，预测offsets，$\Delta \in R^{H\times W\times 4}$</li>
+<li><p>然后split成$\Delta_{F1}$和$\Delta_{F4}$，分别给到F1和F4做align</p>
+</li>
+<li><p>再用F1和F4生成一个gate map，attention-style的结构，用pooling，1x1 conv和sigmoid，给两个warped feature做gated sum，思路是make full use of high level semantic feature and let the low level feature as a supplement of high level feature</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/gatemap.png" width="40%;"></p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/fuse.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SFNet-Lite structure</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/SFNet-Lite.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+</li>
+</ol>
+<h2 id="STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation"><a href="#STDC-Seg-Rethinking-BiSeNet-For-Real-time-Semantic-Segmentation" class="headerlink" title="STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation"></a>STDC-Seg: Rethinking BiSeNet For Real-time Semantic Segmentation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>BiSeNet<ul>
+<li>use extra path to encode spatial information (low-level)</li>
+<li>time consuming</li>
+<li>not convenient to use pretrained backbones</li>
+<li>the auxiliary path is always lack of low-level information guidance</li>
+</ul>
+</li>
+<li>this paper<ul>
+<li>回归test-time singe-stream manner</li>
+<li>用一个Detail guidance module来促进backbone的low-level stage学习spatial feature，有直接监督，且test-time free cost</li>
+<li>设计了STDC backbone，主要包含STDC module (Short-Term Dense Concatentae Network)，有点类似denseNet的block</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>ImageNet</li>
+<li>Cityscapes: STDC1-Seg50 / 71.9% mIoU / 250.4 FPS,  STDC2-Seg75 / 76.8% mIoU / 97.0 FPS</li>
+<li>CamVid</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overview</p>
+<ul>
+<li><p>single-stream</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/detail guidance.png" width="40%;"></p>
+</li>
+<li><p>STDC backbone</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/STDC.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>Short-Term Dense Concatenate Module</p>
+<ul>
+<li>each module is separated into several blocks：block1永远是1x1，block2/3/4是3x3</li>
+<li>the output gathers multi-scale information</li>
+<li><p>一种是stride1的一种是stride2的，reception field如下</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/reception field.png" width="45%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Classification Architecture</p>
+<ul>
+<li>stage1/2分别是一个conv-bn-relu</li>
+<li><p>stage3/4/5是STDC Module，每个stage的第一个module用stride2 </p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/STDC hypers.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Segmentation Architecture</p>
+<ul>
+<li>STDC back：用stage3/4/5的feature map（x8/16/32）</li>
+<li>stage3的feature作为low-level feature</li>
+<li>stage4/5以及global pooling的stage5的feature作为high-level context feature，做FPN：stage4/5通过Attention Refine Module（类似SE），然后和前一个feature level做add，然后上采样，然后conv</li>
+<li>以上的feature通过Feature Fusion Module（也类似SE block）融合</li>
+<li>SegHead：3x3conv-1x1conv</li>
+<li><p>stage3的feature上还接了一个DetailHead</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/STDC-Seg.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Detail Guidance of Low-level Features</p>
+<ul>
+<li>detail path是用来encode spatial detail（boundary/corner）</li>
+<li>建模成binary segmentation task</li>
+<li>首先将ground truth map通过Detail Aggregation module得到detail map<ul>
+<li>一个stride1/2/4的Laplacian operator（conv kernel）</li>
+<li>然后是upsampling</li>
+<li>然后fuse and 1x1 conv</li>
+<li>最后用thresh 0.1转换成binary detail mask</li>
+</ul>
+</li>
+<li>detail loss：dice + bce</li>
+<li><p>有了detail guidance以后能够force backbone的stage3 feature保留更加detail的low-level feature</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/detail feature.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>backbone实验</p>
+<ul>
+<li><p>对标MobileNetV3和EfficientNet-B0，精度和速度都是更好的</p>
+<p><img src="/2022/10/30/real-time-semantic-segmentation/backbone cmp.png" width="50%;"></p>
+</li>
+<li><p>ImageNet精度&amp;Flops，Flops比较大，但都是3x3卷积，推理速度更快</p>
+<p>  <img src="/2022/10/30/real-time-semantic-segmentation/backbone cmp1.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/23/mask2former/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2547,375 +3018,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/05/20/cython-flask/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/05/20/cython-flask/" itemprop="url">cython & flask</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-05-20T10:33:47+08:00">
-                2022-05-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/05/20/cython-flask/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/05/20/cython-flask/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>python的编译</p>
-<ul>
-<li><p>pyc：</p>
-<ul>
-<li><p>pyc是编译py之后生成的二进制文件，由python虚拟机来执行的</p>
-</li>
-<li><p>在模块被加载时，.pyc文件比.py文件更快</p>
-</li>
-<li><p>可直接反编译为源码</p>
-</li>
-<li><p>生成方式1：</p>
-<ul>
-<li>生成pyc文件：python -m py_compile {file1,file2}.py / python -m compileall DIR</li>
-<li>删除py文件：find . -name “*.py” |xargs rm -rf</li>
-<li>删除pycache目录：find . -name “pycache” |xargs rm -rf</li>
-</ul>
-</li>
-<li><p>生成方式2：</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># single file</span></span><br><span class="line"><span class="keyword">import</span> py_compile</span><br><span class="line">py_compile.compile(<span class="string">'$file_path'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># dir</span></span><br><span class="line"><span class="keyword">import</span> compileall</span><br><span class="line">compileall.compile_dir(<span class="string">'$dir'</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>cython编译成动态库.so：</p>
-<ul>
-<li>pyx文件由cython编译为.c文件，.c文件由C/C++编译器编译为.so动态库</li>
-<li>能起到代码保护的作用</li>
-<li>但是编译速度太慢了</li>
-<li>注意在编译的时候每个库里必须有一个__init__.py文件</li>
-<li>生成方式：<ul>
-<li>创建setup.py</li>
-<li>运行python setup.py build_ext</li>
-<li>会在执行目录下，新增build文件夹，里面放有.so</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>python的反编译</p>
-<ul>
-<li>pyc：<ul>
-<li>需要安装第三方库：pip install uncompyle6 </li>
-<li>uncompyle6 -o . *.pyc</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Flask（<a href="https://zhuanlan.zhihu.com/p/32202156）" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/32202156）</a></p>
-<ul>
-<li><p>一些概念</p>
-<ul>
-<li>API：应用程序接口，由服务器（Server）提供，一般是web server（网络服务器），使得外部机器通过API读取、编辑网站数据，通俗来讲API是一套协议，规定了与外界的沟通方式——如何发送请求和接受响应</li>
-<li>HTTP动词（GET、POST、PUT、DELETE）：它们分别对应四种基本操作：GET用来获取资源，POST用来新建资源（也可以用于更新资源），PUT用来更新资源，DELETE用来删除资源</li>
-<li>装饰器：放在函数前面，相当于将函数对象传入这个wrapper方法中</li>
-</ul>
-</li>
-<li><p>startup：URL</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Index Page'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/hello')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Hello World'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/user/&lt;string:username&gt;')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show_user_profile</span><span class="params">(username)</span>:</span></span><br><span class="line">    <span class="comment"># show the user profile for that user</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'User %s'</span> % username</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># app.run()</span></span><br><span class="line">    app.run(debug=<span class="keyword">True</span>)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>    * app = Flask(\__name__): 新建一个Flask类的实例，这是一个wsgi（Web服务器网关接口，Python Web Server Gateway Interface）
-
-    * @app.route(URL): 用route装饰器告诉Flask什么样的URL能够触发我们的函数
-           - @app.route(&#39;/&#39;)就代表默认根地址http://127.0.0.1:5000/
-
-           - @app.route(&#39;/hello&#39;)则代表http://127.0.0.1:5000/hello
-
-           - @app.route(&#39;/user/&lt;str: username&gt;&#39;)则带了传入变量以及它的变量转换器，e.g. http://127.0.0.1:5000/user/amber
-
-                &lt;img src=&quot;cython-flask/转换器.png&quot; width=&quot;60%;&quot; /&gt;
-
-           - 同时可以看到，每执行一次访问，debug界面生成一次GET请求（&quot;GET /hello HTTP/1.1&quot;）以及服务器返回的内容（200），具体的解释在下面的章节
-
-    * def index()/hello_world()/show_user_profile(username): 这些函数在生成指定URL时被调用，这些方法都叫做视图函数
-
-    &lt;img src=&quot;cython-flask/url.png&quot; width=&quot;40%;&quot; /&gt;   &lt;img src=&quot;cython-flask/get.png&quot; width=&quot;40%;&quot; /&gt;
-
-* HTTP方法
-
-  * HTTP 方法，通过浏览器告知服务器，客户端想对请求的页面做什么
-
-    * GET(方法)告知服务器：只获取页面上的信息并发给我，这是最常用的方法
-    * POST(方法)告诉服务器：想在 URL 上发布新信息。并且服务器必须确保数据已存储且仅存储一次，这是 HTML 表单通常发送数据到服务器的方法
-    * PUT(方法)类似 POST 但是服务器可能触发了存储过程多次，多次覆盖掉旧值。你可能会问这有什么用，当然这是有原因的。考虑到传输中连接可能会丢失，在这种情况下浏览器和服务器之间的系统可能安全地第二次接收请求，而不破坏其它东西。因为 POST 它只触发一次，所以用 POST 是不可能的
-
-    * DELETE(方法)删除给定位置的信息
-
-  * 默认情况下，路由只回应GET请求，如上图的GET info，在访问指定URL时候就被触发了，具体方法通过route()装饰器传递methods参数来指定
-
-* 设计一个简单的应用todoList
-
-  * 首先设计一个根URL：如http://[hostname]/todo/api/v1.0/
-
-    * hostname：[ip：port_id]
-    * todo：应用名称
-    * api/v1.0：API版本
-
-  * 第二步规划数据结构和动作
-
-    * 动作
-
-    | HTTP方法 |                       URL                       |         动作         |
-    | :------: | :---------------------------------------------: | :------------------: |
-    |   GET    |      http://[hostname]/todo/api/v1.0/tasks      |     检索任务清单     |
-    |   GET    | http://[hostname]/todo/api/v1.0/tasks/[task_id] |     检索指定任务     |
-    |   POST   |      http://[hostname]/todo/api/v1.0/tasks      |   创建一个新的任务   |
-    |   PUT    | http://[hostname]/todo/api/v1.0/tasks/[task_id] | 更新一个已存在的任务 |
-    |  DELETE  | http://[hostname]/todo/api/v1.0/tasks/[task_id] |     删除一个任务     |
-    |          |                                                 |                      |
-
-    ​    可以看到我们通过指定HTTP method，可以在同一个URL上实现不同的请求
-
-    * 任务的数据结构
-        * id:唯一标识。整型。
-        * title:简短的任务描述。字符串型。
-        * description:完整的任务描述。文本型。
-        * done:任务完成状态。布尔值型。
-
-  * 第三步实现第一个方法：get_tasks()
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">global</span> tasks</span><br><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_tasks</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> jsonify(&#123;<span class="string">'tasks'</span>: tasks&#125;)</span><br></pre></td></tr></table></figure>
-
-
-    通过访问http://127.0.0.1:5000/todo/api/v1.0/tasks可以查看task列表
-
-  * 第四步实现【获取指定任务/删除任务】方法：get_task(task_id)/delete_task(task_id)
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">	<span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['DELETE'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-
-    这两个方法比较类似，都是先查询，存在即执行操作，否则抛出404
-
-  * 第五步实现【创建一个新的任务】方法：create_task()
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_task</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> request.json <span class="keyword">or</span> <span class="string">'title'</span> <span class="keyword">not</span> <span class="keyword">in</span> request.json:</span><br><span class="line">        abort(<span class="number">400</span>)</span><br><span class="line">    <span class="comment"># new task</span></span><br><span class="line">    task = &#123;</span><br><span class="line">        <span class="string">'id'</span>: tasks[<span class="number">-1</span>][<span class="string">'id'</span>] + <span class="number">1</span>,</span><br><span class="line">        <span class="string">'title'</span>: request.json[<span class="string">'title'</span>],   <span class="comment"># not blank</span></span><br><span class="line">        <span class="string">'description'</span>: request.json.get(<span class="string">'description'</span>, <span class="string">""</span>),</span><br><span class="line">        <span class="string">'done'</span>: <span class="keyword">False</span></span><br><span class="line">    &#125;</span><br><span class="line">    tasks.append(task)</span><br><span class="line">    <span class="keyword">return</span> jsonify(&#123;<span class="string">'task'</span>: task&#125;), <span class="number">201</span></span><br></pre></td></tr></table></figure>
-
-
-    这里面出现了**request和状态码**，这部分内容放在下一节
-
-  * 第六步实现【更新一个任务】方法：update_task(task_id)
-
-      <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.route('/todo/api/v1.0/tasks/&lt;int:task_id&gt;', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">update_task</span><span class="params">(task_id)</span>:</span></span><br><span class="line">    <span class="comment"># request.json</span></span><br><span class="line">	<span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-
-* 配置服务器ip和端口号
-</code></pre><ol>
-<li><p>HTTP请求（<a href="https://www.jianshu.com/p/4456b0906708）" target="_blank" rel="noopener">https://www.jianshu.com/p/4456b0906708）</a></p>
-<ul>
-<li><p>flask的工作，就是开启一个server，监听client端发出的请求，并作出响应，请求和响应都是以http request的方式</p>
-<p> <img src="/2022/05/20/cython-flask/request.png" width="40%;"></p>
-</li>
-<li><p>服务器端就是flask开启的web server，客户端通过浏览器向server传递指令</p>
-<p> <img src="cython-flask/http.png" width="30%;"></p>
-</li>
-<li><p>请求报文 request message</p>
-<ul>
-<li><p>请求报文由请求行（HTTP方法、URL、协议版本）、首部字段(header)、空行、请求数据（内容实体）组成</p>
-<p><img src="/2022/05/20/cython-flask/request message.png" width="70%;"></p>
-</li>
-<li><p>request对象</p>
-<ul>
-<li><p>假设请求的url是：<a href="http://helloflask.com/hello?name=Grey" target="_blank" rel="noopener">http://helloflask.com/hello?name=Grey</a></p>
-<ul>
-<li>http：//：协议字符串，指定要使用的协议，这里是http协议</li>
-<li>helloflask.com：服务器的地址（域名）</li>
-<li>/hello：资源路径（route）</li>
-<li>?name=Grey：query string，查询字符串，查询字符串从?开始,以键值对的形式写出,多个键值对之间用&amp;分隔</li>
-</ul>
-</li>
-<li><p>属性和方法：</p>
-<p><img src="/2022/05/20/cython-flask/attr1.png" width="70%;"></p>
-<p><img src="/2022/05/20/cython-flask/attr2.png" width="70%;"></p>
-<ul>
-<li>上面出现的request.json，就是在获取json格式的报文</li>
-<li>本例中执行request.args.get(‘name’, ‘’)，就能获取到url请求中name的value——Grey</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>路由匹配 &amp; server处理</p>
-<ul>
-<li><p>当server能够匹配到http request给出的host/URL和methods的时候，就会调用对应的视图函数，否则得到404</p>
-</li>
-<li><p>查看当前server定义的所有路由：</p>
-<ul>
-<li>export FLASK_APP=todo</li>
-<li><p>flask routes</p>
-<p><img src="/2022/05/20/cython-flask/routes.png" width="40%;"></p>
-</li>
-<li><p>每个路由对应：断点（Endpoint）、HTTP方法（Methods）和URL规则（Rule），其中static是flask添加的特殊路由，用来访问静态文件</p>
-</li>
-</ul>
-</li>
-<li><p>生成响应</p>
-<ul>
-<li><p>在flask程序中，客户端发出的请求触发响应的视图函数，获取的返回值会作为响应的主体最后生成完整的响应，即响应报文</p>
-</li>
-<li><p>视图函数可以返回最多由三个元素组成的元组：响应主体、状态码、首部字段</p>
-</li>
-<li><p>默认的状态码为200</p>
-</li>
-<li><p>首部字段可以为字典，或是两元素元组组成的列表</p>
-</li>
-<li><p>一个普通的响应可以只返回主体内容，其余保持默认值（200，{}）</p>
-</li>
-<li><p>在abort()函数中传入状态码即可返回对应的错误响应，不需要return，abort之后的代码将不会被执行</p>
-</li>
-<li><p>Flask中可以调用make_response()方法将视图函数返回值转换为响应对象</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> make_response</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/foo')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">()</span>:</span></span><br><span class="line">    response = make_response(<span class="string">'Hello, World!'</span>)</span><br><span class="line">    response.mimetype = <span class="string">'text/plain'</span></span><br><span class="line">    <span class="keyword">return</span> response</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>响应报文 response message</p>
-<ul>
-<li><p>视图函数可以返回最多由三个元素组成的元组：响应主体、状态码、首部字段，这就是响应的主体</p>
-</li>
-<li><p>响应的报文首部包含一些关于响应和服务器的信息，这些内容由Flask生成</p>
-</li>
-<li><p>浏览器接收到响应后，会将响应主体解析并显示在浏览器窗口上</p>
-</li>
-<li><p>响应报文主要由协议版本、状态码（status code）、原因短语（reason phrase）、响应首部和响应主体组成</p>
-<p><img src="/2022/05/20/cython-flask/response.png" width="60%;"></p>
-</li>
-<li><p>常见HTTP状态码</p>
-<p><img src="/2022/05/20/cython-flask/status.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2970,7 +3072,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

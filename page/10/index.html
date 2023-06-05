@@ -276,6 +276,321 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/11/noisy-student/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/09/11/noisy-student/" itemprop="url">noisy student</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-11T12:20:19+08:00">
+                2020-09-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/11/noisy-student/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/09/11/noisy-student/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Self-training-with-Noisy-Student-improves-ImageNet-classification"><a href="#Self-training-with-Noisy-Student-improves-ImageNet-classification" class="headerlink" title="Self-training with Noisy Student improves ImageNet classification"></a>Self-training with Noisy Student improves ImageNet classification</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>semi-supervised learning（SSL）</li>
+<li>semi-supervised approach when labeled data is abundant</li>
+<li>use unlabeled images to improve SOTA model</li>
+<li>improve self-training and distillation</li>
+<li>accuracy and robustness  </li>
+<li>better acc, mCE, mFR<ul>
+<li>EfficientNet model on labeled images</li>
+</ul>
+</li>
+<li>student<ul>
+<li>even or larger student model</li>
+<li>on labeled &amp; pseudo labeled images</li>
+<li>noise, stochastic depth, data augmentation</li>
+<li>generalizes better</li>
+</ul>
+</li>
+<li>process iteration<ul>
+<li>by putting back the student as the teacher</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>supervised learning which requires a large corpus of labeled images to work well </li>
+<li>robustness<ul>
+<li>noisy data：unlabeled images that do not belong to any category in ImageNet</li>
+<li>large margins on much harder test sets </li>
+</ul>
+</li>
+<li>training process<ul>
+<li>teacher<ul>
+<li>EfficientNet model on labeled images</li>
+</ul>
+</li>
+<li>student<ul>
+<li>even or larger student model</li>
+<li>on labeled &amp; pseudo labeled images</li>
+<li>noise, stochastic depth, data augmentation</li>
+<li>generalizes better</li>
+</ul>
+</li>
+<li>process iteration<ul>
+<li>by putting back the student as the teacher</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>improve in two ways<ul>
+<li>it makes the student larger：因为用了更多数据</li>
+<li>noised student is forced to learn harder：因为label有pseudo labels，input有各类augmentation，网络有dropout／stochastic depth</li>
+</ul>
+</li>
+<li>main difference compared with Knowledge Distillation <ul>
+<li>use noise ——— KD do not use</li>
+<li>use equal/larger student ——— KD use smaller student to learn faster</li>
+</ul>
+</li>
+<li>think of as Knowledge Expansion<ul>
+<li>giving the student model enough capacity and difficult environments</li>
+<li>want the student to be better than the teacher </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>algorithm<ul>
+<li>train teacher use labeled images</li>
+<li>use teacher to inference unlabedled images, generating pseudo labels, soft/one-hot</li>
+<li>train student model use labeled &amp; unlabeld images</li>
+<li>make student the new teacher, jump to the inter step</li>
+</ul>
+</li>
+<li>noise<ul>
+<li>enforcing invariances：要求student网络能够对各种增强后的数据预测label一样，ensure consistency </li>
+<li>required to mimic a more powerful ensemble model：teacher网络在inference阶段进行dropout和stochastic depth，behaves like an ensemble，whereas the student behaves like a single model，这就push student网络去学习一个更强大的模型</li>
+</ul>
+</li>
+<li>other techniques<ul>
+<li>data filtering  <ul>
+<li>we filter images that the teacher model has low confidences </li>
+<li>这部分data与training data的分布范围内</li>
+</ul>
+</li>
+<li>data balancing <ul>
+<li>duplicate images in classes where there are not enough images </li>
+<li>take the images with the highest confidence when there are too many</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>soft／hard pseudo labels  <ul>
+<li>both work</li>
+<li>soft slightly better </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>dataset<ul>
+<li>benchmarked dataset：ImageNet 2012 ILSVRC </li>
+<li>unlabeled dataset：JFT</li>
+<li>fillter &amp; balancing：<ul>
+<li>use EfficientNet-B0</li>
+<li>trained on ImageNet，inference over JFT</li>
+<li>take images with confidence over 0.3</li>
+<li>130M at most per class</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>models<ul>
+<li>EfficientNet-L2<ul>
+<li>further scale up EfficientNet-B7</li>
+<li>wider &amp; deeper</li>
+<li>lower resolution</li>
+<li><img src="/2020/09/11/noisy-student/l2.png" width="50%"></li>
+<li>train-test resolution discrepancy <ul>
+<li>first perform normal training with a smaller resolution for 350 epochs</li>
+<li>then finetune the model with a larger resolution for 1.5 epochs on unaugmented labeled images</li>
+<li>shallow layers are fixed during finetuning</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>noise<ul>
+<li>stochastic depth：stochastic depth 0.8 for the final layer and follow the linear decay rule for other layers </li>
+<li>dropout：dropout 0.5 for the final layer</li>
+<li>RandAugment：two random operations with magnitude set to 27</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>iterative training</p>
+<ul>
+<li>【teacher】first trained an EfficientNet-B7 on ImageNet</li>
+<li>【student】then trained an EfficientNet-L2 with the unlabeled batch size set to 14 times the labeled batch size</li>
+<li>【new teacher】trained a new EfficientNet-L2 </li>
+<li>【new student】trained an EfficientNet-L2 with the unlabeled batch size set to 28 times the labeled batch size</li>
+<li>【iteration】…</li>
+<li><img src="/2020/09/11/noisy-student/iteration.png" width="50%"></li>
+</ul>
+</li>
+<li><p>robustness test</p>
+<ul>
+<li>difficult images </li>
+<li><p>common corruptions and perturbations  </p>
+<p><img src="/2020/09/11/noisy-student/robustness.png" width="70%"></p>
+</li>
+<li><p>FGSM attack </p>
+</li>
+<li><p>metrics</p>
+<ul>
+<li>improves the top-1 accuracy </li>
+<li><p>reduces mean corruption error (mCE) </p>
+</li>
+<li><p>reduces mean flip rate (mFR) </p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>ablation study</p>
+<ul>
+<li>noisy<ul>
+<li>如果不noise the student，当student model的预测和teacher预测的unlabeled数据完全一样的情况下，loss为0，不再学习，这样student就不能outperform teacher了</li>
+<li>injecting noise to the student model enables the teacher and the student to make different predictions </li>
+<li>The student performance consistently drops with noise function removed </li>
+<li>removing noise leads to a smaller drop in training loss，说明noise的作用不是为了preventing overfitting，就是为了enhance model</li>
+</ul>
+</li>
+<li>iteration<ul>
+<li>iterative training is effective in producing increas- ingly better models </li>
+<li>larger batch size ratio for latter iteration</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/09/08/complement-cross-entropy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2982,220 +3297,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/29/polarMask/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/29/polarMask/" itemprop="url">polarMask</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-29T11:20:08+08:00">
-                2020-06-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/29/polarMask/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/29/polarMask/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="PolarMask-Single-Shot-Instance-Segmentation-with-Polar-Representation"><a href="#PolarMask-Single-Shot-Instance-Segmentation-with-Polar-Representation" class="headerlink" title="PolarMask: Single Shot Instance Segmentation with Polar Representation"></a>PolarMask: Single Shot Instance Segmentation with Polar Representation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>instance segmentation</li>
-<li>anchor-free</li>
-<li>single-shot</li>
-<li>modified on FCOS</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>two-stage methods <ul>
-<li>FCIS, Mask R-CNN</li>
-<li>bounding box detection then semantic segmentation within each box</li>
-</ul>
-</li>
-<li>single-shot method<ul>
-<li>formulate the task as instance center classification and dense distance regression in a polar coordinate </li>
-<li>FCOS can be regarded as a special case that the contours has only 4 directions</li>
-</ul>
-</li>
-<li><p>this paper</p>
-<ul>
-<li>two parallel task：<ul>
-<li>instance center classification</li>
-<li>dense distance regression</li>
-</ul>
-</li>
-<li>Polar IoU Loss can largely ease the optimization and considerably improve the accuary</li>
-<li>Polar Centerness improves the original idea of “Centreness” in FCOS, leading to further performance boost</li>
-</ul>
-<p><img src="/2020/06/29/polarMask/PolarMask.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>architecture <ul>
-<li>back &amp; fpn are the same as FCOS </li>
-<li>model the instance mask as one center and n rays<ul>
-<li>conclude that mass-center is more advantageous than box center</li>
-<li>the angle interval is pre-fixed, thus only the length of the rays is to be regressed</li>
-<li>positive samples：falls into 1.5xstrides of the area around the gt mass-center，that is 9-16 pixels around gt grid</li>
-<li>distance regression<ul>
-<li>如果一条射线上存在多个交点，取最长的</li>
-<li>如果一条射线上没有交点，取最小值$\epsilon=10^{-6}$</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>potential issuse of the mask regression branch<ul>
-<li>dense regression task with such as 36 rays, may cause imbalance between regression loss and classification  loss</li>
-<li>n rays are relevant and should be trained as a whole rather than a set of independent values—-&gt;iou loss</li>
-</ul>
-</li>
-<li>inference<ul>
-<li>multiply center-ness with classification to obtain final confidence scores, conf thresh=0.05</li>
-<li>take top-1k predictions per fpn level</li>
-<li>use the smallest bounding boxes to run NMS, nms thresh=0.5</li>
-</ul>
-</li>
-<li>polar centerness<ul>
-<li>to suppress low quality detected centers</li>
-<li>$polar\ centerness=\sqrt{\frac{min(\{d_1,d_2, …, d_n\})}{max(\{d_1,d_2, …, d_n\})}}$</li>
-<li>$d_{min}$和$d_{max}$越接近，说明中心点质量越好</li>
-<li>Experiments show that Polar Centerness improves accuracy especially under stricter localization metrics, such as $AP_{75}$</li>
-</ul>
-</li>
-<li>polar IoU loss<ul>
-<li>polar IoU：$IoU=lim_{N\to\inf}\frac{\sum_{i=1}^N\frac{1}{2} d_{min}^2 \Delta \theta}{\sum_{i=1}^N\frac{1}{2} d_{max}^2 \Delta \theta}$</li>
-<li>empirically observe that 去掉平方项效果更好：$polar\ IoU=\frac{\sum_{i=1}^n d_{min}}{\sum_{i=1}^n d_{max}}$</li>
-<li>polar iou loss：bce of polar IoU，$-log(\frac{\sum_{i=1}^n d_{min}}{\sum_{i=1}^n d_{max}})$</li>
-<li>advantage<ul>
-<li>differentiable, enable bp</li>
-<li>regards the regression targets as a whole</li>
-<li>keep balance with classification loss </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3250,7 +3351,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

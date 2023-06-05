@@ -276,6 +276,332 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/17/pre-training-self-training/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/01/17/pre-training-self-training/" itemprop="url">pre-training & self-training</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-17T19:54:36+08:00">
+                2021-01-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/17/pre-training-self-training/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/17/pre-training-self-training/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[pre-training] Rethinking ImageNet Pre-training，He Kaiming，imageNet pre-training并没有真正helps acc，只是speedup，random initialization能够reach no worse的结果，前提是数据充足增强够猛，对小门小户还是没啥用，我们希望speedup</p>
+<p>[pre-training &amp; self-training] Rethinking Pre-training and Self-training，Google Brain，提出task-specific的pseudo label要比pre-training中搞出来的各种标签要好，前提还是堆数据，对小门小户没啥用，low-data下还是pre-train保平安</p>
+<p>总体上都是针对跨任务下，imageNet pre-training意义的探讨，</p>
+<ul>
+<li>分类问题还是可以继续pretrained</li>
+<li>kaiming这个只是fact，没有现实指导意义</li>
+<li>google这个one step further，提出了self-training在现实条件中可以一试</li>
+</ul>
+<h2 id="Rethinking-Pre-training-and-Self-training"><a href="#Rethinking-Pre-training-and-Self-training" class="headerlink" title="Rethinking Pre-training and Self-training"></a>Rethinking Pre-training and Self-training</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>given fact：ImageNet pre-training has limited impact on COCO object detection </li>
+<li>investigate self-training to utilize the additional data</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>common practice pre-training<ul>
+<li>supervised pre-training<ul>
+<li>首先要求数据有标签</li>
+<li>pre-train the backbone on ImageNet as a classification task</li>
+</ul>
+</li>
+<li>弱监督学习<ul>
+<li>with pseudo/noisy label</li>
+<li>kaiming：Exploring the limits of weakly supervised pretraining</li>
+</ul>
+</li>
+<li>self-supervised pre-training<ul>
+<li>无标签的海量数据</li>
+<li>构造学习目标：autoencoder，contrastive，…</li>
+<li><a href="https://zhuanlan.zhihu.com/p/108906502" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/108906502</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>self-training paradigm on COCO<ul>
+<li>train an object detection model on COCO </li>
+<li>generate pseudo labels on ImageNet</li>
+<li>both labeled data are combined to train a new model</li>
+<li>基本基于noisy student的方法</li>
+</ul>
+</li>
+<li>observations<ul>
+<li>with stronger data augmentation, pre-training hurts the accuracy, but helps in self-training</li>
+<li>both supervised and self-supervised pre-training methods fails</li>
+<li>the benefit of pre-training does not cancel out the gain by self-training</li>
+<li>flexible about unlabeled data sources, model architectures and computer vision tasks</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>data augmentation<ul>
+<li>vary the strength of data augmentation as 4 levels</li>
+</ul>
+</li>
+<li><p>pre-training</p>
+<ul>
+<li>efficientNet-B7</li>
+<li>AutoAugment weights &amp; noisy student weights</li>
+</ul>
+<p><img src="/2021/01/17/pre-training-self-training/notations.png" width="70%;"></p>
+</li>
+<li><p>self-training</p>
+<ul>
+<li>noisy student scheme</li>
+<li>实验发现self-training with this standard loss function can be unstable </li>
+<li>implement a loss normalization technique </li>
+</ul>
+</li>
+<li>experimental settings<ul>
+<li>object detection<ul>
+<li>COCO dataset for supervised learning</li>
+<li>unlabeled ImageNet and OpenImages dataset for self-training：score thresh 0.5 to generate pesudo labels</li>
+<li>retinaNet &amp; spineNet</li>
+<li>batch：half supervised half pesudo</li>
+</ul>
+</li>
+<li>semantic segmentation<ul>
+<li>PASCAL VOC 2012 for supervised learning</li>
+<li>augmented PASCAL &amp; COCO &amp; ImageNet for self-training：score thresh 0.5 to generate pesudo masks &amp; multi-scale</li>
+<li>NAS-FPN</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>pre-training</p>
+<ul>
+<li>Pre-training hurts performance when stronger data augmentation is used：因为会sharpen数据差异？</li>
+<li>More labeled data diminishes the value of pre-training：通常我们的实验数据fraction都比较小的相对imageNet，所以理论上不会harm？</li>
+<li><p>self-supervised pre-training也会一样harm，在augment加强的时候</p>
+<p><img src="/2021/01/17/pre-training-self-training/pre-training.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>self-training</p>
+<ul>
+<li><p>Self-training helps in high data/strong augmentation regimes, even when pre-training hurts：不同的augment level，self-training对最终结果都有加成</p>
+<p><img src="/2021/01/17/pre-training-self-training/self1.png" width="60%;"></p>
+</li>
+<li><p>Self-training works across dataset sizes and is additive to pre-training：不同的数据量，也都有加成，但是low data regime下enjoys the biggest gain</p>
+<p><img src="/2021/01/17/pre-training-self-training/self2.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>discussion</p>
+<ul>
+<li>weak performance of pre-training is that pre-training is not aware of the task of interest and can fail to adapt </li>
+<li>jointly training also helps：address the mismatch between two dataset</li>
+<li>noisy labeling is worse than targeted pseudo labeling</li>
+</ul>
+</li>
+<li><p>总体结论：小样本量的时候，pre-training还是有加成的，再加上self-training进一步提升，样本多的时候就直接self-training</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Rethinking-ImageNet-Pre-training"><a href="#Rethinking-ImageNet-Pre-training" class="headerlink" title="Rethinking ImageNet Pre-training"></a>Rethinking ImageNet Pre-training</h2><ol>
+<li>动机<ul>
+<li>thinking random initialization &amp; pre-training</li>
+<li>ImageNet pre-training<ul>
+<li>speed up</li>
+<li>but not necessarily improving</li>
+</ul>
+</li>
+<li>random initialization<ul>
+<li>can achieve no worse result</li>
+<li>robust to data size, models, tasks and metrics</li>
+</ul>
+</li>
+<li>rethink current paradigm of ‘pre- training and fine-tuning’</li>
+</ul>
+</li>
+<li>论点<ul>
+<li>no fundamental obstacle preventing us from training from scratch <ul>
+<li>if use normalization techniques appropriately </li>
+<li>if train sufficiently long </li>
+</ul>
+</li>
+<li>pre-training<ul>
+<li>speed up</li>
+<li>when fine-tuning on small dataset new hyper-parameters must be selected to avoid overfitting</li>
+<li>localization-sensitive task benefits limited from pre-training</li>
+<li>aimed at communities that don’t have enough data or computational resources</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>方法<ul>
+<li>normalization<ul>
+<li>form<ul>
+<li>normalized parameter initialization </li>
+<li>normalization layers </li>
+</ul>
+</li>
+<li>BN layers makes training from scratch difficult <ul>
+<li>small batch size degrade the acc of BN</li>
+<li>fine-tuning可以freeze BN</li>
+<li>alternatives<ul>
+<li>GN：对batch size不敏感</li>
+<li>syncBN</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>with appropriately normalized initialization可以train from scratch VGG这种不用BN层的</li>
+</ul>
+</li>
+<li>convergence<ul>
+<li>pre-training model has learned low-level features that do not need to be re-learned during </li>
+<li>random-initial training need more iterations to learn both low-level and semantic features</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>实验<ul>
+<li>investigate maskRCNN<ul>
+<li>替换BN：GN/sync-BN</li>
+<li>learning rate：<ul>
+<li>training longer for the first (large) learning rate is useful</li>
+<li>but training for longer on small learning rates often leads to overfitting </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>10k COCO往上，train from scratch results能够catch up pretraining results，只要训的够久</li>
+<li>1k和3.5k的COCO，converges show no worse，但是在验证集上差一些：strong overfitting due to lack of data</li>
+<li>PASCAL的结果也差一点，因为instance和category都更少，not directly comparable to the same number of COCO images：fewer instances and categories has a similar negative impact as insufficient training data</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/11/long-tailed/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2853,215 +3179,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/11/17/CSPNet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/11/17/CSPNet/" itemprop="url">CSPNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-17T17:06:34+08:00">
-                2020-11-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/11/17/CSPNet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/11/17/CSPNet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="CSPNET-A-NEW-BACKBONE-THAT-CAN-ENHANCE-LEARNING-CAPABILITY-OF-CNN"><a href="#CSPNET-A-NEW-BACKBONE-THAT-CAN-ENHANCE-LEARNING-CAPABILITY-OF-CNN" class="headerlink" title="CSPNET: A NEW BACKBONE THAT CAN ENHANCE LEARNING CAPABILITY OF CNN"></a>CSPNET: A NEW BACKBONE THAT CAN ENHANCE LEARNING CAPABILITY OF CNN</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>propose a network from the respect of the variability of the gradients</li>
-<li>reduces computations </li>
-<li>superior accuracy while being lightweightening</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>CNN architectures design </p>
-<ul>
-<li>ResNeXt：cardinality can be more effective than width and depth </li>
-<li>DenseNet：reuse features </li>
-<li>partial ResNet：high cardinality and sparse connection，the concept of gradient combination </li>
-</ul>
-</li>
-<li><p>introduce Cross Stage Partial Network (CSPNet) </p>
-<ul>
-<li>strengthening learning ability of a CNN：sufficient accuracy while being lightweightening </li>
-<li>removing computational bottlenecks：hoping evenly distribute the amount of computation at each layer in CNN </li>
-<li><p>reducing memory costs：adopt cross-channel pooling during fpn</p>
-<p><img src="/2020/11/17/CSPNet/CSP.png" width="90%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>结构</p>
-<ul>
-<li>Partial Dense Block：节省一半计算</li>
-<li>Partial Transition Layer：fusion last能够save computation同时精度不掉太多</li>
-</ul>
-<p><img src="/2020/11/17/CSPNet/fusion.png" width="90%;"></p>
-<ul>
-<li>论文说fusion first使得大量梯度得到重用，computation cost is significantly dropped，fusion last会损失部分梯度重用，但是精度损失也比较小(0.1)。</li>
-<li>it is obvious that if one can effectively reduce the repeated gradient information, the learning ability of a network will be greatly improved. </li>
-</ul>
-<p><img src="/2020/11/17/CSPNet/acc.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>Apply CSPNet to Other Architectures </p>
-<ul>
-<li>因为只有一半的channel参与resnet block的计算，所以无需再引入bottleneck结构了</li>
-<li><p>最后两个path的输出concat</p>
-<p><img src="/2020/11/17/CSPNet/cspresnet.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>EFM</p>
-<p>  <img src="/2020/11/17/CSPNet/ERM.png" width="80%;"></p>
-</li>
-<li><p>fusion</p>
-<pre><code>  * 特征金字塔（FPN）：融合当前尺度和以前尺度的特征。
-  * 全局融合模型（GFM）：融合所有尺度的特征。
-  * 精确融合模型（EFM）：融合anchor尺寸上的特征。
-</code></pre><ul>
-<li>EFM<ul>
-<li>assembles features from the three scales：当前尺度&amp;相邻尺度</li>
-<li>同时又加了一组bottom-up的融合</li>
-<li>Maxout technique对特征映射进行压缩</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>结论</p>
-<p> 从实验结果来看，</p>
-<ul>
-<li>分类问题中，使用CSPNet可以降低计算量，但是准确率提升很小；</li>
-<li>在目标检测问题中，使用CSPNet作为Backbone带来的提升比较大，可以有效增强CNN的学习能力，同时也降低了计算量。本文所提出的EFM比GFM慢2fps，但AP和AP50分别显著提高了2.1%和2.4%。</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3116,7 +3233,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">172</span>
+                  <span class="site-state-item-count">173</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
