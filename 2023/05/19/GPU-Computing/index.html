@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2023-06-04T04:29:14.388Z">
+<meta property="og:updated_time" content="2023-06-06T04:19:26.722Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GPU Computing">
 <meta name="twitter:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
@@ -377,10 +377,12 @@
 </li>
 <li>reg &amp; cache<ul>
 <li>GPU通过设计很多寄存器的方式，维持高效的数据传输效率</li>
+<li>不同层次的数据存储，reg/cache/shared mem/global mem</li>
 </ul>
 </li>
-<li>Tensor Core<ul>
-<li>不同层次的数据存储</li>
+<li>Cuda Core &amp; Tensor Core<ul>
+<li>都是基本计算单元</li>
+<li>Cuda Core算浮点，Tensor Core算int</li>
 </ul>
 </li>
 </ul>
@@ -512,6 +514,26 @@
 
 * Cython
 </code></pre><ol>
+<li><p><a href="https://docs.nvidia.com/deeplearning/tensorrt/pytorch-quantization-toolkit/docs/userguide.html#quantization-aware-training" target="_blank" rel="noopener">pytorch-quantization</a></p>
+<ul>
+<li><p>tensor quant和fake tensor quant：given a tensor，调用pytorch_quantization.tensor_quant.tensor_quant(x)返回一个tensor的量化tensor(int)和scale，调用pytorch_quantization.tensor_quant.fake_tensor_quant(x)返回一个tensor的伪量化值(float)，即QDQ的值，可以对比原始tensor，计算quant error</p>
+</li>
+<li><p>QuantDescriptor：量化配置</p>
+</li>
+<li><p>TensorQuantizer：基于量化配置实例化一个Quantizer</p>
+</li>
+<li><p>quant_nn：实例化一个quant layer</p>
+<ul>
+<li><p>given fc1 = nn.Linear(in_features, out_features, bias=True)</p>
+</li>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">quant_fc1 = quant_nn.Linear(</span><br><span class="line">    in_features, out_features, bias=<span class="keyword">True</span>,</span><br><span class="line">    quant_desc_input=tensor_quant.QUANT_DESC_8BIT_PER_TENSOR,</span><br><span class="line">    quant_desc_weight=tensor_quant.QUANT_DESC_8BIT_LINEAR_WEIGHT_PER_ROW)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
 <li><p>c++ basics recall</p>
 <ul>
 <li>cmake</li>
@@ -603,7 +625,8 @@
 </ul>
 </li>
 </ol>
-
+<pre><code>  * 计算平方根
+</code></pre>
       
     </div>
     
@@ -714,7 +737,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

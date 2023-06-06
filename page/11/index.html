@@ -276,6 +276,922 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/cornerNet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/17/cornerNet/" itemprop="url">cornerNet</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-17T11:32:07+08:00">
+                2020-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/17/cornerNet/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/17/cornerNet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="CornerNet-Detecting-Objects-as-Paired-Keypoints"><a href="#CornerNet-Detecting-Objects-as-Paired-Keypoints" class="headerlink" title="CornerNet: Detecting Objects as Paired Keypoints"></a>CornerNet: Detecting Objects as Paired Keypoints</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>corner formulation <ul>
+<li>top-left corner  </li>
+<li>bottom-right corner </li>
+</ul>
+</li>
+<li>anchor-free</li>
+<li>corner pooling</li>
+<li>no multi-scale</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>anchor box drawbacks    </p>
+<ul>
+<li>huge set of anchors boxes to ensure sufficient overlap，cause huge imbalance</li>
+<li>hyperparameters and design choices</li>
+</ul>
+</li>
+<li><p>cornerNet</p>
+<ul>
+<li><p>detect and group</p>
+<ul>
+<li>heatmap to predict corners<ul>
+<li>从数学表达上看，全图wh个tl corner，wh个bt corner，可以表达wwhh个框</li>
+</ul>
+</li>
+<li>anchor-based，全图wh个中心点，9个anchor size，只能表达有限的框，且可能match不上</li>
+<li>embeddings to group pairs of corners</li>
+</ul>
+<p><img src="/2020/07/17/cornerNet/cornerNet.png" width="80%;"></p>
+</li>
+<li><p>corner pooling</p>
+<ul>
+<li><p>better localize corners  which are usually out of the foreground</p>
+<p><img src="/2020/07/17/cornerNet/cornerPooling.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>modifid hourglass architecture </p>
+</li>
+<li><p>add our novel variant of focal loss </p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<p> <img src="/2020/07/17/cornerNet/overview.png" width="75%;"></p>
+<ul>
+<li><p>two prediction modules</p>
+<ul>
+<li><p>heatmaps </p>
+<ul>
+<li><p>C channels, C for number of categories </p>
+</li>
+<li><p>binary mask</p>
+</li>
+<li><p>each corner has only one ground-truth positive</p>
+</li>
+<li><p>penalty the neighbored negatives within a radius that still hold high iou (0.3 iou)</p>
+<ul>
+<li>determine the radius </li>
+<li>penalty reduction $=e^{-\frac{x^2+y^2}{2\sigma^2}}$</li>
+</ul>
+</li>
+<li><p>variant focal loss</p>
+<ul>
+<li><script type="math/tex; mode=display">
+  L_{det} = \frac{-1}{N} \sum^C \sum^H \sum^W 
+  \begin{cases}
+  (1-p_{i,j})^\alpha log(p_{i,j}), \ \ if y_{ij}=1\\
+  (1-y_{ij})^\beta (p_{i,j})^\alpha log(1-p_{i,j}), \ \ otherwise
+  \end{cases}</script></li>
+<li><p>$\alpha=2, \beta=4$</p>
+</li>
+<li><p>N is the number of gts</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>embeddings</p>
+<ul>
+<li>associative embedding </li>
+<li>use 1-dimension embedding</li>
+<li>pull and push loss on gt positives <ul>
+<li>$L_{pull} = \frac{1}{N} \sum^N [(e_{tk}-e_k)^2 + (e_{bk}-e_k)^2]$</li>
+<li>$L_{push} = \frac{1}{N(N-1)} \sum_j^N\sum_{k\neq j}^N max(0, \Delta -|e_k-e_j|)$</li>
+<li>$e_k$ is the average of $e_{tk}$ and $e{bk}$</li>
+<li>$\Delta$ = 1</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>offsets</p>
+<ul>
+<li>从heatmap resolution remapping到origin resolution存在精度损失<script type="math/tex; mode=display">
+  o_k = （\frac{x_k}{n} - \lfloor \frac{x_k}{n} \rfloor， \frac{y_k}{n} - \lfloor \frac{y_k}{n} \rfloor）</script></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>greatly affect the IoU of small bounding boxes  </p>
+</li>
+<li><p>shared among all categories</p>
+</li>
+<li><p>smooth L1 loss on gt positives </p>
+<pre><code>      $$
+      L_{off} = \frac{1}{N} \sum^N SmoothL1(o_k, \hat o_k)
+</code></pre><p>  $$</p>
+</li>
+<li><p>corner pooling</p>
+<ul>
+<li>top-left pooling layer：<pre><code>  * 从当前点(i,j)开始，
+  * 向下elementwise max所有feature vecor，得到$t_{i,j}$
+  * 向右elementwise max所有feature vecor，得到$l_{i,j}$
+  * 最后两个vector相加
+</code></pre><ul>
+<li>bottom-right corner：向左向上</li>
+</ul>
+</li>
+</ul>
+<p><img src="/2020/07/17/cornerNet/prediction.png" width="80%;"></p>
+</li>
+<li><p>Hourglass Network </p>
+<ul>
+<li>hourglass modules<ul>
+<li>series of convolution and max pooling layers </li>
+<li>series of upsampling and convolution layers </li>
+<li>skip layers </li>
+</ul>
+</li>
+<li><p>multiple hourglass modules stacked：reprocess the features to capture higher-level information</p>
+<p><img src="/2020/07/17/cornerNet/hourglass.png" width="40%;"></p>
+</li>
+<li><p>intermediate supervision</p>
+<ul>
+<li><p>常规的中继监督：</p>
+<p>  <img src="/2020/07/17/cornerNet/intermediate.png" width="70%;"></p>
+<p>  下一级hourglass module的输入包括三个部分</p>
+<ul>
+<li>前一级输入</li>
+<li>前一级输出</li>
+<li>中继监督的输出</li>
+</ul>
+</li>
+<li><p>本文使用了中继监督，但是没把这个结果加回去</p>
+<ul>
+<li>hourglass2 input：1x1 conv-BN to both input and output of hourglass1 + add + relu</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Our backbone</p>
+<ul>
+<li>2 hourglasses</li>
+<li>5 times downsamp with channels [256,384,384,384,512]</li>
+<li>use stride2 conv instead of max-pooling</li>
+<li>upsamp：2 residual modules + nearest neighbor upsampling</li>
+<li>skip connection: 2 residual modules，add</li>
+<li>mid connection: 4 residual modules</li>
+<li>stem: 7x7 stride2, ch128 + residual stride2, ch256</li>
+<li>hourglass2 input：1x1 conv-BN to both input and output of hourglass1 + add + relu</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>training details<ul>
+<li>randomly initialized, no pretrained</li>
+<li>bias：set the biases in the convolution layers that predict the corner heatmaps</li>
+<li>input：511x511</li>
+<li>output：128x128</li>
+<li>apply PCA to the input image</li>
+<li>full loss：$L = L_{det} + \alpha L_{pull} + \beta L_{push} + \gamma L_{off}$<ul>
+<li>配对loss：$\alpha=\beta=0.1$</li>
+<li>offset loss：$\gamma=1$</li>
+</ul>
+</li>
+<li>batch size = 49 = 4+5x9</li>
+</ul>
+</li>
+<li>test details<ul>
+<li>NMS：3x3 max pooling on heatmaps</li>
+<li>pick：top100 top-left corners &amp; top100 bottom-right corners</li>
+<li>filter pairs：<ul>
+<li>L1 distance greater than 0.5</li>
+<li>from different categories </li>
+</ul>
+</li>
+<li>fusion：combine the detections from the original and flipped images  + soft nms</li>
+</ul>
+</li>
+<li>Ablation Study <ul>
+<li>corner pooling is especially helpful for medium and large objects</li>
+<li>penalty reduction especially benefits medium and large objects</li>
+<li>CornerNet achieves a much higher AP at 0.9 IoU than other detectors：更有能力生成高质量框</li>
+<li>error analysis：the main bottleneck is detecting corners</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="CornerNet-Lite-Efficient-Keypoint-Based-Object-Detection"><a href="#CornerNet-Lite-Efficient-Keypoint-Based-Object-Detection" class="headerlink" title="CornerNet-Lite: Efficient Keypoint-Based Object Detection"></a>CornerNet-Lite: Efficient Keypoint-Based Object Detection</h2><ol>
+<li><p>动机</p>
+<ul>
+<li><p>keypoint-based methods</p>
+<ul>
+<li>detecting and grouping</li>
+<li>accuary but with processing cost</li>
+</ul>
+</li>
+<li><p>propose CornerNet-Lite </p>
+<ul>
+<li>CornerNet-Saccade：attention mechanism </li>
+<li>CornerNet-Squeeze：a new compact backbone </li>
+</ul>
+</li>
+<li><p>performance</p>
+<p>  <img src="/2020/07/17/cornerNet/performance.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>main drawback of cornerNet<ul>
+<li>inference speed</li>
+<li>reducing the number of scales or the image resolution cause a large accuracy drop </li>
+</ul>
+</li>
+<li>two orthogonal directions <ul>
+<li>reduce the number of pixels to process：CornerNet-Saccade </li>
+<li>reduce the amount of processing per pixel：</li>
+</ul>
+</li>
+<li>CornerNet-Saccade <ul>
+<li>downsized attention map </li>
+<li>select a subset of crops to examine in high resolution </li>
+<li>for off-line：AP of 43.2% at 190ms per image </li>
+</ul>
+</li>
+<li>CornerNet-Squeeze  <ul>
+<li>inspired by squeezeNet and mobileNet</li>
+<li>1x1 convs</li>
+<li>bottleneck layers</li>
+<li>depth-wise separable convolution</li>
+<li>for real-time：AP of 34.4% at 30ms </li>
+</ul>
+</li>
+<li>combined??<ul>
+<li>CornerNet-Squeeze-Saccade turns out slower and less accurate than CornerNet- Squeeze </li>
+</ul>
+</li>
+<li>Saccades：扫视<ul>
+<li>to generate interesting crops</li>
+<li>RCNN系列：single-type &amp; single object</li>
+<li>AutoFocus：add a branch调用faster-RCNN，thus multi-type &amp; mixed-objects，有single branch有multi branch</li>
+<li>CornerNet-Saccade：<ul>
+<li>single-type &amp; multi object</li>
+<li>crops can be much smaller than number of objects</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>CornerNet-Saccade </p>
+<p>  <img src="/2020/07/17/cornerNet/Saccade.png" width="60%;"></p>
+<ul>
+<li><p>step1：obtain possible locations  </p>
+<ul>
+<li>downsize：two scales，255 &amp; 192，zero-padding</li>
+<li>predicts 3 attention maps<ul>
+<li>small object：longer side&lt;32 pixels</li>
+<li>medium object：32-96</li>
+<li>large object：&gt;96</li>
+<li>so that we can control the zoom-in factor：zoom-in more for smaller objects</li>
+<li>feature map：different scales from the upsampling layers</li>
+<li>attention map：3x3 conv-relu + 1x1 conv-sigmoid</li>
+<li>process locations where scores &gt; 0.3</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>step2：finer detection</p>
+<ul>
+<li>zoom-in scales：4，2，1 for small、medium、large objects</li>
+<li>apply CornerNet-Saccade on the ROI<ul>
+<li>255x255 window</li>
+<li>centered at the location</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>step3：NMS</p>
+<ul>
+<li>soft-nms</li>
+<li>remove the bounding boxes which touch the crop boundary</li>
+</ul>
+</li>
+<li><p>CornerNet-Saccade uses the same network for attention maps and bounding boxes</p>
+<ul>
+<li>在第一步的时候，对一些大目标已经有了检测框</li>
+<li>也要zoom-in，矫正一下</li>
+</ul>
+</li>
+<li><p>efficiency</p>
+<ul>
+<li>regions/croped images都是processed in batch/parallel</li>
+<li>resize/crop操作在GPU中实现</li>
+<li><p>suppress redundant regions using a NMS-similar policy before prediction</p>
+<p><img src="/2020/07/17/cornerNet/efficiency.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>new hourglass backbone</p>
+<ul>
+<li>3 hourglass module，depth 54</li>
+<li>downsize twice before hourglass modules</li>
+<li>downsize 3 times in each module，with channels [384,384,512]</li>
+<li>one residual in both encoding path &amp; skip connection</li>
+<li>mid connection：one residual，with channels 512</li>
+</ul>
+</li>
+<li><p>CornerNet-Squeeze </p>
+<ul>
+<li>to replace the heavy hourglass104</li>
+<li>use fire module to replace residuals</li>
+<li>downsizes 3 times before hourglass modules</li>
+<li>downsize 4 times in each module</li>
+<li>replace the 3x3 conv in prediction head with 1x1 conv</li>
+<li><p>replace the nearest neighboor upsampling with 4x4 transpose conv</p>
+<p><img src="/2020/07/17/cornerNet/fire.png" width="60%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/07/17/SOLO/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/07/17/SOLO/" itemprop="url">SOLO</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-17T11:31:20+08:00">
+                2020-07-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/17/SOLO/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/17/SOLO/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>[SOLO] SOLO: Segmenting Objects by Locations：字节，目前绝大多数方法实例分割的结构都是间接得到——检测框内语义分割／全图语义分割聚类，主要原因是formulation issue，很难把实例分割定义成一个结构化的问题</p>
+<p>[SOLOv2] SOLOv2: Dynamic, Faster and Stronger：best 41.7% AP </p>
+<h2 id="SOLO-Segmenting-Objects-by-Locations"><a href="#SOLO-Segmenting-Objects-by-Locations" class="headerlink" title="SOLO: Segmenting Objects by Locations"></a>SOLO: Segmenting Objects by Locations</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>challenging：arbitrary number of instances</li>
+<li>form the task into a classification-solvable problem</li>
+<li>direct &amp; end-to-end &amp; one-stage &amp; using mask annotations solely</li>
+<li>on par accuracy with Mask R-CNN</li>
+<li>outperforming recent single-shot instance segmenters</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>formulating<ul>
+<li>Objects in an image belong to a fixed set of semantic categories——semantic segmentation can be easily formulated as a dense per-pixel classification problem</li>
+<li>the number of instances varies</li>
+</ul>
+</li>
+<li>existing methods<ul>
+<li>检测／聚类：step-wise and indirect</li>
+<li>累积误差</li>
+</ul>
+</li>
+<li>core idea <ul>
+<li>in most cases two instances in an image either have different center locations or have different object sizes </li>
+<li>location：<ul>
+<li>think image as a divided grid of cells</li>
+<li>an object instance is assigned to one of the grid cells as its center location category </li>
+<li>encode center location categories as the channel axis </li>
+</ul>
+</li>
+<li>size<ul>
+<li>FPN</li>
+<li>assign objects of different sizes to different levels of feature maps</li>
+</ul>
+</li>
+<li>SOLO converts coordinate regression into classification by discrete quantization </li>
+<li>One feat of doing so is the avoidance of heuristic coordination normalization and log-transformation typically used in detectors【？？？不懂这句话想表达啥】</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>problem formulation</p>
+<ul>
+<li>divided grids</li>
+<li><p>simultaneous task</p>
+<ul>
+<li>category-aware prediction  </li>
+<li>instance-aware mask generation</li>
+</ul>
+<p><img src="/2020/07/17/SOLO/solo.png" width="70%;"></p>
+</li>
+<li><p>category prediction</p>
+<ul>
+<li>predict instance for each grid：$S<em>S</em>C$</li>
+<li>grid size：$S*S$</li>
+<li>number of classes：$C$</li>
+<li>based on the assumption that each cell must belong to one individual instance</li>
+<li>C-dim vec indicates the class probability for each object instance in each grid</li>
+</ul>
+</li>
+<li>mask prediction<ul>
+<li>predict instance mask for each positive cell：$H<em>W</em>S^2$</li>
+<li>the channel corresponding to the location</li>
+<li>position sensitive：因为每个grid中分割的mask是要映射到对应的channel的，因此我们希望特征图是spatially variant<ul>
+<li>让特征图spatially variant的最直接办法就是加一维spatially variant的信息</li>
+<li>inspired by CoordConv：添加两个通道，normed_x和normed_y，[-1,1]</li>
+<li>original feature tensor $H<em>W</em>D$ becomes $H<em>W</em>(D+2)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>final results<ul>
+<li>gather category prediction &amp; mask prediction</li>
+<li>NMS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>network</p>
+<ul>
+<li>backbone：resnet</li>
+<li>FCN：256-d</li>
+<li><p>heads：weights are shared across different levels except for the last 1x1 conv</p>
+<p><img src="/2020/07/17/SOLO/head.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>learning</p>
+<ul>
+<li>positive grid：falls into a center region<ul>
+<li>mask：mask center $(c_x, c_y)$，mask size $(h,w)$</li>
+<li>center region：$(c_x,c_y,\epsilon w, \epsilon h)$，set $\epsilon = 0.2$</li>
+</ul>
+</li>
+<li>loss：$L = L_{cate} + \lambda L_{seg}$<ul>
+<li>cate loss：focal loss</li>
+<li>seg loss：dice，$L_{mask} = \frac{1}{N_{pos}}\sum_k 1_{p^<em>_{i,j}&gt;0} dice(m_k, m^</em>_k) $，带星号的是groud truth</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li><p>use a confidence threshold of 0.1 to filter out low spacial predictions</p>
+</li>
+<li><p>use a threshold of 0.5 to binary the soft masks</p>
+</li>
+<li><p>select the top 500 scoring masks </p>
+</li>
+<li><p>NMS </p>
+<ul>
+<li>Only one instance will be activated at each grid</li>
+<li><p>and one in- stance may be predicted by multiple adjacent mask channels </p>
+<p><img src="/2020/07/17/SOLO/results.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>keep top 100</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li><p>grid number</p>
+<ul>
+<li>适当增加有提升，主要提升还是在FPN</li>
+<li><img src="/2020/07/17/SOLO/grid.png" width="40%;"></li>
+</ul>
+</li>
+<li><p>fpn</p>
+<ul>
+<li>五个FPN pyramids </li>
+<li><p>大特征图，小感受野，用来分配小目标，grid数量要增大</p>
+</li>
+<li><p><img src="/2020/07/17/SOLO/fpn.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>feature alignment</p>
+<ul>
+<li>在分类branch，$H<em>W$特征图要转换成$S</em>S$的特征图<ul>
+<li>interpolation：bilinear interpolating </li>
+<li>adaptive-pool：apply a 2D adaptive max-pool </li>
+<li>region-grid- interpolation：对每个cell，采样多个点做双线性插值，然后取平均</li>
+</ul>
+</li>
+<li>is no noticeable performance gap between these variants </li>
+<li>（可能因为最终是分类任务</li>
+</ul>
+</li>
+<li><p>head depth</p>
+<ul>
+<li>4-7有涨点</li>
+<li>所以本文选了7</li>
+<li><img src="/2020/07/17/SOLO/depth.png" width="40%;"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>decoupled SOLO</p>
+<ul>
+<li><p>mask branch预测的channel数是$S^2$，其中大部分channel其实是没有贡献的，空占内存</p>
+</li>
+<li><p>prediction is somewhat redundant as in most cases the objects are located sparsely in the image </p>
+</li>
+<li><p>element-wise multiplication </p>
+<p>  <img src="/2020/07/17/SOLO/decoupled.png" width="40%;"></p>
+</li>
+<li><p>实验下来</p>
+<ul>
+<li>achieves the same performance </li>
+<li>efficient and equivalent variant  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SOLOv2-Dynamic-Faster-and-Stronger"><a href="#SOLOv2-Dynamic-Faster-and-Stronger" class="headerlink" title="SOLOv2: Dynamic, Faster and Stronger"></a>SOLOv2: Dynamic, Faster and Stronger</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>take one step further on the mask head<ul>
+<li>dynamically learning the mask head</li>
+<li>decoupled into mask kernel branch and mask feature branch</li>
+</ul>
+</li>
+<li>propose Matrix NMS<ul>
+<li>faster &amp; better results</li>
+</ul>
+</li>
+<li>try object detection  and panoptic segmentation</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li>SOLO develop pure instance segmentation </li>
+<li>instance segmentation <ul>
+<li>requires instance-level and pixel-level predictions simultaneously </li>
+<li>most existing instance segmentation methods build on the top of bounding boxes </li>
+<li>SOLO develop pure instance segmentation </li>
+</ul>
+</li>
+<li>SOLOv2 improve SOLO<ul>
+<li>mask learning：dynamic scheme </li>
+<li>mask NMS：parallel matrix operations，outperforms Fast NMS </li>
+</ul>
+</li>
+<li>Dynamic Convolutions <ul>
+<li>STN：adaptively transform feature maps conditioned on the input </li>
+<li>Deformable Convolutional Networks：learn location</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>revisit SOLOv1</p>
+<ul>
+<li>redundant mask prediction</li>
+<li>decouple</li>
+<li><p>dynamic：dynamically pick the valid ones from predicted $s^2$ classifiers and perform the convolution </p>
+<p><img src="/2020/07/17/SOLO/dynamic.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+<li><p>SOLOv2</p>
+<ul>
+<li><p>dynamic mask segmentation head</p>
+<ul>
+<li>mask kernel branch</li>
+<li>mask feature branch</li>
+</ul>
+</li>
+<li><p>mask kernel branch</p>
+<ul>
+<li>prediction heads：4 convs + 1 final conv，shared across scale</li>
+<li>no activation on the output</li>
+<li>concat normalized coordinates in two additional input channels at start</li>
+<li>ouputs D-dims kernel weights for each grid：e.g.  for 3x3 conv with E input channels, outputs $S<em>S</em>9E$</li>
+</ul>
+</li>
+<li><p>mask feature branch</p>
+<ul>
+<li><p>predict instance-aware feature：$F \in R^{H<em>W</em>E}$</p>
+</li>
+<li><p>unified and high-resolution mask feature：只输出一个尺度的特征图，encoded x32 feature with coordinates info</p>
+<ul>
+<li>we feed normalized pixel coordinates to the deepest FPN level (at 1/32 scale)</li>
+<li>repeated 【3x3 conv, group norm, ReLU, 2x bilinear upsampling】</li>
+<li>element-wise sum</li>
+<li><p>last layer：1x1 conv, group norm, ReLU</p>
+<p><img src="/2020/07/17/SOLO/unified mask.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>instance mask</p>
+<ul>
+<li>mask feature branch conved by the mask kernel branch：final conv $H<em>W</em>S^2$</li>
+<li>mask NMS</li>
+</ul>
+</li>
+<li><p>train</p>
+<ul>
+<li>loss：$L = L_{cate} + \lambda L_{seg}$<ul>
+<li>cate loss：focal loss</li>
+<li>seg loss：dice，$L_{mask} = \frac{1}{N_{pos}}\sum_k 1_{p^<em>_{i,j}&gt;0} dice(m_k, m^</em>_k) $，带星号的是groud truth</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>inference</p>
+<ul>
+<li>category score：first use a confidence threshold of 0.1 to filter out predictions with low confidence </li>
+<li>mask branch：run convolution based on the filtered category map</li>
+<li>sigmoid</li>
+<li>use a threshold of 0.5 to convert predicted soft masks to binary masks </li>
+<li>Matrix NMS</li>
+</ul>
+</li>
+<li><p>Matrix NMS</p>
+<ul>
+<li>decremented functions  <ul>
+<li>linear：$f(iou_{i,j}=1-iou_{i,j})$</li>
+<li>gaussian：$f(iou_{i,j}=exp(-\frac{iou_{i,j}^2}{\sigma})$</li>
+</ul>
+</li>
+<li>the most overlapped prediction for $m_i$：max iou<ul>
+<li>$f(iou_{*,i}) = min_{s_k}f(iou_{k,i})$</li>
+</ul>
+</li>
+<li>decay factor  <ul>
+<li>$decay_i = min \frac{f(iou_{i,j})}{f(iou_{*,i})}$</li>
+</ul>
+</li>
+<li><img src="/2020/07/17/SOLO/matrix nms.png" width="60%;"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/06/29/polarMask/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2689,480 +3605,6 @@ f(x) = \begin{cases}
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/27/densenet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/27/densenet/" itemprop="url">densenet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-27T09:14:38+08:00">
-                2020-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/27/densenet/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/27/densenet/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>动机</p>
-<ul>
-<li>embrace shorter connections</li>
-<li>the feature-maps of all preceding layers are used as inputs</li>
-<li>advantages<ul>
-<li>alleviate vanishing-gradient</li>
-<li>encourage feature reuse</li>
-<li>reduce the number of parameters</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>Dense<ul>
-<li>each layer obtains additional inputs from all preceding lay- ers and passes on its own feature-maps to all subsequent layers</li>
-<li>feature reuse</li>
-<li>combine features by concatenating：the summation in ResNet may impede the information flow in the network</li>
-</ul>
-</li>
-<li>information preservation<ul>
-<li>id shortcut/additive identity transformations</li>
-</ul>
-</li>
-<li><p>fewer params</p>
-<ul>
-<li>DenseNet layers are very narrow </li>
-<li>add only a small set of feature-maps to the “collective knowledge”</li>
-</ul>
-</li>
-<li><p>gradients flow</p>
-<ul>
-<li>each layer has direct access to the gradients from the loss function  </li>
-<li>have regularizing effect </li>
-</ul>
-<p><img src="/2020/05/27/densenet/densenet.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>architecture</p>
-<p>  <img src="/2020/05/27/densenet/block.png" width="70%;"></p>
-<ul>
-<li>dense blocks<ul>
-<li>concat</li>
-<li>BN-ReLU-3x3 conv</li>
-<li>$x_l = H_l([x_0, x_1, …, x_{l-1}])$</li>
-</ul>
-</li>
-<li>transition layers<ul>
-<li>change the size of feature-maps</li>
-<li>BN-1x1 conv-2x2 avg pooling</li>
-</ul>
-</li>
-<li><p>growth rate k</p>
-<ul>
-<li>$H_l$ produces feature- maps</li>
-<li>narrow：<em>e.g.</em>, k = 12 </li>
-<li>One can view the feature-maps as the global state of the network </li>
-<li>The growth rate regulates <strong>how much new information</strong> each layer contributes to the global state</li>
-</ul>
-<p><img src="/2020/05/27/densenet/architectures.png" width="80%;"></p>
-</li>
-<li><p>bottleneck —- DenseNet-B </p>
-<ul>
-<li>in dense block stage</li>
-<li>1x1 conv reduce dimension first</li>
-<li>number of channels：4k </li>
-</ul>
-</li>
-<li><p>compression —- DenseNet-C</p>
-<ul>
-<li>in transition stage</li>
-<li>reduce the number of feature-maps </li>
-<li>number of channels：$\theta k$</li>
-</ul>
-</li>
-<li><p>structure configurations </p>
-<ul>
-<li>1st conv channels：第一层卷积通道数</li>
-<li>number of dense blocks</li>
-<li>L：dense block里面的layer数</li>
-<li>k：growth rate</li>
-<li>B：bottleneck 4k</li>
-<li>C：compression 0.5k</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>讨论</p>
-<ul>
-<li><p>concat replace sum：</p>
-<ul>
-<li>seemingly small modification lead to substantially different behaviors of the two network architectures </li>
-<li>feature reuse：feature can be accessed anywhere</li>
-<li>parameter efficient：同样参数量，test acc更高，同样acc，参数量更少</li>
-<li><p>deep supervision：classifiers attached to every hidden layer</p>
-</li>
-<li><p>weight assign</p>
-<ul>
-<li>All layers spread their weights over multi inputs (include transition layers)</li>
-<li>least weight are assigned to the transition layer, indicating that transition layers contain many redundant features, <strong>thus can be compressed</strong></li>
-<li>overall there seems to be concentration towards final feature-maps, suggesting that more high-level features are produced late in the network</li>
-</ul>
-<p><img src="/2020/05/27/densenet/weight.png" width="50%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2020/05/25/GANomaly/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/05/25/GANomaly/" itemprop="url">GANomaly</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-25T22:12:37+08:00">
-                2020-05-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/05/25/GANomaly/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/25/GANomaly/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training"><a href="#GANomaly-Semi-Supervised-Anomaly-Detection-via-Adversarial-Training" class="headerlink" title="GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training"></a>GANomaly: Semi-Supervised Anomaly Detection via Adversarial Training</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>Anomaly detection <ul>
-<li>highly biased towards one class (normal) </li>
-<li>insufficient sample size of the other class (abnormal)</li>
-</ul>
-</li>
-<li>semi-supervised learning <ul>
-<li>detecting the unknown/unseen anomaly case  </li>
-<li>trained on normal samples </li>
-<li>tested on normal and abnormal samples </li>
-</ul>
-</li>
-<li>encoder-decoder-encoder  <ul>
-<li>minimizing the distance between the images </li>
-<li>and the latent vectors  </li>
-<li>a larger distance metric </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>supervised approaches heavily depend on large, labeled datasets </li>
-<li>Generative Adversarial Networks (GAN) have emerged as a leading methodology across both unsupervised and semi-supervised problems</li>
-<li>reconstruction-based anomaly techniques<ul>
-<li>Overall prior work strongly supports the hypothesis that the use of autoencoders and GAN </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>GAN<ul>
-<li>unsupervised </li>
-<li>to generate realistic images </li>
-<li>compete<ul>
-<li>generator tries to generate an image, decoder- alike network, map input to latent space</li>
-<li>discriminator decides whether the generated image is a real or a fake, classical classification architecture, reading an input image, and determining its validity </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Adversarial Auto-Encoders (AAE) </p>
-<ul>
-<li>encoder + decoder </li>
-<li>reconstruction: maps the input to latent space and remaps back to input data space</li>
-<li>train autoencoders with adversarial setting </li>
-</ul>
-</li>
-<li><p>inverse mapping</p>
-<ul>
-<li>with the additional use of an encoder, a vanilla GAN network is capable of learning inverse mapping </li>
-</ul>
-</li>
-<li><p>model</p>
-<p>  <img src="/2020/05/25/GANomaly/GANomaly.png" width="50%;"></p>
-<ul>
-<li>learns both the normal data distribution and minimizes the output anomaly score </li>
-<li>two encoder, one decoder, a discriminator</li>
-<li>encoder<ul>
-<li>convolutional layers followed by batch-norm and leaky ReLU() activation </li>
-<li>compress to a vector z</li>
-</ul>
-</li>
-<li>decoder<ul>
-<li>convolutional transpose layers, ReLU() activation and batch-norm </li>
-<li>a tanh layer at the end</li>
-</ul>
-</li>
-<li>2nd encoder<ul>
-<li>with the same architectural </li>
-<li>but different parametrization</li>
-</ul>
-</li>
-<li>discriminator <ul>
-<li>DCGAN discriminator </li>
-</ul>
-</li>
-<li>Adversarial Loss <ul>
-<li>不是基于GAN的traditional 0/1 ouput</li>
-<li>而是选了一个中间层，计算real／fake(reconstructed)的L2 distance</li>
-</ul>
-</li>
-<li>Contextual Loss <ul>
-<li>L1 yields less blurry results than L2</li>
-<li>计算输入图像和重建图像的L1 distance</li>
-</ul>
-</li>
-<li>Encoder Loss <ul>
-<li>an additional encoder loss to minimize the distance of the bottleneck features </li>
-<li>计算两个高维向量的L2 distance</li>
-<li>在测试的时候用它来scoring the abnormality  </li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3217,7 +3659,7 @@ f(x) = \begin{cases}
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

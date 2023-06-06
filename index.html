@@ -276,6 +276,350 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/06/PETR/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/06/06/PETR/" itemprop="url">PETR</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-06T11:45:48+08:00">
+                2023-06-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/06/PETR/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/06/PETR/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>prev knowledge</li>
+</ul>
+<p>DETR：Dectection Transformer，facebook，主要贡献是提出了query-based decoder的架构</p>
+<p>deformable DETR：use multi-scale deformable attn，sensetime，主要贡献是deformable attn来降低计算复杂度，加速收敛</p>
+<h2 id="PETR-Position-Embedding-Transformation-for-Multi-View-3D-Object-Detection"><a href="#PETR-Position-Embedding-Transformation-for-Multi-View-3D-Object-Detection" class="headerlink" title="PETR: Position Embedding Transformation for Multi-View 3D Object Detection"></a>PETR: Position Embedding Transformation for Multi-View 3D Object Detection</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li><p>将3D coordinates编码成PE，aggregate进image features，得到3D position-aware features</p>
+</li>
+<li><p>Comparison of DETR, DETR3D, PETR：区别就在PE上</p>
+<ul>
+<li>DETR适用于单张图场景，只用2D PE</li>
+<li>DETR3D可以用于multi-camera场景，PE是在3D ref points world coords通过相机参数转换到对应camera coords上</li>
+<li><p>PETR直接使用3D world coords PE</p>
+<p><img src="/2023/06/06/PETR/cmp.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overview</p>
+<ul>
+<li>a 3D coordinates generator：将2D的image转化成3D的meshgrid，然后通过相机参数将3D meshgrid投影的世界坐标系</li>
+<li>a 3D position encoder：输入2D feature和3D grids coords，使得2D feature包含3D coords的信息—— 3D position-aware features</li>
+<li><p>a query generator：这个还需要PE吗？</p>
+<p><img src="/2023/06/06/PETR/overview.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li>3D Coordinates Generator<ul>
+<li>given meshgrid (H,W,D)</li>
+<li>每个meshgrid的camera-3D坐标为$(u<em>d,v</em>d,d,1)$，uv是2D image的坐标，d是depth</li>
+<li>world 3D coord为$p_w = K^{-1} p_c$</li>
+<li>最后对xyz分别normalize</li>
+</ul>
+</li>
+<li>3D Position Encoder<ul>
+<li>given 2D features：N个HWC，先接1x1 conv降通道</li>
+<li>given 3D coords：N个HW3，先接MLP转化成embedding</li>
+<li>两个通道对齐以后相加，作为decoder的context输入</li>
+</ul>
+</li>
+<li>Query Generator<ul>
+<li>learnable query被初始化为3D world space下的anchor points，也是用一个MLP编码成embedding</li>
+</ul>
+</li>
+<li>Decoder<ul>
+<li>standard decoder from DETR</li>
+<li>query heads<ul>
+<li>classification：focal loss</li>
+<li>regression：预测anchor query的offsets，L1 loss</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/06/LLM-finetune/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/06/06/LLM-finetune/" itemprop="url">LLM finetune</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-06T09:39:24+08:00">
+                2023-06-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/06/LLM-finetune/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/06/LLM-finetune/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>prve knowledge</p>
+<ul>
+<li>LLM：take a sequence of words as input and recursively generate next words<ul>
+<li>GPT</li>
+<li>LLaMA：meta的大模型<ul>
+<li>PyLLaMA：社区项目，比官方原版降低显存，可以压到13G</li>
+<li><a href="https://github.com/tloen/llama-int8" target="_blank" rel="noopener">llama-int8</a>：int8方案，只需要 7.12GB 的初始显存，但是模型加载和推理时间变长</li>
+<li>unofficial startup guide：<a href="https://github.com/soulteary/llama-docker-playground" target="_blank" rel="noopener">https://github.com/soulteary/llama-docker-playground</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>finetuning<ul>
+<li><a href="https://huggingface.co/blog/zh/rlhf" target="_blank" rel="noopener">RLHF</a>：基于人类反馈对语言模型进行强化学习<ul>
+<li>花钱招人给问题（prompt）写回答（demonstration），然后finetune一个GPT3，supervising</li>
+<li>用多个模型给出问题的多个回答，人工评价排序QA对，训练一个reward model来打分，supervising</li>
+<li>用强化学习训练上面那个finetune后的GPT3，reward function是是基于reward model输出来的</li>
+</ul>
+</li>
+<li><a href="https://github.com/tatsu-lab/stanford_alpaca" target="_blank" rel="noopener">alpaca</a>：斯坦福羊驼，从chatgpt拿了5.2w条数据微调LLaMA-7B</li>
+<li>Alpaca-LoRA：羊驼上改进，Low-rank adaptation，进一步压缩算力，4090上5小时完成，也可以用来微调stable diffusion，冻结原模型参数，在模型旁边添加一个旁路，来模拟task，并只训练这个旁路，推理时这部分训练参数加在原始权重上</li>
+<li>LIMA是「Less is More for Alignment」，一个强大的预训练AI模型，通过几个样本就足以实现高质量的结果</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/05/BEV/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1082,10 +1426,12 @@
 </li>
 <li>reg &amp; cache<ul>
 <li>GPU通过设计很多寄存器的方式，维持高效的数据传输效率</li>
+<li>不同层次的数据存储，reg/cache/shared mem/global mem</li>
 </ul>
 </li>
-<li>Tensor Core<ul>
-<li>不同层次的数据存储</li>
+<li>Cuda Core &amp; Tensor Core<ul>
+<li>都是基本计算单元</li>
+<li>Cuda Core算浮点，Tensor Core算int</li>
 </ul>
 </li>
 </ul>
@@ -1217,6 +1563,26 @@
 
 * Cython
 </code></pre><ol>
+<li><p><a href="https://docs.nvidia.com/deeplearning/tensorrt/pytorch-quantization-toolkit/docs/userguide.html#quantization-aware-training" target="_blank" rel="noopener">pytorch-quantization</a></p>
+<ul>
+<li><p>tensor quant和fake tensor quant：given a tensor，调用pytorch_quantization.tensor_quant.tensor_quant(x)返回一个tensor的量化tensor(int)和scale，调用pytorch_quantization.tensor_quant.fake_tensor_quant(x)返回一个tensor的伪量化值(float)，即QDQ的值，可以对比原始tensor，计算quant error</p>
+</li>
+<li><p>QuantDescriptor：量化配置</p>
+</li>
+<li><p>TensorQuantizer：基于量化配置实例化一个Quantizer</p>
+</li>
+<li><p>quant_nn：实例化一个quant layer</p>
+<ul>
+<li><p>given fc1 = nn.Linear(in_features, out_features, bias=True)</p>
+</li>
+<li><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">quant_fc1 = quant_nn.Linear(</span><br><span class="line">    in_features, out_features, bias=<span class="keyword">True</span>,</span><br><span class="line">    quant_desc_input=tensor_quant.QUANT_DESC_8BIT_PER_TENSOR,</span><br><span class="line">    quant_desc_weight=tensor_quant.QUANT_DESC_8BIT_LINEAR_WEIGHT_PER_ROW)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<ol>
 <li><p>c++ basics recall</p>
 <ul>
 <li>cmake</li>
@@ -1308,7 +1674,8 @@
 </ul>
 </li>
 </ol>
-
+<pre><code>  * 计算平方根
+</code></pre>
           
         
       
@@ -2673,453 +3040,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/11/05/light-weight-ViTs/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/05/light-weight-ViTs/" itemprop="url">light-weight transfomers</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-05T18:19:50+08:00">
-                2022-11-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/05/light-weight-ViTs/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/11/05/light-weight-ViTs/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[tinyViT ECCV2022] TinyViT: Fast Pretraining Distillation for Small Vision Transformers：微软，swin的todevice版本，用CLIP做unlabel KD</p>
-<p>[topformer CVPR2022] TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation：</p>
-<p>[mobileViT ICLR2022] MOBILEVIT: LIGHT-WEIGHT, GENERAL-PURPOSE, AND MOBILE-FRIENDLY VISION TRANSFORMER：苹果</p>
-<p>[mobileformer CVPR2022] Mobile-Former: Bridging MobileNet and Transformer：微软</p>
-<h2 id="TopFormer-Token-Pyramid-Transformer-for-Mobile-Semantic-Segmentation"><a href="#TopFormer-Token-Pyramid-Transformer-for-Mobile-Semantic-Segmentation" class="headerlink" title="TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation"></a>TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation</h2><ol>
-<li><p>abstract</p>
-<ul>
-<li>task：semantic segmentation</li>
-<li>take advantage of CNNs &amp; ViTs<ul>
-<li>CNN-based Token Pyramid Module：MobileNetV2 blocks</li>
-<li>a ViT-based module Semantics Extractor</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>ADE20K：比mobileNetV3高5%的miou，同时latency更低</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>method</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2022/11/05/light-weight-ViTs/topformer.png" width="80%"></p>
-<ul>
-<li>Token Pyramid Module：输入image，输出token pyramid</li>
-<li>Semantics Extractor：输入token pyramid，输出scale-aware semantics</li>
-<li>Semantics Injection Module：将global semantics融合进对应level的local tokens里面，得到augmented representations</li>
-<li>Segmentation Head：fuse and predict</li>
-</ul>
-</li>
-<li><p>Token Pyramid Module</p>
-<ul>
-<li>use stacked MobileNet blocks来生成token pyramids</li>
-<li><p>不是为了丰富的语义信息，也不是为了更大的感受野，只是为了得到multi-scale tokens，所以用比较少的层</p>
-<p><img src="/2022/11/05/light-weight-ViTs/hypers.png" width="80%"></p>
-</li>
-<li><p>输入512x512的图</p>
-</li>
-<li>输出x4/x8/x16/x32的feature map</li>
-<li>然后将multi-scale的features统一avg pool到x64，然后concat by dim，得到[b,(16+32+64+96),64,64]的tokens</li>
-</ul>
-</li>
-<li><p>Scale-aware Semantics Extractor</p>
-<ul>
-<li>这部分用vision transformer来提取语义信息</li>
-<li>首先为了keep the shape，将linear layer换成1x1 conv，把layernorm换成了batchnorm</li>
-<li>所有ViT-stype GeLU换成ReLU6</li>
-<li>MSA的QK投影维度为16，V投影维度为32，降低similarity的计算量</li>
-<li>FFN的两层1x1卷积之间加了一个depth-wise卷积</li>
-</ul>
-</li>
-<li><p>Semantics Injection Module</p>
-<ul>
-<li>fuse local tokens 和 scale-aware semantics</li>
-<li>to alleviate the semantic gap<ul>
-<li>local token经过一个1x1 conv-bn，用semantic token经过一个1x1conv-bn-sigmoid生成的weight map做加权</li>
-<li>再加上一个1x1 conv-bn的semantic token</li>
-<li>（这个semantic token应该是要上采样的吧？）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Segmentation Head</p>
-<ul>
-<li>所有的low-resolution tokens都上采样的high-resolution tokens的尺度（x8）</li>
-<li>然后element-sum</li>
-<li>然后两层卷积</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>datasets</li>
-<li>ADE20k：1+150，25k（20k/2k/3k）<ul>
-<li>PASCAL Context：1+59，4998/5105</li>
-</ul>
-</li>
-<li>COCO-Stuff10k：9k/1k</li>
-<li>training details<ul>
-<li>iteration：ADE20k训练160k iteration，PASCAL和COCO训练80k iteration</li>
-<li>syncBN</li>
-<li>lr：baselr=0.00012，poly schedule with factor 1.0</li>
-</ul>
-</li>
-<li>weight decay：0.01</li>
-</ul>
-</li>
-</ol>
-<h2 id="TinyViT-Fast-Pretraining-Distillation-for-Small-Vision-Transformers"><a href="#TinyViT-Fast-Pretraining-Distillation-for-Small-Vision-Transformers" class="headerlink" title="TinyViT: Fast Pretraining Distillation for Small Vision Transformers"></a>TinyViT: Fast Pretraining Distillation for Small Vision Transformers</h2><ol>
-<li><p>abstract</p>
-<ul>
-<li>tiny and efficient</li>
-<li>KD on large-scale datasets</li>
-<li>用大模型的logits离线蒸馏</li>
-<li>精度：21M：ImageNet 84.8%，use larger resolution：86.5%</li>
-<li>good transfer ability on downstream tasks<ul>
-<li>linear probe</li>
-<li>few-shot learning</li>
-<li>object detection：COCO AP 50.2%</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>overview</p>
-<p> <img src="/2022/11/05/light-weight-ViTs/TinyViT.png" width="60%"></p>
-<ul>
-<li>离线蒸馏</li>
-<li>保存数据增强的参数和teacher logits</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>Fast Pretraining Distillation<ul>
-<li>direct pretraining small models on massive data does not bring much gains，especially when transferring to downstream tasks，但是蒸馏的boost就十分显著了</li>
-<li>一些方法在finetuning阶段进行蒸馏，本文focus on pretraining distillation：inefficient and costly</li>
-<li>given image x<ul>
-<li>save strong data augmentation A （RandAugment &amp; CutMix）</li>
-<li>save teacher prediction $\hat y=T(A(x))$</li>
-</ul>
-</li>
-<li>因为RandAugment内置随机性，同样的增强方式每次结果也不同，因为每个iteration的A都要存下来</li>
-<li>用ground truth的one-hot label去蒸馏的效果反而不如unlabeled logits，因为one-hot太overfit了</li>
-<li>Sparse soft labels：imagnet21k的logits有21, 841个，为了节约只保存topK logits and indices，其余的用label smoothing</li>
-<li>Data augmentation encoding：<ul>
-<li>将一系列data aug params encode成一个scalar d</li>
-<li>然后通过decoder将其还原：PCG输入single parameter，输出a sequence of parameters</li>
-<li>实际实现的时候，就是存下一个d0，然后用PCG对T&amp;S解码增强参数</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Model Architectures<ul>
-<li>adopt hierarchical vision transformer，从大模型开始，定义一系列contraction factors，开始scaling down<ul>
-<li>patch embedding：2个3x3 convs，stride2，pad1</li>
-<li>stage1：MBConvs &amp; down sampling blocks</li>
-<li>stage2/3/4：transformer blocks with window attention</li>
-<li>attention biases</li>
-<li>a 3 × 3 depthwise convolution between attention and MLP</li>
-<li>常规的residuals、LayerNorm依旧保留，conv的norm是BN，所有activation都是GELU</li>
-</ul>
-</li>
-<li>Contraction factors<ul>
-<li>embeded dimension：21M-[96,192,384,576]，11M-[64,128,256,448]，5M-[64,128,160,320]</li>
-<li>number of blocks：[2,2,6,2]</li>
-<li>window size：[7,14,7]</li>
-<li>channel expansion ratio of the MBConv block：4</li>
-<li>expansion ratio of MLP：4</li>
-<li>head dimension：32</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/30/tiny-dataset/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/30/tiny-dataset/" itemprop="url">tiny dataset</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-30T10:11:20+08:00">
-                2022-10-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/30/tiny-dataset/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/30/tiny-dataset/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>说明：这个文档用来记录一些常用的dataset</p>
-<ol>
-<li>cityscape<ul>
-<li>主要用于语义分割</li>
-<li>包含5000精细标注（gtFine/2975 training, 500 validation, and 1525 testing）和20000粗标注（gtCoarse）</li>
-<li>leftImg8bit里面是原图，8-bit LDR</li>
-<li>30个类别</li>
-<li>数据处理脚本：<a href="https://github.com/mcordts/cityscapesScripts" target="_blank" rel="noopener">https://github.com/mcordts/cityscapesScripts</a></li>
-<li>（也包含3D标注/right stereo views &amp; disparity）</li>
-</ul>
-</li>
-<li>ade20k<ul>
-<li>用于语义分割</li>
-<li>25,000张图像（20ktrain，2k val，3ktest）</li>
-<li>*.png是原图</li>
-<li>*_seg.png是mask：R和G通道编码对象类掩码，通道B对实例对象掩码进行编码</li>
-<li>* _.txt是文本描述文件</li>
-<li>包含室内外场景</li>
-<li>共包含3688个类别，其中高频类别150类（100个thing和50个stuff，占所有像素的89％）</li>
-</ul>
-</li>
-<li>coco-stuff<ul>
-<li>COCO-Stuff是对COCO2017数据集中全部164K图片做了像素级的标注</li>
-<li>包含80 thing classes, 91 stuff classes and 1 class ‘unlabeled’</li>
-<li>图像共用，标签分为stuffthingmaps_trainval2017.zip / stuff_trainval2017.zip (Stuff-only) / annotations_trainval2017.zip (thing-only)，用灰度图格式保存</li>
-</ul>
-</li>
-<li>PPM-100<ul>
-<li>人像抠图</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3174,7 +3094,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

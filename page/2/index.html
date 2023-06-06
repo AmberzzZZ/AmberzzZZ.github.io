@@ -276,6 +276,453 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/11/05/light-weight-ViTs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/11/05/light-weight-ViTs/" itemprop="url">light-weight transfomers</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-05T18:19:50+08:00">
+                2022-11-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/11/05/light-weight-ViTs/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/11/05/light-weight-ViTs/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<p>[tinyViT ECCV2022] TinyViT: Fast Pretraining Distillation for Small Vision Transformers：微软，swin的todevice版本，用CLIP做unlabel KD</p>
+<p>[topformer CVPR2022] TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation：</p>
+<p>[mobileViT ICLR2022] MOBILEVIT: LIGHT-WEIGHT, GENERAL-PURPOSE, AND MOBILE-FRIENDLY VISION TRANSFORMER：苹果</p>
+<p>[mobileformer CVPR2022] Mobile-Former: Bridging MobileNet and Transformer：微软</p>
+<h2 id="TopFormer-Token-Pyramid-Transformer-for-Mobile-Semantic-Segmentation"><a href="#TopFormer-Token-Pyramid-Transformer-for-Mobile-Semantic-Segmentation" class="headerlink" title="TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation"></a>TopFormer: Token Pyramid Transformer for Mobile Semantic Segmentation</h2><ol>
+<li><p>abstract</p>
+<ul>
+<li>task：semantic segmentation</li>
+<li>take advantage of CNNs &amp; ViTs<ul>
+<li>CNN-based Token Pyramid Module：MobileNetV2 blocks</li>
+<li>a ViT-based module Semantics Extractor</li>
+</ul>
+</li>
+<li>verified on<ul>
+<li>ADE20K：比mobileNetV3高5%的miou，同时latency更低</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2022/11/05/light-weight-ViTs/topformer.png" width="80%"></p>
+<ul>
+<li>Token Pyramid Module：输入image，输出token pyramid</li>
+<li>Semantics Extractor：输入token pyramid，输出scale-aware semantics</li>
+<li>Semantics Injection Module：将global semantics融合进对应level的local tokens里面，得到augmented representations</li>
+<li>Segmentation Head：fuse and predict</li>
+</ul>
+</li>
+<li><p>Token Pyramid Module</p>
+<ul>
+<li>use stacked MobileNet blocks来生成token pyramids</li>
+<li><p>不是为了丰富的语义信息，也不是为了更大的感受野，只是为了得到multi-scale tokens，所以用比较少的层</p>
+<p><img src="/2022/11/05/light-weight-ViTs/hypers.png" width="80%"></p>
+</li>
+<li><p>输入512x512的图</p>
+</li>
+<li>输出x4/x8/x16/x32的feature map</li>
+<li>然后将multi-scale的features统一avg pool到x64，然后concat by dim，得到[b,(16+32+64+96),64,64]的tokens</li>
+</ul>
+</li>
+<li><p>Scale-aware Semantics Extractor</p>
+<ul>
+<li>这部分用vision transformer来提取语义信息</li>
+<li>首先为了keep the shape，将linear layer换成1x1 conv，把layernorm换成了batchnorm</li>
+<li>所有ViT-stype GeLU换成ReLU6</li>
+<li>MSA的QK投影维度为16，V投影维度为32，降低similarity的计算量</li>
+<li>FFN的两层1x1卷积之间加了一个depth-wise卷积</li>
+</ul>
+</li>
+<li><p>Semantics Injection Module</p>
+<ul>
+<li>fuse local tokens 和 scale-aware semantics</li>
+<li>to alleviate the semantic gap<ul>
+<li>local token经过一个1x1 conv-bn，用semantic token经过一个1x1conv-bn-sigmoid生成的weight map做加权</li>
+<li>再加上一个1x1 conv-bn的semantic token</li>
+<li>（这个semantic token应该是要上采样的吧？）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Segmentation Head</p>
+<ul>
+<li>所有的low-resolution tokens都上采样的high-resolution tokens的尺度（x8）</li>
+<li>然后element-sum</li>
+<li>然后两层卷积</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>datasets</li>
+<li>ADE20k：1+150，25k（20k/2k/3k）<ul>
+<li>PASCAL Context：1+59，4998/5105</li>
+</ul>
+</li>
+<li>COCO-Stuff10k：9k/1k</li>
+<li>training details<ul>
+<li>iteration：ADE20k训练160k iteration，PASCAL和COCO训练80k iteration</li>
+<li>syncBN</li>
+<li>lr：baselr=0.00012，poly schedule with factor 1.0</li>
+</ul>
+</li>
+<li>weight decay：0.01</li>
+</ul>
+</li>
+</ol>
+<h2 id="TinyViT-Fast-Pretraining-Distillation-for-Small-Vision-Transformers"><a href="#TinyViT-Fast-Pretraining-Distillation-for-Small-Vision-Transformers" class="headerlink" title="TinyViT: Fast Pretraining Distillation for Small Vision Transformers"></a>TinyViT: Fast Pretraining Distillation for Small Vision Transformers</h2><ol>
+<li><p>abstract</p>
+<ul>
+<li>tiny and efficient</li>
+<li>KD on large-scale datasets</li>
+<li>用大模型的logits离线蒸馏</li>
+<li>精度：21M：ImageNet 84.8%，use larger resolution：86.5%</li>
+<li>good transfer ability on downstream tasks<ul>
+<li>linear probe</li>
+<li>few-shot learning</li>
+<li>object detection：COCO AP 50.2%</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>overview</p>
+<p> <img src="/2022/11/05/light-weight-ViTs/TinyViT.png" width="60%"></p>
+<ul>
+<li>离线蒸馏</li>
+<li>保存数据增强的参数和teacher logits</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li>Fast Pretraining Distillation<ul>
+<li>direct pretraining small models on massive data does not bring much gains，especially when transferring to downstream tasks，但是蒸馏的boost就十分显著了</li>
+<li>一些方法在finetuning阶段进行蒸馏，本文focus on pretraining distillation：inefficient and costly</li>
+<li>given image x<ul>
+<li>save strong data augmentation A （RandAugment &amp; CutMix）</li>
+<li>save teacher prediction $\hat y=T(A(x))$</li>
+</ul>
+</li>
+<li>因为RandAugment内置随机性，同样的增强方式每次结果也不同，因为每个iteration的A都要存下来</li>
+<li>用ground truth的one-hot label去蒸馏的效果反而不如unlabeled logits，因为one-hot太overfit了</li>
+<li>Sparse soft labels：imagnet21k的logits有21, 841个，为了节约只保存topK logits and indices，其余的用label smoothing</li>
+<li>Data augmentation encoding：<ul>
+<li>将一系列data aug params encode成一个scalar d</li>
+<li>然后通过decoder将其还原：PCG输入single parameter，输出a sequence of parameters</li>
+<li>实际实现的时候，就是存下一个d0，然后用PCG对T&amp;S解码增强参数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Model Architectures<ul>
+<li>adopt hierarchical vision transformer，从大模型开始，定义一系列contraction factors，开始scaling down<ul>
+<li>patch embedding：2个3x3 convs，stride2，pad1</li>
+<li>stage1：MBConvs &amp; down sampling blocks</li>
+<li>stage2/3/4：transformer blocks with window attention</li>
+<li>attention biases</li>
+<li>a 3 × 3 depthwise convolution between attention and MLP</li>
+<li>常规的residuals、LayerNorm依旧保留，conv的norm是BN，所有activation都是GELU</li>
+</ul>
+</li>
+<li>Contraction factors<ul>
+<li>embeded dimension：21M-[96,192,384,576]，11M-[64,128,256,448]，5M-[64,128,160,320]</li>
+<li>number of blocks：[2,2,6,2]</li>
+<li>window size：[7,14,7]</li>
+<li>channel expansion ratio of the MBConv block：4</li>
+<li>expansion ratio of MLP：4</li>
+<li>head dimension：32</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/30/tiny-dataset/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/10/30/tiny-dataset/" itemprop="url">tiny dataset</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-30T10:11:20+08:00">
+                2022-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/10/30/tiny-dataset/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2022/10/30/tiny-dataset/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>说明：这个文档用来记录一些常用的dataset</p>
+<ol>
+<li>cityscape<ul>
+<li>主要用于语义分割</li>
+<li>包含5000精细标注（gtFine/2975 training, 500 validation, and 1525 testing）和20000粗标注（gtCoarse）</li>
+<li>leftImg8bit里面是原图，8-bit LDR</li>
+<li>30个类别</li>
+<li>数据处理脚本：<a href="https://github.com/mcordts/cityscapesScripts" target="_blank" rel="noopener">https://github.com/mcordts/cityscapesScripts</a></li>
+<li>（也包含3D标注/right stereo views &amp; disparity）</li>
+</ul>
+</li>
+<li>ade20k<ul>
+<li>用于语义分割</li>
+<li>25,000张图像（20ktrain，2k val，3ktest）</li>
+<li>*.png是原图</li>
+<li>*_seg.png是mask：R和G通道编码对象类掩码，通道B对实例对象掩码进行编码</li>
+<li>* _.txt是文本描述文件</li>
+<li>包含室内外场景</li>
+<li>共包含3688个类别，其中高频类别150类（100个thing和50个stuff，占所有像素的89％）</li>
+</ul>
+</li>
+<li>coco-stuff<ul>
+<li>COCO-Stuff是对COCO2017数据集中全部164K图片做了像素级的标注</li>
+<li>包含80 thing classes, 91 stuff classes and 1 class ‘unlabeled’</li>
+<li>图像共用，标签分为stuffthingmaps_trainval2017.zip / stuff_trainval2017.zip (Stuff-only) / annotations_trainval2017.zip (thing-only)，用灰度图格式保存</li>
+</ul>
+</li>
+<li>PPM-100<ul>
+<li>人像抠图</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/10/30/real-time-semantic-segmentation/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2583,441 +3030,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/03/FAN-full-attention-networks/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/06/03/FAN-full-attention-networks/" itemprop="url">FAN:full attention networks</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-03T09:53:14+08:00">
-                2022-06-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/06/03/FAN-full-attention-networks/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/03/FAN-full-attention-networks/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>paper: <a href="https://arxiv.org/abs/2204.12451" target="_blank" rel="noopener">https://arxiv.org/abs/2204.12451</a></p>
-<p>repo: <a href="https://github.com/NVlabs/FAN" target="_blank" rel="noopener">https://github.com/NVlabs/FAN</a></p>
-<h2 id="Understanding-The-Robustness-in-Vision-Transformers"><a href="#Understanding-The-Robustness-in-Vision-Transformers" class="headerlink" title="Understanding The Robustness in Vision Transformers"></a>Understanding The Robustness in Vision Transformers</h2><ol>
-<li>动机<ul>
-<li>ViT展现出了strong robustness（图像出现各类corruption的时候仍旧保持特征提取能力），但是缺少systematic understanding</li>
-<li>this paper<ul>
-<li>examine the role of self-attention</li>
-<li>further propose a family of fully attentional networks (FANs) that strengthen its capability</li>
-</ul>
-</li>
-<li>verified state-of-the-art on<ul>
-<li>ImageNet-1k：acc 87.1% </li>
-<li>downstream tasks：semantic segmentation and object detection</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>论点<ul>
-<li>ViT针对non-local relations的建模被认为是the robustness against various corruptions的重要要素</li>
-<li>但是convNext用纯卷积网络也达到了相当的精度，raising the interest in the actual role of self-attention in robust generalization</li>
-<li>our approach <ul>
-<li>首先是观察：<ul>
-<li>在执行分类任务的时候，网络天然地做出了目标的分割——self-attention promotes mid-level representations</li>
-<li>对每层ViT的输出tokens做spectral clustering，观察到了极大的特征值</li>
-<li>发现极大特征值的数量与input perturbation是存在相关性的——这两个指标在mid-level layers中会显著降低，从而保持robustness，同时 indicates the symbiosis of grouping </li>
-</ul>
-</li>
-<li>然后进一步探究这个grouping phenomenon<ul>
-<li>发现self-attention类似于information bottleneck (IB)，这个暂时不理解</li>
-</ul>
-</li>
-<li>最后是对transformer结构的改动<ul>
-<li>原始的ViT block，用MSA（multi heads）去提取不同特征，然后用MLP去整合</li>
-<li>本文在融合的时候，加了一个channel attention</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/06/01/TokenLearner/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/06/01/TokenLearner/" itemprop="url">TokenLearner</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-01T13:49:52+08:00">
-                2022-06-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/06/01/TokenLearner/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/06/01/TokenLearner/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>recollect：</p>
-<p>[ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，开启了vision transformer的固定范式，都是切割patches作为tokens，这也对应了文本的词/字符切割，但是一个patch和一个词向量的信息量是不一样的（像素信息更低级）</p>
-<p>[TokenLearner 2022] TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?    Google，使用更少数量的、能够挖掘重要信息的learnable tokens，</p>
-<p>repo：<a href="https://github.com/google-research/scenic/tree/main/scenic/projects/token_learner" target="_blank" rel="noopener">https://github.com/google-research/scenic/tree/main/scenic/projects/token_learner</a></p>
-<p>unofficial keras repo：<a href="https://github.com/ariG23498/TokenLearner" target="_blank" rel="noopener">https://github.com/ariG23498/TokenLearner</a></p>
-<h2 id="TokenLearner-What-Can-8-Learned-Tokens-Do-for-Images-and-Videos"><a href="#TokenLearner-What-Can-8-Learned-Tokens-Do-for-Images-and-Videos" class="headerlink" title="TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?"></a>TokenLearner: What Can 8 Learned Tokens Do for Images and Videos?</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>tokens<ul>
-<li>previous：densely sampled patches</li>
-<li>ours：a handful of adpatively learned tokens</li>
-</ul>
-</li>
-<li>learn to mine important tokens in visual data<ul>
-<li>find a few import visual tokens</li>
-<li>enable long range pair-wise attention</li>
-</ul>
-</li>
-<li>applicable to both image &amp; video tasks<ul>
-<li>strong performance</li>
-<li>computationally more efficient</li>
-</ul>
-</li>
-<li>comparable results are verified on classifications tasks<ul>
-<li>与state-of-the-arts on ImageNet对比</li>
-<li>video datasets, including Kinetics-400, Kinetics-600, Charades, and AViD</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>the main challenge of ViTs<ul>
-<li>require too many tokens：按照16x16的切割方式，512x512的图像也对应着1024个tokens</li>
-<li>transformer block的computation和memory是基于token length平方型增长的</li>
-<li>因此限制了larger image/longer video</li>
-</ul>
-</li>
-<li>thus we propose TokenLearner<ul>
-<li>a learnable module</li>
-<li>take image as input</li>
-<li>generates a small set of tokens</li>
-<li>idea很直接：找到图像的重点区域regions-of-importance，然后用重点区域生成token</li>
-<li>实验发现保留8-16个（之前transformer block通常保留200-500通道数）就能够保持甚至提升精度，同时降低flops</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>TokenLearner</p>
-<ul>
-<li><p>formulation</p>
-<ul>
-<li>a space-time tensor input $X$：$X \in R^{T \times H \times W \times C}$</li>
-<li>a temporal slice $X_t$：$X_t \in R^{H \times W \times C}$</li>
-<li>T是时间维度，如果是image的话T=1，HWC是常规的长/宽/通道数</li>
-<li>for every time frame t，we learn to generate a series of tokens $Z_t$ from the input frame $X_t$：$Z_t=[z_i]_{i=1}^S$ </li>
-<li>thus we use a tokenizer function $A_i$：$z_i=A_i(X_t)$，adaptively selects important combination of pixels</li>
-<li>这样的function我们有S个，而且S远远小于HW，通常S=8</li>
-</ul>
-</li>
-<li><p>tokenizer function </p>
-<ul>
-<li>implemented with a spatial attention mechanism </li>
-<li>首先生成一个spatial weight map (size HW1)</li>
-<li>然后乘在$X_t$上，得到an intermediate weighted tensor (size HWC)</li>
-<li>最后进行spatial维度的global averge pooling，将weighted maps转化成vector (size C)</li>
-<li>所有的resulting tokens are gathered to form the output $Z_t =[z_i]_{i=1}^S\in R^{S \times C}$</li>
-<li>spatial attention的实现有两种<ul>
-<li>本文v1.0使用了一层/多层卷积(channel=S)+sigmoid</li>
-<li>本文v1.1使用了一个MLP(dense-gelu-dense)</li>
-<li>（这两个版本的参数量差距巨大啊）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>图：将$R^{HWC}$的input image稀疏映射到$R^{SC}$</p>
-<p>  <img src="/2022/06/01/TokenLearner/TokenLearner.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>TokenFuser</p>
-<ul>
-<li><p>after the Transformer layers，此时的tensor flow还是$R^{SC}$</p>
-</li>
-<li><p>引入TokenFuser</p>
-<ul>
-<li>fuse information across tokens，融合所有token</li>
-<li>remap the representation back to origin resolution，重映射</li>
-</ul>
-</li>
-<li><p>首先做fuse：give tokens $Y\in R^{ST \times C}$，乘以一个learnable weight $M (ST \times ST)$，得到tensor  $\in R^{ST \times C}$，可以理解为空间（或时空）关联</p>
-</li>
-<li><p>然后做remap，对每个temporal slice $Y_t \in R^{SC}$:</p>
-<p>  <img src="/2022/06/01/TokenLearner/TokenFuser.png" width="60%;"></p>
-<ul>
-<li>$X_t^{j+1} = B(Y_t, X_t^j) = B_w Y_t + X_t^j = \beta_i(X_t^j)Y_t+X_t^j$<ul>
-<li>$X_t^j$是TokenLinear的残差输入，也就是原图HWC，等待被reweight的分支</li>
-<li>$X_t^{j+1}$是模块输出</li>
-<li>$Y_t^j$是TokenFuser的fuse这步的结果，对应图上transformer output SC</li>
-</ul>
-</li>
-<li>$\beta_i()$是个dense+sigmoid，作用在原图上，得到HWS的weight tensor $B_w$</li>
-<li>然后乘上Y得到HWC</li>
-<li>再加上这个残差</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>整体架构</p>
-<ul>
-<li><p>整体计算流程</p>
-<p>  <img src="/2022/06/01/TokenLearner/overall.png" width="80%;"></p>
-</li>
-<li><p>两种模型结构（有/没有TokenFuser）</p>
-<p>  <img src="/2022/06/01/TokenLearner/models.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>settings</p>
-<ul>
-<li>tobeadded</li>
-</ul>
-</li>
-<li><p>TokenFuser的ablation实验：整体有提升，模型越大提升越不明显</p>
-<p>  <img src="/2022/06/01/TokenLearner/drop.png" width="90%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3072,7 +3084,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

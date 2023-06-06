@@ -276,6 +276,454 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/17/Self-Knowledge-Distillation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/17/Self-Knowledge-Distillation/" itemprop="url">Self-Knowledge Distillation</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-17T11:49:50+08:00">
+                2021-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/17/Self-Knowledge-Distillation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/17/Self-Knowledge-Distillation/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Refine-Myself-by-Teaching-Myself-Feature-Refinement-via-Self-Knowledge-Distillation"><a href="#Refine-Myself-by-Teaching-Myself-Feature-Refinement-via-Self-Knowledge-Distillation" class="headerlink" title="Refine Myself by Teaching Myself : Feature Refinement via Self-Knowledge Distillation"></a>Refine Myself by Teaching Myself : Feature Refinement via Self-Knowledge Distillation</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>传统的知识蒸馏<ul>
+<li>by stage：先训练庞大的teacher</li>
+</ul>
+</li>
+<li>self knowledge distillation<ul>
+<li>without the pretrained network</li>
+<li>分为data augmentation based approach 和 auxiliary network based approach</li>
+<li>data augmentation approach如UDA，通过监督原始图像和增强图像的一致性，但是会loose local information，对pixel-level tasks不友好，而且监督信息是从logits层，没有直接去refine feature maps</li>
+</ul>
+</li>
+<li>our approach FRSKD<ul>
+<li>auxiliary network based approach</li>
+<li>utilize both soft label and featuremap distillation</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>various distillation methods</p>
+<p>  <img src="/2021/09/17/Self-Knowledge-Distillation/methods.png" width="75%;"></p>
+<ul>
+<li>a是传统知识蒸馏，深绿色是pretrained teacher，浅绿色是student，橙色箭头是feature蒸馏，绿色箭头是soft label蒸馏</li>
+<li>b是data augmentation based 自蒸馏，shared 网络，原图和增强后的图，用soft logits来蒸馏</li>
+<li>c是auxiliary classifier based 自蒸馏，cascaded分类头，每个分类器都接前一个的</li>
+<li>d是本文自蒸馏，和c最大的不同是bifpn结构使得两个分类器每个level的特征图之间都有连结，监督方式一样的</li>
+</ul>
+</li>
+<li><p>FPN</p>
+<ul>
+<li>PANet：上行+下行</li>
+<li>biFPN：上行+下行+同层级联</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>方法</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li><p><img src="/2021/09/17/Self-Knowledge-Distillation/overview.png" width="80%;"></p>
+</li>
+<li><p>notations</p>
+<ul>
+<li>dataset $D=\{(x_1,y_1), (x_2,y_2),…, (x_N,y_N)\}$</li>
+<li>feature map $F_{i,j}$，i-th sample，j-th block</li>
+<li>channel dimension $c_j$，j-th block</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>self-teacher network</p>
+<ul>
+<li>self-teacher network的目的是提供refined feature map和soft labels作为监督信息</li>
+<li>inputs：feature maps $F_1, F_2, …, F_n$，也就是说teacher在进行梯度回传的时候到F就停止了，不会更新student model的参数</li>
+<li>modified biFPN<ul>
+<li>第一个不同：别的FPN都是在fuse之前先用一个fixed-dim 1x1 conv将所有level的feature map转换成相同通道数（如256），we design $d_i$ according to $c_i$，引入一个宽度系数width，$d_i=width*c_i$，</li>
+<li>第二个不同：使用depth-wise convolution</li>
+<li>notations<ul>
+<li>BiFPN：每层dim固定的版本</li>
+<li>BiFPNc：每层dim随输入变化的版本</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>self-feature distillation</p>
+<ul>
+<li>feature distillation<ul>
+<li>adapt attention transfer</li>
+<li>对feature map先进行channel-wise的pooling，然后L2 norm，提取spatial information</li>
+<li><img src="/2021/09/17/Self-Knowledge-Distillation/feature.png" width="40%;"></li>
+</ul>
+</li>
+<li>soft label distillation<ul>
+<li>两个分类头的KL divergence</li>
+<li><img src="/2021/09/17/Self-Knowledge-Distillation/label.png" width="40%;"></li>
+</ul>
+</li>
+<li>CE with gt<ul>
+<li>两个分类头分别还有正常的CE loss</li>
+</ul>
+</li>
+<li>overall<ul>
+<li>总的loss是4个loss相加：$L_{FRSKD}(x,y,\theta_c, \theta_t, K)=L_{CE}(x,y,\theta_c)+L_{CE}(x,y,\theta_t)+\alpha L_{KD}(x,\theta_c,\theta_t, K) + \beta L_{F}(T,F,\theta_c,\theta_T)$</li>
+<li>$\alpha \in [1,2,3]$</li>
+<li>$\beta \in [100,200]$</li>
+<li>【QUESTION】FRSKD updates the parameters by the distillation loss，$L_{KD}$ and $L_F$，which is only applied to the student network，这个啥意思暂时没理解</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>实验</p>
+<ul>
+<li>experiment settings<ul>
+<li>FRSKD\F：只做soft label的监督，不做feature map的监督</li>
+<li>FRSKD：标准的本文方法</li>
+<li>FRSKD+SLA：本文方法的基础上attach data augmentation based distillation</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/16/L2-Regularization-and-Batch-Norm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/09/16/L2-Regularization-and-Batch-Norm/" itemprop="url">L2 Regularization and Batch Norm</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-16T13:53:55+08:00">
+                2021-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/09/16/L2-Regularization-and-Batch-Norm/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/09/16/L2-Regularization-and-Batch-Norm/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>reference：</p>
+<p><a href="https://blog.janestreet.com/l2-regularization-and-batch-norm/" target="_blank" rel="noopener">https://blog.janestreet.com/l2-regularization-and-batch-norm/</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/56142484" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/56142484</a></p>
+<p><a href="https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html" target="_blank" rel="noopener">https://vitalab.github.io/article/2020/01/24/L2-reg-vs-BN.html</a></p>
+<p>解释了之前的一个疑点：</p>
+<ul>
+<li>在keras自定义的BN层中，没有类似kernel_regularizer这样的参数</li>
+<li>在我们写自定义optmizer的时候，BN层也不进行weight decay的</li>
+</ul>
+<h2 id="L2-Regularization-versus-Batch-and-Weight-Normalization"><a href="#L2-Regularization-versus-Batch-and-Weight-Normalization" class="headerlink" title="L2 Regularization versus Batch and Weight Normalization"></a>L2 Regularization versus Batch and Weight Normalization</h2><ol>
+<li><p>动机</p>
+<ul>
+<li>两个common tricks：Normalization（BN、WN、LN等）和L2 Regularization<ul>
+<li>发现两者结合时L2 regularization对normalization层没有正则效果</li>
+<li>L2 regularization反而对norm layer的scale有影响，间接影响了learning rate</li>
+<li>现代优化器如Adam只能间接消除这种影响</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>论点</p>
+<ul>
+<li><p>BN</p>
+<ul>
+<li>popular in training deep networks</li>
+<li>solve the problem of covariate shift</li>
+<li>使得每个神经元的输入保持normal分布，加速训练</li>
+<li>mean &amp; variance：training time基于每个mini-batch计算，test time使用所有iteration的mean &amp; variance的EMA</li>
+</ul>
+</li>
+<li><p>usually trained with SGD with L2 regularization</p>
+<ul>
+<li><p>result in weight decay：从数学表示上等价于对权重做衰减</p>
+</li>
+<li><p>每一步权重scaled by a 小于1的数</p>
+</li>
+<li>但是normalization strategies是对scale of the weights invariant的，因为在输入神经元之前都会进行norm</li>
+<li>therefore<ul>
+<li>there is no regularizing effect</li>
+<li>rather strongly influence the learning rate??👂</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>L2 Regularization </p>
+<ul>
+<li><p>formulation：</p>
+<ul>
+<li>在loss的基础上加一个regularization term，$L_{\lambda}(w)=L(w)+\lambda ||w||^2_2$</li>
+<li>loss是每个样本经过一系列权重运算，$L(w)=\sum_N l_i (y(X_i;w,\gamma,\beta))$</li>
+<li>当使用normalization layer的时候：$y(X_i;w,\alpha,\beta)=y(X_i;\alpha w,\gamma,\beta)$，即loss term不会变</li>
+<li>$L_{\lambda}(\alpha w)=L(w)+\lambda||w||^2_2$</li>
+<li>在有normalization layer的时候，L2 penalty还是能够通过reg term force权重的scale越来越小，但是不会影响优化进程（不影响main objective value），因为loss term不变</li>
+</ul>
+</li>
+<li><p>Effect of the Scale of Weights on Learning Rate</p>
+<ul>
+<li>BN层的输出是scale invariant的，但是梯度不是，梯度是成反比被抑制的！</li>
+<li><p>所以weights在变小，同时梯度在变大！</p>
+<p><img src="/2021/09/16/L2-Regularization-and-Batch-Norm/lr.png" width="70%;"></p>
+</li>
+<li><p>在减小weight scale的时候，网络的梯度会变大，等价于学习率在变大，会引起震荡不稳定</p>
+</li>
+<li>所以在设定hyper的时候，如果我们要适当加大weight decay $\lambda$，就要反比scale学习率</li>
+</ul>
+</li>
+<li><p>Effect of Regularization on the Scale of Weights</p>
+<ul>
+<li>during training the scale of weights will change<ul>
+<li>the gradients of the loss function will cause the norm of the weights to grow</li>
+<li>the regularization term causes the weights to shrink</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/09/10/SAM-loss/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2544,993 +2992,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/06/22/few-shot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/06/22/few-shot/" itemprop="url">few-shot</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-22T11:46:43+08:00">
-                2021-06-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/06/22/few-shot/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/06/22/few-shot/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><ol>
-<li><p>few-shot</p>
-<ul>
-<li>few-shot learning：通过少量样本学习识别模型</li>
-<li>问题：过拟合&amp;泛化性，数据增强和正则能在一定程度上缓解但不解决，还是推荐从大数据上迁移学习</li>
-<li>共识：<ul>
-<li>样本量有限的情况下，不依靠外部数据很难得到不错的结果，当下所有的解决方案都是借助外部数据作为先验知识，构造学习任务</li>
-<li>迁移数据也不是随便找的，数据集的domain difference越大，迁移效果越差（e.g. 用miniImagenet做类间迁移，效果不错，但是用miniImagenet做base class用CUB做novel class，学习效果会明显下降）</li>
-</ul>
-</li>
-<li>数据集：<ul>
-<li>miniImagenet：自然图像，600张，100类</li>
-<li>Omniglot：手写字符，1623张，50类</li>
-<li>CUB：鸟集，11788张，200类，可用于细粒度，可以用于zero-shot</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>methods</p>
-<ul>
-<li><p>pretraining + finetuning</p>
-<ul>
-<li>pretraining阶段用base class训练一个feature extractor</li>
-<li><p>finetuning阶段fix feature extractor重新训练一个classifier</p>
-<p><img src="/2021/06/22/few-shot/pretraining.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>基于度量学习</p>
-<ul>
-<li>引入distance metric其实都算度量学习，所以上面（pretraining+finetuning）和下面（meta learning）的方法都有属于度量学习的方法</li>
-</ul>
-</li>
-<li><p>基于元学习</p>
-<p><img src="/2021/06/22/few-shot/metalearning.png" width="60%;"></p>
-<ul>
-<li>base class&amp;novel class：base class是已有的大数据集，多类别，大样本量，novel class是我们要解决的小数据集，类别少，每类样本也少</li>
-<li>N-way-K-shot：基于novel class先在base class上构建多个子任务，N-way就是构建随机N个类别的分类任务，K-shot就是每个类别对应样本量为K</li>
-<li><p>supportset S &amp; queryset Q：N-way-K-shot的训练集和测试集，来自base class中相同的类别，均用于training procedure</p>
-</li>
-<li><p>与传统分类任务对比：</p>
-<p><img src="/2021/06/22/few-shot/meta1.jpeg" width="45%;">        <img src="/2021/06/22/few-shot/meta2.jpeg" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>leaderboard：<a href="https://few-shot.yyliu.net/miniimagenet.html" target="_blank" rel="noopener">https://few-shot.yyliu.net/miniimagenet.html</a></p>
-</li>
-</ul>
-</li>
-<li><p>papers</p>
-<ul>
-<li>[2015 siamese]：Siamese Neural Networks for One-shot Image Recognition，核心思想就是基于孪生网络构建similarity任务，用一个大数据集构造的same/diff pairs去训练，然后直接用在novel set上，metric是reweighted L1</li>
-<li>[2016 MatchingNet]：Matching Networks for One Shot Learning，本质上也是孪生网络+metric learning，监督的是support set S和test set B的相似度——在S下训练的模型在B的预测结果误差最小，网络上的创新是用了memory&amp;attention，train procedure的创新在于“test and train conditions must match N-way-K-shot”，</li>
-<li>[2017 ProtoNet]：Prototypical Networks for Few-shot Learning，</li>
-<li>[2019 few-shot综述]：A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</li>
-</ul>
-</li>
-</ol>
-<h2 id="Siamese-Neural-Networks-for-One-shot-Image-Recognition"><a href="#Siamese-Neural-Networks-for-One-shot-Image-Recognition" class="headerlink" title="Siamese Neural Networks for One-shot Image Recognition"></a>Siamese Neural Networks for One-shot Image Recognition</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>learning good features is expensive</li>
-<li>when little data is available：一个典型任务one-shot learning</li>
-<li>we desire<ul>
-<li>generalize to the new distribution without extensive retraining</li>
-</ul>
-</li>
-<li>we propose<ul>
-<li>train a siamese network to rank similarity between inputs</li>
-<li>capitalize on powerful discriminative features</li>
-<li>generalize the network to new data/new classes</li>
-</ul>
-</li>
-<li>experiment on<ul>
-<li>character recognition</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>general strategy</p>
-<ul>
-<li>learn image representation：supervised metric-based approach，siamese neural network</li>
-<li><p>reuse the feature extractor：on new data，without any retraining</p>
-<p><img src="/2021/06/22/few-shot/siamese.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>why siamese</p>
-<ul>
-<li>we hypothesize that networks which do well at verification tasks should generalize to one-shot classification</li>
-</ul>
-</li>
-<li><p>siamese nets</p>
-<ul>
-<li>twin networks accept distinct inputs that are joined by an energy function at the top</li>
-<li>twin back shares the weights：symmetric</li>
-<li>原始论文用了contrastive energy function：contains dual terms to increase like-pairs energy &amp; decrease unlike-pairs energy</li>
-<li>in this paper we use weighted L1 + sigmoid</li>
-</ul>
-</li>
-<li><p>model</p>
-<ul>
-<li><p>conv-relu-maxpooling：conv of varying sizes</p>
-</li>
-<li><p>最后一个conv-relu完了接flatten-fc-sigmoid得到归一化的feature vector</p>
-</li>
-<li><p>然后是joined layer：计算两个feature vector的L1 distance后learnable reweighting</p>
-<p>  <img src="/2021/06/22/few-shot/reweighting.png" width="45%;"></p>
-</li>
-<li><p>然后接sigmoid</p>
-<p><img src="/2021/06/22/few-shot/architecture.png" width="85%;"></p>
-</li>
-</ul>
-</li>
-<li><p>loss</p>
-<ul>
-<li>binary classifier</li>
-<li>regularized CE</li>
-<li>loss function里面加了layer-wise-L2正则</li>
-<li>bp的时候两个孪生网络的bp gradient是additive的</li>
-</ul>
-</li>
-<li><p>weight initialization</p>
-<ul>
-<li>conv weights：mean 0 &amp; std var 0.01</li>
-<li>conv bias：mean 0.5 &amp; std var 0.01</li>
-<li>fc weights：mean 0 &amp; std var 0.2</li>
-<li>fc bias：mean 0.5 &amp; std var 0.01</li>
-</ul>
-</li>
-<li><p>learning schedule</p>
-<ul>
-<li>uniform lr decay 0.01</li>
-<li>individual lr rate &amp; momentum</li>
-<li>annealing</li>
-</ul>
-</li>
-<li><p>augmentation</p>
-<ul>
-<li>individual affine distortions</li>
-<li>每个affine param的probability 0.5</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>  &lt;img src=&quot;few-shot/affine.png&quot; width=&quot;45%;&quot; /&gt;
-</code></pre><ol>
-<li><p>实验</p>
-<ul>
-<li>dataset<ul>
-<li>Omniglot：50个字母（international/lesser known/fictitious）</li>
-<li>训练用的子集：60% of the total data，12个drawer创建的30个字母，每类样本数一样多</li>
-<li>validation：4个drawer的10个字母</li>
-<li>test：4个drawer的10个字母</li>
-<li>8个affine transforms：9倍样本量，same&amp;different pairs</li>
-<li>在不经过微调训练的条件下，模型直接应用在MNIST数据集，仍有70%的准确率：泛化能力</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>评价</p>
-<ul>
-<li>孪生网络对于两个图像之间的差异是非常敏感的<ul>
-<li>一只黄色的猫和黄色的老虎之间的差别要比一只黄色的猫和黑色的猫之间的差别更小</li>
-<li>一个物体出现在图像的左上角和图像的右下角时其提取到的特征信息可能截然不同</li>
-<li>尤其经过全连接层，空间位置信息被破坏</li>
-</ul>
-</li>
-<li>手写字符数据集相比较于ImageNet太简单了<ul>
-<li>优化网络结构：MatchingNet</li>
-<li>更好的训练策略：meta learning</li>
-</ul>
-</li>
-<li>现在去复现已经没啥意义，算是metric learning在小样本学习上的一个startup吧</li>
-</ul>
-</li>
-</ol>
-<h2 id="MatchingNet-Matching-Networks-for-One-Shot-Learning"><a href="#MatchingNet-Matching-Networks-for-One-Shot-Learning" class="headerlink" title="MatchingNet: Matching Networks for One Shot Learning"></a>MatchingNet: Matching Networks for One Shot Learning</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>learning new concepts rapidly from little data</li>
-<li>employ ideas<ul>
-<li>metric learning</li>
-<li>memory cell</li>
-</ul>
-</li>
-<li>define one-shot learning problems<ul>
-<li>Omniglot</li>
-<li>ImageNet</li>
-<li>language tasks</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>parametric models learns slow and require large datasets</li>
-<li>non-parametric models rapidly assimilate new examples</li>
-<li>we aim to incorporate both</li>
-<li>we propose Matching Nets<ul>
-<li>uses recent advances in attention and memory that enable rapid learning</li>
-<li>test and train conditions must match：如果要测试一个n类的新分布，就要在m类大数据集上训类似的minibatch——抽n个类，每类show a few examples</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>build one-shot learning within the set-to-set framework</p>
-<ul>
-<li><p>训练以后的模型不需要进一步tuning就能produce sensible test labels for unobserved classes</p>
-</li>
-<li><p>given a small support set $S=\{(x_i,y_i)\}^k_{i=0}$</p>
-</li>
-<li><p>train a classifier $c_S$</p>
-</li>
-<li><p>given a test example $\hat x$：we get a probability distribution $\hat y=c_S(\hat x)$</p>
-</li>
-<li><p>define the mapping：$S \rightarrow c_S $ to be $P(\hat y| \hat x ,S)$</p>
-</li>
-<li><p>when given a new support set $S^{‘}=\{\hat x\}$：直接用模型P去预测$\hat y$就可以了</p>
-</li>
-<li><p>simplest form：</p>
-<script type="math/tex; mode=display">
-  \hat y = \sum_{i=1}^k a(\hat x, x_i)y_i</script><ul>
-<li>a是attention mechanism：如果和测试样本$\hat x$最远的b个支持样本$x_i$的attention是0，其余为一个定值，这就等价于一个k-b-NN机制</li>
-<li>$y_i$ act as memories：可以把每个$y_i$看作是每个$x_i$提取到的信息保存成memory</li>
-<li><p>workflow定义：given a input，我们基于attention锁定corresponding samples in the support set，并retrieve the label</p>
-<p><img src="/2021/06/22/few-shot/formulation.png" width="55%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>attention kernel</p>
-<ul>
-<li>用一个embedding function先将$\hat x$和$x_i$转化成embeddings</li>
-<li>然后计算和每个$x_i$ embedding的cosine distance</li>
-<li>然后softmax，得到每个的attention value</li>
-<li>softmax之后的attention value，大部分是N选1，如果每个attention value都不高，说明query sample和训练集每类都不像，是个novel</li>
-</ul>
-</li>
-<li><p>Full Context Embeddings（FCE）</p>
-<ul>
-<li><p>简单的模式下f和g就是两个shared weights的CNN feature extractor，FCE是接在常规feature vector后面精心设计的一个结构</p>
-</li>
-<li><p>设计思路</p>
-<ul>
-<li>g：support set don’t get embedded individually</li>
-<li>f：support set modify how we embed the test image</li>
-</ul>
-</li>
-<li><p>the first issue：</p>
-<ul>
-<li><p>bidirectional Long-Short Term Memory</p>
-</li>
-<li><p>encoder the whole support set as contexts，each time step的输入是$g^{‘}(x_i)$</p>
-<p>  <img src="/2021/06/22/few-shot/biLSTM.png" width="35%;"></p>
-</li>
-<li><p>skip connection</p>
-<script type="math/tex; mode=display">
-  g(x_i) = \overrightarrow{h_i}+\overleftarrow{h_i}+g^{'}(x_i)</script></li>
-</ul>
-</li>
-<li><p>the second issue</p>
-<ul>
-<li><p>LSTM with read attention over the whole set S</p>
-</li>
-<li><p>$f(\hat x, S)=attLSTM(f^{‘}(\hat x), g(S), K)$</p>
-<p>  <img src="/2021/06/22/few-shot/FCE.png" width="55%;"></p>
-</li>
-<li><p>$f^{‘}(\hat x)$是query sample的feature vector，作为LSTM each time step的输入</p>
-</li>
-<li><p>$K$是fixed number of unrolling steps，限制LSTM计算的step，也就是feature vector参与LSTM循环计算的次数，最终的输出是$h_K$</p>
-</li>
-<li><p>skip connection as above</p>
-</li>
-<li><p>support set S的引入：</p>
-<ul>
-<li>content based attention + softmax</li>
-<li>$r_{k-1}$和$h_{k-1}$是concat到一起，作为hidden states：【QUESTION】这样lstm cell的hidden size就变了啊？？？</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>attention of K fixed unrolling steps</p>
-</li>
-<li><p>encode $x_i$ in the context of the support set S</p>
-</li>
-</ul>
-</li>
-<li><p>training strategy</p>
-<ul>
-<li>the training procedure has to be chosen carefully so as to match the never seen</li>
-<li>task define：从全集中选取few unique classes(e.g. 5)，每个类别选取few examples(e.g. 1-5)，构成support set S，再从对应类别抽一个batch B，训练目标就是minimise the error predicting the labels in the batch B conditioned on the support set S</li>
-<li><p>batch B的预测过程就是figure1：需要$g(S(x_i,y_i))$和$f(\hat x)$计算$P(\hat y|\hat x, S)$，然后和$gt(\hat y)$计算log loss</p>
-<p><img src="/2021/06/22/few-shot/matchingnetloss.png" width="55%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>模式</p>
-<ul>
-<li>N-way-K-shot train</li>
-<li>one-shot test：用唯一的one-shot novel sample生成对应类别的feature vector，然后对每个test sample计算cosine distance，选择最近的作为其类别</li>
-</ul>
-</li>
-<li><p>comparing methods</p>
-<ul>
-<li>baseline classifier + NN</li>
-<li>MANN</li>
-<li>Convolutional Siamese Net + NN</li>
-<li>further finetuning：one-shot</li>
-</ul>
-</li>
-<li>结论<ul>
-<li>using more examples for k-shot classification helps all models</li>
-<li>5-way is easier than 20-way</li>
-<li>siamese net在5-shot的时候跟our method差不多，但是one-shot degrades rapidly </li>
-<li>FCE在简单数据集（Omniglot）上没啥用，在harder task（<em>mini</em>ImageNet）显著提升</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION"><a href="#A-CLOSER-LOOK-AT-FEW-SHOT-CLASSIFICATION" class="headerlink" title="A CLOSER LOOK AT FEW-SHOT CLASSIFICATION"></a>A CLOSER LOOK AT FEW-SHOT CLASSIFICATION</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>为主流方法提供一个consistent comparative analysis，并且发现：<ul>
-<li>deeper backbones significantly reduce differences</li>
-<li>reducing intra-class variation is an important factor when shallow backbone</li>
-</ul>
-</li>
-<li>propose a modified baseline method<ul>
-<li>achieves com- petitive performance</li>
-<li>verified on miniImageNet &amp; CUB</li>
-</ul>
-</li>
-<li>in realistic cross-domain settings<ul>
-<li>generalization analysis</li>
-<li>baseline method with standard fine-tuning win</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>three main categories of methods</p>
-<ul>
-<li>initialization based<ul>
-<li>aims to learn good model initialization</li>
-<li>to achieve rapid adaption with a limited number of training samples</li>
-<li>have difficulty in handling domain shifts</li>
-</ul>
-</li>
-<li>metric learning based<ul>
-<li>训练目标是learn to compare</li>
-<li>if a model can determine the similarity of two images, it can classify an unseen input image with the labeled instances：本质是similarity计算器，脱离label level</li>
-<li>花式训练策略：meta learning/graph</li>
-<li>花式距离metric：cosine/Euclidean</li>
-<li>turns out大可不必：<ul>
-<li>a simple baseline method with a distance- based classifier is competitive to the sophisticated algorithms</li>
-<li>simply reducing intra-class variation in a baseline method leads to competitive performance</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>hallucination based<ul>
-<li>用base class训练一个生成模型，然后用生成模型给novel class造假数据</li>
-<li>通常和metric-based模型结合起来用，不单独分析</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>two main challenges 没法统一横向比较</p>
-<ul>
-<li>implementation details有差异，baseline approach被under-estimated：无法准确量化the relative performance gain</li>
-<li>lack of domain shift between base &amp; novel datasets：makes the evaluation scenarios unrealistic</li>
-</ul>
-</li>
-<li>our work<ul>
-<li>针对代表性方法conduct consistent comparative experiments on common ground<ul>
-<li>discoveries on deeper backbones</li>
-</ul>
-</li>
-<li>轻微改动baseline method获得显著提升<ul>
-<li>replace the linear classifier with distance-based classifier</li>
-</ul>
-</li>
-<li>practical sceneries with domain shift<ul>
-<li>发现这种现实场景下，那些代表性的few-shot methods反而干不过baseline method</li>
-</ul>
-</li>
-<li>open source code：<a href="https://github.com/wyharveychen/CloserLookFewShot" target="_blank" rel="noopener">https://github.com/wyharveychen/CloserLookFewShot</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li>baseline<ul>
-<li>standard transfer learning：pre-training + fine-tuning</li>
-<li>training stage<ul>
-<li>train a feature extractor $f_{\theta}$ and a classifier $C_{W_b}$</li>
-<li>use abundant base class labeled data</li>
-<li>standard CE loss</li>
-</ul>
-</li>
-<li>fine-tuning stage<ul>
-<li>fix feature extractor $f_{\theta}$</li>
-<li>train a new classifier $C_{W_n}$</li>
-<li>use the few labeled novel samples</li>
-<li>standard CE loss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>baseline++<ul>
-<li>variant of the baseline：唯一的不同就在于classifier design</li>
-<li>显式地reduce intra-class varation among features during training，和center loss思路有点像，但是center loss的质心是滑动平均的，这里面的质心是learnable的</li>
-<li>training stage<ul>
-<li>write the weight matrix $W_b$ as $[w_1, w_2, …, w_c]$，类似每类的簇心</li>
-<li>for an input feature，compute cosine similarity</li>
-<li>multiply a class-wise learnable scalar to adjust origin [-1,1] value to fit softmax</li>
-<li>然后用softmax对similarity vector进行归一化，作为predict label</li>
-<li>the softmax function prevents the learned weight vectors collapsing to zeros：每类的预测distance都是0是网络比较容易陷入的局部最优解</li>
-</ul>
-</li>
-<li>【in fine-tuning stage？？】</li>
-</ul>
-</li>
-<li>meta-learning algorithms<ul>
-<li>three distance metric based methods：MatchingNet，ProtoNet，RelationNet</li>
-<li>one initialization based method：MAML</li>
-<li>meta-training stage<ul>
-<li>a collection of N-way-K-shot tasks</li>
-<li>使得模型$M(*|S)$学会的是一种学习模式——在有限数据下做预测</li>
-</ul>
-</li>
-<li>meta-testing stage<ul>
-<li>所有的novel data都作为对应类别的support set</li>
-<li>(class mean)</li>
-<li>模型就用这个新的support set来进行预测</li>
-</ul>
-</li>
-<li>Different meta-learning methods主要区别在于如何基于support set做预测，也就是classifier的设计<ul>
-<li>MatchingNet计算的是query和support set的每个cosine distance，然后mean per class</li>
-<li>ProtoNet是先对support features求class mean，然后Euclidean distance</li>
-<li>RelationNet先对support features求class mean，然后将距离计算模块替换成learnable relation module</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li><p>three scenarios</p>
-<ul>
-<li>generic object recognition：mini-ImageNet，100类，600张per class，【64-base，16-val，20-novel】</li>
-<li>fine-grained image classification：CUB-200-2011，200类，总共11,788张，【random 100-base，50-val，50-novel】</li>
-<li>cross-domain adaptation：mini-ImageNet —&gt; CUB，【100-mini-ImageNet-base，50-CUB-val，50-CUB-test】</li>
-</ul>
-</li>
-<li><p>training details</p>
-<ul>
-<li>baseline和baseline++模型：train 400 epochs，batch size 16</li>
-<li>meta learning methods：<ul>
-<li>train 60000 episodes for 5-way-1-shot tasks，train 40000 episodes for 5-way-5-shot tasks</li>
-<li>use validation set to select the training episodes with the best acc</li>
-<li>k-shot for support set，16 instances for query set</li>
-</ul>
-</li>
-<li>Adam with 1e-3 initial lr</li>
-<li>standard data augmentation：crop，left-right flip，color jitter</li>
-</ul>
-</li>
-<li><p>testing stage</p>
-<ul>
-<li>average over 600 experiments</li>
-<li>each experiment randomly choose 5-way-k-shot support set + 16 instances query set</li>
-<li>meta learning methods直接基于support set给出对query set的预测结果</li>
-<li>baseline methods基于support set训练一个新的分类头，100 iterations，batch size 4</li>
-</ul>
-</li>
-<li><p>模型details</p>
-<ul>
-<li>baseline++的similarity乘上了class-wise learnable scalar </li>
-<li>MachingNet用了FCE classification layer without fine-tuning版本，也乘了class-wise learnable scalar </li>
-<li>RelationNet将L2 norm替换成softmax加速训练</li>
-<li>MAML使用了一阶梯度近似for efficiency</li>
-</ul>
-</li>
-<li><p>初步结果</p>
-<ul>
-<li><p>4-layer conv backbone</p>
-</li>
-<li><p>input size 84x84</p>
-</li>
-<li><p>origin和re-implementation的精度对比</p>
-<ul>
-<li>原始的baseline没加data augmentation，所以过拟合了精度差，被underestimated了</li>
-<li>MatchingNet加了那个scalar shift的改进以后精度有显著提升</li>
-<li><p>ProtoNet原论文是20-shot&amp;30-shot，本文主要比较1-shot和5-shot，精度都放出来了</p>
-<p><img src="/2021/06/22/few-shot/re-implement.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>our experiment setting下各模型的精度对比</p>
-<ul>
-<li>baseline++大幅提升精度，已经跟meta learning methods差不多了</li>
-<li>说明few-shot的key factor是reduce intra-class variation</li>
-<li><p>但是要注意的是这是在4-layer-conv的backbone setting下，deeper backbone can inherently reduce intra-class variation</p>
-<p><img src="/2021/06/22/few-shot/cmp.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>增加网络深度</p>
-<ul>
-<li>上面说了，deeper backbone能够隐式地降低类内距离</li>
-<li>deeper models<ul>
-<li>conv4</li>
-<li>conv6：相对于conv4那个模型，加了两层conv blocks without pooling</li>
-<li>resnet10：简化版resnet18，r18里面conv block的两层卷积换成一层</li>
-<li>resnet18：origin paper</li>
-<li>resnet34：origin paper</li>
-</ul>
-</li>
-<li><p>随着网络加深，各方法的精度差异缩小，baseline方法甚至反超了一些meta learning方法</p>
-<p><img src="/2021/06/22/few-shot/tendency.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>effect of domain shift</p>
-<ul>
-<li>一个现实场景：mini-ImageNet —&gt; CUB，收集general class data相对容易，收集fine-grained数据集则更困难</li>
-<li>用resnet18实验</li>
-<li>Baseline outperforms all meta-learning methods under this scenario</li>
-<li>因为meta learning methods的学习完全依赖于base support class，not able to adapt</li>
-<li>随着domain difference get larger，Baseline相对于其他方法的gap也逐渐拉大</li>
-<li><p>说明了在domain shift场景下，adaptation based method的必要性</p>
-<p><img src="/2021/06/22/few-shot/domain shift.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>further adapt meta-learning methods</p>
-<ul>
-<li>MatchingNet &amp; ProtoNet：跟baseline方法一样，fix feature extractor，然后用novel set train a new classifier</li>
-<li>MAML：not feasible to fix the feature，用novel set finetune整个网络</li>
-<li>RelationNet：features是conv maps而不是vector，randomly split一部分novel set作为训练集</li>
-<li><p>MatchingNet &amp; MAML都有大幅精度提升，尤其在domain shift场景下，但是ProtoNet会掉点，说明adaptation是影响精度的key factor，但是还没有完美解决方案</p>
-<p><img src="/2021/06/22/few-shot/adaptation.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/06/17/ATSS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/06/17/ATSS/" itemprop="url">ATSS</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-17T15:37:17+08:00">
-                2021-06-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/06/17/ATSS/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/06/17/ATSS/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="ATSS-Bridging-the-Gap-Between-Anchor-based-and-Anchor-free-Detection-via-Adaptive-Training-Sample-Selection"><a href="#ATSS-Bridging-the-Gap-Between-Anchor-based-and-Anchor-free-Detection-via-Adaptive-Training-Sample-Selection" class="headerlink" title="ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection"></a>ATSS: Bridging the Gap Between Anchor-based and Anchor-free Detection via Adaptive Training Sample Selection</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>anchor-based和anchor-free方法的本质区别是对正负样本的定义，这也直接导致了performance gap</li>
-<li>we propose ATSS<ul>
-<li>adaptive training sample selection</li>
-<li>automatically select positive and negative samples according to statistical characteristics of objects</li>
-<li>anchor-based&amp;anchor-free模型上都涨点</li>
-</ul>
-</li>
-<li>discuss tiling multiple anchors</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>主流anchor-based方法<ul>
-<li>one-stage/two-stage</li>
-<li>tile a large number of preset anchors on the image</li>
-<li>output these refined anchors as detection results</li>
-</ul>
-</li>
-<li>anchor-free detectors主要分成两种<ul>
-<li>key-point based：预测角点/轮廓点/heatmap，然后bound轮廓得到框</li>
-<li>center-based：预测中心点，然后基于中心点回归4个距离</li>
-<li>消除pre-defined anchors的hyper-params：强化generalization ability</li>
-</ul>
-</li>
-<li>举例对比RetinaNet&amp;FCOS<ul>
-<li>RetinaNet：one-stage anchor-based</li>
-<li>FCOS：center-based anchor-free</li>
-<li>主要区别1：anchor数量，RetinaNet是hxwx9，FCOS是hxwx1</li>
-<li>主要区别2：正样本定义，RetinaNet是与gt box的IOU大于一定阈值的anchor，FCOS是featuremap上所有落进框内的格子点</li>
-<li>主要区别3：回归方式，RetinaNet是回归gt相对pos anchor的相对偏移量，FCOS是预测四条边相对中心点的绝对距离</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Difference Analysis of Anchor-based and Anchor-free Detection</p>
-<ul>
-<li><p>we focus on the last two differences：正负样本定义 &amp; 回归starting status</p>
-</li>
-<li><p>设定RetinaNet也是one square anchor per location，和FCOS保持一致</p>
-</li>
-<li><p>experiment setting</p>
-<ul>
-<li>MS COCO：80类前景，common split</li>
-<li>ImageNet pretrained ResNet-50</li>
-<li>resize input</li>
-<li>SGD，90K iterations，0.9 momentum，1e-4 weight decay，16 batch size，0.01 lr with 0.1 lr decay/60K</li>
-<li>testing：<ul>
-<li>0.05 score to filter out bg boxes</li>
-<li>output top 1000 detections per feature pyramid</li>
-<li>0.6 IoU thresh per class NMS to give final top 100 detections per image </li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>inconsistency removal</p>
-<ul>
-<li>五大improvements加在FCOS上进一步boost the gap</li>
-<li><p>我们将其逐步加在RetinaNet上，能够拉到37%，和FCOS还有0.8个点的差距</p>
-<p><img src="/2021/06/17/ATSS/inconsistency.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>分析essential difference</p>
-<ul>
-<li><p>训练一个检测模型，首先要分出正负样本，然后用正样本来回归</p>
-</li>
-<li><p>Classification</p>
-<ul>
-<li>RetinaNet用anchor boxes与gt box的IoU决定正负样本：best match anchor和大于一定IoU thresh的anchor是正样本，小于一定IoU thresh的anchor是负样本，其他的是ignore样本</li>
-<li><p>FCOS用spatial and scale constraints选择正负样本：gt box以内的所有像素作为候选正样本，然后去掉部分尺度不匹配的候选样本，正样本以外都是负样本，没有ignore</p>
-<p><img src="/2021/06/17/ATSS/samples1.png" width="45%;"></p>
-</li>
-<li><p>两个模型在两种样本选择策略上实验：Spatial and Scale Constraint相比较于IoU都会显著提点</p>
-</li>
-<li><p>当两种方法都使用Spatial and Scale Constraint策略选择正负样本，模型精度就没啥差别了</p>
-<p><img src="/2021/06/17/ATSS/samples.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>Regression</p>
-<ul>
-<li>RetinaNet regresses from the anchor box with 4 offsets：回归gt box相对于anchor box的偏移量，regression starting status是个box</li>
-<li><p>FCOS regresses from the anchor point with 4 distances：回归gt box四条边相对于anchor center的距离，regression starting status是个point</p>
-<p><img src="/2021/06/17/ATSS/regress.png" width="45%;"></p>
-</li>
-<li><p>上面那个表说明了选择同样的正负样本，regression starting status就是个无关项，不影响精度</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Adaptive Training Sample Selection （ATSS）</p>
-<ul>
-<li><p>影响检测模型精度的essential difference在于how to define positive and negative training samples</p>
-</li>
-<li><p>previous strategies都有sensitive hyperparameters（anchors/scale），some outer objects may be neglected</p>
-</li>
-<li><p>we propose ATSS</p>
-<ul>
-<li>almost no hyper</li>
-<li><p>divides pos/neg samples according to data statistical characteristics </p>
-<p><img src="/2021/06/17/ATSS/ATSS.png" width="45%;"></p>
-</li>
-<li><p>对每个gt box，首先在每个level上，基于L2 center distance，找到k-closest anchor——k*L个candidates per gt box</p>
-</li>
-<li>计算每个candidates的mean &amp; var</li>
-<li>基于mean &amp; var 计算这个gt box的IoU thresh</li>
-<li>在candidates里面选取大于等于IoU thresh，同时anchor center在gt box内的，留作正样本</li>
-<li>如果一个acnhor box匹配了多个gt box，选择IoU大的那个作为标签</li>
-</ul>
-</li>
-<li><p>基于center distance选择anchor box：因为越靠近目标中心，越容易produce高品质框</p>
-</li>
-<li><p>用mean+var作为IoU thresh：</p>
-<ul>
-<li>higher mean indicates high-quality candidates，对应的IoU thresh应该高一点</li>
-<li>higher variation indicates level specific，mean+var作为thresh能将candidates里面IoU较高的筛选出来</li>
-</ul>
-</li>
-<li><p>limit the anchor center in object：anchor中心不在目标框内显然不是个好框，用于筛掉前两步里的漏网之鱼，双保险</p>
-</li>
-<li><p>fair between different objects</p>
-<ul>
-<li>统计下来每类目标都有差不多0.2kL个正样本，与尺度无关</li>
-<li>但是RetinaNet和FCOS都是大目标正样本多，小目标正样本少</li>
-</ul>
-</li>
-<li><p>hyperparam-free：只有一个k，【还有anchor-setting呢？？？】</p>
-</li>
-<li><p>verification</p>
-<ul>
-<li>lite version：被FCOS官方引用并称作center sampling，scale limit still exists in this version</li>
-<li>full version：本文版本</li>
-<li><p>两个方法选择candidates的方法完全一致，就是select final postives的方法不同</p>
-<p><img src="/2021/06/17/ATSS/verification.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>hyperparam的鲁棒性</p>
-<ul>
-<li><p>k在一定范围内（7-17）相对insensitive，太多了低质量框太多，太少了less statistical</p>
-<p>  <img src="/2021/06/17/ATSS/kvalue.png" width="45%;"></p>
-</li>
-<li><p>尝试不同的fix-ratio anchor scale和fix-scale anchor ratio，发现精度相对稳定，说明robust to anchor settings</p>
-<p>  <img src="/2021/06/17/ATSS/anchor setting.png" width="45%;"></p>
-</li>
-<li><p>multi-anchors settings</p>
-<ul>
-<li><p>RetinaNet在不同的anchor setting下，精度基本不变，说明主要正样本选的好，不管一个location绑定几个anchor结果都一样</p>
-<p><img src="/2021/06/17/ATSS/multi.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3585,7 +3046,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -276,6 +276,427 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/29/skid-steer-drive/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/29/skid-steer-drive/" itemprop="url">skid-steer drive</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-29T10:39:44+08:00">
+                2018-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/29/skid-steer-drive/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/29/skid-steer-drive/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>实验中使用了两种类型的底盘，基于差速驱动的2WD底盘和基于滑动转向的4WD底盘。两种驱动方式原理相似，也有其显著的区别。</p>
+<p><strong>相同点：</strong></p>
+<p>两种底盘都没有显示的转动机制，采用差速驱动的方式通过以不同的方向或速度驱动两边轮子来实现方向控制。</p>
+<p>差速驱动的运动形式通常有一下几种类型：</p>
+<ul>
+<li>第一种是原地旋转，左右轮的速度大小相等，方向相反，这样相当于绕着底盘的形心原地打转。</li>
+<li>第二种是沿着某个方向直线行走，此时左右轮速度相同。</li>
+<li>第三种是沿着某条曲线前行或后退，此时左右轮速度方向相同，大小不同。</li>
+<li>第四种是旋转转弯，此时左右轮速度方向相反。</li>
+</ul>
+<p>两种机构共同的优势是：没有显示的转向机构，极大地简化了运动学模型。</p>
+<p>而两种机构共同的缺点是：由于两侧的轮子是由独立电机分别驱动的，直线运动要求两侧的轮子以相同速度转动，这将很难完成。</p>
+<p><strong>不同点：</strong></p>
+<p>差速驱动底盘通常是由一个两轮系统，每个轮子都带有独立的执行机构（直流电机），以及一个无驱动轮（可以是脚轮或者万向滚珠）组成，<strong>机器人的运动矢量是每个独立车轮运动的总和</strong>。</p>
+<p><img src="/2018/10/29/skid-steer-drive/Diffdrv.jpg" alt="Diffdrv"></p>
+<p>滑动转向底盘通常被用在履带车上，比如坦克和推土机，也被用于某些四轮六轮机构上，相比较于两轮差速底盘，滑动转向的主要区别在于：</p>
+<ul>
+<li>优势：滑动转向使用了两个额外的驱动轮代替了差速驱动的脚轮，增大了牵引力。</li>
+<li>劣势：引入了滑动，在对里程计要求高的场景中，滑动是一个致命的缺陷，因为这会对编码器造成负面影响，滑动的轮子不会跟踪机器人的确切运动。</li>
+</ul>
+<p><img src="/2018/10/29/skid-steer-drive/4WD.png" alt="4WD"></p>
+<p><strong>运动学分析：</strong></p>
+<p>对于差速驱动机构，移动机器人航向角变化了多少角度，它就绕其运动轨迹的圆心旋转了多少角度。这句话很好验证，我们让机器人做圆周运动，从起点出发绕圆心一圈回到起点处，在这过程中机器人累计的航向角为360度，同时它也确实绕轨迹圆心运动了360度。</p>
+<p>机器人的速度是指两个相邻的控制时刻之间的速度，因此小车的行驶轨迹可以分解为连续的圆弧片段，对于每一段圆弧，根据<strong>阿克曼转向几何原理</strong>，在小车转向时，为保证行驶稳定性，两侧轮胎都近似围绕一个中心点旋转。即整个小车底盘都围绕一个中心点旋转，已知小车中心的线速度（上层算法给定），此时小车底盘的运动学模型如下图：</p>
+<p><img src="/2018/10/29/skid-steer-drive/底盘.png" alt=""></p>
+<p>参数说明：</p>
+<blockquote>
+<p>$\alpha_1$是小车前左轮和后左轮的转角。</p>
+<p>$\alpha_2$是小车前右轮和后右轮的转角。</p>
+<p>$2L$是左右轮距离。</p>
+<p>$2K$是前后轮距离。</p>
+<p>$w$是小车转轴的角速度。</p>
+<p>$v$是小车几何中心的线速度。</p>
+<p>$v1, v2, v3, v4$是四个车轮的速度。</p>
+<p>$i$是电机的减速比。</p>
+<p>$r$是车轮半径。</p>
+</blockquote>
+<p>首先可以得到各车轮速度和角速度的关系：</p>
+<script type="math/tex; mode=display">
+V_1 = w * R_1 = w * \frac{K}{sin\alpha_1}\\
+V_2 = w * R_2 = w * \frac{K}{sin\alpha_2}\\
+V_3 = V_1 = w * \frac{K}{sin\alpha_1}\\
+V_4 = V_2 = w * \frac{K}{sin\alpha_2}\\</script><p>其中车轮沿着转动方向（$y$方向）的速度由电机提供，切向速度由地面摩擦提供，车轮沿着$y$方向的速度为：</p>
+<script type="math/tex; mode=display">
+R =\frac{v}{w}\\
+V_{1y} = V_1 * cos\alpha_1 = w * \frac{K}{tan \alpha_1} = w(R-L)\\
+V_{2y} = V_2 * cos\alpha_2 = w * \frac{K}{tan \alpha_2} = w(R+L)\\
+V_{3y} = V_{1y} =  w(R-L)\\
+V_{4y} = V_{2y} = w(R+L)\\</script><p>那么电机的角速度为：</p>
+<script type="math/tex; mode=display">
+w_n= \frac{V_{ny}*i}{r}, n = 1,2,3,4\\</script><p>相应电机的转速（by rpm）为：</p>
+<script type="math/tex; mode=display">
+n  = \frac{w_n*60}{2\pi}</script><p>整理成矩阵表达式为：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+w_1\\
+w_2\\
+w_3\\
+w_4
+\end{bmatrix}=
+\begin{bmatrix}
+1 & - L\\
+1 & L\\
+1 & - L\\
+1 & L
+\end{bmatrix}
+\begin{bmatrix}
+v\\
+w
+\end{bmatrix}</script><p>该表达式反映了机器人关键点速度与主动轮转速之间的关系。给定小车底盘电机转速就可以求出机器人关键点的速度，并由此得到机器人上任意一点的速度（如激光雷达的安装位置的速度），上层算法给出的关键点速度控制信号也可以由此转化成电机的控制量。</p>
+<p><strong>里程计模型 ／ 机器人定位方法</strong></p>
+<p><strong>坐标变换模型：</strong></p>
+<p><img src="/2018/10/29/skid-steer-drive/编码器.png" alt="编码器"></p>
+<p>在一个较短的时间间隔$\Delta t$内，假定机器人左右轮的移动距离分别是$\Delta l$和$\Delta r$，那么在<strong>机器人坐标系下</strong>：机器人中心沿着机器人坐标系的$x$轴方向前进的距离为$\Delta u = (\Delta l + \Delta r)/2$，$y$轴方向前进的距离为$\Delta v = 0$，转过的角度为$\Delta \varphi = (\Delta l - \Delta r)/b$。机器人坐标系到世界坐标系的旋转变换矩阵为$R(\phi)$。</p>
+<p>那么转换到<strong>世界坐标系下</strong>机器人的运动增量为：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+\Delta x\\
+\Delta y\\
+\Delta \phi
+\end{bmatrix} = 
+\begin{bmatrix}
+R(\phi) & 0\\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+\Delta u\\
+\Delta v\\
+\Delta \varphi
+\end{bmatrix} = 
+\begin{bmatrix}
+cos\phi & sin\phi & 0\\
+-sin\phi & cos\phi & 0\\
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+(\Delta l + \Delta r)/2\\
+0\\
+(\Delta l - \Delta r)/b
+\end{bmatrix}</script><p>世界坐标系下机器人位姿更新为：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+x_t\\
+y_t\\
+\phi_t
+\end{bmatrix} =
+\begin{bmatrix}
+cos\phi_{t-1}(\Delta l + \Delta r)/2\\
+sin\phi_{t-1}(\Delta l + \Delta r)/2\\
+(\Delta l - \Delta r)/b
+\end{bmatrix} +
+\begin{bmatrix}
+x_{t-1}\\
+y_{t-1}\\
+\phi_{t-1}
+\end{bmatrix}</script><p>beside from测量误差，利用坐标变换模型去推算里程计信息是引入了<strong>模型误差</strong>的——在时间间隔$\Delta t$内，为了简化计算，机器人坐标系相对世界坐标系的旋转变换矩阵被假定为起始值$R(\phi)$。在转向运动比较多的情况下，里程计信息会迅速恶化。</p>
+<p><strong>圆弧模型：</strong></p>
+<p>将极小时间间隔内小车运动的轨迹看作是一段圆弧，那么就可以确定该时刻的转动中心$C_{t-1}$，及内侧轮的转动半径为$R_{t-1}$，根据几何关系：</p>
+<p><img src="/2018/10/29/skid-steer-drive/圆弧模型.png" alt="圆弧模型"></p>
+<script type="math/tex; mode=display">
+\left\{ 
+\begin{align}
+&\Delta l = (b + R)\Delta \varphi\\
+&\Delta r = R  \Delta \varphi
+\end{align}
+\right.</script><p>解得：</p>
+<script type="math/tex; mode=display">
+\left\{ 
+\begin{align}
+&R = \frac{b\Delta r}{\Delta l - \Delta r}\\
+&\Delta \varphi = \frac{\Delta l - \Delta r }{b}
+\end{align}
+\right.</script><p>由三角相似得：</p>
+<script type="math/tex; mode=display">
+\frac{Rsin(\Delta \varphi/2)}{D/2} = \frac{R}{R + b/2}</script><p>解得弦$D$的长度为：</p>
+<script type="math/tex; mode=display">
+D = [b(\Delta l + \Delta r)/(\Delta l-\Delta r)]sin[(\Delta l - \Delta r)/2b]</script><p>弦$D$与世界坐标系$x$轴正向的夹角为$\theta = \phi - \Delta \varphi/2$，那么机器人在世界坐标系下的位姿增量为：</p>
+<script type="math/tex; mode=display">
+\left\{
+\begin{align}
+&\Delta x_{t-1} = D_{t-1} cos\theta_{t-1}\\
+&\Delta y_{t-1} = D_{t-1} sin\theta_{t-1}\\
+&\Delta \varphi = (\Delta l - \Delta r )/b
+\end{align}
+\right.</script><p>使用圆弧模型对里程计增量进行推算，完全依照几何关系来计算，计算过程中没有近似，能够有效控制误差累积。</p>
+<p><strong>概率模型：</strong></p>
+<p>不是单纯的基于里程计的估计，而是结合其他传感器的测量值对里程计进行矫正，详见<a href="https://amberzzzz.github.io/2018/11/16/amcl/">滤波算法</a>。</p>
+<p><strong>scan match模型：</strong></p>
+<p>同样也不是单纯的基于里程计的估计，详见<a href="https://amberzzzz.github.io/2018/06/05/karto-key-concepts/">karto scanMatch</a>。与滤波的区别在于，返回的不是概率分布，而是一个代表最佳估计的值。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/26/scan-matcher/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/26/scan-matcher/" itemprop="url">scan matcher</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-26T14:53:12+08:00">
+                2018-10-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/26/scan-matcher/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/26/scan-matcher/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>目前开源算法中采取的scanMatching方法主要是以下四种：</p>
+<ol>
+<li>Gmapping：ICP（simple Gradient Descent）</li>
+<li>Hector：Guass-Newton（multi-resolution map）</li>
+<li>karto：Real-time CSM（multi-resolution + 三维窗口遍历寻优）</li>
+<li>cartographer：Fast CSM（multi-resolution + branch and bound）</li>
+</ol>
+<p>scanMatcher主要涉及两个评价函数，一个score用于优化调整粒子pose作为参考，一个likelihoodAndScore用于更新粒子权重：</p>
+<script type="math/tex; mode=display">
+s(x, z, m) = \sum_i s(x, z^i, m)\\
+s(x, z^i, m) = e^{d^2/ \sigma}</script><p>粒子权重根据地图的匹配度更新：</p>
+<script type="math/tex; mode=display">
+laser\ frame \to map\ frame: \hat{z}^i = x \oplus z^i\\
+map\ cell: (x,\ y)^T\\
+d^2 = (\hat{z}^i - (x,y)^T)^T (\hat{z}^i - (x,y)^T)</script>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/10/23/navigation-stack/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1756,362 +2177,6 @@ f(x,y) = \frac{f(Q_{11})}{(x_2-x_1)(y_2-y_1)}(x_2-x)(y_2-y) +  \frac{f(Q_{21})}{
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/12/OpenCV定制源码编译/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/12/OpenCV定制源码编译/" itemprop="url">OpenCV定制源码编译</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-12T11:44:19+08:00">
-                2018-06-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/12/OpenCV定制源码编译/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/12/OpenCV定制源码编译/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-cmake选项"><a href="#1-cmake选项" class="headerlink" title="1. cmake选项"></a>1. cmake选项</h3><ul>
-<li>测试单元可以关掉：BUILD_DOCS，BUILD_EXAMPLES，BUILD_XXX_TESTS，BUILD_opencv_ts(一些单元测试代码)，BUILD_PACKAGE (CPACK_BINARY_XXX，CPACK_SOURCE_XXX)，INSTALL_XXX</li>
-<li>减少引入体积：打开世界模块开关BUILD_opencv_world(暂时没开，因为编译之后发现找不到要引用的头文件了)，打开BUILD_SHARED_LIBS</li>
-<li>关掉音视频处理相关模块：BUILD_opencv_video，BUILD_opencv_videoio，BUILD_opencv_videostab，WITH_1394，WITH_GSTREAMER_XXX</li>
-<li>关闭GPU相关模块：WITH_OPENCL，WITH_CUDA</li>
-<li>打开TBB模块：隐式的并行计算程序，底层依赖于操作系统的多线程库，BUILD_TBB</li>
-<li>打开viz模块：WITH_VTK，BUILD_opencv_viz</li>
-<li>暂时没开启Java相关模块：ant，就没brew过这个包</li>
-</ul>
-<p>以上reference from <a href="https://blog.csdn.net/rrrfff/article/details/76796261" target="_blank" rel="noopener">博客1</a>，<a href="http://tianchunbinghe.blog.163.com/blog/static/7001201151592834161/" target="_blank" rel="noopener">博客2</a></p>
-<h3 id="2-extra-modules"><a href="#2-extra-modules" class="headerlink" title="2. extra modules"></a>2. extra modules</h3><blockquote>
-<p>with opencv3.0, SURF/SIFT and some other things have been moved to a seperate <a href="https://github.com/itseez/opencv_contrib/" target="_blank" rel="noopener">opencv_contrib repo</a>.</p>
-</blockquote>
-<p>一部分模块被独立到了opencv_contrib这个包，首先clone到本地，然后在cmake选项里面找到OPENCV_EXTRA_MODULES_PATH，填好。</p>
-<h3 id="2-其他说明"><a href="#2-其他说明" class="headerlink" title="2. 其他说明"></a>2. 其他说明</h3><p>另外之前brew install的opencv包一定要卸载掉，不要乱link，否则INCLUDE和LIBS的路径都会出问题，手动修改cmake文件不要太酸爽。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2018/06/07/PnP-Perspective-n-Point/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/07/PnP-Perspective-n-Point/" itemprop="url">PnP, Perspective-n-Point</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T10:21:11+08:00">
-                2018-06-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/07/PnP-Perspective-n-Point/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/07/PnP-Perspective-n-Point/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
-<p>PnP是求解3D到2D点对运动的方法，它描述了当知道n个3D空间点及其投影位置时，如何估计相机的位姿变换。最少只需要3个点对就可以估计相机的运动。</p>
-</blockquote>
-<p>该方法使用的条件是，参考点为世界坐标系下的特征点，其空间位置已知，并且知道query帧中对应参考点的像素坐标。</p>
-<p>PnP问题的求解方法有很多种：</p>
-<ul>
-<li>直接线性变换</li>
-<li>P3P</li>
-<li>非线性优化方法——Bundle Ajustment</li>
-</ul>
-<p>本节着眼于BA求解方法，其他方法暂时不做展开。</p>
-<h3 id="2-Bundle-Ajustment"><a href="#2-Bundle-Ajustment" class="headerlink" title="2. Bundle Ajustment"></a>2. Bundle Ajustment</h3><p>利用优化求解的思路是：<strong>最小化重投影误差</strong>——期望计算query帧的相机位姿$R, t$，它的李代数为$\xi$，空间特征点的坐标为$P_i = [X_i, Y_i, Z_i]^T$，其在query帧上的像素坐标为$u_i = [u_i, v_i]^T$，那么理论上：</p>
-<script type="math/tex; mode=display">
-s_i u_i = K exp(\xi^{\wedge})P_i</script><p>构建成最小二乘问题就是：寻找最优的相机位姿$\xi$，使得误差最小化：</p>
-<script type="math/tex; mode=display">
-\xi^* = argmin_{\xi} \frac{1}{2}\sum_{i=1}^{n}||u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i||^2_2</script><p>在使用优化库来求解之前，还有一个问题——每个误差项$e_i = u_i -\frac{1}{s_i}Kexp(\xi^{\wedge})P_i$的导数$J_i$。</p>
-<blockquote>
-<p>回忆<a href="https://amberzzzz.github.io/2018/05/02/graph-based-optimization/">图优化</a>中讲过的，优化问题最终转化成为矩阵的线性求解$H\Delta x = g$，其中矩阵$H$是由单个误差项一阶展开$e(x+\Delta x) = e(x) + J\Delta x$中的雅可比矩阵$J_i$ 构成的稀疏对称阵。</p>
-</blockquote>
-<p>误差项是一个二维向量（像素坐标差），优化变量是一个六维向量（空间位姿李代数），因此$J$是一个2*6的矩阵。</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial \delta \xi} = \lim_{\delta \xi \rightarrow0} \frac{\partial e}{\partial P^{'}}\frac{\partial P^{'}}{\partial \delta \xi}</script><p>其中$P^{‘}$是特征点转换到相机坐标系下的空间坐标：</p>
-<script type="math/tex; mode=display">
-su = KP^{'}\\
-u = f_x \frac{X^{'}}{Z^{'}} + c_x\\
-v = f_y \frac{X^{'}}{Z^{'}} + c_y</script><p>因此误差项导数的第一项为：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P^{'}} = -
-\begin{bmatrix}
-\frac{\partial u}{\partial X^{'}} & \frac{\partial u}{\partial Y^{'}} & \frac{\partial u}{\partial Z^{'}}\\
-\frac{\partial v}{\partial X^{'}} & \frac{\partial v}{\partial Y^{'}} & \frac{\partial v}{\partial Z^{'}}
-\end{bmatrix}
-=-
-\begin{bmatrix}
-\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}}\\
-0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}\\
-\end{bmatrix}</script><p>误差项的第二项为变换后的点关于李代数的导数，参考<a href="https://amberzzzz.github.io/2018/05/12/%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8-%E6%9D%8E%E4%BB%A3%E6%95%B0/">李代数</a>节：</p>
-<script type="math/tex; mode=display">
-\frac{\partial TP}{\partial \delta \xi} = 
-\begin{bmatrix}
-I & -P^{'\wedge}\\
-0^T & 0^T
-\end{bmatrix}</script><p>其中$P^{‘\wedge}$是$P^{‘}$的反对称阵：</p>
-<script type="math/tex; mode=display">
-P^{'\wedge} = 
-\begin{bmatrix}
-0 & -Z^{'} & Y^{'}\\
-Z^{'} & 0 & -X^{'}\\
--Y^{'} & X^{'} & 0
-\end{bmatrix}</script><p>因此得到完整的雅可比矩阵：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial \delta \xi} =\frac{\partial e}{\partial P^{'}}
-\begin{bmatrix}
-I & P^{'\wedge}
-\end{bmatrix}=-
-\begin{bmatrix}
-\frac{f_x}{Z^{'}} & 0 & -\frac{f_xX^{'}}{Z^{'2}} & |& -\frac{f_xX^{'}Y^{'}}{Z^{'2}} & f_x + \frac{f_xX^{'2}}{Z^{'2}} & -\frac{f_xY^{'}}{Z^{'}}\\
-0 & \frac{f_y}{Z^{'}}  & -\frac{f_yY^{'}}{Z^{'2}}& | & - f_y - \frac{f_xY^{'2}}{Z^{'2}}  & \frac{f_yX^{'}Y^{'}}{Z^{'2}} &  \frac{f_yX^{'}}{Z^{'}}\\
-\end{bmatrix}</script><p>除了优化相机位姿以外，还可以同时优化特征点的空间位置$P$：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P} = \frac{\partial e}{\partial P^{'}} \frac{\partial P^{'}}{\partial P}</script><p>其中的第二项为：</p>
-<script type="math/tex; mode=display">
-P^{'} = exp(\xi^{\wedge})P = RP +t\\
-\therefore \frac{\partial P^{'}}{\partial P} = R^T</script><h3 id="3-优化库使用"><a href="#3-优化库使用" class="headerlink" title="3. 优化库使用"></a>3. 优化库使用</h3><p>构建图模型：</p>
-<ul>
-<li>优化变量1：节点1：query相机位姿（六维向量李代数）</li>
-<li>优化变量2：节点2：特征点空间位置（三维向量坐标描述）</li>
-<li>预测值：边n：根据当前estimate的优化量，投影到投影平面的像素坐标$z_i = h(\xi, P_i)$</li>
-<li>观测值：能够直接读出的，query帧上对应特征点的实际投影坐标$u_i$</li>
-</ul>
-<p>g2o中已经提供了相近的基类（在g2o/types/sba/types_six_dof_expmap.h中）：李代数位姿节点VertexSE3Expmap、空间点位置节点VertexSBAPointXYZ、投影方程边EdgeProjectXYZ2UV。</p>
-<p>边类里面要关注linearizeOplus函数，这个函数描述的是非线性函数进行线性化的过程中，求导的解析解（当然也可以使用数值解），最后函数给出的是每个节点的导数矩阵（$\frac{\partial e}{\partial \delta \xi} $和$\frac{\partial e}{\partial P_i}$） 。<strong>这点是Ceres库和g2o库的一点主要差别：Ceres都是使用自动的数值导数，g2o要自己求导</strong>。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> EdgeProjectXYZ2UV::linearizeOplus()</span><br><span class="line">&#123;</span><br><span class="line">    VertexSE3Expmap * vj = <span class="keyword">static_cast</span>&lt;VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">    VertexSBAPointXYZ* vi = <span class="keyword">static_cast</span>&lt;VertexSBAPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">    ...</span><br><span class="line">    ...</span><br><span class="line">    _jacobianOplusXi = <span class="number">-1.</span>/z * tmp * T.rotation().toRotationMatrix();</span><br><span class="line"> </span><br><span class="line">    _jacobianOplusXj(<span class="number">0</span>,<span class="number">0</span>) = x*y/z^<span class="number">2</span> * cam-&gt;focal_length;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="4-OpenCV内置函数"><a href="#4-OpenCV内置函数" class="headerlink" title="4. OpenCV内置函数"></a>4. OpenCV内置函数</h3><p><strong>basic：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line"></span><br><span class="line">Mat r, t, R;</span><br><span class="line">cv::solvePnP ( pts3d, pts2d, K, Mat(), r, t, <span class="literal">false</span> );</span><br><span class="line">cv::Rodrigues ( r, R );     <span class="comment">// 旋转向量和旋转矩阵的转换</span></span><br></pre></td></tr></table></figure>
-<p><strong>advanced：</strong></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> cv::solvePnPRansac( </span><br><span class="line">    InputArray objectPoints,      <span class="comment">// 3D空间坐标 vector&lt;cv::Point3f&gt; pts3d</span></span><br><span class="line">    InputArray imagePoints,       <span class="comment">// 2D像素坐标 vector&lt;cv::Point2f&gt; pts2d</span></span><br><span class="line">    InputArray cameraMatrix,      <span class="comment">// 相机内部参数矩阵 K</span></span><br><span class="line">    InputArray distCoeffs,        <span class="comment">// 畸变系数向量 cv::Mat()</span></span><br><span class="line">    OutputArray rvec,             <span class="comment">// 旋转向量</span></span><br><span class="line">    OutputArray tvec,             <span class="comment">// 平移向量</span></span><br><span class="line">    <span class="keyword">bool</span> useExtrinsicGuess = <span class="literal">false</span>, <span class="comment">// If true, the function uses the provided rvec and tvec values as initial</span></span><br><span class="line">    <span class="keyword">int</span> iterationsCount = <span class="number">100</span>,    <span class="comment">// Number of iterations</span></span><br><span class="line">    <span class="keyword">float</span> reprojectionError = <span class="number">8.0</span>,<span class="comment">// 重投影误差最大值</span></span><br><span class="line">    <span class="keyword">double</span> confidence = <span class="number">0.99</span>,</span><br><span class="line">    OutputArray inliers = noArray(), <span class="comment">// Output vector that contains indices of inliers in objectPoints and imagePoints .</span></span><br><span class="line">    <span class="keyword">int</span> flags = SOLVEPNP_ITERATIVE   <span class="comment">// method for solving PnP</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>Ransac：考虑到我们提供的匹配里面存在误匹配的情况，OpenCV采用“随机采样一致性算法”（Random Sample Consensus），从现有匹配中随机取一部分用来估计运动（PnP的解析解法最少只需要三个点就能计算相对位姿），正确的匹配结果都是近似的，从而剔除误匹配。</li>
-<li>inlier：内点，函数最终给出的匹配可信的点。</li>
-<li>RANSAC只采用少数几个随机点来计算PnP，容易受到噪声影响。工程上通常使用RANSAC的解作为初值，再使用非线性优化方法求解最优值。</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Ransac粗匹配</span></span><br><span class="line">cv::solvePnPRansac( pts3d, pts2d, K, Mat(), rvec, tvec, <span class="literal">false</span>, <span class="number">100</span>, <span class="number">4.0</span>, <span class="number">0.99</span>, inliers );</span><br><span class="line">cv::Rodrigues ( rvec, R ); </span><br><span class="line">Eigen::Matrix3d rotation_matrix = R.at&lt;<span class="keyword">double</span>&gt;;</span><br><span class="line">T_c_r_estimated_ = SE3d(</span><br><span class="line">        SO3d(rotation_matrix),</span><br><span class="line">        Vector3d( tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>,<span class="number">0</span>), tvec.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line"><span class="comment">// BA局部优化</span></span><br><span class="line">g2o::VertexSE3Expmap* pose <span class="keyword">new</span> g2o::VertexSE3Expmap();</span><br><span class="line">...</span><br><span class="line">pose-&gt;setEstimate(g2o::SE3Quat( T_c_r_estimated_.rotationMatrix(), T_c_r_estimated_.translation()));</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2166,7 +2231,7 @@ P^{'} = exp(\xi^{\wedge})P = RP +t\\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

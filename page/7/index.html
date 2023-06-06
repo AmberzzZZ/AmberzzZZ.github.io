@@ -276,6 +276,458 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/09/mongodb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/03/09/mongodb/" itemprop="url">mongodb</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-09T12:19:54+08:00">
+                2021-03-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/09/mongodb/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/09/mongodb/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>download：<a href="https://www.mongodb.com/try/download/enterprise" target="_blank" rel="noopener">https://www.mongodb.com/try/download/enterprise</a></p>
+</li>
+<li><p>install</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将解压以后的文件夹放在/usr/<span class="built_in">local</span>下</span></span><br><span class="line">sudo mv mongodb-osx-x86_64-4.0.9/ /usr/local/</span><br><span class="line">sudo ln -s mongodb-macos-x86_64-4.4.4 mongodb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> ENV PATH</span></span><br><span class="line">export PATH=/usr/local/mongodb/bin:$PATH</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建日志及数据存放的目录</span></span><br><span class="line">sudo mkdir -p /usr/local/var/mongodb</span><br><span class="line">sudo mkdir -p /usr/local/var/log/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/mongodb</span><br><span class="line">sudo chown [amber] /usr/local/var/log/mongodb</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>configuration</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 后台启动</span></span><br><span class="line">mongod --dbpath /usr/local/var/mongodb --logpath /usr/local/var/log/mongodb/mongo.log --fork</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 控制台启动</span></span><br><span class="line">mongod --config /usr/local/etc/mongod.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看状态</span></span><br><span class="line">ps aux | grep -v grep | grep mongod</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>run</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在db环境下启动一个终端</span></span><br><span class="line">cd /usr/local/mongodb/bin </span><br><span class="line">./mongo</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>original settings</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 显示所有数据的列表</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line">admin   0.000GB</span><br><span class="line">config  0.000GB</span><br><span class="line">local   0.000GB</span><br><span class="line"><span class="meta">#</span><span class="bash"> 三个系统保留的特殊数据库</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 连接/创建一个指定的数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use <span class="built_in">local</span></span></span><br><span class="line">switched to db local</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前数据库, 如果没use默认为<span class="built_in">test</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db</span></span><br><span class="line">test</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 【！！重要】关闭服务</span></span><br><span class="line">之前服务器被kill -9强制关闭，数据库丢失了</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use admin</span></span><br><span class="line">switched to db admin</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.shutdownServer()</span></span><br><span class="line">server should be down...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>concepts</p>
+<p> <img src="/2021/03/09/mongodb/concepts.png" width="90%;"></p>
+</li>
+<li><p>文档document</p>
+<p> 一组key-value对，如上面左图中的一行记录，如上面右图中的一个dict</p>
+</li>
+<li><p>集合collection</p>
+<p> 一张表，如上面左图和上面右图</p>
+</li>
+<li><p>主键primary key</p>
+<p> 唯一主键，ObjectId类型，自定生成，有标准格式</p>
+</li>
+<li><p>常用命令</p>
+<p>10.1 创建/删除/重命名db</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换至数据库test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 插入一条doc, db.COLLECTION_NAME.insert(document)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> db要包含至少一条文档，才能在show dbs的时候显示（才真正创建）</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet1.insert(&#123;<span class="string">'name'</span>: img0&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示当前已有数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show dbs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除指定数据库</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use test1</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 旧版本(before4.0)重命名：先拷贝一份，在删除旧的</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.copyDatabase(<span class="string">'OLDNAME'</span>, <span class="string">'NEWNAME'</span>);</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> use old_name</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.dropDatabase()</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 新版本重命名：dump&amp;restore，这个东西在mongodb tools里面，要另外下载，可执行文件放在bin下</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump   <span class="comment"># 将所有数据库导出到bin/dump/以每个db名字命名的文件夹下</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mongodump -h dbhost -d dbname -o dbdirectory</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -h: 服务器地址:端口号</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -d: 需要备份的数据库</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -o: 存放位置（需要已存在）</span></span><br><span class="line">mongodump -d test -o tmp/</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在恢复备份数据库的时候换个名字：mongorestore -h dbhost -d dbname path</span></span><br><span class="line">mongorestore -d test_bkp tmp/test</span><br><span class="line"><span class="meta">#</span><span class="bash"> 这时候可以看到一个新增了一个叫test_bkp的db</span></span><br></pre></td></tr></table></figure>
+<p>10.2 创建/删除/重命名collection</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建：db.createCollection(name, options)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.createCollection(<span class="string">'case2img'</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有tables</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show collections</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 不用显示创建，在db insert的时候会自动创建集合</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.insert(&#123;<span class="string">"name"</span> : <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除：db.COLLECTION_NAME.drop()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.drop()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名：db.COLLECTION_NAME.renameCollection(<span class="string">'NEWNAME'</span>)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.renameCollection(<span class="string">'sheet3'</span>)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 复制：db.COLLECTION_NAME.aggregate(&#123;<span class="variable">$out</span>: <span class="string">'NEWNAME'</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.sheet2.aggregate(&#123; <span class="variable">$out</span> : <span class="string">"sheet3"</span> &#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.3 插入/显示/更新/删除document</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 插入</span></span><br><span class="line">db.COLLECTION_NAME.insert(document)</span><br><span class="line">db.COLLECTION_NAME.save(document)</span><br><span class="line">db.COLLECTION_NAME.insertOne()</span><br><span class="line">db.COLLECTION_NAME.insertMany()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示已有doc</span></span><br><span class="line">db.COLLECTION_NAME.find()</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新doc的部分内容</span></span><br><span class="line">db.COLLECTION_NAME.update(</span><br><span class="line">   &lt;query&gt;,   # 查询条件</span><br><span class="line">   &lt;update&gt;,  # 更新操作</span><br><span class="line">   &#123;</span><br><span class="line">     upsert: &lt;boolean&gt;,     # if true 如果不存在则插入</span><br><span class="line">     multi: &lt;boolean&gt;,      # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">'case'</span>: <span class="string">'s2'</span>, <span class="string">'name'</span>: <span class="string">'img2'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 给doc的某个key重命名</span></span><br><span class="line">db.COLLECTION_NAME.updateMany(</span><br><span class="line">&#123;&#125;,</span><br><span class="line">&#123;'$rename': &#123;"old_key": "new_key"&#125;&#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 更新整条文档by object_id</span></span><br><span class="line">db.COLLECTION_NAME.save(</span><br><span class="line">   &lt;document&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.save(&#123;<span class="string">"_id"</span>: ObjectId(<span class="string">"60474e4b77e21bad9bd4655a"</span>), <span class="string">"case"</span>:<span class="string">"s3"</span>, <span class="string">"name"</span>:<span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除满足条件的doc</span></span><br><span class="line">db.COLLECTION_NAME.remove(</span><br><span class="line">   &lt;query&gt;,</span><br><span class="line">   &#123;</span><br><span class="line">     justOne: &lt;boolean&gt;,   # find fist/all match</span><br><span class="line">     writeConcern: &lt;document&gt;</span><br><span class="line">   &#125;</span><br><span class="line">)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 删除所有doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.remove(&#123;&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.4 简单查询find</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s0"</span>, <span class="string">"name"</span>: <span class="string">"img0"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>, <span class="string">"name"</span>: <span class="string">"img1"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img2"</span>&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.insert(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>, <span class="string">"name"</span>: <span class="string">"img3"</span>&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询表中的doc：db.COLLECTION_NAME.find(&#123;query&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: <span class="string">'s1'</span>&#125;, &#123;<span class="string">"name"</span>:1&#125;)   <span class="comment"># projection的value在对应的key-value是list的时候有意义</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 格式化显示查询结果：db.COLLECTION_NAME.find(&#123;query&#125;).pretty()</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: s2&#125;).pretty()</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取指定数量的数据记录：db.COLLECTION_NAME.find(&#123;query&#125;).<span class="built_in">limit</span>(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).<span class="built_in">limit</span>(1)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 跳过指定数量的数据：db.COLLECTION_NAME.find(&#123;query&#125;).skip(NUMBER)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;).skip(1)</span></span><br></pre></td></tr></table></figure>
+<p>10.5 条件操作符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">(&gt;</span><span class="bash">) 大于 - <span class="variable">$gt</span></span></span><br><span class="line">(&lt;) 小于 - $lt</span><br><span class="line"><span class="meta">(&gt;</span><span class="bash">=) 大于等于 - <span class="variable">$gte</span></span></span><br><span class="line">(&lt;=) 小于等于 - $lte</span><br><span class="line">(or) 或 - $or</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img1'</span>, <span class="string">'size'</span>:100&#125;&#125;)</span></span><br><span class="line">WriteResult(&#123; "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 &#125;)</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.update(&#123;<span class="string">'case'</span>:<span class="string">'s2'</span>&#125;, &#123;<span class="variable">$set</span>: &#123;<span class="string">"name"</span>:<span class="string">'img2'</span>, <span class="string">'size'</span>:200&#125;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询size&gt;150的doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>: 150&#125;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查询满足任意一个条件的doc</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'$or'</span>: [&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;, &#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>: 150&#125;&#125;]&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.6 数据类型操作符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type(KEY)等于 - $type</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 比较对象可以是字符串/对应的reflect NUM</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'string'</span>&#125;&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find(&#123;<span class="string">'case'</span>: &#123;<span class="variable">$type</span>: <span class="string">'0'</span>&#125;&#125;)</span></span><br></pre></td></tr></table></figure>
+<p>10.7 排序find().sort</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 通过指定字段&amp;指定升序/降序来对数据排序：db.COLLECTION_NAME.find().sort(&#123;KEY:1/-1&#125;)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.find().sort(&#123;<span class="string">'name'</span>:1&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> skip(), limilt(), sort()三个放在一起执行的时候，执行的顺序是先 sort(), 然后是 skip()，最后是显示的 <span class="built_in">limit</span>()。</span></span><br></pre></td></tr></table></figure>
+<p>10.8 索引</p>
+<p>skip</p>
+<p>10.9 聚合aggregate</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 用于统计 db.COLLECTION_NAME.aggregate(AGGREGATE_OPERATION)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by group</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:1&#125;&#125;&#125;])</span></span><br><span class="line">group by key value 'case'</span><br><span class="line">count number of items in each group</span><br><span class="line">refer to the number as img_num</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$group</span>: &#123;_id: <span class="string">'$case'</span>, img_num:&#123;<span class="variable">$sum</span>:<span class="string">'$size'</span>&#125;&#125;&#125;])</span></span><br><span class="line">计算每一个group内，size值的总和</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> by match</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$match</span>: &#123;<span class="string">'size'</span>: &#123;<span class="variable">$gt</span>:150&#125;&#125;&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br><span class="line">类似shell的管道，match用来筛选条件，符合条件的送入下一步统计</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> db.case2img.aggregate([&#123;<span class="variable">$skip</span>: 4&#125;, </span></span><br><span class="line">												 &#123;$group:&#123;_id: null, totalsize: &#123;$sum: '$size'&#125;&#125;&#125;])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>快速统计distinct</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.case2img.distinct(TAG_NAME)</span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意如果distinct的内容太长，超过16M，会报distinct too big的error，推荐用聚合来做统计</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">12. pymongo</span><br><span class="line"></span><br><span class="line">   用python代码来操作数据库</span><br><span class="line"></span><br><span class="line">   先安装：pip install pymongo</span><br><span class="line"></span><br><span class="line">   11.1 连接client</span><br><span class="line"></span><br><span class="line">   ```python</span><br><span class="line">   from pymongo import MongoClient</span><br><span class="line">   Client = MongoClient()</span><br></pre></td></tr></table></figure>
+<p>   11.2 获取数据库</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db = Client.DB_NAME</span><br><span class="line">db = Client[<span class="string">'DB_NAME'</span>]</span><br></pre></td></tr></table></figure>
+<p>   11.3 获取collection</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">collection = db.COLLECTION_NAME</span><br><span class="line">collection = db[<span class="string">'COLLECTION_NAME'</span>]</span><br></pre></td></tr></table></figure>
+<p>   11.4 插入doc</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># insert one</span></span><br><span class="line">document1 = &#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;</span><br><span class="line">document2 = &#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;</span><br><span class="line">post_1 = collection.insert_one(document1).inserted_id</span><br><span class="line">post_2 = collection.insert_one(document2).inserted_id</span><br><span class="line">print(post_1)</span><br><span class="line"></span><br><span class="line"><span class="comment"># insert many</span></span><br><span class="line">new_document = [&#123;<span class="string">'x'</span>:<span class="number">1</span>&#125;,&#123;<span class="string">'x'</span>:<span class="number">2</span>&#125;]</span><br><span class="line"><span class="comment"># new_document = [document1,document2]  注意doc是神拷贝，只能作为一条doc被插入一次</span></span><br><span class="line">result = collection.insert_many(new_document).inserted_ids</span><br><span class="line">print(result)</span><br></pre></td></tr></table></figure>
+<p>   11.5 查找</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> bson.objectid <span class="keyword">import</span> ObjectId</span><br><span class="line"></span><br><span class="line"><span class="comment"># find one 返回一条doc</span></span><br><span class="line">result = collection.find_one()</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'case'</span>: <span class="string">'s0'</span>&#125;)</span><br><span class="line">result = collection.find_one(&#123;<span class="string">'_id'</span>: ObjectId(<span class="string">'604752f277e21bad9bd46560'</span>)&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># find 返回一个迭代器</span></span><br><span class="line"><span class="keyword">for</span> _, item <span class="keyword">in</span> enumerate(collection.find()):</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
+<p>   11.6 更新</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># update one</span></span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br><span class="line">collection.update_one(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$push'</span>:&#123;<span class="string">'add'</span>:<span class="number">1</span>&#125;&#125;)    <span class="comment"># 追加数组内容</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># update many</span></span><br><span class="line">collection.update_many(&#123;<span class="string">'case'</span>:<span class="string">'s1'</span>&#125;,&#123;<span class="string">'$set'</span>:&#123;<span class="string">'size'</span>:<span class="number">300</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
+<p>   11.7 删除</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在mongo shell里面是remove方法，在pymongo里面被deprecated成delete方法</span></span><br><span class="line">collection.delete_one(&#123;<span class="string">"case"</span>: <span class="string">"s2"</span>&#125;)</span><br><span class="line">collection.delete_many(&#123;<span class="string">"case"</span>: <span class="string">"s1"</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>   11.8 统计</p>
+   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计数：count方法已经被重构</span></span><br><span class="line">print(collection.count_documents(&#123;<span class="string">'case'</span>:<span class="string">'s0'</span>&#125;))</span><br><span class="line"></span><br><span class="line"><span class="comment"># unique：distinct方法</span></span><br><span class="line">print(collection.distinct(<span class="string">'case'</span>))</span><br></pre></td></tr></table></figure>
+<p>​    11.9 正则</p>
+<p>​    mongo shell命令行里的正则和pymongo脚本里的正则写法是不一样的，因为python里面有封装正则方法，然后通过bson将python的正则转换成数据库的正则</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pymongo</span></span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> bson</span><br><span class="line"></span><br><span class="line">pattern = re.compile(<span class="string">r'(.*)-0[345]-(.*)'</span>)</span><br><span class="line">regex = bson.regex.Regex.from_native(pattern)</span><br><span class="line">result = collection.aggregate([&#123;<span class="string">'$match'</span>: &#123;<span class="string">'date'</span>: regex&#125;&#125;])</span><br><span class="line"></span><br><span class="line"><span class="comment"># mongo shell</span></span><br><span class="line">&gt; db.collection.find(&#123;date:&#123;$regex:<span class="string">"(.*)-0[345]-(.*)"</span>&#125;&#125;)</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/04/docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/03/04/docker/" itemprop="url">docker</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-04T13:28:08+08:00">
+                2021-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/04/docker/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/04/docker/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>shartup</p>
+<ul>
+<li><p>部署方案</p>
+<ul>
+<li><p>古早年代</p>
+<p>  <img src="/2021/03/04/docker/old.png" width="50%;"></p>
+</li>
+<li><p>虚拟机</p>
+<p>  <img src="/2021/03/04/docker/vm.png" width="50%;"></p>
+</li>
+<li><p>docker</p>
+<p>  <img src="/2021/03/04/docker/docker.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>image镜像 &amp; container容器 &amp; registry仓库</p>
+<ul>
+<li>镜像：相当于是一个 root 文件系统，提供容器运行时所需的程序、库、资源、配置等</li>
+<li>容器：镜像运行时的实体，可以被创建、启动、停止、删除、暂停等</li>
+<li>仓库：用来保存镜像<ul>
+<li>官方仓库：docker hub：<a href="https://hub.docker.com/r/floydhub/tensorflow/tags?page=1&amp;ordering=last_updated" target="_blank" rel="noopener">https://hub.docker.com/r/floydhub/tensorflow/tags?page=1&amp;ordering=last_updated</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>常用命令</p>
+<ul>
+<li>拉镜像<ul>
+<li>docker pull [选项] [Docker Registry 地址[:端口号]/]仓库名[:标签]</li>
+<li>地址可以是官方地址，也可以是第三方（如Harbor）</li>
+<li>仓库名由作者名和软件名组成（如zhangruiming/skin）</li>
+<li>标签用来指定某个版本的image，省略则默认latest</li>
+</ul>
+</li>
+<li>列出所有镜像<ul>
+<li>docker  images</li>
+</ul>
+</li>
+<li>删除镜像<ul>
+<li>docker rmi [-f] [镜像id]</li>
+<li>删除镜像之前要kill/rm所有使用该镜像的container：docker rm [容器id]</li>
+</ul>
+</li>
+<li>运行镜像并创建一个容器<ul>
+<li>docker run [-it] [仓库名] [命令]</li>
+<li>选项 -it：为容器配置一个交互终端</li>
+<li>选项 -d：后台运行容器，并返回容器ID（不直接进入终端）</li>
+<li>选项 —name=’xxx’：为容器指定一个名称</li>
+<li>选项-v /host_dir:/container_dir：将主机上指定目录映射到容器的指定目录</li>
+<li>[命令]参数必须要加，而且要是那种一直挂起的命令（/bin/bash），如果是ls/cd/直接不填，那么命令运行完容器就会停止运行，docker ps -a查看状态，发现都是Exited</li>
+</ul>
+</li>
+<li>创建容器<ul>
+<li>docker run</li>
+</ul>
+</li>
+<li>查看所有容器<ul>
+<li>docker ps</li>
+</ul>
+</li>
+<li>启动一个已经停止的容器/停止正在运行的容器<ul>
+<li>docker start [容器id]</li>
+<li>docker stop [容器id]</li>
+</ul>
+</li>
+<li>进入容器<ul>
+<li>docker exec -it [容器id] [linux命令]</li>
+</ul>
+</li>
+<li>删除容器<ul>
+<li>docker rm [容器id]</li>
+</ul>
+</li>
+<li>删除所有不活跃的容器<ul>
+<li>docker container prune</li>
+</ul>
+</li>
+<li>提交镜像到远端仓库<ul>
+<li>docker tag [镜像id] [用户名]/[仓库]:[标签]    # 重命名</li>
+<li>docker login    # 登陆用户</li>
+<li>docker push </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>案例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 拉镜像</span></span><br><span class="line">docker pull 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 显示镜像</span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 运行指定镜像</span></span><br><span class="line">docker run -itd --name='test' 地址/仓库:标签</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看运行的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 进入容器</span></span><br><span class="line">docker exec -it 容器id或name /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 一顿操作完退出容器</span></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 将修改后的容器保存为镜像</span></span><br><span class="line">docker commit 容器id或name 新镜像名字</span><br><span class="line">docker images可以看到这个镜像了</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 保存镜像到本地</span></span><br><span class="line">docker save -o tf_torch.rar  tf_torch</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 还原镜像</span></span><br><span class="line">docker load --input tf_torch.tar</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重命名镜像</span></span><br><span class="line">docker tag 3db0b2f40a70 amberzzzz/tf1.14_torch1.4_cuda10.0:v1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 提交镜像</span></span><br><span class="line">docker push amberzzzz/tf1.14-torch0.5-cuda10.0:v1</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>dockerfile</p>
+<ul>
+<li><p>Dockerfile 是用来说明如何自动构建 docker image 的指令集文件</p>
+</li>
+<li><p>常用命令</p>
+<ul>
+<li>FROM image_name，指定依赖的镜像</li>
+<li>RUN command，在 shell 或者 exec 的环境下执行的命令</li>
+<li>COPY srcfile_path_inhost dstfile_incontainer，将本机文件复制到容器中</li>
+<li>ADD srcfile_path dstfile_incontainer，将本机文件复制到容器中，src文件不仅可以是local host，也可以是网络地址</li>
+<li>CMD [“executable”,”param1”,”param2”]，指定容器启动默认执行的命令</li>
+<li>WORKDIR path_incontainer，指定 RUN、CMD 与 ENTRYPOINT 命令的工作目录</li>
+<li>VOLUME [“/data”]，授权访问从容器内到主机上的目录</li>
+</ul>
+</li>
+<li><p>basic image</p>
+<ul>
+<li><p>从nvidia docker开始：<a href="https://hub.docker.com/r/nvidia/cuda/tags?page=1&amp;ordering=last_updated&amp;name=10" target="_blank" rel="noopener">https://hub.docker.com/r/nvidia/cuda/tags?page=1&amp;ordering=last_updated&amp;name=10</a>.</p>
+</li>
+<li><p>选一个喜欢的：如docker pull nvidia/cuda:10.0-cudnn7-devel-ubuntu16.04</p>
+</li>
+<li><p>然后编辑dockerfile</p>
+  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04</span><br><span class="line">MAINTAINER amber &lt;amber.zhang@tum.de&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install basic dependencies</span></span><br><span class="line">RUN apt-get update </span><br><span class="line">RUN apt-get install -y wget vim cmake</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install Anaconda3</span></span><br><span class="line">RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ~/anaconda3.sh</span><br><span class="line">RUN bash ~/anaconda3.sh -b -p /home/anaconda3 &amp;&amp; rm ~/anaconda3.sh </span><br><span class="line">ENV PATH /home/anaconda3/bin:$PATH</span><br><span class="line"><span class="meta">#</span><span class="bash"> RUN <span class="built_in">echo</span> <span class="string">"export PATH=/home/anaconda3/bin:<span class="variable">$PATH</span>"</span> &gt;&gt; ~/.bashrc &amp;&amp; /bin/bash -c <span class="string">"source /root/.bashrc"</span> </span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> change mirror</span></span><br><span class="line">RUN mkdir ~/.pip \</span><br><span class="line">    &amp;&amp; cd ~/.pip    </span><br><span class="line">RUN echo '[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple/' &gt;&gt; ~/.pip/pip.conf</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> install tensorflow</span></span><br><span class="line">RUN /home/anaconda3/bin/pip install tensorflow-gpu==1.8.0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<pre><code>      * 然后build dockerfile
+
+          <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t &lt;docker_name&gt; .</span><br></pre></td></tr></table></figure>
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/03/02/layer-norm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3257,1982 +3709,6 @@ P_s(X) \neq P_t(X)</script></li>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/18/GCN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/18/GCN/" itemprop="url">GCN</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-18T12:24:59+08:00">
-                2021-01-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/18/GCN/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/18/GCN/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>reference：<a href="https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/SWQHgogAP164Kr082YkF4A</a></p>
-<ol>
-<li><p>图</p>
-<ul>
-<li>$G = (V,E)$：节点 &amp; 边，连通图 &amp; 孤立点</li>
-<li>邻接矩阵A：NxN，有向 &amp; 无向</li>
-<li>度矩阵D：NxN对角矩阵，每个节点连接的节点</li>
-<li>特征矩阵X：NxF，每个1-dim F是每个节点的特征向量</li>
-</ul>
-</li>
-<li><p>特征学习</p>
-<ul>
-<li>可以类比CNN：对其邻域（kernel）内特征进行线性变换（w加权），然后求和，然后激活函数</li>
-<li>$H^{k+1} = f(H^{k},A) = \sigma(AH^{k}W^{k})$<ul>
-<li>H：running updating 特征矩阵，NxFk</li>
-<li>A：0-1邻接矩阵，NxN</li>
-<li>W：权重，$F_k$x$F_{k+1}$</li>
-</ul>
-</li>
-<li>权重所有节点共享</li>
-<li>节点的邻接节点可以看做感受野</li>
-<li>网络加深，感受野增大：节点的特征融合了更多节点的信息</li>
-</ul>
-</li>
-<li><p>图卷积</p>
-<ul>
-<li><p>A中没有考虑自己的特征：添加自连接</p>
-<ul>
-<li>A = A + I</li>
-</ul>
-</li>
-<li><p>加法规则对度大的节点，特征会越来越大：归一化</p>
-<ul>
-<li><p>使得邻接矩阵每行和为1：左乘度矩阵的逆</p>
-</li>
-<li><p>数学实质：求平均</p>
-</li>
-<li><p>one step further：不单对行做平均，对度较大的邻接节点也做punish</p>
-<p>  <img src="/2021/01/18/GCN/graph-conv-layer.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>GCN网络</p>
-<p>  <img src="/2021/01/18/GCN/gcn.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>实现</p>
-<ul>
-<li><p>weights：in x out，kaiming_uniform_initialize</p>
-</li>
-<li><p>bias：out，zero_initialize</p>
-</li>
-<li><p>activation：relu</p>
-</li>
-<li><p>A x H x W：左乘是系数矩阵乘法</p>
-</li>
-<li><p>邻接矩阵的结构从输入开始就不变了，和每层的特征矩阵一起作为输入，传入GCN</p>
-</li>
-<li><p>分类头：最后一层预测Nxn_class的特征向量，提取感兴趣节点F(n_class)，然后softmax，对其分类</p>
-</li>
-<li><p>归一化</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对称归一化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalize_adj</span><span class="params">(adj)</span>:</span></span><br><span class="line">    <span class="string">"""compute L=D^-0.5 * (A+I) * D^-0.5"""</span></span><br><span class="line">    adj += sp.eye(adj.shape[<span class="number">0</span>])</span><br><span class="line">    degree = np.array(adj.sum(<span class="number">1</span>))</span><br><span class="line">    d_hat = sp.diags(np.power(degree, <span class="number">-0.5</span>).flatten())</span><br><span class="line">    norm_adj = d_hat.dot(adj).dot(d_hat)</span><br><span class="line">    <span class="keyword">return</span> norm_adj</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"><span class="comment"># 均值归一化</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">normalize_adj</span><span class="params">(adj)</span>:</span></span><br><span class="line">    <span class="string">"""compute L=D^-1 * (A+I)"""</span></span><br><span class="line">    adj += sp.eye(adj.shape[<span class="number">0</span>])</span><br><span class="line">    degree = np.array(adj.sum(<span class="number">1</span>))</span><br><span class="line">    d_hat = sp.diags(np.power(degree, <span class="number">-1</span>).flatten())</span><br><span class="line">    norm_adj = d_hat.dot(adj)</span><br><span class="line">    <span class="keyword">return</span> norm_adj</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>应用场景</p>
-<p> [半监督分类GCN]：SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS，提出GCN</p>
-<p> [skin GCN]：Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks，体素，一个单独的基于图的相关性分支，给feature加权</p>
-<p> [Graph Attention]：Graph Attention Networks，图注意力网络</p>
-</li>
-</ol>
-<h2 id="Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks"><a href="#Learning-Differential-Diagnosis-of-Skin-Conditions-with-Co-occurrence-Supervision-using-Graph-Convolutional-Networks" class="headerlink" title="Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks"></a>Learning Differential Diagnosis of Skin Conditions with Co-occurrence Supervision using Graph Convolutional Networks</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>皮肤病：发病率高，experts少</li>
-<li>differential diagnosis：鉴别诊断，就是从众多疾病类别中跳出正确类别</li>
-<li>still challenging：timely and accurate</li>
-<li>propose a DLS(deep learning system)<ul>
-<li>clinical images</li>
-<li>multi-label classification</li>
-<li>80 conditions，覆盖病种</li>
-<li>labels incompleteness：用GCN建模成Co-occurrence supervision，benefit top5</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>google的DLS<ul>
-<li>26中疾病</li>
-<li>建模成multi-class classification problem：非0即1的多标签表达破坏了类别间的correlation</li>
-</ul>
-</li>
-<li>our DLS：GCN-CNN<ul>
-<li>multi-label classification task over 80 conditions</li>
-<li>incomplete image labels：GCN that characterizes label co-occurrence supervision</li>
-<li>combine the classification network with the GCN</li>
-<li>数据量：136,462 clinical images</li>
-<li>精度：test on 12,378 user taken images，top-5 acc 93.6%</li>
-</ul>
-</li>
-<li>GCN<ul>
-<li>original application：<ul>
-<li>nodes classification，only a small subset of nodes had their labels available：半监督文本分类问题，只有一部分节点用于训练</li>
-<li>the graph structure is contructed from data</li>
-</ul>
-</li>
-<li>ML-GCN：<ul>
-<li>multi-label classification task</li>
-<li>correlation map（图结构）则是通过数据直接建立</li>
-<li>图节点是每个类别的semantic embeddings</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<ul>
-<li>一个trainable的CNN，将图片转化成feature vector</li>
-<li>一个GCN branch：两层图卷积，都是order-1，图结构是基于训练集计算，无向图，encoding的是图像labels之间的dependency，用它 implicitly supervises the classification task</li>
-<li><p>然后两个feature vector相乘，给出最终结果</p>
-<p><img src="/2021/01/18/GCN/GCN-CNN.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>GCN branch </p>
-<ul>
-<li>two graph convolutional (GC) layers</li>
-<li>一种estimated图结构：build co-occurence graph using only training data<ul>
-<li>node embed semantic meaning to labels</li>
-<li>边的值定义有点像类别间的相关性强度：$e_{ij} = 1(\frac{C(i,j)}{C(i)+C(j)} \geq t)$，分子是有两种标签的样本量，分母是各自样本量</li>
-</ul>
-</li>
-<li>一种designed图结构：intial value是基于有经验的专家构建</li>
-<li>node representation<ul>
-<li>graph branch的输入 label embedding</li>
-<li>用了BioSentVec，一个基于生物医学语料库训练的word bag</li>
-</ul>
-</li>
-<li>GCN<ul>
-<li>randomly initialize</li>
-<li>GCN-0：dim 700</li>
-<li>GCN-1：dim 1024</li>
-<li>GCN-2：dim 2048</li>
-<li>最终得到(cls,2048)的node features</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>cls branch</p>
-<ul>
-<li>input：downsized to 448x448</li>
-<li>resnet101：执行到FC-2048，作为image features</li>
-<li>先训练300 epochs，lr 0.1，step decay</li>
-</ul>
-</li>
-<li><p>GCN-CNN</p>
-<ul>
-<li>先预训练resnet backbone，</li>
-<li>然后整体一起训练300 epochs，lr 0.0003，</li>
-<li>image feature和node features通过dot product融合，得到(cls, )的cls vec，</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>图结构不能random initialization，会使结果变差</li>
-<li><p>基于数据集估计的graph initialization有显著提升</p>
-<p><img src="/2021/01/18/GCN/acc1.png" width="60%;"></p>
-</li>
-<li><p>基于专家设计的graph initialization有进一步提升，但是不明显，考虑到标注工作繁重不太推荐</p>
-<p><img src="/2021/01/18/GCN/acc2.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS"><a href="#SEMI-SUPERVISED-CLASSIFICATION-WITH-GRAPH-CONVOLUTIONAL-NETWORKS" class="headerlink" title="SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS"></a>SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS</h2><ol>
-<li><p>reference</p>
-<ul>
-<li><a href="http://tkipf.github.io/graph-convolutional-networks/，官方博客" target="_blank" rel="noopener">http://tkipf.github.io/graph-convolutional-networks/，官方博客</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/35630785，知乎笔记" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/35630785，知乎笔记</a></li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>场景<ul>
-<li>semi-supervised learning</li>
-<li>on graph-structured data </li>
-<li>比如：在一个citation network，classifying nodes (such as documents)，labels are only available for a small subset of nodes，任务的目标是对大部分未标记的节点预测类别</li>
-</ul>
-</li>
-<li>previous approach<ul>
-<li>Standard Approach<ul>
-<li>loss由两部分组成：单个节点的fitting error，和相邻节点的distance error</li>
-<li>基于一个假设：相邻节点间的label相似</li>
-<li>限制了模型的表达能力</li>
-</ul>
-</li>
-<li>Embedding-based Approach<ul>
-<li>分两步进行：先学习节点的embedding，再基于embedding训练分类器</li>
-<li>不end-to-end，两个task分别执行，不能保证学到的embedding是适合第二个任务的</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>思路<ul>
-<li>train on a supervised target for nodes with labels</li>
-<li>然后通过图的连通性，trainable adjacency matrix，传递梯度给unlabeled nodes</li>
-<li>使得全图得到监督信息</li>
-</ul>
-</li>
-<li>contributions<ul>
-<li>introduce a layer-wise propagation rule，使得神经网络能够operate on graph，实现end-to-end的图结构分类器</li>
-<li>use this graph-based neural network model，训练一个semi-supervised classification of nodes的任务</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>fast approximate convolutions on graphs</p>
-<ul>
-<li><p>given：</p>
-<ul>
-<li>layer input：$H^l$</li>
-<li>layer output：$H^{l+1}$</li>
-<li>kernel pattern：$A$，在卷积里面是fixed kxk 方格，在图里面就是自由度更高的邻接矩阵</li>
-<li>kernel weights：$W$</li>
-</ul>
-</li>
-<li><p>general layer form：$H^{l+1}=f(H^l,A)$</p>
-</li>
-<li><p>inspiration：卷积其实是一种特殊的图，每个grid看作一个节点，每个节点都加上其邻居节点的信息，也就是：</p>
-<script type="math/tex; mode=display">
-  H^{l+1}=\sigma(AH^lW)</script><ul>
-<li>W是在对grids加权</li>
-<li><p>A是在对每个grids加上他的邻接节点</p>
-<p><img src="/2021/01/18/GCN/conv.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>details in practice</p>
-<ul>
-<li>自环：保留自身节点信息，$\hat A=A+I$</li>
-<li>正则化：stabilize the scale，$H^{l+1}=\sigma(\hat D^{-\frac{1}{2}}\hat A\hat D^{-\frac{1}{2}}H^lW)$</li>
-<li><p>一个实验：只利用图的邻接矩阵，就能够学得效果不错</p>
-<p><img src="/2021/01/18/GCN/adj.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>semi-supervised node classification</p>
-<p>  <img src="/2021/01/18/GCN/cls.png" width="60%;"></p>
-<ul>
-<li>思路就是在所有有标签节点上计算交叉熵loss</li>
-<li>模型结构<ul>
-<li>input：X，(b,N,D)</li>
-<li>两层图卷积<ul>
-<li>GCN1-relu：hidden F，(b,N,F)</li>
-<li>GCN2-softmax：output Z，(b,N,cls)</li>
-</ul>
-</li>
-<li>计算交叉熵</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>code</p>
-<ul>
-<li>torch/keras/tf官方都有：<ul>
-<li><a href="https://github.com/tkipf/gcn，论文里给的tf这个链接" target="_blank" rel="noopener">https://github.com/tkipf/gcn，论文里给的tf这个链接</a></li>
-<li>torch和keras的readme里面有说明，initialization scheme, dropout scheme, and dataset splits和tf版本不同，不是用来复现论文</li>
-<li>python setup.py bdist_wheel</li>
-</ul>
-</li>
-<li>数据集：Cora dataset，是一个图数据集，用于分类任务，数据集介绍<a href="https://blog.csdn.net/yeziand01/article/details/93374216" target="_blank" rel="noopener">https://blog.csdn.net/yeziand01/article/details/93374216</a><ul>
-<li>cora.content是所有论文的独自的信息，总共2708个样本，每一行都是论文编号+词向量1433-dim+论文类别</li>
-<li>cora.cites是论文之间的引用记录，A to B的reflect pair，5429行，用于创建邻接矩阵</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2021/01/18/transformers/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/18/transformers/" itemprop="url">transformers</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-18T12:02:51+08:00">
-                2021-01-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/18/transformers/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2021/01/18/transformers/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="startup"><a href="#startup" class="headerlink" title="startup"></a>startup</h2><p>reference1：<a href="https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/Rm899vLhmZ5eCjuy6mW_HA</a></p>
-<p>reference2：<a href="https://zhuanlan.zhihu.com/p/308301901" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/308301901</a></p>
-<ol>
-<li><p>NLP &amp; RNN</p>
-<ul>
-<li>文本涉及上下文关系</li>
-<li>RNN时序串行，建立前后关系</li>
-<li>缺点：对超长依赖关系失效，不好并行化</li>
-</ul>
-</li>
-<li><p>NLP &amp; CNN</p>
-<ul>
-<li>文本是1维时间序列</li>
-<li>1D CNN，并行计算</li>
-<li>缺点：CNN擅长局部信息，卷积核尺寸和长距离依赖的balance</li>
-</ul>
-</li>
-<li><p>NLP &amp; transformer</p>
-<ul>
-<li>对流入的每个单词，建立其对词库的权重映射，权重代表attention</li>
-<li>自注意力机制</li>
-<li><p>建立长距离依赖</p>
-<p><img src="/2021/01/18/transformers/transformer.png" width="30%;"></p>
-</li>
-</ul>
-</li>
-<li><p>put in CV</p>
-<ul>
-<li>插入类似的自注意力层</li>
-<li>完全抛弃卷积层，使用Transformers</li>
-</ul>
-</li>
-<li><p>RNN &amp; LSTM &amp; GRU cell</p>
-<ul>
-<li><p>标准要素：输入x、输出y、隐层状态h</p>
-</li>
-<li><p>RNN</p>
-<ul>
-<li>RNN cell每次接收一个当前输入$x_t$，和前一步的隐层输出$h_{t-1}$，然后产生一个新的隐层状态$h_t$，也是当前的输出$y_t$</li>
-<li>formulation：$y_t, h_t = f(x_t, h_{t-1})$</li>
-<li>same parameters for each time step：同一个cell每个time step的权重共享</li>
-<li><p>一个问题：梯度消失/爆炸</p>
-<ul>
-<li>考虑hidden states’ chain的简化形式：$h_t = \theta^t h_0$，一个sequence forward下去就是same weights multiplied over and over again</li>
-<li>另外tanh也是会让神经元梯度消失/爆炸</li>
-</ul>
-<p><img src="/2021/01/18/transformers/RNN.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>LSTM</p>
-<ul>
-<li><p>key ingredient</p>
-<ul>
-<li>cell：增加了一条cell state workflow，优化梯度流</li>
-<li>gate：通过门结构删选携带信息，优化长距离关联</li>
-</ul>
-<p><img src="/2021/01/18/transformers/LSTM.png" width="25%;"></p>
-</li>
-<li><p>可以看到LSTM的循环状态有两个：细胞状态$c_t$和隐层状态$h_t$，输出的$y_t$仍旧是$h_t$</p>
-</li>
-</ul>
-</li>
-<li><p>GRU</p>
-<ul>
-<li><p>LSTM的变体，仍旧是门结构，比LSTM结构简单，参数量小，据说更好训练</p>
-<p><img src="/2021/01/18/transformers/GRU.png" width="25%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>papers</p>
-<p>[一个列了很多论文的主页] <a href="https://github.com/dk-liang/Awesome-Visual-Transformer" target="_blank" rel="noopener">https://github.com/dk-liang/Awesome-Visual-Transformer</a></p>
-<p>[经典考古]</p>
-<p>​    * [Seq2Seq 2014] Sequence to Sequence Learning with Neural Networks，Google，最早的encoder-decoder stacking LSTM用于机翻</p>
-<p>​    * [self-attention/Transformer 2017] Transformer: Attention Is All You Need，Google，</p>
-<p>​    * [bert 2019] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding，Google，NLP，输入single sentence/patched sentences，用Transformer encoder提取bidirectional cross sentence representation，用输出的第一个logit进行分类</p>
-<p>[综述]</p>
-<p>​    * [综述2020] Efficient Transformers: A Survey，Google，</p>
-<p>​    * [综述2021] Transformers in Vision: A Survey，迪拜，</p>
-<p>​    * [综述2021] A Survey on Visual Transformer，华为，</p>
-<p>[classification]</p>
-<p>​    * [ViT 2020] AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE，Google，分类任务，用transformer的encoder替换CNN再加分类头，每个feature patch作为一个input embedding，channel dim是vector dim，可以看到跟bert基本一样，就是input sequence换成patch，后续基于它的提升有DeiT、LV-ViT</p>
-<p>​    * [BotNet 2021] Bottleneck Transformers for Visual Recognition，Google，将CNN backbone最后几个stage替换成MSA</p>
-<p>​    * [CvT 2021] CvT: Introducing Convolutions to Vision Transformers，微软，</p>
-<p>​    * [Swin 2021] Swin Transformer: Hierarchical Vision Transformer using Shifted Windows，微软</p>
-<p>​    * [PVT2021] Pyramid Vision Transformer: A Versatile Backbone for Dense Prediction without Convolutions，跟swin一样也是multi-scale features</p>
-<p>[detection]</p>
-<p>​    * [DeTR 2020] DeTR: End-to-End Object Detection with Transformers，Facebook，目标检测，CNN+transformer(en-de)+预测头，每个feature pixel作为一个input embedding，channel dim是vector dim</p>
-<p>​    * [Deformable DETR]</p>
-<p>​    * [Anchor DETR] </p>
-<p>​    * 详见《det-transformers》</p>
-<p>[segmentation]</p>
-<p>​    * [SETR] Rethinking Semantic Segmentation from a Sequence-to-Sequence Perspective with Transformers，复旦，水，感觉就是把FCN的back换成transformer</p>
-<p>[Unet+Transformer]：</p>
-<p>​    * [UNETR 2021] UNETR: Transformers for 3D Medical Image Segmentation，英伟达，直接使用transformer encoder做unet encoder</p>
-<p>​    * [TransUNet 2021] TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation，encoder stream里面加transformer block</p>
-<p>​    * [TransFuse 2021] TransFuse: Fusing Transformers and CNNs for Medical Image Segmentation，大学，CNN feature和Transformer feature进行bifusion</p>
-<p>​    * 详见《seg-transformers》</p>
-</li>
-</ol>
-<h2 id="Sequence-to-Sequence"><a href="#Sequence-to-Sequence" class="headerlink" title="Sequence to Sequence"></a>Sequence to Sequence</h2><ol>
-<li><p>[a keras tutorial][<a href="https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html" target="_blank" rel="noopener">https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html</a>]</p>
-<ul>
-<li><p>general case</p>
-<ul>
-<li>extract the information of the entire input sequence</li>
-<li>then start generate the output sequence</li>
-</ul>
-</li>
-<li><p>seq2seq model workflow</p>
-<ul>
-<li>a (stacking of) RNN layer acts as encoder<ul>
-<li>processes the input sequence</li>
-<li>returns its own internal state：不要RNN的outputs，只要internal states</li>
-<li>encoder编码得到的东西叫Context Vector</li>
-</ul>
-</li>
-<li>a (stacking of) RNN layer acts as decoder<ul>
-<li>given previous characters of the target sequence</li>
-<li>it is trained to predict the next characters of the target sequence</li>
-<li>teacher forcing：<ul>
-<li>输入是target sequence，训练目标是使模型输出offset by one timestep的target sequence</li>
-<li>也可以不teacher forcing：直接把预测作为next step的输入</li>
-</ul>
-</li>
-<li>Context Vector的同质性：每个step，decoder都读取一样的Context Vector作为initial_state</li>
-</ul>
-</li>
-<li>when inference<ul>
-<li>第一步获取input sequence的state vectors</li>
-<li>repeat<ul>
-<li>给decoder输入input states和out sequence(begin with a 起始符)</li>
-<li>从prediction中拿到next character</li>
-</ul>
-</li>
-<li>append the character to the output sequence</li>
-<li>until：得到end character / hit the character limit</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>implementation</p>
-<p>  <a href="https://github.com/AmberzzZZ/transformer/blob/master/seq2seq.py" target="_blank" rel="noopener">https://github.com/AmberzzZZ/transformer/blob/master/seq2seq.py</a></p>
-</li>
-</ul>
-</li>
-<li><p>one step further</p>
-<ul>
-<li>改进方向<ul>
-<li>bi-directional RNN：粗暴反转序列，有效涨点</li>
-<li>attention：本质是将encoder的输出Context Vector加权</li>
-<li>ConvS2S：还没看</li>
-</ul>
-</li>
-<li>主要都是针对RNN的缺陷提出</li>
-</ul>
-</li>
-<li><p>动机</p>
-<ul>
-<li>present a general end-to-end sequence learning approach<ul>
-<li>multi-layered LSTMs</li>
-<li>encode the input seq to a fix-dim vector</li>
-<li>decode the target seq from the fix-dim vector</li>
-</ul>
-</li>
-<li>LSTM did not have difficulty on long sentences </li>
-<li><p>reversing the order of the words improved performance</p>
-<p><img src="/2021/01/18/transformers/seq2seq.png" width="65%;"></p>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>standard  RNN</p>
-<ul>
-<li><p>given a sequence $(x_1, x_2, …, x_T)$</p>
-</li>
-<li><p>iterating：</p>
-<script type="math/tex; mode=display">
-  h_t = sigm(W^{hx} x_t + W^{hh}h_{t-1})\\
-  y_t = W^{yh} h_t</script></li>
-<li><p>如果输入、输出的长度事先已知且固定，一个RNN网络就能建模seq2seq model了</p>
-</li>
-<li><p>如果输入、输出的长度不同、并且服从一些更复杂的关系？就得用两个RNN网络，一个将input seq映射成fixed-sized vector，另一个将vector映射成output seq，but long-term-dependency issue</p>
-</li>
-</ul>
-</li>
-<li><p>LSTM</p>
-<ul>
-<li>LSTM是始终带着全部seq的信息的，如上图那样</li>
-</ul>
-</li>
-<li><p>our actual model</p>
-<ul>
-<li>use two LSTMs：encoder-decoder能够增加参数量</li>
-<li>an LSTM with four layers：deeper</li>
-<li>input sequence倒序：真正的句首更接近trans的句首，makes it easy for SGD to establish communication</li>
-</ul>
-</li>
-<li><p>training details</p>
-<ul>
-<li>LSTM：4 layers，1000 cells</li>
-<li>word-embedding：1000-dim，(input vocab 160,000, output vocab 80,000)</li>
-<li>naive softmax</li>
-<li>uniform initialization：(-0.08, 0.08)</li>
-<li>SGD，lr=0.7，half by every half epoch，total 7.5 epochs</li>
-<li>gradient norm [10, 25]</li>
-<li>all sentences in a minibatch are roughly of the same length</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Transformer-Attention-Is-All-You-Need"><a href="#Transformer-Attention-Is-All-You-Need" class="headerlink" title="Transformer: Attention Is All You Need"></a>Transformer: Attention Is All You Need</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>sequence2sequence models<ul>
-<li>encoder + decoder</li>
-<li>RNN / CNN + an attention path</li>
-</ul>
-</li>
-<li>we propose Transformer<ul>
-<li>base solely on attention mechanisms</li>
-<li>more parallelizable and less training time</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>sequence modeling<ul>
-<li>主流：RNN，LSTM，gated<ul>
-<li>align the positions to computing time steps</li>
-<li>sequential本质阻碍并行化</li>
-</ul>
-</li>
-<li>Attention mechanisms acts as a integral part<ul>
-<li>in previous work used in conjunction with the RNN</li>
-</ul>
-</li>
-<li>为了并行化<ul>
-<li>some methods use CNN as basic building blocks</li>
-<li>difficult to learn dependencies between distant positions</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>we propose Transformer<ul>
-<li>rely entirely on an attention mechanism</li>
-<li>draw global dependencies</li>
-</ul>
-</li>
-<li>self-attention<ul>
-<li>relating different positions of a single sequence</li>
-<li>to generate a overall representation of the sequence</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>encoder-decoder </p>
-<ul>
-<li>encoder：doc2emb<ul>
-<li>given an input sequence of symbol representation $(x_1, x_2, …, x_n)$</li>
-<li>map to a sequence of continuous representations  $(z_1, z_2, …, z_n)$，(embeddings)</li>
-</ul>
-</li>
-<li>decoder：hidden layers<ul>
-<li>given embeddings z</li>
-<li>generate an output sequence  $(y_1, y_2, …, y_m)$ one element at a time</li>
-<li>the previous generated symbols are served as additional input when computing the current time step</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Transformer Architecture</p>
-<ul>
-<li><p>Transformer use </p>
-<ul>
-<li>for both encoder and decoder</li>
-<li><p>stacked self-attention and point-wise fully-connected layers</p>
-<p><img src="/2021/01/18/transformers/architecture.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-<li><p>encoder</p>
-<ul>
-<li>N=6 identical layers</li>
-<li>each layer has 2 sub-layers<ul>
-<li>multi-head self-attention mechanism</li>
-<li>postision-wise fully connected layer</li>
-</ul>
-</li>
-<li>residual<ul>
-<li>for two sub-layers independently</li>
-<li>add &amp; layer norm</li>
-</ul>
-</li>
-<li>d=512</li>
-</ul>
-</li>
-<li><p>decoder</p>
-<ul>
-<li>N=6 identical layers</li>
-<li>3 sub-layers<ul>
-<li>[new] masked multi-head self-attention：combine了先验知识，output embedding只能基于在它之前的time-step的embedding计算</li>
-<li>multi-head self-attention mechanism</li>
-<li>postision-wise fully connected layer</li>
-</ul>
-</li>
-<li>residual</li>
-</ul>
-</li>
-<li><p>attention</p>
-<ul>
-<li>reference：<a href="https://bbs.cvmart.net/articles/4032" target="_blank" rel="noopener">https://bbs.cvmart.net/articles/4032</a></li>
-<li>step1：project embedding to query-key-value pairs<ul>
-<li>$Q = W_Q^{d<em>d} A^{d</em>N}$</li>
-<li>$K = W_K^{d<em>d} A^{d</em>N}$</li>
-<li>$V = W_V^{d<em>d} A^{d</em>N}$</li>
-</ul>
-</li>
-<li>step2：scaled dot-product attention<ul>
-<li>$A^{N*N}=softmax(K^TQ/\sqrt{d})$</li>
-<li>$B^{d<em>N} = V^{d</em>N}A^{N*N}$</li>
-</ul>
-</li>
-<li>multi-head attention <ul>
-<li>以上的step1&amp;step2操作performs a single attention function</li>
-<li>事实上我们可以用多组projection得到多组$\{Q,K,V\}^h$，in parallel地执行attention运算，得到多组$\{B^{d*N}\}^h$</li>
-<li>concat &amp; project<ul>
-<li>concat in d-dim：$B\in R^{(d<em>h)</em>N}$</li>
-<li>linear project：$out = W^{d<em>(d</em>h)} B$</li>
-</ul>
-</li>
-<li>h=8</li>
-<li>$d_{in}/h=64$：embedding的dim</li>
-<li>$d_{out}=64$：query-key-value的dim</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>positional encoding</p>
-<ul>
-<li><p>数学本质是一个hand-crafted的映射矩阵$W^P$和one-hot的编码向量$p$：</p>
-<script type="math/tex; mode=display">
-  \left[ \begin{array}{ccc}
-  a\\
-  e
-  \end{array} 
-  \right ]
-  =
-  [W^I, W^P] 
-  \left[ \begin{array}{ccc}
-  x\\
-  p
-  \end{array} 
-  \right ]</script></li>
-<li><p>用PE表示e</p>
-<p>  <img src="/2021/01/18/transformers/PE.png" width="35%;"></p>
-<ul>
-<li>pos是sequence x上的position</li>
-<li>2i和2i+1是embedding a上的idx</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>point-wise feed-forward network</p>
-<ul>
-<li>fc-ReLU-fc</li>
-<li>dim_fc=2048</li>
-<li>dim_in &amp; dim_out = 512</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>运行过程</p>
-<ul>
-<li><p>encoder是可以并行计算的</p>
-<ul>
-<li>输入是sequence embedding和positional embedding：$A\in R^{d*N}$</li>
-<li>经过repeated blocks</li>
-<li>输出是另外一个sequence：$B\in R^{d*N}$</li>
-<li>self-attention：Q、K、V是一个东西</li>
-<li>encoder的本质就是在解析自注意力：</li>
-<li>并行的全局两两比较，一步到位<ul>
-<li>RNN要by step</li>
-</ul>
-</li>
-<li>CNN要stack layers</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<ul>
-<li><p>decoder是在训练阶段是可以并行的，在inference阶段by step</p>
-<ul>
-<li><p>输入是encoder的输出和上一个time-step decoder的输出embedding</p>
-</li>
-<li><p>输出是当前time-step对应position的输出词的概率</p>
-</li>
-<li><p>第一个attention layer是out embedding的self-attention：要实现像RNN一样依次解码出来，每个time step要用到上一个位置的输出作为输入——masking</p>
-<ul>
-<li>given输入sequence是\ I have a cat，5个元素</li>
-<li>那么mask就是$R^{5*5}$的下三角矩阵</li>
-<li><p>输入embedding经过transformation变成Q、K、V三个矩阵</p>
-</li>
-<li><p>仍旧是$A=K^TQ$计算attention</p>
-</li>
-<li><p>这里有一些attention是非法的：位置靠前的query只能用到比他位置更靠前的query，因此要乘上mask矩阵：$A=M A$</p>
-</li>
-<li><p>softmax：$A=softmax(A)$</p>
-</li>
-<li><p>scale：$B = VA$</p>
-</li>
-<li><p>concat &amp; projection</p>
-<p><img src="/2021/01/18/transformers/mask.png" width="60%;"></p>
-<ul>
-<li>第二个attention layer是in &amp; out sequence的注意力，其key和value来自encoder，query来自上一个decoder block的输出</li>
-</ul>
-</li>
-</ul>
-<p><img src="/2021/01/18/transformers/flow.jpeg" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-<ol>
-<li><p>why self-attention</p>
-<ul>
-<li>衡量维度<ul>
-<li>total computational complexity per layer</li>
-<li>amount of computation that can be parallelized</li>
-<li>path-length between long-range dependencies</li>
-</ul>
-</li>
-<li>given input sequence with length N &amp; dim $d_{in}$，output sequence with dim $d_{out}$<ul>
-<li>RNN need N sequencial operations of $W\in R^{d_{in} * d_{out}}$</li>
-<li>CNN need N/k stacking layers of $d_{in}<em>d_{out}$ sequence operations of $W\in R^{k</em>k}$，generally是RNN的k倍</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training</p>
-<ul>
-<li>optimizer：$Adam(lr, \beta_1=0.9, \beta_2=0.98, \epsilon=10^{-9})$</li>
-<li>lrschedule：warmup by 4000 steps，then decay</li>
-<li><p>dropout</p>
-<ul>
-<li>residual dropout：就是stochastic depth</li>
-<li>dropout to the sum of embeddings &amp; PE for both encoder and decoder</li>
-<li>drop_rate = 0.1</li>
-</ul>
-</li>
-<li><p>label smoothing：smooth_factor = 0.1</p>
-</li>
-</ul>
-</li>
-<li><p>实验</p>
-<ul>
-<li>A：vary the number of attention heads，发现多了少了都hurts</li>
-<li>B：reduce the dim of attention key，发现hurts</li>
-<li>C &amp; D：大模型+dropout helps</li>
-<li>E：learnable &amp; sincos PE：nearly identical</li>
-<li><p>最后是big model的参数</p>
-<p><img src="/2021/01/18/transformers/transformer_arch.png" width="65%;"></p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding"><a href="#BERT-Pre-training-of-Deep-Bidirectional-Transformers-for-Language-Understanding" class="headerlink" title="BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding"></a>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>BERT：Bidirectional Encoder Representations from Transformers<ul>
-<li>Bidirectional</li>
-<li>Encoder</li>
-<li>Representations</li>
-<li>Transformers</li>
-</ul>
-</li>
-<li>workflow<ul>
-<li>pretrain bidirectional representations from unlabeled text</li>
-<li>tune with one additional output layer to obtain the model</li>
-</ul>
-</li>
-<li>SOTA<ul>
-<li>GLUE score 80.5%</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>pretraining is effective in NLP tasks<ul>
-<li>feature-based method：use task-specfic architectures，仅使用pretrained model的特征</li>
-<li>fine-tuining method：直接fine-tune预训练模型</li>
-<li>两种方法在预训练阶段训练目标一致：use unidirectional language models to learn general language representations</li>
-<li>reduce the need for many heavily-engineered task- specific architectures</li>
-</ul>
-</li>
-<li>current methods’ limitations<ul>
-<li>unidirectional：<ul>
-<li>limit the choice of architectures</li>
-<li>事实上token的上下文都很重要，不能只看上文</li>
-</ul>
-</li>
-<li>简单的concat两个independent的L2R和R2L模型（biRNN）<ul>
-<li>independent</li>
-<li>shallow concat</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>BERT<ul>
-<li>masked language model：在一个sequence中预测被遮挡的词</li>
-<li>next sentence prediction：trains text-pair representations</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>two steps</p>
-<ul>
-<li>pre-training<ul>
-<li>unlabeled data</li>
-<li>different pretraining tasks</li>
-</ul>
-</li>
-<li>fine-tuning<ul>
-<li>labeled data of the downstream tasks</li>
-<li>fine-tune all the params</li>
-</ul>
-</li>
-<li><p>两个阶段的模型，只有输出层不同</p>
-<ul>
-<li>例如问答模型</li>
-<li>pretraining阶段，输入是两个sentence，输入的起始有一个CLS symbol，两个句子的分隔有一个SEP symbol</li>
-<li>fine-tuning阶段，输入分别是问和答，【输出是啥？】</li>
-</ul>
-<p><img src="/2021/01/18/transformers/bert.png" width="65%;"></p>
-</li>
-</ul>
-</li>
-<li><p>architecture</p>
-<ul>
-<li><p>multi-layer bidirectional Transformer encoder</p>
-<ul>
-<li>number of transfomer blocks L</li>
-<li>hidden size H</li>
-<li>number of self-attention heads A</li>
-<li>FFN dim 4H</li>
-</ul>
-</li>
-<li><p>Bert base：L=12，H=768，A=12</p>
-</li>
-<li><p>Bert large：L=24，H=1024，A=16</p>
-</li>
-<li><p>input/output representations</p>
-<ul>
-<li>a single sentence / two packed up sentence：<ul>
-<li>拼接的sentence用特殊token SEP衔接</li>
-<li>segment embedding：同时add a learned embedding to every token indicating who it belongs</li>
-</ul>
-</li>
-<li>use WordPiece embeddings with 30000 token vocabulary</li>
-<li>输入sequence的第一个token永远是一个特殊符号CLS，它对应的final state输出作为sentence整体的representation，用于分类任务</li>
-<li><p>overall网络的input representation是通过将token embeddings拼接上上特殊符号，加上SE和PE得到</p>
-<p><img src="/2021/01/18/transformers/bert input.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>pre-training</p>
-<ul>
-<li>two unsupervised tasks<ul>
-<li>Masked LM (MLM)<ul>
-<li>mask some percentage of the input tokens at random：15%<ul>
-<li>80%的概率用MASK token替换</li>
-<li>10%的概率用random token替换</li>
-<li>10%的概率unchanged</li>
-</ul>
-</li>
-<li>then predict those masked tokens</li>
-<li>the final hidden states corresponding to the masked tokens are fed into a softmax</li>
-<li>相比较于传统的left2right/right2left/concat模型<ul>
-<li>既有前文又有后文</li>
-<li>只预测masked token，而不是全句预测</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Next Sentence Prediction (NSP)<ul>
-<li>对于relationship between sentences：<ul>
-<li>例如question&amp;answer，句子推断</li>
-<li>not direatly captured by language modeling，模型直观学习的是token relationship</li>
-</ul>
-</li>
-<li>binarized next sentence prediction task<ul>
-<li>选取sentence A&amp;B：<ul>
-<li>50%的概率是真的上下文（IsNext）</li>
-<li>50%的概率是random（NotNext）</li>
-</ul>
-</li>
-<li>构成了一个二分类问题：仍旧用CLS token对应的hidden state C来预测</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>fine-tuning</p>
-<ul>
-<li>BERT兼容many downstream tasks：single text or text pairs</li>
-<li>直接组好输入，end-to-end fine-tuning就行</li>
-<li>输出还是用CLS token对应的hidden state C来预测，接分类头</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="A-Survey-on-Visual-Transformer"><a href="#A-Survey-on-Visual-Transformer" class="headerlink" title="A Survey on Visual Transformer"></a>A Survey on Visual Transformer</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>provide a comprehensive overview of the recent advances in visual transformers </li>
-<li>discuss the potential directions for further improvement</li>
-<li><p>develop timeline</p>
-<p><img src="/2021/01/18/transformers/timeline.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-<li><p>按照应用场景分类</p>
-<ul>
-<li>backbone：分类</li>
-<li>high/mid-level vision：通常是语义相关的，检测/分割/姿态估计</li>
-<li>low-level vision：对图像本身进行操作，超分/图像生成，目前应用较少</li>
-<li><p>video processing</p>
-<p><img src="/2021/01/18/transformers/category.png" width="85%;"></p>
-</li>
-</ul>
-</li>
-<li><p>revisiting transformer</p>
-<ul>
-<li><p>key-concepts：sentence、embedding、positional encoding、encoder、decoder、self-attention layer、encoder-decoder attention layer、multi-head attention、feed-forward neural network</p>
-<p><img src="/2021/01/18/transformers/revisit transformer.png" width="45%;"></p>
-</li>
-<li><p>self-attention layer</p>
-<ul>
-<li>input vector is transformed into 3 vectors<ul>
-<li>input vector is embedding+PE(pos,i)：pos是word在sequence中的位置，i是PE-element在embedding vec中的位置</li>
-<li>query vec q</li>
-<li>key vec k</li>
-<li>value vec v</li>
-<li>$d_q = d_k = d_v = d_{model} = 512$</li>
-</ul>
-</li>
-<li>then calculate：$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$</li>
-<li>encoder-decoder attention layer<ul>
-<li>K和V是从encoder中拿到</li>
-<li>Q是从前一层拿到</li>
-<li>计算是相似的</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>multi-head attention<ul>
-<li>一个attention是一个softmax，对应了一对强相关，同时抑制了其他word的相关性</li>
-<li>考虑一个词往往与几个词强相关，这就需要多个attention</li>
-<li>multi-head：different QKV matrices are used for different heads</li>
-<li>given a input vector，the number of heads h<ul>
-<li>先产生h个<q,k,v> pairs</q,k,v></li>
-<li>$d_q=d_k=d_v=d_{model}/h=64$</li>
-<li>这h个pair，分别计算attention vector，得到h个[b,d]的context vector</li>
-<li>concat along-d-axis and linear projection to final [b,d] vector</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>residual &amp; layer-norm：layer-norm在residual-add以后</li>
-<li>feed-forward network<ul>
-<li>fc-GeLU-fc</li>
-<li>$d_h=2048$</li>
-</ul>
-</li>
-<li>final-layer in decoder<ul>
-<li>dense+softmax</li>
-<li>$d_{words}=$ number of words in the vocabulary </li>
-</ul>
-</li>
-<li>when applied in CV tasks<ul>
-<li>most transformers adopt the original transformer’s encoder module</li>
-<li>used as a feature selector</li>
-<li>相比较于CNN，能够capture long-distance characteristics，derive global information</li>
-<li>相比较于RNN，能够并行计算</li>
-</ul>
-</li>
-<li>计算量<ul>
-<li>首先是三个线性层：线性时间复杂度O(n)，计算量与$d_{model}$成正比</li>
-<li>然后是self-attention层：QKV矩阵乘法运算，平方时间复杂度O(n^2)</li>
-<li>multi-head的话，还有一个线性层：平方时间复杂度O(n^2)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>revisiting transformers for NLP</p>
-<ul>
-<li>最早期的RNN + attention：rnn的sequential本质影响了长距离/并行化/大模型</li>
-<li><p>transformer的solely attention结构：解决以上问题，促进了large pre-trained models (PTMs) for NLP</p>
-</li>
-<li><p>BERT and its variants </p>
-<ul>
-<li>are a series of PTMs built on the multi-layer transformer encoder architecture </li>
-<li>pre-trained<ul>
-<li>Masked language modeling </li>
-<li>Next sentence prediction </li>
-</ul>
-</li>
-<li>fine-tuned<ul>
-<li>add an output layer</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Generative Pre-trained Transformer models (GPT)<ul>
-<li>are another type of PTMs based on the transformer decoder architecture</li>
-<li>masked self-attention mechanisms </li>
-<li>pre-trained<ul>
-<li>与BERT最大的不同是有向性</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>visual transformer</p>
-<ul>
-<li><p>【category1】: backbone for image classification</p>
-<ul>
-<li>transformer的输入是tokens，在NLP里是embedding形式的分词序列，在CV里就是representing a certain semantic concept的visual token<ul>
-<li>visual token可以来自CNN的feature</li>
-<li>也可以直接来自image的小patch</li>
-</ul>
-</li>
-<li><p>purely use transformer来做image classification任务的模型有iGPT、ViT、DeiT</p>
-</li>
-<li><p>iGPT</p>
-<ul>
-<li>pretraining stage + finetuning stage</li>
-<li>pre-training stage<ul>
-<li>self-supervised：自监督，所以结果较差</li>
-<li>given an unlabeled dataset</li>
-<li>train the model by minimizing the -log(density)，感觉是在force光栅排序正确</li>
-</ul>
-</li>
-<li>fine-tuning stage<ul>
-<li>average pool + fc + softmax</li>
-<li>jointly train with L_gen &amp; L_CE</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>ViT<ul>
-<li>pre-trained on large datasets<ul>
-<li>standard transformer’s encoder + MLP head</li>
-<li>treats all patches equally</li>
-<li>有一个类似BERT class token的东西<ul>
-<li>从训练的角度，gather knowledge of the entire class</li>
-<li>inference的时候，只拿了这第一个logit用来做预测</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>fine-tuning<ul>
-<li>换一个zero-initialized的MLP head</li>
-<li>use higher resolution &amp; 插值pe</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>DeiT<ul>
-<li>Data-efficient image transformer </li>
-<li>better performance with <ul>
-<li>a more cautious training strategy </li>
-<li>and a token-based distillation</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>【category2】: High/Mid-level Vision </p>
-</li>
-<li><p>【category3】: Low-level Vision </p>
-</li>
-<li><p>【category4】: Video Processing </p>
-</li>
-<li><p>efficient transformer：瘦身&amp;加速</p>
-<ul>
-<li>Pruning and Decomposition </li>
-<li>Knowledge Distillation </li>
-<li>Quantization </li>
-<li><p>Compact Architecture Design </p>
-<p><img src="/2021/01/18/transformers/efficient.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE"><a href="#ViT-AN-IMAGE-IS-WORTH-16X16-WORDS-TRANSFORMERS-FOR-IMAGE-RECOGNITION-AT-SCALE" class="headerlink" title="ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE"></a>ViT: AN IMAGE IS WORTH 16X16 WORDS: TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>attention in vision<ul>
-<li>either in conjunction with CNN</li>
-<li>or replace certain part of a CNN</li>
-<li>overall都还是CNN-based</li>
-</ul>
-</li>
-<li>use a pure transformer to sequence of image patches</li>
-<li>verified on image classification tasks in supervised fashion</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>transformer lack some inductive biases inherent to CNNs，所以在insufficient data上not generalize well</li>
-<li>however large scale training trumps inductive bias，大数据集上ViT更好</li>
-<li>naive application of self-attention<ul>
-<li>建立pixel之间的两两关联：计算量太大了</li>
-<li>需要approximation：local/改变size</li>
-</ul>
-</li>
-<li>we use transformer<ul>
-<li>wih global self-attention</li>
-<li>to full-sized images</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<p> <img src="/2021/01/18/transformers/ViT.png" width="65%;"></p>
-<ul>
-<li><p>input 1D-embedding sequence</p>
-<ul>
-<li>将image $x\in R^{HWC}$ 展开成patches $\{x_p \in R^{P^2C}\}$</li>
-<li>thus sequence length $N=HW/P^2$</li>
-<li>patch embedding：<ul>
-<li>use a trainable linear projection</li>
-<li>fixed dimension size through-all</li>
-</ul>
-</li>
-<li>position embedding：<ul>
-<li>add to patch embedding</li>
-<li>standard learnable 1D position embedding</li>
-</ul>
-</li>
-<li>prepended embedding：<ul>
-<li>前置的learnable embedding $x_{class}$</li>
-<li>similar to BERT’s class token</li>
-</ul>
-</li>
-<li>以上三个embedding组合起来，作为输入sequence</li>
-</ul>
-</li>
-<li><p>transformer encoder</p>
-<ul>
-<li>follow the original Transformer </li>
-<li>交替的MSA和MLP</li>
-<li>layer norm LN</li>
-<li>residual</li>
-<li><p>GELU</p>
-<p><img src="/2021/01/18/transformers/ViT formulation.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>hybrid architecture</p>
-<ul>
-<li>input sequence也可以来源于CNN的feature maps</li>
-<li>patch size可以是1x1</li>
-</ul>
-</li>
-<li><p>classification head</p>
-<ul>
-<li>attached to $z_L^0$：是class token用来做预测</li>
-<li>pre-training的时候是MLP</li>
-<li>fine-tuning的时候换一个zero-initialized的single linear layer</li>
-</ul>
-</li>
-<li><p>workflow</p>
-<ul>
-<li>typically先pre-train on large datasets</li>
-<li>再fine-tune to downstream tasks</li>
-<li>fine-tune的时候替换一个zero-initialized的新线性分类头</li>
-<li>when feeding images with higher resolution<ul>
-<li>keep the patch size</li>
-<li>results in larger sequence length</li>
-<li>这时候pre-trained PE就no longer meaningful了</li>
-<li>we therefore perform 2D interpolation基于它在原图上的位置</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>training details</p>
-<ul>
-<li>Adam：$\beta_1=0.9，\beta_2=0.999$</li>
-<li>batch size 4096</li>
-<li>high weight decay 0.1</li>
-<li>linear lr warmup &amp; decay</li>
-</ul>
-</li>
-<li><p>fine-tuning details</p>
-<ul>
-<li>SGDM</li>
-<li>cosine LR</li>
-<li>no weight decay</li>
-<li>【？？？？】average 0.9999</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="win-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows"><a href="#win-Transformer-Hierarchical-Vision-Transformer-using-Shifted-Windows" class="headerlink" title="win Transformer: Hierarchical Vision Transformer using Shifted Windows"></a>win Transformer: Hierarchical Vision Transformer using Shifted Windows</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>use Transformer as visual tasks’ backbone</li>
-<li>challenges of Transformer in vision domain<ul>
-<li>large variations of scales of the visual entities</li>
-<li>high resolution of pixels</li>
-</ul>
-</li>
-<li>we propose hierarchical Transformer<ul>
-<li>shifted windows</li>
-<li>self-attention in local windows</li>
-<li>cross-window connection</li>
-</ul>
-</li>
-<li>verified on<ul>
-<li>classification：ImageNet top1 acc 86.4</li>
-<li>detection：COCO box-MAP 58.7</li>
-<li>segmentation：ADE20K</li>
-<li>this paper主要介绍分类，检测是以swin作为backbone，用MaskRCNN等二阶段架构来训练的，分割是以swin作为backbone，用UperNet去训练的，具体模型配置official repo的readme里面有详细列表</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>when transfer Transformer’s high performance in NLP domain to CV domain<ul>
-<li>differences between the two modalities <ul>
-<li>scale：NLP里面，word tokens serves as the basic element，但是CV里面，patch的形态大小都是可变的，previous methods里面，都是统一设定固定大小的patch token</li>
-<li>resolution：主要问题就是self-attention的计算复杂度，是image size的平方</li>
-</ul>
-</li>
-<li>we propose Swin Transformer<ul>
-<li>hierarchial feature maps</li>
-<li>linear computatoinal complexity to image size</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>hierarchical<ul>
-<li>start from small patches</li>
-<li>merge in deeper layers</li>
-<li>所以对不同尺度的特征patch进行了融合</li>
-</ul>
-</li>
-<li><p>linear complexity</p>
-<ul>
-<li>compute self-attention locally in each window</li>
-<li>每个window的number of patches是设定好的，window数是与image size成正比的</li>
-<li>所以是线性</li>
-</ul>
-<p><img src="/2021/01/18/transformers/hierarchical.png" width="45%;"></p>
-</li>
-<li><p>shifted window approach</p>
-<ul>
-<li>跨层的window shift，建立起相邻window间的桥梁</li>
-<li><p>【QUESTION】all query patches within a window share the same key set</p>
-<p><img src="/2021/01/18/transformers/shifted window.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-<li><p>previous attemptations of Transformer</p>
-<ul>
-<li>self-attention based backbone architectures<ul>
-<li>将部分/全部conv layers替换成self-attention</li>
-<li>模型主体架构还是ResNet</li>
-<li>slightly better acc</li>
-<li>larger latency caused by self-att</li>
-</ul>
-</li>
-<li>self-attention complement CNNs<ul>
-<li>作为additional block，给到backbone/head，提供长距离信息</li>
-<li>有些检测/分割网络也开始用了transformer的encoder-decoder结构</li>
-</ul>
-</li>
-<li>transformer-based vision backbones<ul>
-<li>主要就是ViT及其衍生品</li>
-<li>ViT requires large-scale training sets</li>
-<li>DeiT introduces training strategies</li>
-<li>但是还存在high resolution计算量的问题</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/01/18/transformers/Swin.png" width="75%;"></p>
-<ul>
-<li>Swin-T：tiny version</li>
-<li>第一步是patch partition：<ul>
-<li>将RGB图切成non-overlapping patches</li>
-<li>patches：token，basic element</li>
-<li>feature input dim：with patch size 4x4，dim=4x4x3=48</li>
-</ul>
-</li>
-<li>然后是linear embedding layer<ul>
-<li>将raw feature re-projection到指定维度</li>
-<li>指定维度C：default=96</li>
-</ul>
-</li>
-<li>接下来是Swin Transformer blocks<ul>
-<li>the number of tokens maintain</li>
-</ul>
-</li>
-<li>patch merging layers负责reduce the number of tokens<ul>
-<li>第一个patch merging layer concat 所有2x2的neighbor patches：4C-dim vec each</li>
-<li>然后用了一个线性层re-projection</li>
-<li>number of tokens（resolution）：（H/4*W/4）/4 = （H/8*W/8），跟常规的CNN一样变化的</li>
-<li>token dims：2C</li>
-<li>后面接上一个Transformer blocks</li>
-<li>合起来叫stage2（stage3、stage4）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Swin Transformer blocks</p>
-<ul>
-<li><p>跟原始的Transformer block比，就是把原始的MSA替换成了window-based的MSA</p>
-</li>
-<li><p>原始的attention：global computation leads to quadratic complexity</p>
-</li>
-<li><p>window-based attention：</p>
-<ul>
-<li>attention的计算只发生在每个window内部</li>
-<li>non-overlapping partition</li>
-<li>很显然lacks connections across windows </li>
-</ul>
-</li>
-<li><p>shifted window partitioning in successive blocks</p>
-<ul>
-<li><p>两个attention block</p>
-</li>
-<li><p>第一个用常规的window partitioning strategy：从左上角开始，take M=4，window size 4x4（一个window里面包含4x4个patch）</p>
-</li>
-<li><p>第二层的window，基于前一层，各平移M/2</p>
-</li>
-<li><p>introduce connections between neighbor non-overlapping windows in the previous layer</p>
-</li>
-<li><p>efficient computation</p>
-<ul>
-<li><p>shifted window会导致window尺寸不一致，不利于并行计算</p>
-<p><img src="/2021/01/18/transformers/efficient-SW.png" width="55%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>relative position bias</p>
-<ul>
-<li>我们在MxM的window内部计算local attention：也就是input sequence的time-step是$M^2$</li>
-<li>Q、K、V $\in R ^ {M^2 d}$</li>
-<li>$Attention(Q,K,V)=Softmax(QK^T/\sqrt{d}+B)V$</li>
-<li>这个B作为local的position bias，在二维上，在每个轴上的变化范围[-M+1,M-1]</li>
-<li>we parameterized a smaller-sized bias matrix $\hat B\in R ^{(2M-1)*(2M-1)}$</li>
-<li>values in $B \in R ^ {M^2*M^2}$ are taken from $\hat B$</li>
-<li>the learnt relative position bias可以用来initialize fine-tuned model</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Architecture variants</p>
-<ul>
-<li><p>base model：Swin-B，参数量对标ViT-B</p>
-</li>
-<li><p>Swin-T：0.25x，对标ResNet-50 (DeiT-S) </p>
-</li>
-<li><p>Swin-S：0.5x，对标ResNet-101</p>
-</li>
-<li><p>Swin-L：2x</p>
-</li>
-<li><p>window size：M=7</p>
-</li>
-<li><p>query dim：d=32，（每个stage的input sequence dim逐渐x2，heads num逐渐x2）</p>
-</li>
-<li><p>MLP：expansion ratio=4</p>
-</li>
-<li><p>channel number C：第一个stage的embdding dim，（后续逐渐x2）</p>
-</li>
-<li><p>hypers：</p>
-<ul>
-<li>drop_rate：0.0</li>
-<li>drop_path_rate：0.1</li>
-</ul>
-<p><img src="/2021/01/18/transformers/swins.png" width="40%;"></p>
-</li>
-<li><p>acc</p>
-<p>  <img src="/2021/01/18/transformers/swinsacc.png" width="45%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>official repo: <a href="https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md" target="_blank" rel="noopener">https://github.com/microsoft/Swin-Transformer/blob/main/get_started.md</a></p>
-<ul>
-<li><p>keras官方也出了一版：<a href="https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py" target="_blank" rel="noopener">https://github.com/keras-team/keras-io/blob/master/examples/vision/swin_transformers.py</a></p>
-</li>
-<li><p>model zoo</p>
-<p>model   |    resolution   |    C     |   num_layers   |   num_heads   |   window_size</p>
-<p>Swin-T  |         224         |    96    |      {2,2,6,2}       |    {3,6,12,24}     |           7</p>
-<p>Swin-S  |         224         |    96    |      {2,2,18,2}     |    {3,6,12,24}     |           7</p>
-<p>Swin-B  |     224/384    |    128  |      {2,2,18,2}     |    {4,8,16,32}     |         7/12</p>
-<p>Swin-L  |     224/384    |    192  |      {2,2,18,2}     |    {6,12,24,48}   |         7/12</p>
-<p><img src="/2021/01/18/transformers/swin zoo.png" width="75%;"></p>
-</li>
-<li><p>models/build.py</p>
-<ul>
-<li>SwinTransformer &amp; SwinMLP：前者就是论文里的，basic block是transformer的MSA加上MLP layers，后者是没用MSA，就用MLP来建模相邻windows之间的global relationship的，用的conv1d。</li>
-<li></li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="DETR-End-to-End-Object-Detection-with-Transformers"><a href="#DETR-End-to-End-Object-Detection-with-Transformers" class="headerlink" title="DETR: End-to-End Object Detection with Transformers"></a>DETR: End-to-End Object Detection with Transformers</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>new task formulation：a direct set prediction problem</li>
-<li>main gradients<ul>
-<li>a set-based global loss</li>
-<li>a transformer en-de architecture</li>
-<li>remove the hand-designed componets like nms &amp; anchor</li>
-</ul>
-</li>
-<li>acc &amp; run-time on par with Faster R-CNN on COCO<ul>
-<li>significantly better performance on large objects</li>
-<li>lower performances on small objects</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li><p>modern detectors run object detection in an indirect way</p>
-<ul>
-<li>基于格子/anchor/proposals进行回归和分类</li>
-<li>算法性能受制于nms机制、anchor设计、target-anchor的匹配机制</li>
-</ul>
-</li>
-<li><p>end-to-end approach</p>
-<p>  <img src="/2021/01/18/transformers/DETR.png" width="65%;"></p>
-<ul>
-<li>transformer的self-attention机制，explicitly model all pairwise interactions between elements：内含了去重（nms）的能力</li>
-<li>bipartite matching：set loss function，将预测和gt的box一一匹配，run in parallel</li>
-<li>DETR does not require any customized layers, thus can be reproduced easily</li>
-<li>expand to segmentation task：a simple segmentation head trained on top of a pre-trained DETR</li>
-</ul>
-</li>
-<li><p>set prediction：to predict a set of bounding boxes and the categories for each</p>
-<ul>
-<li>basic：multilabel classification</li>
-<li>detection task has near-duplicates issues</li>
-<li>set prediction是postprocessing-free的，它的global inference schemes能够avoid redundancy</li>
-<li>usual loss：bipartite match</li>
-</ul>
-</li>
-<li><p>object detection</p>
-<ul>
-<li>set-based loss<ul>
-<li>modern detectors use non-unique assignment rules together with NMS</li>
-<li>bipartite matching是target和pred一一对应</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overall</p>
-<p>  <img src="/2021/01/18/transformers/DETR pipeline.png" width="65%;"></p>
-<ul>
-<li>three main components<ul>
-<li>a CNN backbone</li>
-<li>an encoder-decoder transformer</li>
-<li>a simple FFN</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>backbone</p>
-<ul>
-<li>conventional r50</li>
-<li>input：$[H_0, W_0, 3]$</li>
-<li>output：$[H,W,C], H=\frac{H_0}{32}, W=\frac{W_0}{32}, C=2048$</li>
-</ul>
-</li>
-<li><p>transformer encoder</p>
-<ul>
-<li>reduce channel dim to $d$：1x1 conv，$d=512$</li>
-<li>collapse the spatial dimensions：feature sequence [d, HW]，每个spatial pixel作为一个feature</li>
-<li>fixed positional encodings：<ul>
-<li>added to the input of each attention layer</li>
-<li>【QUESTION】加在K和Q上还是embedding上？</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>transformer decoder</p>
-<ul>
-<li>输入N个dim=d的embedding<ul>
-<li>叫object queries：表示我们预测固定值N个目标</li>
-<li>因为decoder也是permutation-invariant的（因为all shared），所以要输入N个不一样的embedding</li>
-<li>learnt positional encodings</li>
-<li>add them to the input of each attention layer</li>
-</ul>
-</li>
-<li>decodes the N objects in parallel</li>
-</ul>
-</li>
-<li><p>prediction FFN</p>
-<ul>
-<li>3 layer，ReLU，</li>
-<li>box prediction：normalized center coords &amp; height &amp; width</li>
-<li>class prediction：<ul>
-<li>an additional class label $\varnothing$ 表示no object</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>auxiliary losses</p>
-<ul>
-<li>each decoder layer后面都接一个FFN prediction和Hungarian loss</li>
-<li>shared FFN</li>
-<li>an additional shared LN to norm the inputs of FFN</li>
-<li>three components of the loss<ul>
-<li>class loss：CE loss</li>
-<li>box loss<ul>
-<li>GIOU loss</li>
-<li>L1 loss</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>technical details</p>
-<ul>
-<li>AdamW：<ul>
-<li>initial transformer lr=10e-4</li>
-<li>initial backbone lr=10e-5</li>
-<li>weight decay=10e-4</li>
-</ul>
-</li>
-<li>Xavier init</li>
-<li>imagenet-pretrained resnet weights with frozen batchnorm layers：r50 &amp; r101，DETR &amp; DETR-R101</li>
-<li>a variant：<ul>
-<li>increase feature resolution version</li>
-<li>remove stage5’s stride and add a dilation</li>
-<li>DETR-DC5 &amp; DETR-DC5-R101</li>
-<li>improve performance for small objects</li>
-<li>overall 2x computation increase</li>
-</ul>
-</li>
-<li>augmentation<ul>
-<li>resize input</li>
-<li>random crop：with 0.5 prob then resize</li>
-</ul>
-</li>
-<li>transformer default dropout 0.1</li>
-<li>lr schedule<ul>
-<li>300 epochs</li>
-<li>drop by factor 10 after 200 epochs</li>
-</ul>
-</li>
-<li>4 images per GPU，total batch 64</li>
-</ul>
-</li>
-<li><p>for segmentation task：全景分割</p>
-<ul>
-<li>给decoder outputs加mask head</li>
-<li>compute multi-head attention among<ul>
-<li>decoder box predictions</li>
-<li>encoder outputs</li>
-</ul>
-</li>
-<li>generate M attention heatmaps per object</li>
-<li>add a FPN styled CNN to recover resolution</li>
-<li><p>pixel-wise argmax</p>
-<p><img src="/2021/01/18/transformers/DETRseg.png" width="75%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="UNETR-Transformers-for-3D-Medical-Image-Segmentation"><a href="#UNETR-Transformers-for-3D-Medical-Image-Segmentation" class="headerlink" title="UNETR: Transformers for 3D Medical Image Segmentation"></a>UNETR: Transformers for 3D Medical Image Segmentation</h2><ol>
-<li><p>动机</p>
-<ul>
-<li>unet结构用于医学分割<ul>
-<li>encoder learns global context</li>
-<li>decoder utilize the representations to predict the semanic ouputs</li>
-<li>the locality of CNN limits long-range spatial dependency</li>
-</ul>
-</li>
-<li>our method<ul>
-<li>use a pure transformer as the encoder</li>
-<li>learn sequence representations of the input volume</li>
-<li>global</li>
-<li>multi-scale</li>
-<li>encoder directly connects to decoder with skip connections</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>论点</p>
-<ul>
-<li>unet结构<ul>
-<li>encoder用来提取全图特征</li>
-<li>decoder用来recover</li>
-<li>skip connections用来补充spatial information that is lost during downsampling</li>
-<li>localized receptive fields：<ul>
-<li>disadvantage in capturing multi-scale contextual information</li>
-<li>如不同尺寸的脑肿瘤</li>
-<li>缓和手段：atrous convs，still limited</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>transformer<ul>
-<li>self-attention mechanism in NLP<ul>
-<li>highlight the important features of word sequences</li>
-<li>learn its long-range dependencies</li>
-</ul>
-</li>
-<li>in ViT<ul>
-<li>an image is represented as a patch embedding sequence</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>our method<ul>
-<li>formulation<ul>
-<li>1D seq2seq problem</li>
-<li>use embedded patches</li>
-</ul>
-</li>
-<li>the first completely transformer-based encoder</li>
-</ul>
-</li>
-<li>other unet- transformer methods<ul>
-<li>2D (ours 3D)</li>
-<li>employ only in the bottleneck (ours pure transformer)</li>
-<li>CNN &amp; transformer in separate streams and fuse</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>方法</p>
-<ul>
-<li><p>overview</p>
-<p>  <img src="/2021/01/18/transformers/UNETR.png" width="75%;"></p>
-</li>
-<li><p>transformer encoder</p>
-<ul>
-<li>input：1D sequence of input embeddings</li>
-<li>given 3D volume $x \in R^{HWDC}$</li>
-<li>divide into flattened uniform non-overlapping patches $x\in R^{LCN^3}$<ul>
-<li>$L=HWD/N^3$：the sequence length</li>
-<li>$N^3$：patch dimension</li>
-</ul>
-</li>
-<li>linear projection to K-dim $E \in R^{LCK}$：remain constant through transformer</li>
-<li>1D learnable positional embedding $E_{pos} \in R^LD$</li>
-<li>12 self-att blocks：MSA + MLP</li>
-</ul>
-</li>
-<li>decoder &amp;skip connections<ul>
-<li>选取encoder第{3,6,9,12}个block的输出</li>
-<li>reshape back to 3D volume $[\frac{H}{N},\frac{W}{N},\frac{D}{N},C]$</li>
-<li>consecutive 3x3x3 conv+BN+ReLU</li>
-<li>bottleneck<ul>
-<li>deconv by 2 to increase resolution</li>
-<li>then concat with the previous resized feature</li>
-<li>then jointly consecutive conv</li>
-<li>then upsample with deconv…</li>
-</ul>
-</li>
-<li>concat到原图resolution以后，consecutive conv以后，再1x1x1 conv+softmax</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>dice loss<ul>
-<li>dice：for each class channel，计算dice，然后求类平均</li>
-<li>1-dice</li>
-</ul>
-</li>
-<li>ce loss<ul>
-<li>for each pixel，求bce，然后求所有pixel的平均</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -5287,7 +3763,7 @@ P_s(X) \neq P_t(X)</script></li>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">173</span>
+                  <span class="site-state-item-count">175</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
