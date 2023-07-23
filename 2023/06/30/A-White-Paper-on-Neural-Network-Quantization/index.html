@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="A White Paper on Neural Network Quantization 高通白皮书  Quantization fundamentals  basic block：y=Wx+b  推理的瓶颈通常在带宽，32bit数据的加载和写入占据大部分能耗  16个处理单元PE，使用int8可以优化数据瓶颈  累加器Accumulator，通常保持32bit，做完加法以后再量化到8bit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A White Paper on Neural Network Quantization">
+<meta property="og:url" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/index.html">
+<meta property="og:site_name" content="Less is More">
+<meta property="og:description" content="A White Paper on Neural Network Quantization 高通白皮书  Quantization fundamentals  basic block：y=Wx+b  推理的瓶颈通常在带宽，32bit数据的加载和写入占据大部分能耗  16个处理单元PE，使用int8可以优化数据瓶颈  累加器Accumulator，通常保持32bit，做完加法以后再量化到8bit">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/mac.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/simulation.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/STE.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/LSQ.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/standard%20QAT.png">
+<meta property="og:updated_time" content="2023-06-30T10:43:42.597Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="A White Paper on Neural Network Quantization">
+<meta name="twitter:description" content="A White Paper on Neural Network Quantization 高通白皮书  Quantization fundamentals  basic block：y=Wx+b  推理的瓶颈通常在带宽，32bit数据的加载和写入占据大部分能耗  16个处理单元PE，使用int8可以优化数据瓶颈  累加器Accumulator，通常保持32bit，做完加法以后再量化到8bit">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/mac.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/"/>
+
+
+
+
+
+  <title>A White Paper on Neural Network Quantization | Less is More</title><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Less is More</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">A White Paper on Neural Network Quantization</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-30T15:36:15+08:00">
+                2023-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="A-White-Paper-on-Neural-Network-Quantization"><a href="#A-White-Paper-on-Neural-Network-Quantization" class="headerlink" title="A White Paper on Neural Network Quantization"></a>A White Paper on Neural Network Quantization</h2><ol>
+<li><p>高通白皮书</p>
+</li>
+<li><p>Quantization fundamentals</p>
+<ul>
+<li><p>basic block：y=Wx+b</p>
+</li>
+<li><p>推理的瓶颈通常在带宽，32bit数据的加载和写入占据大部分能耗</p>
+</li>
+<li><p>16个处理单元PE，使用int8可以优化数据瓶颈</p>
+</li>
+<li><p>累加器Accumulator，通常保持32bit，做完加法以后再量化到8bit</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/mac.png" width="50%;"></p>
+</li>
+<li><p>浮点做定点近似：$\hat x=s_x x_{int} \approx x$</p>
+</li>
+<li><p>$\hat y = \hat b + \sum (s_w w_{int}) (s_x x_{int}) =  \hat b + s_w s_x \sum(w_{int} x_{int})$</p>
+</li>
+<li><p>常见的量化方式</p>
+<ul>
+<li>均匀仿射量化(Uniform affine quantization)，也叫非对称量化(asymmetric quantization)<ul>
+<li>量化：$x_{int} = clamp(round[\frac{x}{s}]+z, 0, 2^{b}-1)$</li>
+<li>反量化：$x\approx \hat x=s(x_{int}-z)$</li>
+<li>反量化恢复的x范围：$[-sz，s(2^b-1-z)]$，不再这个范围内的值就被截断了，扩大s能够扩大量化范围减少clipping error，但是会增加rounding error，所以在截断误差和舍入误差之间需要trade-off</li>
+</ul>
+</li>
+<li>对称均匀量化(Symmetric uniform quantization)<ul>
+<li>省略zero point</li>
+<li>量化：$x_{int} = clamp (round[\frac{x}{s}], 0, 2^b-1)$</li>
+<li>反量化：$\hat x=sx_{int}$</li>
+<li>无符号对称量化非常适用于单边激活值，如relu</li>
+<li>有符号对称量化可以被用于大致关于零对称分布的数据（如conv-bn）</li>
+</ul>
+</li>
+<li>二次幂量化(Power-of-two quantizer)<ul>
+<li>二次幂量化是对称量化的一个特例，zero point依旧是0，比例因子被限制为二次幂</li>
+<li>可以提升硬件的计算效率</li>
+<li>但是比例因子s的限制性表达可能会使截断误差和舍入误差之间的权衡变得复杂</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>量化粒度</p>
+<ul>
+<li>per tensor量化：为每个tensor定义一组量化参数（权重量化参数$s_w, z_w$以及激活量化参数$s_x, z_x$）</li>
+<li>per channel量化：<ul>
+<li>对于权重量化，可以为每个输出通道指定一个不同的量化器，因为basic block里面是逐行累加，不会影响计算效率</li>
+<li>但是对于激活值量化，通常不会做per-channel量化，因为如果每个x都有一组s和z，$\sum wx$中的scale就没法提到$\sum$外面了</li>
+<li>实际卷积的per-channel量化，是对每个kernel单独统计一个scale和zero-point<br>  * </li>
+</ul>
+</li>
+<li>per group量化：还有比per channel更细粒度的量化方案，增加组的粒度通常可以提升量化的准确性，但是要额外付出一些计算开销，目前大多数的定点累加器都不支持这类操作</li>
+</ul>
+</li>
+<li><p>量化模拟</p>
+<ul>
+<li><p>在训练硬件上模拟量化行为</p>
+<ul>
+<li>用于QAT</li>
+<li>用于测试神经网络在量化设备上的运行情况</li>
+<li>on-device真实场景下：tensor、weight都是int8的</li>
+<li>模拟场景下：tensor、weights都是浮点的，通过给conv加入量化器来模拟权重的量化，通过给act加入量化器来模拟激活值的量化</li>
+<li>量化器实现了上面定义的量化函数</li>
+<li><p>量化器的输入输出都是浮点格式的，但是输出是限制在量化范围以内的</p>
+<p><img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/simulation.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>常见层量化</p>
+<ul>
+<li>批量归一化的折叠(Batch normalization folding)：bn参数就被融合到前一个线性层</li>
+<li>激活函数融合(Activation function fusing)：<ul>
+<li>通常我们做完conv-bn以后要反量化了，然后写入内存，然后act层再读取进来，再进行量化，然后process</li>
+<li>但是像relu可以和轻松的和反量化前的conv-bn结合：直接对量化值做relu就可以了，这样就节省了一组读写和量化</li>
+<li>像sigmoid/swish之类的，硬件会针对这个计算有专门的实现：泰勒展开近似/查找表</li>
+</ul>
+</li>
+<li>最大值池化(Max pooling)：激活量化是不需要的，因为输入和输出的范围是一致的</li>
+<li>均值池化(Average pooling)：整数的平均不一定是整数，因此需要在平均之后增加一个量化步骤。但是我们对输入和输出使用相同的量化器，因为求平均不会显著改变量化后值的范围。</li>
+<li>逐点相加(Element-wise addition)：在计算的时候两个输入的量化范围必须要完全匹配。如果输入的量化范围不匹配，就需要格外的注意才能确保计算能正确的执行。因此没有公认的解决方案。额外增加一个反量化步骤可以粗略的模拟增加的误差或者噪声，另外一种方案是绑定多个输入的量化器从而实现一致的输入，这可以省去反量化步骤但是可能需要微调(fine-tuning)。</li>
+<li>连接(Concatenation)：被连接的两个分支通常不共享量化参数，这意味着它们的量化范围不一定会重叠，因此反量化步骤可能是需要的。与逐点相加一样，你可以对网络进行优化(fine-tuning)以使得多个连接分支可以共享量化参数。</li>
+<li>通常对激活使用非对称量化，对权重使用对称量化：因为权重分布通常在0附近，而且反量化WX时候不会引入running time item $s_wz_ws_xx_{int}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>PTQ</p>
+<ul>
+<li>data-free/small calibration set</li>
+<li></li>
+</ul>
+</li>
+<li><p>QAT</p>
+<ul>
+<li><p>STE：直通估计器，bp时候跳过量化器，同时假定该模块的梯度为1，更新浮点参数以后，用min-max来更新量化器的s和z</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/STE.png" width="30%;"></p>
+</li>
+<li><p>LSQ：可微量化参数，训练中对s和z求导，直接更新量化参数</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/LSQ.png" width="50%;"></p>
+</li>
+<li><p>standart QAT pipeline</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/standard QAT.png" width="40%;"></p>
+</li>
+<li><p>首先拿到trained浮点模型</p>
+</li>
+<li><p><strong>Cross-layer equalization 跨层均衡化(CLE)</strong> ，对于遇到不平衡权重分布的模型（例如 MobileNet 架构），此步骤是必要的。</p>
+</li>
+<li><p><strong>Add quantizers 使用量化模块</strong>，选择量化器并在网络中添加量化操作，针对特定硬件，通常对权重使用对称量化器，对激活使用非对称量化器，如果硬件支持，对权重使用per-channel量化</p>
+</li>
+<li><p><strong>Range estimation 范围设置</strong>，基于层的MSE标准来设置所有量化参数，在按通道(per-channel)量化的特定情况下，使用最小-最大设置有时可能是更有利的。</p>
+</li>
+<li><p><strong>Learnable Quantization Parameters 量化参数可学习</strong>，直接学习量化参数，用对s和z的梯度直接更新他们</p>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/06/07/tensorRT/" rel="next" title="tensorRT">
+                <i class="fa fa-chevron-left"></i> tensorRT
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/07/01/Deblurring-via-Stochastic-Refinement/" rel="prev" title="Deblurring via Stochastic Refinement">
+                Deblurring via Stochastic Refinement <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpeg"
+                alt="amber.zhang" />
+            
+              <p class="site-author-name" itemprop="name">amber.zhang</p>
+              <p class="site-description motion-element" itemprop="description">要糖有糖，要猫有猫</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">180</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">98</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AmberzzZZ" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-White-Paper-on-Neural-Network-Quantization"><span class="nav-number">1.</span> <span class="nav-text">A White Paper on Neural Network Quantization</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">amber.zhang</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'u9EV4x74hJaETIaNF0uX3490-gzGzoHsz',
+        appKey: 'asMAPmAVtavwP5Orm1xcyxxK',
+        placeholder: 'leave your comment ...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><!-- hexo-inject:begin --><!-- Begin: Injected MathJax -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({"tex2jax":{"inlineMath":[["$","$"],["\\(","\\)"]],"skipTags":["script","noscript","style","textarea","pre","code"],"processEscapes":true},"TeX":{"equationNumbers":{"autoNumber":"AMS"}}});
+</script>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+      all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js">
+</script>
+<!-- End: Injected MathJax -->
+<!-- hexo-inject:end -->
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

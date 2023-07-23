@@ -87,6 +87,14 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bb%20cmp.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bisenetv2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bisenet%20v2%20hyper.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/stem.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/GE.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/CE.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/BGA.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/booster.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/pp-matting.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/semantic%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/detail%20loss.png">
@@ -101,11 +109,11 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/composition%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/lossF.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/MODNet%20loss.png">
-<meta property="og:updated_time" content="2022-05-10T07:48:29.500Z">
+<meta property="og:updated_time" content="2023-07-23T03:50:40.158Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Matting">
 <meta name="twitter:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
-<meta name="twitter:image" content="https://amberzzzz.github.io/2022/05/05/Matting/pp-matting.png">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bb%20cmp.png">
 
 
 
@@ -374,6 +382,127 @@
 <p>[BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测</p>
 <p>[MODNet 2020] Is a Green Screen Really Necessary for Real-Time Portrait Matting，商汤，摒弃了辅助信息，直接实现Alpha预测</p>
 <p>[PP-Matting 2022] High-Accuracy Natural Image Matting，百度，在MODNet基础上改进</p>
+<p>[BiSeNet v2 2020] Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation，双encoder结构，一个用来显式地guide local feature，本身不是针对matting任务，但是其他matting paper引用了它</p>
+<p>[GCA Matting 2020] Natural Image Matting via Guided Contextual Attention，introduce GCA block来做local guidance</p>
+<h2 id="BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation"><a href="#BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation" class="headerlink" title="BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation"></a>BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li>propose Bilateral Segmentation Network (BiSeNet V2)<ul>
+<li>treat spatial details and categorical semantics separately<ul>
+<li>a Detail Branch：wide channels and shallow layers</li>
+<li>a Semantic Branch：narrow channels and deep layers</li>
+</ul>
+</li>
+<li>design a Guided Aggregation Layer <ul>
+<li>enhance mutual connections </li>
+<li>得到fused feature</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>performance</p>
+<ul>
+<li>on Cityscapes test：with 2048x1024 input，72.6% miou，156 FPS，on NVIDIA GeForce GTX 1080 Ti</li>
+</ul>
+</li>
+<li><p>different backbone</p>
+<ul>
+<li>dilation backbone如deeplab，用空洞卷积扩大reception field，同时保留high resolution，计算量大</li>
+<li>encoder-decoder backbone如unet，skip connection这部分会引入memory access cost，影响latency</li>
+<li><p>本文的Bilateral Segmentation backbone，两个pathway，achieve high accuracy and high efficiency simultaneously</p>
+<p><img src="/2022/05/05/Matting/bb cmp.png" width="80%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>overview</p>
+<p> <img src="/2022/05/05/Matting/bisenetv2.png" width="60%;"></p>
+<p> <img src="/2022/05/05/Matting/bisenet v2 hyper.png" width="80%;"></p>
+</li>
+<li><p>Detail Branch</p>
+<ul>
+<li>负责学spatial details</li>
+<li>wide channels，shallow layers，small strides</li>
+<li>没有residual path，避免memory access cost</li>
+<li>three stages，基本类似VGG<ul>
+<li>每个stage有两层conv-bn-relu</li>
+<li>每个stage的第一个conv的stride是2</li>
+<li>输出x8的feature map</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Semantic Branch</p>
+<ul>
+<li><p>负责学high-level semantics</p>
+</li>
+<li><p>channel数和Detail Branch的channel数有一个比例factor（&lt;1）</p>
+</li>
+<li><p>可以用任何的lightweight convolutional model</p>
+</li>
+<li><p>large strides，large reception field</p>
+</li>
+<li><p>stem block</p>
+<ul>
+<li>迅速下采样到x4尺度，用了两种下采样manner</li>
+<li><p>然后concat + fuse conv</p>
+<p><img src="/2022/05/05/Matting/stem.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>GE block</p>
+<ul>
+<li>基本就是MobileNet V2的block</li>
+<li>但是在resolution/channel变化时，identity path加入dwconv-conv来做align，而不是去掉id path<ul>
+<li>2个stride2的DWconv</li>
+<li>1一个separable conv</li>
+</ul>
+</li>
+<li><p>同时在residual path中，expand layer的1x1conv换成了3x3conv，因为cudnn里面3x3conv更友好，expand操作放在了DWconv里面</p>
+<p><img src="/2022/05/05/Matting/GE.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>最后的CE block用global average pooling to embed the global contextual response</p>
+<ul>
+<li><p>GAP的1x1xC的context vector直接broadcast add到x32 feature上</p>
+<p><img src="/2022/05/05/Matting/CE.png" width="20%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Bilateral Guided Aggregation</p>
+<ul>
+<li><p>fuse manners</p>
+<ul>
+<li>simple sum/concat</li>
+<li>well designed operations，本文用了bidirectional aggregation method</li>
+</ul>
+</li>
+<li><p>BGA</p>
+<ul>
+<li><p>用semantic branch的响应值来guide Detail Branch</p>
+<p><img src="/2022/05/05/Matting/BGA.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Booster Training Strategy</p>
+<ul>
+<li>每个semantic stage的feature上加了auxiliary segmentation head</li>
+<li><p>每个seg head都是3x3conv-bn-relu + 1x1 conv，然后上采样到原始尺度</p>
+<p><img src="/2022/05/05/Matting/booster.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="PP-Matting-High-Accuracy-Natural-Image-Matting"><a href="#PP-Matting-High-Accuracy-Natural-Image-Matting" class="headerlink" title="PP-Matting: High-Accuracy Natural Image Matting"></a>PP-Matting: High-Accuracy Natural Image Matting</h2><ol>
 <li><p>动机</p>
 <ul>
@@ -831,7 +960,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">175</span>
+                  <span class="site-state-item-count">180</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -887,7 +1016,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">1.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><span class="nav-number">2.</span> <span class="nav-text">MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation"><span class="nav-number">1.</span> <span class="nav-text">BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">2.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><span class="nav-number">3.</span> <span class="nav-text">MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</span></a></li></ol></div>
             
 
           </div>

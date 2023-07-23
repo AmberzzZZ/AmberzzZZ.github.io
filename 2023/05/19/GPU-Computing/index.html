@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2023-06-06T04:19:26.722Z">
+<meta property="og:updated_time" content="2023-06-11T03:35:27.970Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GPU Computing">
 <meta name="twitter:description" content="background  GPU Computing：the principal motivation for using the GPU is the prospect of high performance at a relatively low cost  CUDA：CUDA provides a flexible programming model and C-like language">
@@ -401,10 +401,6 @@
 </ul>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// implement cuda kernel of C=A+B</span></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">VecAddKernel</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">	<span class="keyword">if</span> (i&lt;n)</span><br><span class="line">    	C[i] = A[i] + B[i]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
-</ul>
-</li>
-</ol>
-<ul>
 <li><p>CPU host</p>
 <ul>
 <li>在cpu上要运行code，to launch the CUDA kernel</li>
@@ -412,8 +408,156 @@
 </ul>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VecAddCPU</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> threads_per_block = <span class="number">512</span>;</span><br><span class="line">    <span class="keyword">int</span> nblocks = <span class="built_in">ceil</span>(n/threads_per_block);</span><br><span class="line">    VecAddKernel&lt;&lt;&lt;nblocks, threads_per_block&gt;&gt;&gt;(A, B, C, n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+<li><p>CPU &amp; GPU</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在cpu上执行</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello World from CPU\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在gpu上执行</span></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">HelloFromGPU</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello from GPU\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在cpu上发起调用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello from CPU\n"</span>);</span><br><span class="line">    HelloFromGPU&lt;&lt;&lt;<span class="number">1</span>, <span class="number">5</span>&gt;&gt;&gt;();</span><br><span class="line">    cudaDeviceReset();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>__global__：用它去修饰函数HelloFromGPU，成为内核函数，该函数在host端异步调用，在device端执行，无返回值</li>
+<li>__device__：限定函数在device上调用，在device上执行，用于gpu内部调用</li>
+<li>__host__：限定函数在host上调用，在host上执行，即默认cpu执行，所以这个修饰可以省略</li>
+<li>&lt;&lt;<n_block, n_thread="">&gt;&gt;：也指明了是从<code>host</code>端到<code>device</code>端的内核函数调用，里面的参数是执行配置，例子中kernel函数将被执行5个线程执行</n_block,></li>
 </ul>
-<ol>
+</li>
+</ul>
+</li>
+<li><p>流式多处理器(<code>Streaming Multiprocessors，SM</code>)</p>
+<ul>
+<li>GPU架构是通过复制这种架构的构建来实现硬件并行<ul>
+<li>1个GPU包含多个SM，每个<code>SM</code>支持许多线程并发执行</li>
+<li><code>CUDA</code>采用单指令多线程(<code>Single-Instruction Multiple-Thread，SIMT</code>)来管理和执行<code>GPU</code>上的众多线程 <ul>
+<li>两级线程结构</li>
+<li>1个内核的所有线程为一个线程grid，所有线程共享全局内存空间</li>
+<li>1个grid由多个线程块（block）组成，一个线程块包含一组线程，同一线程块内的线程（thread）通过同步和共享内存的方式实现协作</li>
+<li>不同块内的线程不能协作</li>
+</ul>
+</li>
+<li>当host发布一个kernel时，这个内核网格的线程块就被分配到可用的<code>SM</code>上来执行，多个线程在<code>SM</code>上并发执行，多个线程块可以并发地在一个<code>SM</code>上执行，当线程块终止时，新的线程块又可以在腾出的SM上启动执行</li>
+</ul>
+</li>
+<li>SM核心组件<ul>
+<li>核心</li>
+<li>共享内存/一级缓存</li>
+<li>寄存器文件</li>
+<li>加载/存储单元</li>
+<li>特殊功能单元</li>
+<li>线程束调度器warp</li>
+</ul>
+</li>
+<li>并行<ul>
+<li>任务并行：将任务切分成子任务，多线执行，网格并发是任务并行</li>
+<li>数据并行：每个线程处理一份数据，线程执行的计算任务是一样的，线程并行是数据并行</li>
+</ul>
+</li>
+<li>线程束<ul>
+<li><code>CUDA</code>采用<code>SIMT</code>架构来管理和执行线程，将线程块中的线程每<code>32</code>个为一组进行划分，每一组被称为一个线程束(<code>warp</code>)</li>
+<li>线程束的大小<code>warpSize</code>是<code>CUDA</code>中的一个内部属性</li>
+<li>线程束是<code>GPU</code>的基本执行单元</li>
+<li>一旦线程块被调度到一个<code>SM</code>上，线程块中的线程就会被进一步划分为线程束，每个线程束中的所有线程执行相同的命令，每个线程拥有自己的指令地址计数器和寄存器状态</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CUDA中的可编程内存的类型</p>
+<ul>
+<li>overview<ul>
+<li>寄存器(Registers)</li>
+<li>本地内存(Local Memory)</li>
+<li>共享内存(Shared Memory)</li>
+<li>常量内存(Constant Memory)</li>
+<li>纹理内存(Texture Memory)</li>
+<li>全局内存(Global Memory)</li>
+</ul>
+</li>
+<li>thread独享：寄存器(Registers) &amp; 本地内存(Local Memory)</li>
+<li>一个block中的thread共享：共享内存(Shared Memory)</li>
+<li>其余全局共享</li>
+<li>寄存器<ul>
+<li>内核函数中声明且没有其他修饰符修饰的变量，如<strong>VectorAddGPU</strong>中的线程索引变量i</li>
+<li>用于存放内核函数中需要频繁访问的线程私有变量</li>
+<li>变量与内核函数的生命周期相同</li>
+<li>寄存器是<code>GPU</code>中访问速度最快的内存空间</li>
+<li>寄存器溢出：一旦内核函数使用了超过硬件限制的寄存器数量，则会使用本地内存来代替多占用的寄存器</li>
+</ul>
+</li>
+<li>共享内存<ul>
+<li>被<code>__shared__</code>修饰符修饰的变量被存储到共享内存中</li>
+<li>生命周期伴随整个线程块</li>
+<li>线程通过使用共享内存中的数据可以实现互相之间的协作</li>
+<li>使用共享内存必须调用如下函数进行同步：<strong>void</strong> __sybcthreads()</li>
+</ul>
+</li>
+<li>常量内存<ul>
+<li>常量变量用<code>__constant__</code>修饰符进行修饰</li>
+<li>必须在全局空间内和所有内核函数之外进行声明</li>
+<li>用于线程束中的所有线程都需要从相同的内存地址中读取数据的情况</li>
+</ul>
+</li>
+<li>全局内存<ul>
+<li><code>GPU</code>中容量最大、延迟最高的内存空间，其作用域和生命空间都是全局的</li>
+<li>可以在任何<code>SM</code>设备中被访问到</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GPU缓存</p>
+<ul>
+<li><p>缓存：</p>
+<ul>
+<li>缓存是cpu和内存之间，内存中访问频率高的数据的复制品（映射）</li>
+<li>CPU找数据或指令的顺序是：先到一级缓存中找，找不到再到二级缓存中找，还找不到就到内存中找</li>
+</ul>
+</li>
+<li><p>overview</p>
+<ul>
+<li><p>一级缓存</p>
+</li>
+<li><p>二级缓存</p>
+</li>
+<li><p>只读常量缓存</p>
+</li>
+<li><p>只读纹理缓存</p>
+</li>
+</ul>
+</li>
+<li><p>每个<code>SM</code>都有一个一级缓存，所有<code>SM</code>共享一个二级缓存</p>
+</li>
+<li><p>一级和二级缓存用来存储本地内存和全局内存中的数据，包括寄存器溢出的部分</p>
+</li>
+</ul>
+</li>
+<li><p>Host内存：<a href="https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484370&amp;idx=1&amp;sn=a23ddab4c1f7bff4f221f7ae78048d0f&amp;chksm=c0edd2bcf79a5baa9889b06e721f2c70d62bcc489490e8bb3fdc3a74e4ad77803c447351645f&amp;scene=178&amp;cur_album_id=2132879019699240961#rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484370&amp;idx=1&amp;sn=a23ddab4c1f7bff4f221f7ae78048d0f&amp;chksm=c0edd2bcf79a5baa9889b06e721f2c70d62bcc489490e8bb3fdc3a74e4ad77803c447351645f&amp;scene=178&amp;cur_album_id=2132879019699240961#rd</a></p>
+<ul>
+<li>可分页内存pageable：指令/数据被离散存储至内存中，因为cpu和gpu是异步的，可能会发生cpu在gpu执行过程中修改内存发生不安全的情况，所以cuda会将临时分配页面锁定</li>
+<li>固定内存pinned：cuda可以分配固定的主机内存（<strong>cudaMallocHost</strong>），不需要中间freeze的过程，直接被device端访问，因此可以用很高的带宽进行读写操作</li>
+</ul>
+</li>
+<li><p>CUDA Stream</p>
+<ul>
+<li><p><code>CUDA</code>流是一系列异步操作的集合，同一个<code>CUDA</code>流中的操作严格按照顺序在<code>GPU</code>上运行</p>
+</li>
+<li><p>多个流同时启动多个内核任务就可以实现网格级并发，任务并行</p>
+</li>
+<li><p>显式地创建多个流，去执行数据拷贝、kernel计算等，不同的<code>CUDA</code>操作是可以重叠进行的</p>
+</li>
+<li><p>创建显式流：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cudaStream_t stream;</span><br><span class="line">cudaStreamCreate(&amp;stream);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>销毁流：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cudaError_t <span class="title">cudaStreamDestroy</span><span class="params">(cudaStream_t stream)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步拷贝数据：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cudaError_t <span class="title">cudaMemcpyAsync</span><span class="params">(<span class="keyword">void</span>* dst, <span class="keyword">const</span> <span class="keyword">void</span>* src, <span class="keyword">size_t</span> count, cudaMemcpyKind kind, cudaStream_t stream = <span class="number">0</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行指定流的kernel</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel_name&lt;&lt;&lt;grid, block, sharedMemSize, stream&gt;&gt;&gt;(...);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>考虑矩阵乘法</p>
+<ul>
+<li>假如任务是两个矩阵乘法，可以将每个乘法任务绑定一个stream</li>
+<li>每个stream异步计算，然后结果同步</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><p>tensorRT</p>
 <ul>
 <li>NVIDIA TensorRT是一种高性能神经网络推理(Inference)引擎，用于在生产环境中部署深度学习应用，可提供最大的推理吞吐量和效率</li>
@@ -444,6 +588,18 @@
 <li>PyTorch-Quantization：在Pytorch训练或者推理的时候加入模拟量化操作，支持量化训练后的模型导出ONNX和TRT</li>
 </ul>
 </li>
+<li>cookbook：<a href="https://github.com/NVIDIA/trt-samples-for-hackathon-cn/tree/master/cookbook" target="_blank" rel="noopener">https://github.com/NVIDIA/trt-samples-for-hackathon-cn/tree/master/cookbook</a></li>
+<li>workflow<ul>
+<li>使用深度学习框架自带的tensorRT接口，遇到不支持的算子：返回原框架计算</li>
+<li>【推荐】导出onnx，然后导入tensorRT，遇到不支持的算子：custom node</li>
+<li>使用tensorRT搭建网络，遇到不支持的算子：写plugin(cudac++)</li>
+</ul>
+</li>
+<li>命令行工具<ul>
+<li>trtexec：由onnx构建模型序列plan，推理plan及查看相关信息</li>
+<li>polygraphy：</li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>Jetson</p>
@@ -453,7 +609,15 @@
 </li>
 <li><p>pytorch custom cuda op</p>
 <ul>
-<li><p>custom add</p>
+<li><p>custom add：<a href="https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484261&amp;idx=1&amp;sn=d7b500fb8e81da96e4828b36d64a749f&amp;chksm=c0edd20bf79a5b1d54e6557be02552c8ab16d7225202bb87e3a89bbd203d0b3fcd643f4be6a6&amp;scene=178&amp;cur_album_id=2132879019699240961#rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484261&amp;idx=1&amp;sn=d7b500fb8e81da96e4828b36d64a749f&amp;chksm=c0edd20bf79a5b1d54e6557be02552c8ab16d7225202bb87e3a89bbd203d0b3fcd643f4be6a6&amp;scene=178&amp;cur_album_id=2132879019699240961#rd</a></p>
+<ul>
+<li><p>cpu code</p>
+  <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VectorAddCPU</span><span class="params">(<span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> a, <span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> b, <span class="keyword">float</span> *<span class="keyword">const</span> c,</span></span></span><br><span class="line"><span class="function"><span class="params">                  <span class="keyword">const</span> <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// alloc memory for host</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">size_t</span> size = <span class="number">1024</span>;</span><br><span class="line">  <span class="keyword">float</span> *ha = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hb = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hc = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">    ha[i] = i;</span><br><span class="line">    hb[i] = size - i;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  VectorAddCPU(ha, hb, hc, size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">delete</span>[] ha;</span><br><span class="line">  <span class="keyword">delete</span>[] hb;</span><br><span class="line">  <span class="keyword">delete</span>[] hc;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>gpu code</p>
+  <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cuda_runtime.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">VectorAddGPU</span><span class="params">(<span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> a, <span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> b,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">float</span> *<span class="keyword">const</span> c, <span class="keyword">const</span> <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (i &lt; n) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 分配CPU内存</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">size_t</span> size = <span class="number">1024</span>;</span><br><span class="line">  <span class="keyword">float</span> *ha = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hb = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hc = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">    ha[i] = i;</span><br><span class="line">    hb[i] = size - i;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 分配GPU内存</span></span><br><span class="line">  <span class="keyword">float</span> *da = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="keyword">float</span> *db = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="keyword">float</span> *dc = <span class="literal">nullptr</span>;</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;da, size);</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;db, size);</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;dc, size);</span><br><span class="line">  cudaMemcpy(da, ha, size, cudaMemcpyHostToDevice);</span><br><span class="line">  cudaMemcpy(db, hb, size, cudaMemcpyHostToDevice);</span><br><span class="line">  cudaMemcpy(dc, hc, size, cudaMemcpyHostToDevice);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// kernel config</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> thread_per_block = <span class="number">256</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> block_per_grid = (size + thread_per_block - <span class="number">1</span>) / thread_per_block;</span><br><span class="line"> </span><br><span class="line">  VectorAddGPU&lt;&lt;&lt;block_per_grid, thread_per_block&gt;&gt;&gt;(da, db, dc, size);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 把数据从GPU拷贝回CPU</span></span><br><span class="line">  cudaMemcpy(hc, dc, size, cudaMemcpyDeviceToHost);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 释放GPU显存</span></span><br><span class="line">  cudaFree(da);</span><br><span class="line">  cudaFree(db);</span><br><span class="line">  cudaFree(dc);</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// 释放CPU内存</span></span><br><span class="line">  <span class="keyword">delete</span>[] ha;</span><br><span class="line">  <span class="keyword">delete</span>[] hb;</span><br><span class="line">  <span class="keyword">delete</span>[] hc;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 </li>
 <li><p>deformable conv</p>
 <ul>
@@ -486,34 +650,25 @@
 <li><p>step1：在c++侧编写方法</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cmult.h</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cmult.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">float</span> return_value = int_param * float_param;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"    In cmult : int: %d float %.1f returning  %.1f\n"</span>, int_param,</span><br><span class="line">            float_param, return_value);</span><br><span class="line">    <span class="keyword">return</span> return_value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+<li><p>step2：pybind module编写绑定</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pybind11_wrapper.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmult.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(cmult_example, m) &#123;</span><br><span class="line">    m.def(<span class="string">"cmult"</span>, &amp;cmult, <span class="string">"A function that multiplies two numbers"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PYBIND11_MODULE宏是python解释器导入扩展模块的入口，当调用自定义的python库函数cmult时，cmult的函数地址的将被调用</p>
+</li>
+<li><p>step3：setup编译并添加python module</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setup.py</span></span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> pybind11.setup_helpers <span class="keyword">import</span> Pybind11Extension, build_ext</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">example_module = Pybind11Extension(</span><br><span class="line">    <span class="string">'cmult_example'</span>,</span><br><span class="line">    [str(fname) <span class="keyword">for</span> fname <span class="keyword">in</span> Path(<span class="string">'src'</span>).glob(<span class="string">'*.cpp'</span>)],</span><br><span class="line">    include_dirs=[<span class="string">'./'</span>],</span><br><span class="line">    extra_compile_args=[<span class="string">'-O3'</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'cmult_example'</span>,</span><br><span class="line">    description=<span class="string">'pybind11+setup.py example'</span>,</span><br><span class="line">    ext_modules=[example_module],</span><br><span class="line">    cmdclass=&#123;<span class="string">"build_ext"</span>: build_ext&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>安装：python setup install，就会添加名为cmult_example的python module</p>
+</li>
+<li><p>step4：python脚本中调用module以及cmult函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cmult_example <span class="keyword">import</span> cmult</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span></span><br><span class="line">b = <span class="number">1.25</span></span><br><span class="line">print(cmult(a, b))</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
+</li>
+<li><p>Cython</p>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-</ol>
-<pre><code>  * step2：pybind module编写绑定
-
-    <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pybind11_wrapper.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmult.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(cmult_example, m) &#123;</span><br><span class="line">    m.def(<span class="string">"cmult"</span>, &amp;cmult, <span class="string">"A function that multiplies two numbers"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-    PYBIND11_MODULE宏是python解释器导入扩展模块的入口，当调用自定义的python库函数cmult时，cmult的函数地址的将被调用
-
-  * step3：setup编译并添加python module
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setup.py</span></span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> pybind11.setup_helpers <span class="keyword">import</span> Pybind11Extension, build_ext</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">example_module = Pybind11Extension(</span><br><span class="line">    <span class="string">'cmult_example'</span>,</span><br><span class="line">    [str(fname) <span class="keyword">for</span> fname <span class="keyword">in</span> Path(<span class="string">'src'</span>).glob(<span class="string">'*.cpp'</span>)],</span><br><span class="line">    include_dirs=[<span class="string">'./'</span>],</span><br><span class="line">    extra_compile_args=[<span class="string">'-O3'</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'cmult_example'</span>,</span><br><span class="line">    description=<span class="string">'pybind11+setup.py example'</span>,</span><br><span class="line">    ext_modules=[example_module],</span><br><span class="line">    cmdclass=&#123;<span class="string">"build_ext"</span>: build_ext&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-
-    安装：python setup install，就会添加名为cmult_example的python module
-
-  * step4：python脚本中调用module以及cmult函数
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cmult_example <span class="keyword">import</span> cmult</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span></span><br><span class="line">b = <span class="number">1.25</span></span><br><span class="line">print(cmult(a, b))</span><br></pre></td></tr></table></figure>
-
-
-* Cython
-</code></pre><ol>
 <li><p><a href="https://docs.nvidia.com/deeplearning/tensorrt/pytorch-quantization-toolkit/docs/userguide.html#quantization-aware-training" target="_blank" rel="noopener">pytorch-quantization</a></p>
 <ul>
 <li><p>tensor quant和fake tensor quant：given a tensor，调用pytorch_quantization.tensor_quant.tensor_quant(x)返回一个tensor的量化tensor(int)和scale，调用pytorch_quantization.tensor_quant.fake_tensor_quant(x)返回一个tensor的伪量化值(float)，即QDQ的值，可以对比原始tensor，计算quant error</p>
@@ -532,8 +687,6 @@
 </li>
 </ul>
 </li>
-</ol>
-<ol>
 <li><p>c++ basics recall</p>
 <ul>
 <li>cmake</li>
@@ -621,12 +774,14 @@
 </li>
 <li><p>计算bit数中1的个数</p>
  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算效率与n的bit位数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        tmp = n&amp;<span class="number">1</span></span><br><span class="line">        cnt += tmp</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算效率与n中1的个数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        cnt += <span class="number">1</span></span><br><span class="line">        n &amp;= n<span class="number">-1</span>       <span class="comment"># remove the highest 1</span></span><br><span class="line">	<span class="keyword">return</span> cnt</span><br></pre></td></tr></table></figure>
+<ul>
+<li>计算平方根</li>
+</ul>
 </li>
 </ul>
 </li>
 </ol>
-<pre><code>  * 计算平方根
-</code></pre>
+
       
     </div>
     
@@ -737,7 +892,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">175</span>
+                  <span class="site-state-item-count">180</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

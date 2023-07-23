@@ -276,6 +276,1126 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/07/23/U2Net/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/07/23/U2Net/" itemprop="url">U2Net</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-07-23T08:51:03+08:00">
+                2023-07-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/07/23/U2Net/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/07/23/U2Net/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>paper2022 for SOD (salient object detection)</p>
+<ul>
+<li>SOD任务：显著目标检测，预测的是一个binary mask，无类别前景</li>
+<li>highly reference HED paper (Holistically-nested edge de- tection)</li>
+<li><a href="https://github.com/xuebinqin/U-2-Net" target="_blank" rel="noopener">https://github.com/xuebinqin/U-2-Net</a></li>
+</ul>
+<h2 id="U2-Net-Going-Deeper-with-Nested-U-Structure-for-Salient-Object-Detection"><a href="#U2-Net-Going-Deeper-with-Nested-U-Structure-for-Salient-Object-Detection" class="headerlink" title="U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection"></a>U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection</h2><ol>
+<li><p>abstract</p>
+<ul>
+<li>propose ReSidual U-blocks (RSU)<ul>
+<li>mixed contextual information from different scales</li>
+<li>deeper但是没有显著增加计算cost</li>
+<li>没有用预训练backbone，直接train from scratch</li>
+</ul>
+</li>
+<li>两个版本<ul>
+<li>u2net：176.3 MB, 30 FPS with 320x320x3 on GTX 1080Ti GPU</li>
+<li>u2net tiny：4.7 MB, 40 FPS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>introduction</p>
+<ul>
+<li><p>use existing backbones</p>
+<ul>
+<li>用于图像分类预训练的backbone，更多的保留的是语义信息，local details和global contrast information保留的少</li>
+<li>预训练的backbone通常在第一个stem就用stride2conv+maxpooling将原图下采样到x4，但是segmentation task中high resolution map也很重要</li>
+</ul>
+</li>
+<li><p>multi-scale feature</p>
+<ul>
+<li>3x3 conv能够很好的获取local feature</li>
+<li>但是不能通过增大kernel size来获得global feature，会显著增加参数量和计算量</li>
+<li>this paper directly extracts multi-scale features stage by stage</li>
+</ul>
+</li>
+<li>stacking UNets<ul>
+<li>pose estimation的hourglass之类通常是sequentially stack UNets，作为cascaded refine</li>
+<li>this paper stack by stage</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>Residual U-blocks</p>
+<ul>
+<li><p>为了在high resolution的shallow layers中就学习more global information</p>
+<ul>
+<li>inception方法用了不同的dilation rate，但是memory consume</li>
+<li>PPM先下采样feature，然后run常规的卷积，再unsampling，但是这样恢复的feature会degrade</li>
+</ul>
+</li>
+<li><p>RSU three components</p>
+<ul>
+<li>an input convolution layer，用来提取local feature</li>
+<li>a U-Net like symmetric encoder-decoder structure with height of L，用来提取multi-scale contextual information<ul>
+<li>larger L leads to deeper block，more pooling operations，larger reception field，richer feature</li>
+</ul>
+</li>
+<li><p>a residual connection，add local&amp;ms feature</p>
+<p><img src="/2023/07/23/U2Net/RSU1.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+<li><p>plain conv block / residual block / dense block / inception block / RSU block的对比</p>
+<ul>
+<li><p>网络结构</p>
+<p><img src="/2023/07/23/U2Net/RSU2.png" width="70%;"></p>
+</li>
+<li><p>gflops对比</p>
+<p><img src="/2023/07/23/U2Net/RSU3.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>U2Net</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2023/07/23/U2Net/U2Net.png" width="70%;"></p>
+</li>
+<li><p>U2Net 3 parts</p>
+<ul>
+<li>a 6 stage encoder<ul>
+<li>en1 - en4：use RSU-7, RSU-6, RSU-5 and RSU-4，7/6/5/4表示depth</li>
+<li>en5 - en6：RSU-4F，“F” means that the RSU is a dilated version，上/下采样都换成空洞卷积</li>
+</ul>
+</li>
+<li>a 5 stage decoder<ul>
+<li>跟encoder镜像，输入是en-x和prev-stage unsampling的concatenation</li>
+<li>de5：也是空洞卷积版本的RSU-4F</li>
+<li>de4 - de1：RSU4-7</li>
+</ul>
+</li>
+<li>a saliency map fusion module attached with the decoder stages and the last encoder stage<ul>
+<li>side6-1：generate six side output saliency probability maps from en6,de5-1，预测头是3x3conv+sigmoid</li>
+<li>side fuse：upsample the logits from side6-1，concat，1x1conv+sigmoid</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>supervision</p>
+<ul>
+<li>sum loss of side6-1 &amp; side fuse</li>
+<li>每个saliency map的loss是bce</li>
+<li>infer time用fuse map作为final output</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>​    </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/07/05/WinoGrad/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/07/05/WinoGrad/" itemprop="url">WinoGrad</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-07-05T10:04:12+08:00">
+                2023-07-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/07/05/WinoGrad/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/07/05/WinoGrad/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li></li>
+<li>FFT<ul>
+<li>两个序列的乘法通过FFT可以从原始O(n^2)复杂度变成O(nlogn)</li>
+<li>算法性能完全取决于傅立叶变换的性能以及相应卷积参数</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>WinoGrad</p>
+<ul>
+<li><p>通过将卷积中的乘法使用加法来替换，并把一部分替换出来的加法放到 weight 的提前处理中，达到减少卷积运算中乘法的计算总量</p>
+</li>
+<li><p>startup：F(2,3)</p>
+<ul>
+<li><p>对一维tensor $d=[d_0,d_1,d_2,d_3]$和kernel size为3的滑动filter $g=[g_0,g_1,g_3]$</p>
+</li>
+<li><p>计算展开：需要做6次乘法和4次加法</p>
+<script type="math/tex; mode=display">
+  F(2,3) = \left( \begin{array}{cc} d_0, d_1, d_2 \\ d_1, d_2, d_3 \end{array}
+  \right)
+  \left(\begin{array}{cc}
+  g_0\\  g_1\\  g_2
+  \end{array} \right)</script></li>
+<li><p>更general的表达：需要做 m<em>k次乘法和m\</em>(k-1)次加法</p>
+<script type="math/tex; mode=display">
+  F(m,k) = \left( \begin{array}{cc} x_0, x_1, ..., x_{k-1} \\ x_1, x_2, ..., x_k \\
+  ...\\ x_{m-1}, x_{m}, ..., x_{n+k-2}
+  \end{array} \right)
+  \left(\begin{array}{cc}
+  g_0\\  g_1\\ ... \\ g_{k-1}
+  \end{array} \right)</script></li>
+<li><p>左边的矩阵存在很多重复的数值，推导：<a href="https://zhuanlan.zhihu.com/p/260109670，可以得到：" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/260109670，可以得到：</a></p>
+<script type="math/tex; mode=display">
+  \left( \begin{array}{cc} d_0, d_1, d_2 \\ d_1, d_2, d_3 \end{array}
+  \right)
+  \left(\begin{array}{cc}
+  g_0\\  g_1\\  g_2
+  \end{array} \right)
+  = \left( \begin{array}{cc} n_1+n_2+n_3 \\ n_2-n_3-n_4 \end{array}
+  \right)</script></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code>    * 其中：
+        $$
+        n_1 = (d_0-d_2)g_0 \\
+        n_2 = (d_1+d_2)(g_0+g_1+g_2)/2\\
+        n_3 = (d_2-d_1)(g_0-g_1+g_2)/2 \\
+        n_4 = (d_1-d_3)g_2
+        $$
+
+        * g相关的计算可以在推理之前提前处理
+        * 简化为4次乘法4次加法
+
+    * 推广到general表达式：$Y=A^T[(Gg)\odot(B^Td)]$
+
+        * G是卷积核变换矩阵，对g做pre-refine的
+        * B是输入变换矩阵
+        * $\odot$是点乘，就是对应位置的乘法
+        * A是输出变换矩阵
+
+    * 推广到2D的general表达式：$Y=A^T[(GgG^T)\odot(B^TdB)]A$
+
+        * 2D的conv可以tile为2x3个1D filter，合并每个1D的F(2,3)以后2D filter又变成了一个F(2,3)
+        * 所以乘法次数为4x4=16
+        * 原始的im2col的实现，乘法次数为4x9=36
+
+    * 工程实现
+
+        * step0：winograd矩阵获取，https://github.com/andravin/wincnn
+        * step1：得到G矩阵，进行卷积核变换
+        * step2：得到B矩阵，进行输入变换
+        * step3：计算tile矩阵M，$[(GgG^T)\odot(B^TdB)]$
+        * step4：得到A矩阵，计算结果Y，$A^TMA$
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/07/01/Deblurring-via-Stochastic-Refinement/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/07/01/Deblurring-via-Stochastic-Refinement/" itemprop="url">Deblurring via Stochastic Refinement</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-07-01T15:31:28+08:00">
+                2023-07-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/07/01/Deblurring-via-Stochastic-Refinement/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/07/01/Deblurring-via-Stochastic-Refinement/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>papers</p>
+<p>[cvpr 2022] Deblurring via Stochastic Refinement</p>
+<p>[SR3] SR3:Image Super-Resolution via Iterative Refinement</p>
+<h2 id="Deblurring-via-Stochastic-Refinement"><a href="#Deblurring-via-Stochastic-Refinement" class="headerlink" title="Deblurring via Stochastic Refinement"></a>Deblurring via Stochastic Refinement</h2><ol>
+<li><p>overview</p>
+<ul>
+<li>based on conditional diffusion models</li>
+<li>refines the output of a deterministic predictor</li>
+</ul>
+</li>
+<li><p>regress-based methods</p>
+<ul>
+<li>通常用一个unet结构，直接回归clean image</li>
+<li>训练数据是blur-clean pair</li>
+<li>ill posed：If there are multiple possible clean images that correspond to the blurry input, the optimal reconstruction according to the given loss function will be an average of them</li>
+<li>通常结果比较平滑，细节纹理恢复不出来，我觉的是因为缺少noise sampling，只从确定的latent vec去做恢复</li>
+<li>unet regression将去噪task建模成了a to b的确定回归任务，但是实际上去噪的结果是多样的，更接近生成任务，从一个后验分布中生成并挑选不同的样本作为结果，说白了以前的方法是AE，现在的方法是VAE</li>
+</ul>
+</li>
+<li><p>DDPM</p>
+<ul>
+<li><p>核心是两个公式</p>
+<ul>
+<li>前向$q(x_t|x_0)$：given $x_0$，可以采样得到任意time step的$x_t$</li>
+<li>后向$q(x_{t-1}|x_t,x_0)$：given $x_t$，可以随机denoise a single diffusion step得到$x_{t-1}$</li>
+</ul>
+</li>
+<li><p>优化目标</p>
+<ul>
+<li>希望网络学到的$p_{\theta}(x_{t-1}|x_t)$接近真实的reverse diffusion step$q(x_{t-1}|x_t,x_0)$</li>
+<li>方式就是最大化变分下界函数$log p_{\theta}(x)$</li>
+<li><p>通过将x重参数化，将优化目标转换成noise的预测</p>
+<p><img src="/2023/07/01/Deblurring-via-Stochastic-Refinement/loss1.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>Continuous noise level</p>
+<ul>
+<li>allows us to sample from the model using a noise schedule α1:T different from the one used during training</li>
+<li>inference-time noise schedule和训练时不同，但是无需重新训练</li>
+</ul>
+</li>
+<li><p>Conditional DPM</p>
+<ul>
+<li>我们的condition就是blur image</li>
+<li>和输入concat在一起，x是3hw的noise/denoise input，y是3hw的blur prior</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>overview</p>
+<p>  <img src="/2023/07/01/Deblurring-via-Stochastic-Refinement/deblur diagram.png" width="50%;"></p>
+<ul>
+<li>两部分网络<ul>
+<li>initial predictor g：provides a data-adaptive candidate for the clean image</li>
+<li>denoiser network f：denoiser，only needs to model the residual</li>
+</ul>
+</li>
+<li>这样的好处是G可以做很大，F做很小</li>
+<li><p>预测残差的话，x0-xT的定义也变为残差，优化目标里面的$x_0$改为$x_0-g_{\theta}(x_0)$</p>
+<p><img src="/2023/07/01/Deblurring-via-Stochastic-Refinement/loss2.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+<li><p>samping algorithm</p>
+<p>  <img src="/2023/07/01/Deblurring-via-Stochastic-Refinement/algorithm.png" width="50%;"></p>
+<ul>
+<li>run G得到clean image的初始值$x_{init}$</li>
+<li>随机采样正态分布得到初始input $z_T$</li>
+<li>from time step T到1:<ul>
+<li>随机采样一个</li>
+<li>reverse step：得到$z_{t-1}$</li>
+</ul>
+</li>
+<li>最后add初始值和residual得到最终预测</li>
+</ul>
+</li>
+<li><p>inference-time sampling</p>
+<ul>
+<li>较高的step数和较低的噪声水平可以获得高感知的图像，better perceptual quality</li>
+<li>较低的step数和较高的噪声水平可以获得高保真的图像，lower distortion</li>
+<li>网格搜索noise schedule hyperparameters：就是DDIM的$\eta$和$\sigma$<ul>
+<li>两个超参：<ul>
+<li>inference steps T from [10,20,30,50,100,200,300,500]</li>
+<li>noisy schedule $\alpha_T$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>残差模型对图像进行采样所需的时间要少得多</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># construct DDPM noise schedule</span></span><br><span class="line">b_t = (beta2 - beta1) * torch.linspace(<span class="number">0</span>, <span class="number">1</span>, timesteps + <span class="number">1</span>, device=device) + beta1</span><br><span class="line">a_t = <span class="number">1</span> - b_t</span><br><span class="line">ab_t = torch.cumsum(a_t.log(), dim=<span class="number">0</span>).exp()    </span><br><span class="line">ab_t[<span class="number">0</span>] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">denoise_add_noise</span><span class="params">(x, t, pred_noise, z=None)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> z <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        z = torch.randn_like(x)</span><br><span class="line">    noise = b_t.sqrt()[t] * z</span><br><span class="line">    mean = (x - pred_noise * ((<span class="number">1</span> - a_t[t]) / (<span class="number">1</span> - ab_t[t]).sqrt())) / a_t[t].sqrt()</span><br><span class="line">    <span class="keyword">return</span> mean + noise     <span class="comment"># return sampling p(xt-1|xt)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">denoise_ddim</span><span class="params">(x, t, t_prev, pred_noise)</span>:</span></span><br><span class="line">    ab = ab_t[t]</span><br><span class="line">    ab_prev = ab_t[t_prev]</span><br><span class="line">    </span><br><span class="line">    x0_pred = ab_prev.sqrt() / ab.sqrt() * (x - (<span class="number">1</span> - ab).sqrt() * pred_noise)</span><br><span class="line">    dir_xt = (<span class="number">1</span> - ab_prev).sqrt() * pred_noise</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> x0_pred + dir_xt</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/" itemprop="url">A White Paper on Neural Network Quantization</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-30T15:36:15+08:00">
+                2023-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="A-White-Paper-on-Neural-Network-Quantization"><a href="#A-White-Paper-on-Neural-Network-Quantization" class="headerlink" title="A White Paper on Neural Network Quantization"></a>A White Paper on Neural Network Quantization</h2><ol>
+<li><p>高通白皮书</p>
+</li>
+<li><p>Quantization fundamentals</p>
+<ul>
+<li><p>basic block：y=Wx+b</p>
+</li>
+<li><p>推理的瓶颈通常在带宽，32bit数据的加载和写入占据大部分能耗</p>
+</li>
+<li><p>16个处理单元PE，使用int8可以优化数据瓶颈</p>
+</li>
+<li><p>累加器Accumulator，通常保持32bit，做完加法以后再量化到8bit</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/mac.png" width="50%;"></p>
+</li>
+<li><p>浮点做定点近似：$\hat x=s_x x_{int} \approx x$</p>
+</li>
+<li><p>$\hat y = \hat b + \sum (s_w w_{int}) (s_x x_{int}) =  \hat b + s_w s_x \sum(w_{int} x_{int})$</p>
+</li>
+<li><p>常见的量化方式</p>
+<ul>
+<li>均匀仿射量化(Uniform affine quantization)，也叫非对称量化(asymmetric quantization)<ul>
+<li>量化：$x_{int} = clamp(round[\frac{x}{s}]+z, 0, 2^{b}-1)$</li>
+<li>反量化：$x\approx \hat x=s(x_{int}-z)$</li>
+<li>反量化恢复的x范围：$[-sz，s(2^b-1-z)]$，不再这个范围内的值就被截断了，扩大s能够扩大量化范围减少clipping error，但是会增加rounding error，所以在截断误差和舍入误差之间需要trade-off</li>
+</ul>
+</li>
+<li>对称均匀量化(Symmetric uniform quantization)<ul>
+<li>省略zero point</li>
+<li>量化：$x_{int} = clamp (round[\frac{x}{s}], 0, 2^b-1)$</li>
+<li>反量化：$\hat x=sx_{int}$</li>
+<li>无符号对称量化非常适用于单边激活值，如relu</li>
+<li>有符号对称量化可以被用于大致关于零对称分布的数据（如conv-bn）</li>
+</ul>
+</li>
+<li>二次幂量化(Power-of-two quantizer)<ul>
+<li>二次幂量化是对称量化的一个特例，zero point依旧是0，比例因子被限制为二次幂</li>
+<li>可以提升硬件的计算效率</li>
+<li>但是比例因子s的限制性表达可能会使截断误差和舍入误差之间的权衡变得复杂</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>量化粒度</p>
+<ul>
+<li>per tensor量化：为每个tensor定义一组量化参数（权重量化参数$s_w, z_w$以及激活量化参数$s_x, z_x$）</li>
+<li>per channel量化：<ul>
+<li>对于权重量化，可以为每个输出通道指定一个不同的量化器，因为basic block里面是逐行累加，不会影响计算效率</li>
+<li>但是对于激活值量化，通常不会做per-channel量化，因为如果每个x都有一组s和z，$\sum wx$中的scale就没法提到$\sum$外面了</li>
+<li>实际卷积的per-channel量化，是对每个kernel单独统计一个scale和zero-point<br>  * </li>
+</ul>
+</li>
+<li>per group量化：还有比per channel更细粒度的量化方案，增加组的粒度通常可以提升量化的准确性，但是要额外付出一些计算开销，目前大多数的定点累加器都不支持这类操作</li>
+</ul>
+</li>
+<li><p>量化模拟</p>
+<ul>
+<li><p>在训练硬件上模拟量化行为</p>
+<ul>
+<li>用于QAT</li>
+<li>用于测试神经网络在量化设备上的运行情况</li>
+<li>on-device真实场景下：tensor、weight都是int8的</li>
+<li>模拟场景下：tensor、weights都是浮点的，通过给conv加入量化器来模拟权重的量化，通过给act加入量化器来模拟激活值的量化</li>
+<li>量化器实现了上面定义的量化函数</li>
+<li><p>量化器的输入输出都是浮点格式的，但是输出是限制在量化范围以内的</p>
+<p><img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/simulation.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>常见层量化</p>
+<ul>
+<li>批量归一化的折叠(Batch normalization folding)：bn参数就被融合到前一个线性层</li>
+<li>激活函数融合(Activation function fusing)：<ul>
+<li>通常我们做完conv-bn以后要反量化了，然后写入内存，然后act层再读取进来，再进行量化，然后process</li>
+<li>但是像relu可以和轻松的和反量化前的conv-bn结合：直接对量化值做relu就可以了，这样就节省了一组读写和量化</li>
+<li>像sigmoid/swish之类的，硬件会针对这个计算有专门的实现：泰勒展开近似/查找表</li>
+</ul>
+</li>
+<li>最大值池化(Max pooling)：激活量化是不需要的，因为输入和输出的范围是一致的</li>
+<li>均值池化(Average pooling)：整数的平均不一定是整数，因此需要在平均之后增加一个量化步骤。但是我们对输入和输出使用相同的量化器，因为求平均不会显著改变量化后值的范围。</li>
+<li>逐点相加(Element-wise addition)：在计算的时候两个输入的量化范围必须要完全匹配。如果输入的量化范围不匹配，就需要格外的注意才能确保计算能正确的执行。因此没有公认的解决方案。额外增加一个反量化步骤可以粗略的模拟增加的误差或者噪声，另外一种方案是绑定多个输入的量化器从而实现一致的输入，这可以省去反量化步骤但是可能需要微调(fine-tuning)。</li>
+<li>连接(Concatenation)：被连接的两个分支通常不共享量化参数，这意味着它们的量化范围不一定会重叠，因此反量化步骤可能是需要的。与逐点相加一样，你可以对网络进行优化(fine-tuning)以使得多个连接分支可以共享量化参数。</li>
+<li>通常对激活使用非对称量化，对权重使用对称量化：因为权重分布通常在0附近，而且反量化WX时候不会引入running time item $s_wz_ws_xx_{int}$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>PTQ</p>
+<ul>
+<li>data-free/small calibration set</li>
+<li></li>
+</ul>
+</li>
+<li><p>QAT</p>
+<ul>
+<li><p>STE：直通估计器，bp时候跳过量化器，同时假定该模块的梯度为1，更新浮点参数以后，用min-max来更新量化器的s和z</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/STE.png" width="30%;"></p>
+</li>
+<li><p>LSQ：可微量化参数，训练中对s和z求导，直接更新量化参数</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/LSQ.png" width="50%;"></p>
+</li>
+<li><p>standart QAT pipeline</p>
+<p>  <img src="/2023/06/30/A-White-Paper-on-Neural-Network-Quantization/standard QAT.png" width="40%;"></p>
+</li>
+<li><p>首先拿到trained浮点模型</p>
+</li>
+<li><p><strong>Cross-layer equalization 跨层均衡化(CLE)</strong> ，对于遇到不平衡权重分布的模型（例如 MobileNet 架构），此步骤是必要的。</p>
+</li>
+<li><p><strong>Add quantizers 使用量化模块</strong>，选择量化器并在网络中添加量化操作，针对特定硬件，通常对权重使用对称量化器，对激活使用非对称量化器，如果硬件支持，对权重使用per-channel量化</p>
+</li>
+<li><p><strong>Range estimation 范围设置</strong>，基于层的MSE标准来设置所有量化参数，在按通道(per-channel)量化的特定情况下，使用最小-最大设置有时可能是更有利的。</p>
+</li>
+<li><p><strong>Learnable Quantization Parameters 量化参数可学习</strong>，直接学习量化参数，用对s和z的梯度直接更新他们</p>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/07/tensorRT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="amber.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Less is More">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/06/07/tensorRT/" itemprop="url">tensorRT</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-07T10:57:38+08:00">
+                2023-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/06/07/tensorRT/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/07/tensorRT/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>框架</p>
+<ul>
+<li>训练框架：tensorflow/pytorch，trained model转pb/onnx</li>
+<li>推理部署框架：TensorRT加速模型推理，将pb/onnx转换成特定的文件格式，在硬件平台高速运行</li>
+<li>部署流水线 PyTorch - ONNX - ONNX Runtime/TensorRT</li>
+</ul>
+</li>
+<li><p>部署难点</p>
+<ul>
+<li>dynamic shape</li>
+<li>自定义算子</li>
+<li>计算图（onnx/pb）与推理引擎的兼容</li>
+</ul>
+</li>
+<li><p>ONNX Runtime</p>
+<ul>
+<li><p>直接对接 ONNX</p>
+</li>
+<li><p>支持多平台（Windows、Linux、MacOS、Web Browser、Android、iOS等）</p>
+</li>
+<li>支持GPU &amp; CPU</li>
+<li>我暂时理解为session建立在host端（cpu），然后不断向高效计算单元（GPU/NPU）launch op</li>
+</ul>
+</li>
+<li><p>TensorRT</p>
+<ul>
+<li>pipeline<ul>
+<li>使用OnnxParser解析onnx</li>
+<li>创建builder、config、profile</li>
+<li>serialize network into a plan</li>
+<li>deserialize plan ，创建engine</li>
+<li>创建context，类似session</li>
+<li>run：host - device之间的mem交互</li>
+</ul>
+</li>
+<li>plugin<ul>
+<li>plugin是以.so的形式插入网络中的，因此不能与其他层融合</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Triton：<a href="https://mp.weixin.qq.com/s/jWZuNKpVM4k5aDe2JmB-Tg" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/jWZuNKpVM4k5aDe2JmB-Tg</a></p>
+<ul>
+<li>NVIDIA于2018年开源的服务框架，可以对TensorRT生成的推理引擎进行更好的调度以及处理推理请求</li>
+<li>会在本地端口创建一个server，用pytritonclient将需要预测的数据访问相应端口进行推理</li>
+</ul>
+</li>
+<li><p>yolo实践：<a href="https://ost.51cto.com/posts/18986" target="_blank" rel="noopener">https://ost.51cto.com/posts/18986</a></p>
+<ul>
+<li><p>图像预处理：长边resize、padding、归一化</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">cv::Mat input_image = cv::imread(<span class="string">"dog.jpg"</span>);</span><br><span class="line">cv::Mat resize_image;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> model_width = <span class="number">640</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> model_height = <span class="number">640</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">float</span> ratio = <span class="built_in">std</span>::min(model_width / (input_image.cols * <span class="number">1.0f</span>),</span><br><span class="line">                              model_height / (input_image.rows * <span class="number">1.0f</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> border_width = input_image.cols * ratio;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> border_height = input_image.rows * ratio;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> x_offset = (model_width - border_width) / <span class="number">2</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> y_offset = (model_height - border_height) / <span class="number">2</span>;</span><br><span class="line">cv::resize(input_image, resize_image, cv::Size(border_width, border_height));</span><br><span class="line">cv::copyMakeBorder(resize_image, resize_image, y_offset, y_offset, x_offset,</span><br><span class="line">                    x_offset, cv::BORDER_CONSTANT, cv::Scalar(<span class="number">114</span>, <span class="number">114</span>, <span class="number">114</span>));</span><br><span class="line"></span><br><span class="line">cv::cvtColor(resize_image, resize_image, cv::COLOR_BGR2RGB);</span><br><span class="line"></span><br><span class="line">input_blob = <span class="keyword">new</span> <span class="keyword">float</span>[model_height * model_width * <span class="number">3</span>];     <span class="comment">// CHW</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> channels = resize_image.channels();</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> width = resize_image.cols;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> height = resize_image.rows;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> c = <span class="number">0</span>; c &lt; channels; c++) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> h = <span class="number">0</span>; h &lt; height; h++) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> w = <span class="number">0</span>; w &lt; width; w++) &#123;</span><br><span class="line">      input_blob[c * width * height + h * width + w] =</span><br><span class="line">          resize_image.at&lt;cv::Vec3b&gt;(h, w)[c] / <span class="number">255.0f</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>模型序列化</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"NvInfer.h"</span></span></span><br><span class="line"><span class="meta"># <span class="meta-keyword">include</span> <span class="meta-string">"NvOnnxParser.h"</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// logger</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyLogger</span> :</span> <span class="keyword">public</span> nvinfer1::ILogger &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">MyLogger</span><span class="params">(nvinfer1::ILogger::Severity severity =</span></span></span><br><span class="line"><span class="function"><span class="params">                        nvinfer1::ILogger::Severity::kWARNING)</span></span></span><br><span class="line">      : severity_(severity) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">log</span><span class="params">(nvinfer1::ILogger::Severity severity,</span></span></span><br><span class="line"><span class="function"><span class="params">           <span class="keyword">const</span> <span class="keyword">char</span> *msg)</span> <span class="keyword">noexcept</span> override </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (severity &lt;= severity_) &#123;</span><br><span class="line">      <span class="built_in">std</span>::<span class="built_in">cerr</span> &lt;&lt; msg &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  nvinfer1::ILogger::Severity severity_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// builder</span></span><br><span class="line">MyLogger logger;</span><br><span class="line">nvinfer1::IBuilder *builder = nvinfer1::createInferBuilder(logger);</span><br><span class="line"></span><br><span class="line"><span class="comment">// network</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">uint32_t</span> explicit_batch = <span class="number">1U</span> &lt;&lt; <span class="keyword">static_cast</span>&lt;<span class="keyword">uint32_t</span>&gt;(</span><br><span class="line">          nvinfer1::NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);</span><br><span class="line">nvinfer1::INetworkDefinition *network = builder-&gt;createNetworkV2(explicit_batch);</span><br><span class="line"></span><br><span class="line"><span class="comment">// parse</span></span><br><span class="line"><span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> model_path = <span class="string">"yolov5m.onnx"</span>;</span><br><span class="line">nvonnxparser::IParser *parser = nvonnxparser::createParser(*network, logger);</span><br><span class="line">parser-&gt;parseFromFile(model_path.c_str(),</span><br><span class="line">    <span class="keyword">static_cast</span>&lt;<span class="keyword">int</span>&gt;(nvinfer1::ILogger::Severity::kERROR))</span><br><span class="line"><span class="comment">// 如果有错误则输出错误信息</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int32_t</span> i = <span class="number">0</span>; i &lt; parser-&gt;getNbErrors(); ++i) &#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; parser-&gt;getError(i)-&gt;desc() &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// build config: mem/precision</span></span><br><span class="line">nvinfer1::IBuilderConfig *config = builder-&gt;createBuilderConfig();</span><br><span class="line">config-&gt;setMemoryPoolLimit(nvinfer1::MemoryPoolType::kWORKSPACE, <span class="number">1U</span> &lt;&lt; <span class="number">25</span>);</span><br><span class="line"><span class="keyword">if</span> (builder-&gt;platformHasFastFp16()) &#123;</span><br><span class="line">  config-&gt;setFlag(nvinfer1::BuilderFlag::kFP16);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// serialize: tensorRT执行构建优化</span></span><br><span class="line">nvinfer1::IHostMemory *serialized_model =</span><br><span class="line">      builder-&gt;buildSerializedNetwork(*network, *config);</span><br><span class="line"></span><br><span class="line"><span class="comment">// save engine</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">stringstream</span> engine_file_stream;</span><br><span class="line">engine_file_stream.seekg(<span class="number">0</span>, engine_file_stream.beg);</span><br><span class="line">engine_file_stream.write(<span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">char</span> *&gt;(serialized_model-&gt;data()),</span><br><span class="line">                        serialized_model-&gt;size());</span><br><span class="line"><span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> engine_file_path = <span class="string">"yolov5m.engine"</span>;</span><br><span class="line"><span class="built_in">std</span>::<span class="function">ofstream <span class="title">out_file</span><span class="params">(engine_file_path)</span></span>;</span><br><span class="line">assert(out_file.is_open());</span><br><span class="line">out_file &lt;&lt; engine_file_stream.rdbuf();</span><br><span class="line">out_file.close();</span><br><span class="line"></span><br><span class="line"><span class="comment">// engine file构建好了以后前面的builder/network/config/parser啥的都不需要了</span></span><br><span class="line"><span class="keyword">delete</span> config;</span><br><span class="line"><span class="keyword">delete</span> parser;</span><br><span class="line"><span class="keyword">delete</span> network;</span><br><span class="line"><span class="keyword">delete</span> builder;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>模型反序列化</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// runtime deserialize from a serialize object</span></span><br><span class="line">nvinfer1::IRuntime *runtime = nvinfer1::createInferRuntime(logger);</span><br><span class="line">nvinfer1::ICudaEngine *engine = runtime-&gt;deserializeCudaEngine(</span><br><span class="line">    serialized_model-&gt;data(), serialized_model-&gt;size());</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> serialized_model;</span><br><span class="line"><span class="keyword">delete</span> runtime;</span><br><span class="line"></span><br><span class="line"><span class="comment">// or load engine file</span></span><br><span class="line"><span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span> engine_file_path = <span class="string">"yolov5m.engine"</span>;</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">stringstream</span> engine_file_stream;</span><br><span class="line">engine_file_stream.seekg(<span class="number">0</span>, engine_file_stream.beg);</span><br><span class="line"><span class="built_in">std</span>::<span class="function">ifstream <span class="title">ifs</span><span class="params">(engine_file_path)</span></span>;</span><br><span class="line">engine_file_stream &lt;&lt; ifs.rdbuf();</span><br><span class="line">ifs.close();</span><br><span class="line"></span><br><span class="line">engine_file_stream.seekg(<span class="number">0</span>, <span class="built_in">std</span>::ios::end);</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> model_size = engine_file_stream.tellg();</span><br><span class="line">engine_file_stream.seekg(<span class="number">0</span>, <span class="built_in">std</span>::ios::beg);</span><br><span class="line"><span class="keyword">void</span> *model_mem = <span class="built_in">malloc</span>(model_size);</span><br><span class="line">engine_file_stream.read(<span class="keyword">static_cast</span>&lt;<span class="keyword">char</span> *&gt;(model_mem), model_size);</span><br><span class="line"></span><br><span class="line">nvinfer1::IRuntime *runtime = nvinfer1::createInferRuntime(logger);</span><br><span class="line">nvinfer1::ICudaEngine *engine = runtime-&gt;deserializeCudaEngine(model_mem, model_size);</span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> runtime;</span><br><span class="line"><span class="built_in">free</span>(model_mem);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>模型推理</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// context管理推理</span></span><br><span class="line">nvinfer1::IExecutionContext *context = engine-&gt;createExecutionContext();</span><br><span class="line"></span><br><span class="line"><span class="comment">// mem prep</span></span><br><span class="line"><span class="keyword">void</span> *buffers[<span class="number">2</span>];</span><br><span class="line"><span class="comment">// 获取模型输入尺寸并分配GPU内存</span></span><br><span class="line">nvinfer1::Dims input_dim = engine-&gt;getBindingDimensions(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">int</span> input_size = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; input_dim.nbDims; ++j) &#123;</span><br><span class="line">  input_size *= input_dim.d[j];</span><br><span class="line">&#125;</span><br><span class="line">cudaMalloc(&amp;buffers[<span class="number">0</span>], input_size * <span class="keyword">sizeof</span>(<span class="keyword">float</span>));</span><br><span class="line"><span class="comment">// 获取模型输出尺寸并分配GPU内存</span></span><br><span class="line">nvinfer1::Dims output_dim = engine-&gt;getBindingDimensions(<span class="number">1</span>);</span><br><span class="line"><span class="keyword">int</span> output_size = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; output_dim.nbDims; ++j) &#123;</span><br><span class="line">  output_size *= output_dim.d[j];</span><br><span class="line">&#125;</span><br><span class="line">cudaMalloc(&amp;buffers[<span class="number">1</span>], output_size * <span class="keyword">sizeof</span>(<span class="keyword">float</span>));</span><br><span class="line"><span class="comment">// 给模型输出数据分配相应的CPU内存</span></span><br><span class="line"><span class="keyword">float</span> *output_buffer = <span class="keyword">new</span> <span class="keyword">float</span>[output_size]();</span><br><span class="line"></span><br><span class="line"><span class="comment">// cuda stream, enqueue</span></span><br><span class="line">cudaStream_t stream;</span><br><span class="line">cudaStreamCreate(&amp;stream);</span><br><span class="line">cudaMemcpyAsync(buffers[<span class="number">0</span>], input_blob,input_size * <span class="keyword">sizeof</span>(<span class="keyword">float</span>),   <span class="comment">// host to device</span></span><br><span class="line">                  cudaMemcpyHostToDevice, stream);</span><br><span class="line">context-&gt;enqueueV2(buffers, stream, <span class="literal">nullptr</span>);</span><br><span class="line">cudaMemcpyAsync(output_buffer, buffers[<span class="number">1</span>],output_size * <span class="keyword">sizeof</span>(<span class="keyword">float</span>),   <span class="comment">// device to host</span></span><br><span class="line">                  cudaMemcpyDeviceToHost, stream);</span><br><span class="line">cudaStreamSynchronize(stream);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/06/06/PETR/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1450,10 +2570,6 @@
 </ul>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// implement cuda kernel of C=A+B</span></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">VecAddKernel</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">	<span class="keyword">if</span> (i&lt;n)</span><br><span class="line">    	C[i] = A[i] + B[i]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
-</ul>
-</li>
-</ol>
-<ul>
 <li><p>CPU host</p>
 <ul>
 <li>在cpu上要运行code，to launch the CUDA kernel</li>
@@ -1461,8 +2577,156 @@
 </ul>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VecAddCPU</span><span class="params">(<span class="keyword">float</span>* A, <span class="keyword">float</span>* B, <span class="keyword">float</span>* C, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> threads_per_block = <span class="number">512</span>;</span><br><span class="line">    <span class="keyword">int</span> nblocks = <span class="built_in">ceil</span>(n/threads_per_block);</span><br><span class="line">    VecAddKernel&lt;&lt;&lt;nblocks, threads_per_block&gt;&gt;&gt;(A, B, C, n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+<li><p>CPU &amp; GPU</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在cpu上执行</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello World from CPU\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在gpu上执行</span></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">HelloFromGPU</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello from GPU\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在cpu上发起调用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello from CPU\n"</span>);</span><br><span class="line">    HelloFromGPU&lt;&lt;&lt;<span class="number">1</span>, <span class="number">5</span>&gt;&gt;&gt;();</span><br><span class="line">    cudaDeviceReset();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>__global__：用它去修饰函数HelloFromGPU，成为内核函数，该函数在host端异步调用，在device端执行，无返回值</li>
+<li>__device__：限定函数在device上调用，在device上执行，用于gpu内部调用</li>
+<li>__host__：限定函数在host上调用，在host上执行，即默认cpu执行，所以这个修饰可以省略</li>
+<li>&lt;&lt;<n_block, n_thread="">&gt;&gt;：也指明了是从<code>host</code>端到<code>device</code>端的内核函数调用，里面的参数是执行配置，例子中kernel函数将被执行5个线程执行</n_block,></li>
 </ul>
-<ol>
+</li>
+</ul>
+</li>
+<li><p>流式多处理器(<code>Streaming Multiprocessors，SM</code>)</p>
+<ul>
+<li>GPU架构是通过复制这种架构的构建来实现硬件并行<ul>
+<li>1个GPU包含多个SM，每个<code>SM</code>支持许多线程并发执行</li>
+<li><code>CUDA</code>采用单指令多线程(<code>Single-Instruction Multiple-Thread，SIMT</code>)来管理和执行<code>GPU</code>上的众多线程 <ul>
+<li>两级线程结构</li>
+<li>1个内核的所有线程为一个线程grid，所有线程共享全局内存空间</li>
+<li>1个grid由多个线程块（block）组成，一个线程块包含一组线程，同一线程块内的线程（thread）通过同步和共享内存的方式实现协作</li>
+<li>不同块内的线程不能协作</li>
+</ul>
+</li>
+<li>当host发布一个kernel时，这个内核网格的线程块就被分配到可用的<code>SM</code>上来执行，多个线程在<code>SM</code>上并发执行，多个线程块可以并发地在一个<code>SM</code>上执行，当线程块终止时，新的线程块又可以在腾出的SM上启动执行</li>
+</ul>
+</li>
+<li>SM核心组件<ul>
+<li>核心</li>
+<li>共享内存/一级缓存</li>
+<li>寄存器文件</li>
+<li>加载/存储单元</li>
+<li>特殊功能单元</li>
+<li>线程束调度器warp</li>
+</ul>
+</li>
+<li>并行<ul>
+<li>任务并行：将任务切分成子任务，多线执行，网格并发是任务并行</li>
+<li>数据并行：每个线程处理一份数据，线程执行的计算任务是一样的，线程并行是数据并行</li>
+</ul>
+</li>
+<li>线程束<ul>
+<li><code>CUDA</code>采用<code>SIMT</code>架构来管理和执行线程，将线程块中的线程每<code>32</code>个为一组进行划分，每一组被称为一个线程束(<code>warp</code>)</li>
+<li>线程束的大小<code>warpSize</code>是<code>CUDA</code>中的一个内部属性</li>
+<li>线程束是<code>GPU</code>的基本执行单元</li>
+<li>一旦线程块被调度到一个<code>SM</code>上，线程块中的线程就会被进一步划分为线程束，每个线程束中的所有线程执行相同的命令，每个线程拥有自己的指令地址计数器和寄存器状态</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CUDA中的可编程内存的类型</p>
+<ul>
+<li>overview<ul>
+<li>寄存器(Registers)</li>
+<li>本地内存(Local Memory)</li>
+<li>共享内存(Shared Memory)</li>
+<li>常量内存(Constant Memory)</li>
+<li>纹理内存(Texture Memory)</li>
+<li>全局内存(Global Memory)</li>
+</ul>
+</li>
+<li>thread独享：寄存器(Registers) &amp; 本地内存(Local Memory)</li>
+<li>一个block中的thread共享：共享内存(Shared Memory)</li>
+<li>其余全局共享</li>
+<li>寄存器<ul>
+<li>内核函数中声明且没有其他修饰符修饰的变量，如<strong>VectorAddGPU</strong>中的线程索引变量i</li>
+<li>用于存放内核函数中需要频繁访问的线程私有变量</li>
+<li>变量与内核函数的生命周期相同</li>
+<li>寄存器是<code>GPU</code>中访问速度最快的内存空间</li>
+<li>寄存器溢出：一旦内核函数使用了超过硬件限制的寄存器数量，则会使用本地内存来代替多占用的寄存器</li>
+</ul>
+</li>
+<li>共享内存<ul>
+<li>被<code>__shared__</code>修饰符修饰的变量被存储到共享内存中</li>
+<li>生命周期伴随整个线程块</li>
+<li>线程通过使用共享内存中的数据可以实现互相之间的协作</li>
+<li>使用共享内存必须调用如下函数进行同步：<strong>void</strong> __sybcthreads()</li>
+</ul>
+</li>
+<li>常量内存<ul>
+<li>常量变量用<code>__constant__</code>修饰符进行修饰</li>
+<li>必须在全局空间内和所有内核函数之外进行声明</li>
+<li>用于线程束中的所有线程都需要从相同的内存地址中读取数据的情况</li>
+</ul>
+</li>
+<li>全局内存<ul>
+<li><code>GPU</code>中容量最大、延迟最高的内存空间，其作用域和生命空间都是全局的</li>
+<li>可以在任何<code>SM</code>设备中被访问到</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>GPU缓存</p>
+<ul>
+<li><p>缓存：</p>
+<ul>
+<li>缓存是cpu和内存之间，内存中访问频率高的数据的复制品（映射）</li>
+<li>CPU找数据或指令的顺序是：先到一级缓存中找，找不到再到二级缓存中找，还找不到就到内存中找</li>
+</ul>
+</li>
+<li><p>overview</p>
+<ul>
+<li><p>一级缓存</p>
+</li>
+<li><p>二级缓存</p>
+</li>
+<li><p>只读常量缓存</p>
+</li>
+<li><p>只读纹理缓存</p>
+</li>
+</ul>
+</li>
+<li><p>每个<code>SM</code>都有一个一级缓存，所有<code>SM</code>共享一个二级缓存</p>
+</li>
+<li><p>一级和二级缓存用来存储本地内存和全局内存中的数据，包括寄存器溢出的部分</p>
+</li>
+</ul>
+</li>
+<li><p>Host内存：<a href="https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484370&amp;idx=1&amp;sn=a23ddab4c1f7bff4f221f7ae78048d0f&amp;chksm=c0edd2bcf79a5baa9889b06e721f2c70d62bcc489490e8bb3fdc3a74e4ad77803c447351645f&amp;scene=178&amp;cur_album_id=2132879019699240961#rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484370&amp;idx=1&amp;sn=a23ddab4c1f7bff4f221f7ae78048d0f&amp;chksm=c0edd2bcf79a5baa9889b06e721f2c70d62bcc489490e8bb3fdc3a74e4ad77803c447351645f&amp;scene=178&amp;cur_album_id=2132879019699240961#rd</a></p>
+<ul>
+<li>可分页内存pageable：指令/数据被离散存储至内存中，因为cpu和gpu是异步的，可能会发生cpu在gpu执行过程中修改内存发生不安全的情况，所以cuda会将临时分配页面锁定</li>
+<li>固定内存pinned：cuda可以分配固定的主机内存（<strong>cudaMallocHost</strong>），不需要中间freeze的过程，直接被device端访问，因此可以用很高的带宽进行读写操作</li>
+</ul>
+</li>
+<li><p>CUDA Stream</p>
+<ul>
+<li><p><code>CUDA</code>流是一系列异步操作的集合，同一个<code>CUDA</code>流中的操作严格按照顺序在<code>GPU</code>上运行</p>
+</li>
+<li><p>多个流同时启动多个内核任务就可以实现网格级并发，任务并行</p>
+</li>
+<li><p>显式地创建多个流，去执行数据拷贝、kernel计算等，不同的<code>CUDA</code>操作是可以重叠进行的</p>
+</li>
+<li><p>创建显式流：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cudaStream_t stream;</span><br><span class="line">cudaStreamCreate(&amp;stream);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>销毁流：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cudaError_t <span class="title">cudaStreamDestroy</span><span class="params">(cudaStream_t stream)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>异步拷贝数据：</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">cudaError_t <span class="title">cudaMemcpyAsync</span><span class="params">(<span class="keyword">void</span>* dst, <span class="keyword">const</span> <span class="keyword">void</span>* src, <span class="keyword">size_t</span> count, cudaMemcpyKind kind, cudaStream_t stream = <span class="number">0</span>)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>执行指定流的kernel</p>
+ <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel_name&lt;&lt;&lt;grid, block, sharedMemSize, stream&gt;&gt;&gt;(...);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>考虑矩阵乘法</p>
+<ul>
+<li>假如任务是两个矩阵乘法，可以将每个乘法任务绑定一个stream</li>
+<li>每个stream异步计算，然后结果同步</li>
+</ul>
+</li>
+</ul>
+</li>
 <li><p>tensorRT</p>
 <ul>
 <li>NVIDIA TensorRT是一种高性能神经网络推理(Inference)引擎，用于在生产环境中部署深度学习应用，可提供最大的推理吞吐量和效率</li>
@@ -1493,6 +2757,18 @@
 <li>PyTorch-Quantization：在Pytorch训练或者推理的时候加入模拟量化操作，支持量化训练后的模型导出ONNX和TRT</li>
 </ul>
 </li>
+<li>cookbook：<a href="https://github.com/NVIDIA/trt-samples-for-hackathon-cn/tree/master/cookbook" target="_blank" rel="noopener">https://github.com/NVIDIA/trt-samples-for-hackathon-cn/tree/master/cookbook</a></li>
+<li>workflow<ul>
+<li>使用深度学习框架自带的tensorRT接口，遇到不支持的算子：返回原框架计算</li>
+<li>【推荐】导出onnx，然后导入tensorRT，遇到不支持的算子：custom node</li>
+<li>使用tensorRT搭建网络，遇到不支持的算子：写plugin(cudac++)</li>
+</ul>
+</li>
+<li>命令行工具<ul>
+<li>trtexec：由onnx构建模型序列plan，推理plan及查看相关信息</li>
+<li>polygraphy：</li>
+</ul>
+</li>
 </ul>
 </li>
 <li><p>Jetson</p>
@@ -1502,7 +2778,15 @@
 </li>
 <li><p>pytorch custom cuda op</p>
 <ul>
-<li><p>custom add</p>
+<li><p>custom add：<a href="https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484261&amp;idx=1&amp;sn=d7b500fb8e81da96e4828b36d64a749f&amp;chksm=c0edd20bf79a5b1d54e6557be02552c8ab16d7225202bb87e3a89bbd203d0b3fcd643f4be6a6&amp;scene=178&amp;cur_album_id=2132879019699240961#rd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzkwNjE2ODMyMQ==&amp;mid=2247484261&amp;idx=1&amp;sn=d7b500fb8e81da96e4828b36d64a749f&amp;chksm=c0edd20bf79a5b1d54e6557be02552c8ab16d7225202bb87e3a89bbd203d0b3fcd643f4be6a6&amp;scene=178&amp;cur_album_id=2132879019699240961#rd</a></p>
+<ul>
+<li><p>cpu code</p>
+  <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">VectorAddCPU</span><span class="params">(<span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> a, <span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> b, <span class="keyword">float</span> *<span class="keyword">const</span> c,</span></span></span><br><span class="line"><span class="function"><span class="params">                  <span class="keyword">const</span> <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// alloc memory for host</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">size_t</span> size = <span class="number">1024</span>;</span><br><span class="line">  <span class="keyword">float</span> *ha = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hb = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hc = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">    ha[i] = i;</span><br><span class="line">    hb[i] = size - i;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  VectorAddCPU(ha, hb, hc, size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">delete</span>[] ha;</span><br><span class="line">  <span class="keyword">delete</span>[] hb;</span><br><span class="line">  <span class="keyword">delete</span>[] hc;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>gpu code</p>
+  <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cuda_runtime.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line">__<span class="function">global__ <span class="keyword">void</span> <span class="title">VectorAddGPU</span><span class="params">(<span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> a, <span class="keyword">const</span> <span class="keyword">float</span> *<span class="keyword">const</span> b,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">float</span> *<span class="keyword">const</span> c, <span class="keyword">const</span> <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i = blockDim.x * blockIdx.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (i &lt; n) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 分配CPU内存</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">size_t</span> size = <span class="number">1024</span>;</span><br><span class="line">  <span class="keyword">float</span> *ha = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hb = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">float</span> *hc = <span class="keyword">new</span> <span class="keyword">float</span>[size]();</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">    ha[i] = i;</span><br><span class="line">    hb[i] = size - i;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 分配GPU内存</span></span><br><span class="line">  <span class="keyword">float</span> *da = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="keyword">float</span> *db = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="keyword">float</span> *dc = <span class="literal">nullptr</span>;</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;da, size);</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;db, size);</span><br><span class="line">  cudaMalloc((<span class="keyword">void</span> **)&amp;dc, size);</span><br><span class="line">  cudaMemcpy(da, ha, size, cudaMemcpyHostToDevice);</span><br><span class="line">  cudaMemcpy(db, hb, size, cudaMemcpyHostToDevice);</span><br><span class="line">  cudaMemcpy(dc, hc, size, cudaMemcpyHostToDevice);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// kernel config</span></span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> thread_per_block = <span class="number">256</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">int</span> block_per_grid = (size + thread_per_block - <span class="number">1</span>) / thread_per_block;</span><br><span class="line"> </span><br><span class="line">  VectorAddGPU&lt;&lt;&lt;block_per_grid, thread_per_block&gt;&gt;&gt;(da, db, dc, size);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 把数据从GPU拷贝回CPU</span></span><br><span class="line">  cudaMemcpy(hc, dc, size, cudaMemcpyDeviceToHost);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 释放GPU显存</span></span><br><span class="line">  cudaFree(da);</span><br><span class="line">  cudaFree(db);</span><br><span class="line">  cudaFree(dc);</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// 释放CPU内存</span></span><br><span class="line">  <span class="keyword">delete</span>[] ha;</span><br><span class="line">  <span class="keyword">delete</span>[] hb;</span><br><span class="line">  <span class="keyword">delete</span>[] hc;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 </li>
 <li><p>deformable conv</p>
 <ul>
@@ -1535,34 +2819,25 @@
 <li><p>step1：在c++侧编写方法</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cmult.h</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cmult.cpp</span></span><br><span class="line"><span class="function"><span class="keyword">float</span> <span class="title">cmult</span><span class="params">(<span class="keyword">int</span> int_param, <span class="keyword">float</span> float_param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">float</span> return_value = int_param * float_param;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"    In cmult : int: %d float %.1f returning  %.1f\n"</span>, int_param,</span><br><span class="line">            float_param, return_value);</span><br><span class="line">    <span class="keyword">return</span> return_value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+<li><p>step2：pybind module编写绑定</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pybind11_wrapper.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmult.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(cmult_example, m) &#123;</span><br><span class="line">    m.def(<span class="string">"cmult"</span>, &amp;cmult, <span class="string">"A function that multiplies two numbers"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PYBIND11_MODULE宏是python解释器导入扩展模块的入口，当调用自定义的python库函数cmult时，cmult的函数地址的将被调用</p>
+</li>
+<li><p>step3：setup编译并添加python module</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setup.py</span></span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> pybind11.setup_helpers <span class="keyword">import</span> Pybind11Extension, build_ext</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">example_module = Pybind11Extension(</span><br><span class="line">    <span class="string">'cmult_example'</span>,</span><br><span class="line">    [str(fname) <span class="keyword">for</span> fname <span class="keyword">in</span> Path(<span class="string">'src'</span>).glob(<span class="string">'*.cpp'</span>)],</span><br><span class="line">    include_dirs=[<span class="string">'./'</span>],</span><br><span class="line">    extra_compile_args=[<span class="string">'-O3'</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'cmult_example'</span>,</span><br><span class="line">    description=<span class="string">'pybind11+setup.py example'</span>,</span><br><span class="line">    ext_modules=[example_module],</span><br><span class="line">    cmdclass=&#123;<span class="string">"build_ext"</span>: build_ext&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>安装：python setup install，就会添加名为cmult_example的python module</p>
+</li>
+<li><p>step4：python脚本中调用module以及cmult函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cmult_example <span class="keyword">import</span> cmult</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span></span><br><span class="line">b = <span class="number">1.25</span></span><br><span class="line">print(cmult(a, b))</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
+</li>
+<li><p>Cython</p>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-</ol>
-<pre><code>  * step2：pybind module编写绑定
-
-    <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pybind11_wrapper.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmult.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">PYBIND11_MODULE(cmult_example, m) &#123;</span><br><span class="line">    m.def(<span class="string">"cmult"</span>, &amp;cmult, <span class="string">"A function that multiplies two numbers"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-    PYBIND11_MODULE宏是python解释器导入扩展模块的入口，当调用自定义的python库函数cmult时，cmult的函数地址的将被调用
-
-  * step3：setup编译并添加python module
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># setup.py</span></span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> pybind11.setup_helpers <span class="keyword">import</span> Pybind11Extension, build_ext</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">example_module = Pybind11Extension(</span><br><span class="line">    <span class="string">'cmult_example'</span>,</span><br><span class="line">    [str(fname) <span class="keyword">for</span> fname <span class="keyword">in</span> Path(<span class="string">'src'</span>).glob(<span class="string">'*.cpp'</span>)],</span><br><span class="line">    include_dirs=[<span class="string">'./'</span>],</span><br><span class="line">    extra_compile_args=[<span class="string">'-O3'</span>]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'cmult_example'</span>,</span><br><span class="line">    description=<span class="string">'pybind11+setup.py example'</span>,</span><br><span class="line">    ext_modules=[example_module],</span><br><span class="line">    cmdclass=&#123;<span class="string">"build_ext"</span>: build_ext&#125;,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-
-    安装：python setup install，就会添加名为cmult_example的python module
-
-  * step4：python脚本中调用module以及cmult函数
-
-    <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> cmult_example <span class="keyword">import</span> cmult</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span></span><br><span class="line">b = <span class="number">1.25</span></span><br><span class="line">print(cmult(a, b))</span><br></pre></td></tr></table></figure>
-
-
-* Cython
-</code></pre><ol>
 <li><p><a href="https://docs.nvidia.com/deeplearning/tensorrt/pytorch-quantization-toolkit/docs/userguide.html#quantization-aware-training" target="_blank" rel="noopener">pytorch-quantization</a></p>
 <ul>
 <li><p>tensor quant和fake tensor quant：given a tensor，调用pytorch_quantization.tensor_quant.tensor_quant(x)返回一个tensor的量化tensor(int)和scale，调用pytorch_quantization.tensor_quant.fake_tensor_quant(x)返回一个tensor的伪量化值(float)，即QDQ的值，可以对比原始tensor，计算quant error</p>
@@ -1581,8 +2856,6 @@
 </li>
 </ul>
 </li>
-</ol>
-<ol>
 <li><p>c++ basics recall</p>
 <ul>
 <li>cmake</li>
@@ -1670,1336 +2943,8 @@
 </li>
 <li><p>计算bit数中1的个数</p>
  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 计算效率与n的bit位数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        tmp = n&amp;<span class="number">1</span></span><br><span class="line">        cnt += tmp</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> cnt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算效率与n中1的个数成正比</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cnt_1</span><span class="params">(n)</span>:</span></span><br><span class="line">	cnt = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> n:</span><br><span class="line">        cnt += <span class="number">1</span></span><br><span class="line">        n &amp;= n<span class="number">-1</span>       <span class="comment"># remove the highest 1</span></span><br><span class="line">	<span class="keyword">return</span> cnt</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>  * 计算平方根
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/17/diffusion/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2023/05/17/diffusion/" itemprop="url">diffusion</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-17T08:34:01+08:00">
-                2023-05-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2023/05/17/diffusion/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/17/diffusion/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[survey 2023] Diffusion Models: A Comprehensive Survey of Methods and Applications</p>
-<p>[VAE]</p>
-<p>[DDPM 2020] Denoising Diffusion Probabilistic Models</p>
-<p>[LDMs 2022] High-Resolution Image Synthesis with Latent Diffusion Models</p>
-<p>aigc Text-to-Image 大模型</p>
 <ul>
-<li><p>Stable Diffusion</p>
-</li>
-<li><p>DALLE</p>
-</li>
-<li><p>GLIDE</p>
-</li>
-</ul>
-<p>微调方式</p>
-<ul>
-<li>ControlNet</li>
-<li>Textual Inversion</li>
-<li>Hypernetworks</li>
-<li>Lora</li>
-</ul>
-<p>其他生成模型：</p>
-<ul>
-<li><p>GAN</p>
-</li>
-<li><p>VAE</p>
-</li>
-<li><p>Autoregressive model</p>
-</li>
-<li><p>Normalizing flow</p>
-</li>
-<li><p>Energy-based model</p>
-</li>
-</ul>
-<p>Vision Tasks</p>
-<ul>
-<li>repaint：图像补全修复</li>
-<li>GLIDE：文本到图像的生成</li>
-</ul>
-<p>生成式建模的basic idea：正向扩散来系统地扰动数据中的分布，然后通过学习反向扩散过程恢复数据的分布</p>
-<p><img src="/2023/05/17/diffusion/generative models.png" width="50%;"></p>
-<ul>
-<li><p>有监督的生成模型与判别模型</p>
-<ul>
-<li>有监督学习是根据样本和标签{X,Y}去学习一个模型：$Y=f(X)$ / $p(Y|X)$，根据监督方式又分为判别模型和生成模型</li>
-<li>判别模型：直接对条件概率分布建模，监督给定X预测出的Y的质量，来拟合真实分布，所有的有监督的回归、分类等模型都是判别模型</li>
-<li>生成模型：建模联合概率分布$p(X,Y)$，间接计算后验概率，常见方法有朴素贝叶斯(Naive Bayes)、混合高斯模型(GMM)、隐马尔科夫模型(HMM)、GAN的生成器</li>
-</ul>
-</li>
-<li><p>无监督的生成模型</p>
-<ul>
-<li>对输入样本X的分布建模$p(X)$，希望产生与训练集同分布的新样本</li>
-<li>概率模型的输出接近X的真实分布，就可以从概率模型中采样来“生成”样本了</li>
-</ul>
-</li>
-<li><p>极大似然估计</p>
-<ul>
-<li><p>极大似然估计是对概率模型参数进行估计的一种方法</p>
-</li>
-<li><p>假设训练数据服从$P_{data}(X)$，生成模型的输出分布为$P_g(X,\theta)$，可以得到关于模型参数$\theta$的函数，$L(\theta) = \Pi_i^N p_g(x_i,\theta)$</p>
-<ul>
-<li>最好的$\theta$下产生数据集中的所有样本的概率是最大的，$\theta = argmax L(\theta)$</li>
-<li>为了避免多个概率的乘积发生数值下溢问题，采用对似然函数取对数的形式，$\theta = argmax\ log(L(\theta))$</li>
-<li><p>使用极大似然估计时，每个样本都希望拉高它所对应的模型概率值，但是所有样本的概率密度总和为1，一个样本点的概率密度函数值被拉高将不可避免的使其它点的函数值被拉低，最终达到一个相对平衡的状态</p>
-<p><img src="/2023/05/17/diffusion/极大似然.png" width="30%;"></p>
-</li>
-</ul>
-</li>
-<li><p>也可以直接建模成预测分布和真实分布的KL散度</p>
-<ul>
-<li>$\theta = argmax\ D_{KL}(p_{data} | p_g) = argmax \ p_g (log\ p_{data}-log\ p_g) = argmax \ log\ p_g $ </li>
-<li>和上面的形式一样</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p>VAE：变分自编码器</p>
-<ul>
-<li><p>V：Variational，变分推断</p>
-</li>
-<li><p>AE：Auto-Encoder</p>
-<ul>
-<li>encoder-decoder形式的重建模型<ul>
-<li>encode：从输入x得到Latent Variable z</li>
-<li>decode：从隐变量z重建x</li>
-<li>重建loss就是重构像素点误差，可以用MSE</li>
-</ul>
-</li>
-<li>AE的局限是泛化性，仅根据已有分布重建，latent space太窄了，随机采样的latent code就是乱码了，这种性质其实很适合异常检测（GANomaly）</li>
-<li><p>于是想到在latent code上面添加噪声，扩展latent space，一个直观的做法就是将latent code扩展成一个高斯分布，真实编码附近有一个高的概率值，远的地方概率越来越低，将一个单点扩展到整个空间</p>
-<p><img src="/2023/05/17/diffusion/VAE Gaussian.png" width="35%;"></p>
-</li>
-</ul>
-</li>
-<li><p>VAE</p>
-<ul>
-<li>encoder的输出不再是隐向量z，而是一个概率分布，用均值m和方差v来建模，除此以外还添加额外的高斯噪声e，间接得到latent code $z=exp(v)*e+m$</li>
-<li><p>loss包含重建loss + 一个辅助loss</p>
-<ul>
-<li>辅助loss = $e^v-(1+v) + m^2$，他对v的倒数是$e^v-1$，在v=0时取得minimum</li>
-<li>防止v退化成-inf，使得VAE退化成AE</li>
-</ul>
-<p><img src="/2023/05/17/diffusion/VAE.png" width="45%;"></p>
-</li>
-<li><p>最终我们得到了一个decoder，只要我们在给定input的latent分布周围随机采样，就能得到类似input的样本</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p>DDPM</p>
-<ul>
-<li><p>扩散模型包括 <strong>前向扩散过程</strong> 和 <strong>反向去噪过程（采样）</strong>，前向阶段对图像逐步施加噪声，直至图像被破坏变成完全的高斯噪声，然后在反向阶段学习从高斯噪声还原为原始图像的过程，最终我们可以得到一个从纯噪声生成图片的模型</p>
-<p><img src="/2023/05/17/diffusion/DDPM.png" width="50%;"></p>
-</li>
-<li><p>前向过程（扩散）</p>
-<ul>
-<li>逐步向真实图片添加噪声最终得到一个纯噪声</li>
-<li>$x_t = \sqrt {\alpha_t} x_{t-1} + \sqrt {1-\alpha_t} \varepsilon_t$<ul>
-<li>$\varepsilon_t$是满足正态分布的随机噪声</li>
-<li>$\sqrt {\alpha_t}$是图片权重，1-*是噪声权重</li>
-<li>$\alpha_t = 1-\beta_t$是固定的已知函数，可以直接获得的，$\beta$通常很小，accumulate $\alpha$ 逐渐变小</li>
-<li>$\overline \alpha = \Pi_i^t \alpha_i$ 此前所有$\alpha$的累积</li>
-</ul>
-</li>
-<li>$x_t = \sqrt {\overline \alpha_t} x_{0} + \sqrt {1-\overline \alpha_t} \varepsilon_t$</li>
-</ul>
-</li>
-<li><p>反向过程（去噪）</p>
-<ul>
-<li>训练网络去分解每一步的噪声，Unet，得到$\varepsilon_{\theta}(x_t,t)$</li>
-<li>target是使预测噪声与真实噪声接近</li>
-</ul>
-</li>
-<li><p><img src="/2023/05/17/diffusion/DDPM1.png" width="60%;"></p>
-</li>
-<li><p>使用模型</p>
-<ul>
-<li><p>使用一个随机噪声，以及trained Unet噪声模型，逐步还原成一张图片</p>
-<p><img src="/2023/05/17/diffusion/DDPM alg.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-<li><p>diffusion models的缺点</p>
-<ul>
-<li>去噪过程非常耗时，并且非常消耗内存</li>
-<li>因为训的是原始图片，训练的极其缓慢，LDM的改进办法就是将训练放在latent space，用预训练的大模型将原图投影到latent space</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p>Latent Diffusion Models</p>
-<ul>
-<li><p>将训练搬到了latent space</p>
-</li>
-<li><p>支持general consitioning inputs：text / bbox，用cross-attention实现多模态信息的注入</p>
-</li>
-<li><p>overview</p>
-<p>  <img src="/2023/05/17/diffusion/LDMs.png" width="60%;"></p>
-<ul>
-<li>VAE：$E$ 是encoder，用原图编码到latent space，$D$是decoder，将生成的z解码到像素space</li>
-<li>Condition-Encoder：编码多模态信息，text的话就用bert/clip</li>
-<li>UNet with cross attn：cross attn融入condition信息，指导图像生成<ul>
-<li>ResBlock<ul>
-<li>输入是latent feature和timestep_embedding</li>
-<li>timestep_embedding是将timestep用positional embedding类似的编码方式得到的</li>
-</ul>
-</li>
-<li>SpatialTransformer<ul>
-<li>standard transformer block：self attn - cross attn - ffn</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li></li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>Stable Diffusion：<a href="https://jalammar.github.io/illustrated-stable-diffusion/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-stable-diffusion/</a></li>
-<li>deeplearning.AI：<a href="https://learn.deeplearning.ai/diffusion-models" target="_blank" rel="noopener">https://learn.deeplearning.ai/diffusion-models</a></li>
-<li>DDIM<ul>
-<li>sampling is slow，DDIM faster the process by skiping timesteps</li>
-<li>sampling in latent space z</li>
-</ul>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/16/SSIS-methods/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2023/05/16/SSIS-methods/" itemprop="url">SSIS methods</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-16T13:00:07+08:00">
-                2023-05-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2023/05/16/SSIS-methods/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/16/SSIS-methods/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[M2F] Masked-attention Mask Transformer for Universal Image Segmentation</p>
-<p>[VITA 2022] VITA: Video Instance Segmentation via Object Token Association</p>
-<p> [MobileViT v2] Separable Self-attention for Mobile Vision Transformers</p>
-<h2 id="VITA-Video-Instance-Segmentation-via-Object-Token-Association"><a href="#VITA-Video-Instance-Segmentation-via-Object-Token-Association" class="headerlink" title="VITA: Video Instance Segmentation via Object Token Association"></a>VITA: Video Instance Segmentation via Object Token Association</h2><ol>
-<li><p>introduction</p>
-<ul>
-<li><p>explicit object-oriented information can be a strong clue for understanding the context of the entire sequence</p>
-</li>
-<li><p>build video-level understanding through frame-level object tokens</p>
-<ul>
-<li>不是用spatio-temporal structure，efficiency</li>
-<li>也不是用frame-attention，long-term adaptive</li>
-</ul>
-</li>
-<li><p>built on top of an off-the-shelf Transformer-based frame-level detector </p>
-<ul>
-<li>可以用图像预训练一个detector，然后冻结去训练video</li>
-<li>可以handle long and high-resolution videos</li>
-</ul>
-</li>
-<li><p>VIS methods</p>
-<ul>
-<li>onlineVIS：一般是ref和cur通过association的方式，measure the similarities/correspondence</li>
-<li><p>offlineVIS：involve整个video来预测，帧太多spatio-temporal attention太heavy，一般放在decoder上，instance-level的attn</p>
-<p><img src="/2023/05/16/SSIS-methods/VIS.png" width="80%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>method</p>
-<p> <img src="/2023/05/16/SSIS-methods/VITA.png" width="80%;"></p>
-<ul>
-<li><p>Frame-level Detector</p>
-<ul>
-<li>m2f</li>
-<li>frame-level predictions<ul>
-<li>dynamic 1×1 convolutional weight from the frame queries  $f \in R^{NC}$</li>
-<li>per-pixel embeddings from the pixel decoder $M \in R^{CHW}$</li>
-</ul>
-</li>
-<li>用frame queries去decode encoder feature，实现classifying&amp;segmenting their matched objects</li>
-</ul>
-</li>
-<li><p>VITA Head</p>
-<ul>
-<li>input：<ul>
-<li>collect the object-level frame queries throughout the whole video，$\{f_t \}^T_{t=1} \in R^{C(TN)}$</li>
-<li>frame features $\{M_t\}_{t=1}^T \in R^{CTHW}$</li>
-</ul>
-</li>
-<li>Object Encoder<ul>
-<li>build video-level information</li>
-<li>window-shifted self-attention along the temporal axis</li>
-<li>这一步是为了将query-level的信息交互聚合成object-level的信息，在temporal上交互</li>
-</ul>
-</li>
-<li>Object Decoder and Output heads<ul>
-<li>假设object tokens can provide sufficient instance-specific information</li>
-<li>引入trainable video queries $v\in R^{CN_v}$作为Q</li>
-<li>前面的T frame queries $tf \in R^{C(TN_f)}$作为KV</li>
-<li>一样的几层cross+self attn block</li>
-<li>final predictions<ul>
-<li>class embedding：$p \in R^{N_v (K+1)}$</li>
-<li>mask embedding：$m \in R^{N_v C}$</li>
-<li>每个query代表的是tracklet of an instance over all frames</li>
-<li>最终的predicted mask logits用mask embedding和frame masks做matmul得到</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Clip-wise losses</p>
-<ul>
-<li><p>similarity loss</p>
-<ul>
-<li>frame-level matching的query id是变化的</li>
-<li>video-level mathcing的query id是绑定到固定instance的</li>
-<li>collect所有match到gt的frame queries和video queries，然后再进行query之间的pairing<ul>
-<li>similarity pred：embed the collected queries by a linear layer，then measure the similarity by matmul</li>
-<li>similarity target：match到同一个gt instance的为1，否则为0，构建similarity matrix</li>
-</ul>
-</li>
-<li><p>用BCE来计算similarity loss</p>
-<p><img src="/2023/05/16/SSIS-methods/similarity.png" width="40%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>total loss<ul>
-<li>首先是single-frame loss：M2F原始那套</li>
-<li>然后是video mask loss：用video query预测的per-frame mask的loss</li>
-<li>最后是similarity loss：用来match video query和frame query的</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="Separable-Self-attention-for-Mobile-Vision-Transformers"><a href="#Separable-Self-attention-for-Mobile-Vision-Transformers" class="headerlink" title="Separable Self-attention for Mobile Vision Transformers"></a>Separable Self-attention for Mobile Vision Transformers</h2><ol>
-<li><p>introduction</p>
-<ul>
-<li>ViT的efficiency bottleneck是MHA<ul>
-<li>multi-head：costly bmm &amp; mm &amp; softmax</li>
-<li>self-attention：需要O(n^2)的computation cost</li>
-</ul>
-</li>
-<li>this paper propose separable self-attention<ul>
-<li>O(n)</li>
-<li>uses element-wise operations for computing self-attention</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>method</p>
-<ul>
-<li><p>attention方式对比</p>
-<ul>
-<li>dense mm：两两做内积，然后对每个query指向的所有key的distance做归一化，attention是[b,q,q]</li>
-<li>separate method：对query[b,q,c]先计算一个context score [b,q]，然后对key token [b,q,c]计算加权和[b,q,c]，相当于对所有的key token基于context score做了reweight sum，来融合q &amp; k，最终的attention是[b,q,c]</li>
-<li><p>这样计算复杂度就与q-dim线形相关了</p>
-<p><img src="/2023/05/16/SSIS-methods/separable attention.png" width="60%;"></p>
-</li>
-</ul>
-</li>
-<li><p>attention block结构对比</p>
-<ul>
-<li>standard MHA的attn有h个k*k的dense dot</li>
-<li>Linformer会压一下key/value token的长度，压到一个固定值，mm的算力下降，但是bmm的串行pipe还在</li>
-<li><p>Separable self-attention</p>
-<ul>
-<li>query：[b,k,d]先fc到[b,k,1]，然后softmax归一化得到context score，可以理解为各个query在整张图上的响应值高低</li>
-<li>key：[b,k,d]先fc到[b,k,d]，然后与context score做broadcast乘得到[b,k,d]，可以理解为基于query响应值高低对key做rescale来融合qk的信息，然后所有key vector相加得到[b,1,d]，是全局的context vector</li>
-<li>value：[b,k,d]先fc-relu到[b,k,d]，然后与context vector做broadcast乘得到[b,k,d]，然后是project layer</li>
-</ul>
-<p><img src="/2023/05/16/SSIS-methods/separable self-attention.png" width="70%;"></p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>code</p>
-</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># https://github.com/apple/ml-cvnets/blob/main/cvnets/layers/linear_attention.py#L16</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">self_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">    <span class="comment"># q=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(q, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">	</span><br><span class="line">    context_vector = k * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line">    </span><br><span class="line">    out = F.relu(v) * context_vector    <span class="comment"># [b,c,hw]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cross_attn</span><span class="params">(q,k,v)</span>:</span></span><br><span class="line">	<span class="comment"># q!=k</span></span><br><span class="line">    q = self.proj_q(q)    <span class="comment"># [b,c,q] -&gt; [b,c,q]</span></span><br><span class="line">    k = self.proj_k(k)    <span class="comment"># [b,c,hw] -&gt; [b,1,hw]</span></span><br><span class="line">    v = self.proj_v(v)    <span class="comment"># [b,c,hw] -&gt; [b,c,hw]</span></span><br><span class="line">    </span><br><span class="line">    context_scores = F.softmax(k, dim=<span class="number">-1</span>)  <span class="comment"># [b,1,hw]</span></span><br><span class="line">    context_scores = self.attn_dropout(context_scores)</span><br><span class="line">    </span><br><span class="line">    context_vector = v * context_scores    <span class="comment"># [b,c,hw]</span></span><br><span class="line">    context_vector = torch.sum(context_vector, dim=<span class="number">-1</span>, keepdim=<span class="keyword">True</span>)   <span class="comment"># [b,c,1]</span></span><br><span class="line"></span><br><span class="line">    out = F.relu(q) * context_vector    <span class="comment"># [b,c,q]</span></span><br><span class="line">	out = self.out_proj(out)            <span class="comment"># fc-bn</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/15/VIS-methods/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2023/05/15/VIS-methods/" itemprop="url">VIS methods</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-15T15:33:34+08:00">
-                2023-05-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2023/05/15/VIS-methods/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/15/VIS-methods/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>papers</p>
-<p>[RVM 2021]: Robust High-Resolution Video Matting with Temporal Guidance </p>
-<p>[SparseInst 2022]: Sparse Instance Activation for Real-Time Instance Segmentation</p>
-<p>[GMA 2021]: Learning to Estimate Hidden Motions with Global Motion Aggregation</p>
-<h2 id="Robust-High-Resolution-Video-Matting-with-Temporal-Guidance"><a href="#Robust-High-Resolution-Video-Matting-with-Temporal-Guidance" class="headerlink" title="Robust High-Resolution Video Matting with Temporal Guidance"></a>Robust High-Resolution Video Matting with Temporal Guidance</h2><ol>
-<li><p>overview</p>
-<ul>
-<li>robust, real-time, high-resolution human video matting</li>
-<li>uses a recurrent architecture</li>
-<li>propose a new training strategy：多任务，既训matting，又训语义分割</li>
-</ul>
-</li>
-<li><p>LSTM &amp; GRU &amp; ConvLSTM &amp; ConvGRU</p>
-</li>
-<li><p>Model Architecture</p>
-<p> <img src="/2023/05/15/VIS-methods/RVM.png" width="80%;"></p>
-<ul>
-<li><p>a single frame encoder</p>
-<ul>
-<li>MobileNetV3-Large：the last block of MobileNetV3 uses dilated convolutions，extract features [x2,x4,x8,x16]</li>
-<li>LR-ASPP</li>
-</ul>
-</li>
-<li><p>a recurrent decoder</p>
-<ul>
-<li>Bottleneck block<ul>
-<li>接在LRASPP后面的x16 feature上</li>
-<li>convgru只用了一半通道的feature，split&amp;concat，因为convgru is computationally expansive，这样做既efficient，又能分解current frame feature和long-term temporal information</li>
-<li>最后上采样</li>
-</ul>
-</li>
-<li>Upsampling block<ul>
-<li>先concat上一个stage的feature，以及skip过来的encoder feature，以及input image downsampled by repeated 2x2 avg pool</li>
-<li>然后conv-bn-relu：perform feature merging and channel reduction</li>
-<li>然后是convgru block</li>
-<li>最后上采样</li>
-</ul>
-</li>
-<li>Output block<ul>
-<li>已经在原图尺度了，不做GRU了，only uses regular convolutions to refine the results</li>
-<li>先concat input和上一个stage的feature</li>
-<li>然后是2x conv-bn-relu</li>
-<li>最后是prediction head<ul>
-<li>1-channel alpha prediction</li>
-<li>3- channel foreground prediction</li>
-<li>1-channel segmentation prediction</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Deep Guided Filter Module for high-resolution upsampling</li>
-</ul>
-</li>
-</ol>
-<pre><code>## Sparse Instance Activation for Real-Time Instance Segmentation
-
-1. introduction
-
-    * Previous instance segmentation methods heavily rely on  object detection and perform mask prediction based on bounding boxes or dense centers
-
-    * this paper 
-
-        * propose a sparse set of instance activation maps（IAM），用来学习instance-level features
-        * bipartite matching机制抑制了dense prediction，不需要NMS
-
-    * object representation
-
-        &lt;img src=&quot;VIS-methods/object representation.png&quot; width=&quot;60%;&quot; /&gt;
-
-        * center-based的点可能没有hit到instance上，导致获取的feature不准确
-        * region-based包含的内容又太多了
-        * IAM类似CAM，是instance-aware weighted maps，比较能抓住instance的主要特征
-</code></pre><ol>
-<li><p>SparseInst</p>
-<p> <img src="/2023/05/15/VIS-methods/SparseInst.png" width="70%;"></p>
-<ul>
-<li>encoder<ul>
-<li>backbone: ResNet</li>
-<li>Instance Context Encoder: FPN，所有feature aggregate到x8一个level的输出</li>
-</ul>
-</li>
-<li>IAM-based Segmentation Decoder<ul>
-<li>mask branch</li>
-<li>instance branch</li>
-<li>都是由 a stack of 3 × 3 convolutions with 256 channels构成</li>
-<li>encoder feature上还concat了xy的normed absolute coordinate</li>
-</ul>
-</li>
-<li>Instance Activation Maps<ul>
-<li>aim to highlight the informative regions for each object</li>
-<li>given image features $X \in R^{DHW}$</li>
-<li>IAM模块是a simple 3x3conv+ a sigmoid non-linearity：得到instance activation maps $A \in R^{NHW}$，N是sparse set，也可以用group conv（Group-IAM）</li>
-<li>instance features是instance activation maps乘image feature：相当于aggregate所有image feature according to attention区域，$z=\overline A \cdot X^T \in R^{ND}$</li>
-<li>3 linear layers are applied for classification, objectness score, and mask kernel $\{w_i\}^N$</li>
-</ul>
-</li>
-<li>IoU-aware Objectness<ul>
-<li>前背景比例不平衡，大部分predictions会被enforce成背景，整体的classification confidence会偏低，这会导致classification scores 和segmentation masks的效果的misalign</li>
-<li>引入IoU prediction缓解这个问题</li>
-<li>at inference stage，classification probability被rescore成$\sqrt {probability * objectness}$</li>
-</ul>
-</li>
-<li>Mask Head<ul>
-<li>每个mask kernel * mask feature</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="grid-sample"><a href="#grid-sample" class="headerlink" title="grid sample"></a>grid sample</h2><ol>
-<li><p>optical flow</p>
-<p> 光流是一个HxWx2的per-pixel矢量(u,v)，表示img1到img2的偏移量：img1(x,y) = img2(x+u, y+u)</p>
-</li>
-<li><p>warp</p>
- <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">warp</span><span class="params">(x, flow)</span>:</span></span><br><span class="line">    <span class="comment"># x: [b,c,h,w]</span></span><br><span class="line">    <span class="comment"># flow: [b,2,h,w]</span></span><br><span class="line">    h,w = x.shape[<span class="number">-2</span>:]</span><br><span class="line">    grid_y, grid_x = torch.meshgrid(torch.arange(h), torch.arange(w))</span><br><span class="line">    grid_xy = torch.stack([grid_x, grid_y], dim=<span class="number">-1</span>).unsqueeze(<span class="number">0</span>) + flow.permute(<span class="number">0</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">    grid_xy[...,<span class="number">0</span>] = <span class="number">2</span> * grid_xy[...,<span class="number">0</span>] / (w<span class="number">-1</span>) - <span class="number">1</span></span><br><span class="line">    grid_xy[...,<span class="number">1</span>] = <span class="number">2</span> * grid_xy[...,<span class="number">1</span>] / (h<span class="number">-1</span>) - <span class="number">1</span>    <span class="comment"># norm to [-1,1]</span></span><br><span class="line">    warp_x = F.grid_sample(x, grid=grid_xy, mode=<span class="string">'bilinear'</span>, padding_mode=<span class="string">'border'</span>, align_corners=<span class="keyword">True</span>)</span><br><span class="line">	<span class="keyword">return</span> warp_x</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>grid sample</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.nn.functional.grid_sample(input, grid, mode=&apos;bilinear&apos;, padding_mode=&apos;zeros&apos;, align_corners=None)</span><br></pre></td></tr></table></figure>
-<ul>
-<li>input：BCHW</li>
-<li>grid：BHW2，取值范围在[-1,1]之间</li>
-<li>return：BCHW</li>
-<li>mode：[‘nearest’, ‘bilinear’]</li>
-<li>padding_mode：[‘zeros’, ‘border’, ‘reflection’]</li>
-</ul>
-</li>
-<li><p>deformable conv</p>
-<ul>
-<li><p>采样点的值也可以用grid sample来实现</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DeformConv2d</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, in_channels, out_channels, kernel_size)</span>:</span></span><br><span class="line">        self.conv1 = nn.Conv2d(in_channels, kernel_size*kernel_size*<span class="number">2</span>, kernel_size, padding=kernel_size//<span class="number">2</span>)</span><br><span class="line">        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel_size, stride=kernel_size, padding=kernel_size//<span class="number">2</span>)</span><br><span class="line">        self.k = kernel_size</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        b, c, h, w = x.shape</span><br><span class="line">        offsets = torch.split(self.conv1(x), [self.k*self.k*<span class="number">2</span>, self.k], dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        grid_y, grid_x = torch.meshgrid(torch.arange(h), torch.arange(w))</span><br><span class="line">        grid_xy = torch.stack([grid_x, grid_y], dim=<span class="number">1</span>).unsqueeze(<span class="number">0</span>)</span><br><span class="line">		kernel_feats = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.k*self.k):</span><br><span class="line">            loc = grid_xy + offsets[:,k]</span><br><span class="line">            loc[:,<span class="number">0</span>] = <span class="number">2</span> * loc[:,<span class="number">0</span>] / (w<span class="number">-1</span>) - <span class="number">1</span>            </span><br><span class="line">            loc[:,<span class="number">1</span>] = <span class="number">2</span> * loc[:,<span class="number">1</span>] / (h<span class="number">-1</span>) - <span class="number">1</span></span><br><span class="line">            kernel_feats.append(F.grid_sample(x, grid=loc, mode=<span class="string">'bilinear'</span>, padding_mode=<span class="string">'border'</span>, align_corners=<span class="keyword">True</span>))  <span class="comment"># bchw</span></span><br><span class="line">        feats = torch.stack(kernel_feats, dim=<span class="number">-1</span>).reshape(b,c,h,w,k,k)</span><br><span class="line">        feats = feats.permute(<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">5</span>).shape(b,c,h*k,w*k)</span><br><span class="line">        feats = slef.conv2(feats)  <span class="comment"># bchw</span></span><br><span class="line">        <span class="keyword">return</span> feats</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>1x1的deformable conv可以理解为对feature学习learnable flow</p>
-</li>
-</ul>
-</li>
-<li><p>feature align</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2023/05/15/SegmentAnything/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2023/05/15/SegmentAnything/" itemprop="url">SegmentAnything</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-15T09:28:42+08:00">
-                2023-05-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2023/05/15/SegmentAnything/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2023/05/15/SegmentAnything/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>overview</p>
-<ul>
-<li>task：propose a prompt-able segmentation task</li>
-<li>model：build SAM model，promptable，enabling zero-shot </li>
-<li><p>dataset：1B数据集，滚标注的半自动标注方案</p>
-<p><img src="/2023/05/15/SegmentAnything/overview.png" width="80%"></p>
-</li>
-</ul>
-</li>
-<li><p>introduction</p>
-<ul>
-<li>foundation model<ul>
-<li>models that can generalize to unseen/untrained tasks and data</li>
-<li>often implemented with prompt engineering</li>
-<li>图像领域最有名的就是CLIP/Align：aligns paired text and images from the web use contrastive learning</li>
-<li>SAM也被构建成foundation model<ul>
-<li>pre-train it on a broad dataset，enables powerful generalization</li>
-<li>aim to solve a range of downstream segmentation problems on new data distributions using prompt engineering</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>model constrains<ul>
-<li>flexible prompt：point, box, and mask / initial results of free-form text prompts</li>
-<li>real-time：一张图的embedding可以被各种prompt复用，轻量的prompt encoder&amp;mask decoder</li>
-<li>ambiguity-aware：一个prompt可以预测多个mask，allowing SAM to naturally handle ambiguity</li>
-</ul>
-</li>
-<li>data engine<ul>
-<li>stage1：assisted-manual，传统滚标注</li>
-<li>stage2：semi-automatic，用prompt的方式自动标注部分object，人工标注其余的</li>
-<li>stage3：fully automatic，将prompt设定为a regular grid of foreground points，自动全图标注</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Segment Anything Task</p>
-<ul>
-<li>promptable segmentation task<ul>
-<li>prompt：a set of foreground / background points, a rough box or mask, free-form text…</li>
-<li>return a valid segmentation mask：multiple object when ambiguous</li>
-</ul>
-</li>
-<li>pre-training<ul>
-<li>input：for each training sample，simulates a sequence of prompts (<em>e.g</em>., points, boxes, masks)</li>
-<li>supervision：compares the model’s mask predictions against the ground truth</li>
-</ul>
-</li>
-<li>zero-shot transfer<ul>
-<li>at inference time，模型已经具备对任何prompt作出相应的能力</li>
-<li>thus downstream tasks can be solved by engineering appropriate prompts，所以downstream tasks可以建模成prompts engineering的任务</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Segment Anything Model</p>
-<p> <img src="/2023/05/15/SegmentAnything/sam overview.png" width="80%"></p>
-<ul>
-<li><p>image encoder</p>
-<ul>
-<li>MAE pretrained ViT：ViT-H/16 with 14x14 windowed attention，1024×1024</li>
-<li>minimally adapted to process high resolution inputs</li>
-<li>outputs x16 image features：64x64</li>
-<li>into image embeddings：conv1,dim256 - LN - conv3-dim256 - LN</li>
-</ul>
-</li>
-<li><p>prompt encoder</p>
-<ul>
-<li>sparse prompts: <ul>
-<li>point: a positional embedding + learned bg/fg embedding</li>
-<li>box: an embedding pair, (1) a left-top corner positional embedding + earned left-top corner embedding, (2) a bottom-right</li>
-<li>points/box: positional encodings + learned embeddings for each prompt type</li>
-<li>text: any text encoder from CLIP</li>
-<li>dim256</li>
-</ul>
-</li>
-<li>dense prompts: <ul>
-<li>input x4 ds masks: downscale additional x4<ul>
-<li>2x2,s2,dim4 conv - LN - GeLU</li>
-<li>2x2,s2,dim16 conv - LN - GeLU</li>
-<li>1x1,s1,dim256 conv - LN - GeLU</li>
-<li>elewise-add on image embeddings</li>
-</ul>
-</li>
-<li>if there is no mask prompt: add a learned ‘no mask’ mask embedding</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>mask decoder</p>
-<p>  <img src="/2023/05/15/SegmentAnything/mask decoder.png" width="60%"></p>
-<ul>
-<li>insert a learned output token embedding：类似于cls token的东西，Nx256</li>
-<li>use a two-layer decoder</li>
-<li>4 steps inside each decoder<ul>
-<li>self-attention on the tokens</li>
-<li>cross-attention from tokens to images：QKVdim128</li>
-<li>a point-wise MLP updates each token</li>
-<li>cross-attention from the image to tokens：QKVdim128</li>
-</ul>
-</li>
-<li>MLP：drop0.1，with residual，use LN，dim2048</li>
-<li>geometric和task type的强约束<ul>
-<li>image emb每次参与attention都要加上positional encodings</li>
-<li>tokens每次参与attention都要加上原始的original prompt tokens</li>
-</ul>
-</li>
-<li>dynamic prediction head<ul>
-<li>upsample the updated image embedding by 4× with two transposed convs<ul>
-<li>2×2, s2, dim64 TransConv - GeLU - LN - 2×2, s2, dim32 TransConv - GeLU</li>
-<li>得到upscaled mask embedding，64x64x32</li>
-</ul>
-</li>
-<li>用updated image embedding和updated tokens再做一次attn，提取output token，经过一个3-layer MLP得到一个vector：Nx32</li>
-<li>最后通过dot product得到Nx64x64的prediction mask</li>
-</ul>
-</li>
-<li>ambiguity-aware<ul>
-<li>use 3 output tokens，predict 3 masks(whole, part, and subpart) </li>
-<li>计算3组mask loss，但是只回传the lowest loss的梯度</li>
-<li>在output tokens上再接一个small head，用来estimates IOU，inference time用这个IoU prediction来rank3个mask</li>
-</ul>
-</li>
-<li>loss<ul>
-<li>mask loss：focal loss*20 + dice loss*1</li>
-<li>iou loss：pred iou和mask iou的MSE</li>
-</ul>
-</li>
-<li>Training algorithm for one sample<ul>
-<li>init prompt：随机选取points/boxes作为input prompt<ul>
-<li>points从gt masks中随机抽</li>
-<li>boxes基于gt masks的外接框做随机noisy deviation</li>
-</ul>
-</li>
-<li>接下来的points从pred mask和gt mask的error region中抽取</li>
-<li>然后把pred mask也作为一个mask prompt输入给model：用的是unthresholded mask logits，而不是binary mask</li>
-<li>这样迭代8+2个iteration</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amberzzzz.github.io/2022/11/05/knowledge-distillation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="amber.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Less is More">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/05/knowledge-distillation/" itemprop="url">knowledge distillation</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-05T18:29:35+08:00">
-                2022-11-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/05/knowledge-distillation/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2022/11/05/knowledge-distillation/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>paper collection</p>
-<p>[Similarity KD 2019] Similarity-Preserving Knowledge Distillation</p>
-<p>[CWD 2020] Channel-wise Knowledge Distillation for Dense Prediction</p>
-<h2 id="Similarity-Preserving-Knowledge-Distillation"><a href="#Similarity-Preserving-Knowledge-Distillation" class="headerlink" title="Similarity-Preserving Knowledge Distillation"></a>Similarity-Preserving Knowledge Distillation</h2><ol>
-<li><p>与其他KD methods的区别：</p>
-<ul>
-<li>the student is not required to mimic the representation space of the teacher, but rather to preserve the pairwise similarities in its own representation space</li>
-<li>监督student和teacher的similarity</li>
-<li>适用场景：<ul>
-<li>feature shape对不齐：channel/stride，也可以用1x1 conv对齐</li>
-<li>CNN/transformer之间的KD，模型本质diversity就不同</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>method</p>
-<p> <img src="/2022/11/05/knowledge-distillation/similarity KD.png" width="40%;"></p>
-<ul>
-<li><p>given activation map（feature）$F$</p>
-<ul>
-<li>compute similarity：$F*F^T/L2norm(F)$</li>
-<li>compute KD loss：$\frac{1}{b^2}MSE(t,s)$</li>
-</ul>
-</li>
-<li><p>code</p>
-  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">similarity_loss</span><span class="params">(self, f_s, f_t)</span>:</span></span><br><span class="line">    bs = f_s.shape[<span class="number">0</span>]</span><br><span class="line">    f_s = f_s.view(bs, <span class="number">-1</span>)</span><br><span class="line">    f_t = f_t.view(bs, <span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    G_s = f_s * f_s.T   <span class="comment"># bxb</span></span><br><span class="line">    G_s = F.normalize(G_s, p=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line">    G_t = f_t * f_t.T</span><br><span class="line">    G_t = F.normalize(G_t, p=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    G_diff = G_t - G_s</span><br><span class="line">    loss = (G_diff * G_diff).view(<span class="number">-1</span>).sum() / (bs * bs)</span><br><span class="line">    <span class="keyword">return</span> loss</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>其他KD methods</p>
-<ul>
-<li><p>response based：KL divergence loss</p>
-<ul>
-<li><p>作用于softmax以后的probs（可以有temperature factor）</p>
-</li>
-<li><p>$L_{RD} (p_t, p_s) = L_R (p_t, p_s)$</p>
-</li>
-<li><p>$L_R()$通常是KL divergence loss</p>
-</li>
-<li><p>KL divergence loss</p>
-<p>  <img src="/2022/11/05/knowledge-distillation/KLDivLoss.png" width="60%;"></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pred在调用KLDivLoss方法计算loss时先做log，防止先两个normed prob先做除法损失精度</span></span><br><span class="line">pred = F.log_softmax(torch.randn(<span class="number">3</span>, <span class="number">5</span>, requires_grad=<span class="keyword">True</span>))</span><br><span class="line">target = F.softmax(torch.rand(<span class="number">3</span>, <span class="number">5</span>))</span><br><span class="line">loss = nn.KLDivLoss(reduction=<span class="string">"batchmean"</span>)(pred, target)</span><br><span class="line"><span class="comment"># target在调用KLDivLoss时也可以先做log</span></span><br><span class="line">log_target = F.log_softmax(torch.rand(<span class="number">3</span>, <span class="number">5</span>))</span><br><span class="line">output = nn.KLDivLoss(reduction=<span class="string">"batchmean"</span>, log_target=<span class="keyword">True</span>)(pred, log_target)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kl_categorical</span><span class="params">(p_logit, q_logit)</span>:</span></span><br><span class="line">    p = F.softmax(p_logit, dim=<span class="number">-1</span>)</span><br><span class="line">    _kl = torch.sum(p * (F.log_softmax(p_logit, dim=<span class="number">-1</span>) - F.log_softmax(q_logit, dim=<span class="number">-1</span>)), <span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">return</span> torch.mean(_kl)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>feature based</p>
-<ul>
-<li>$L_{FD} (f_t, f_s) = L_F (\Phi_s(f_t), \Phi_s(f_s))$</li>
-<li>$\Phi()$是transform function，用来align feature dimension</li>
-<li>$L_F()$是similarity function，通常可以是L1、L2、L_CE、L_MMD</li>
-<li>MMD：maximum mean discrepancy</li>
+<li>计算平方根</li>
 </ul>
 </li>
 </ul>
@@ -3094,7 +3039,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">175</span>
+                  <span class="site-state-item-count">180</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
