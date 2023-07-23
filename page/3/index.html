@@ -2923,24 +2923,47 @@
 <li>a self-supervised sub-objectives consistency (SOC) strategy：domain shift problem</li>
 </ul>
 </li>
-<li>test device：GTX 1080Ti GPU</li>
+<li>test device：under 512x512, 67 FPS, GTX 1080Ti GPU</li>
 <li>dataset：a carefully designed photographic portrait matting (PPM-100) benchmark &amp; Adobe Matting Dataset</li>
 </ul>
 </li>
 <li><p>论点</p>
 <ul>
-<li><p>Matting Approaches</p>
+<li><p>Portrait Matting Approaches</p>
 <ul>
-<li><p>本文方法能够同时自动化完成matting task的子任务：背景提取 &amp; 前景语义</p>
+<li>trimap-based：有一个pre-defined trimap作为先验</li>
+<li>multi-stage：先用一个semantic network生成一个pseudo trimap，然后refine成alpha matte，数据集有限，suffer from the domain shift problem，对real-world data的泛化性不好</li>
+<li>本文方法能够同时自动化完成matting task的子任务：背景提取 &amp; 前景语义，同时用子任务之间的consistency做自监督，提升模型泛化性</li>
+</ul>
 <p><img src="/2022/05/05/Matting/approaches.png" width="90%;"></p>
 </li>
-</ul>
-</li>
-<li><p>Image Matting</p>
+<li><p>Image Matting Formulation</p>
 <ul>
 <li>an alpha matte predicting task：$I^i = \alpha^i F^i + (1-\alpha^i)B^i$</li>
 <li>ill-posed explanation：上面这个公式，等式右边的参数全是未知的，3通道像素值也就是3+3+1=7个未知数per pixel</li>
-<li>所以通常才需要trimap辅助信息：提供0/0.5/1三种alpha构成的mask，划分为absolute foreground (α = 1), absolute background (α = 0), and unknown area (α = 0.5)，这样任务就简化为之需要预测unknown region的alpha probability</li>
+<li>所以通常才需要trimap辅助信息<ul>
+<li>提供0/0.5/1三种alpha构成的mask</li>
+<li>absolute foreground (α = 1),</li>
+<li>absolute background (α = 0)</li>
+<li>unknown area (α = 0.5)</li>
+<li>这样任务就简化为，基于known 0/1 region的像素信息，需要预测unknown region的alpha probability</li>
+</ul>
+</li>
+<li>matting任务heavily rely on low-level features</li>
+<li>trimap-free matting<ul>
+<li>a semantic estimation step will then be needed to locate the foreground</li>
+</ul>
+</li>
+<li>ASPP<ul>
+<li>proved to boost the performance notably in segmentation-based tasks</li>
+<li>本文改进了an efficient variant of ASPP</li>
+</ul>
+</li>
+<li>Consistency Constraint<ul>
+<li>Consistency supervision用于semi-/self-supervised</li>
+<li>MODNet imposes consistency among various sub-objectives within a model</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2950,8 +2973,8 @@
 <li><p>overview</p>
 <ul>
 <li>divide into three parts<ul>
-<li>semantic estimation：前背景</li>
-<li>detail prediction：边界细节</li>
+<li>semantic estimation：前背景，x16 seg map，用coarse alpha监督</li>
+<li>detail prediction：边界细节，x4 boundary map，用boundary region的alpha监督</li>
 <li>semantic-detail fusion：信息融合，得到最终的alpha matte prediction</li>
 </ul>
 </li>
@@ -2966,7 +2989,9 @@
 </li>
 <li><p>use an encoder MobileNetV2 to predict a coarse mask：16x downsamp</p>
 </li>
-<li><p>ground truth也是粗糙版：ground truth matte也做16x下采样+blur，去除了一些fine feature，专心提前景整体</p>
+<li><p>seg head：1x1conv + sigmoid</p>
+</li>
+<li><p>ground truth也是粗糙版：ground truth matte也做16x下采样+blur，去除了一些类似发丝的fine feature，专心提取前景整体</p>
 </li>
 <li><p>Efficient ASPP (e-ASPP)：</p>
 <ul>
@@ -3004,7 +3029,7 @@
 </li>
 <li><p>L1 loss：focus on transition region only </p>
 <ul>
-<li>$m_d$：boundary mask，对$\alpha_g$先膨胀再腐蚀得到</li>
+<li>$m_d$：boundary mask，对$\alpha_g$先膨胀再腐蚀，提取transition area作为boundary mask</li>
 <li>$d_p$：D(I, S(I))，branch输出</li>
 <li><p>$\alpha_g$：ground truth alpha matte</p>
 <p><img src="/2022/05/05/Matting/lossD.png" width="50%;"></p>
@@ -3026,7 +3051,12 @@
 </li>
 <li><p>L1 loss + compositional loss</p>
 <ul>
+<li>L1 loss：全图的alpha matte的L1 loss</li>
 <li><p>$L_c$： the absolute difference between input image I and the composited image，跟PP-matting公式10一样，用均方根～</p>
+<ul>
+<li>the composited image $I_p$ 用gt的fg和bg以及预测的alpha计算</li>
+<li>loss是L2 loss</li>
+</ul>
 <p><img src="/2022/05/05/Matting/composition loss.png" width="50%;"></p>
 </li>
 <li><p>$\alpha_p$：final prediction</p>
@@ -3046,7 +3076,39 @@
 </li>
 </ul>
 </li>
-<li><p>实验</p>
+<li><p>SOC for Real-World Data</p>
+<ul>
+<li><p>portrait matting requires excellent labeling in the hair area，通常在摄影网站上找虚化背景的图标注的</p>
+</li>
+<li><p>常规的data aug是用背景替换的方式，但是和real-world data还是存在domain gap，模型通常过拟合训练集</p>
+</li>
+<li><p>utilize sub-objectives consistency (SOC) to adapt MODNet to unseen data distributions</p>
+<ul>
+<li><p>MODNet的3个子任务在无标签数据上should have consistent outputs</p>
+</li>
+<li><p>given unlabeled Image I，预测$s, d, \alpha$</p>
+</li>
+<li><p>enforce the semantics in $\alpha$ to be consistent with $s$</p>
+<ul>
+<li>还是用supervised training里面的L2 loss</li>
+<li>gt alpha替换成pred alpha</li>
+</ul>
+</li>
+<li><p>enforce the details in $\alpha$ to be consistent with $d$</p>
+<ul>
+<li>还是用supervised training里面的L1 loss in transition region</li>
+<li>gt alpha替换成pred alpha</li>
+</ul>
+</li>
+<li><p>两项consistency loss加起来</p>
+<p>  <img src="/2022/05/05/Matting/cons loss.png" width="50%;"></p>
+</li>
+<li><p>extra regularization term防止alpha虚化使得detail loss丧失细节信息</p>
+<p>  <img src="/2022/05/05/Matting/reg loss.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ol>
 
