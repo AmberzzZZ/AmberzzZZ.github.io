@@ -87,6 +87,12 @@
 <meta property="og:site_name" content="Less is More">
 <meta property="og:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/methods.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/datasets.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/GFM.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/fd%20loss1.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/fd%20loss2.png">
+<meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/cm%20loss3.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bb%20cmp.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bisenetv2.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bisenet%20v2%20hyper.png">
@@ -111,11 +117,11 @@
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/MODNet%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/cons%20loss.png">
 <meta property="og:image" content="https://amberzzzz.github.io/2022/05/05/Matting/reg%20loss.png">
-<meta property="og:updated_time" content="2023-07-23T05:20:07.199Z">
+<meta property="og:updated_time" content="2023-07-30T12:10:10.569Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Matting">
 <meta name="twitter:description" content="papers： [DIM-Matting 2017] Deep Image Matting，Matting网络始祖，trimap-based [BGMv2 2021] Real-time high-resolution background matting，实现高分辨率图像的实时预测 [MODNet 2020] Is a Green Screen Really Necessary for Real">
-<meta name="twitter:image" content="https://amberzzzz.github.io/2022/05/05/Matting/bb%20cmp.png">
+<meta name="twitter:image" content="https://amberzzzz.github.io/2022/05/05/Matting/methods.png">
 
 
 
@@ -386,6 +392,177 @@
 <p>[PP-Matting 2022] High-Accuracy Natural Image Matting，百度，在MODNet基础上改进</p>
 <p>[BiSeNet v2 2020] Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation，双encoder结构，一个用来显式地guide local feature，本身不是针对matting任务，但是其他matting paper引用了它</p>
 <p>[GCA Matting 2020] Natural Image Matting via Guided Contextual Attention，introduce GCA block来做local guidance</p>
+<p>[animal matting 2022] Bridging Composite and Real: Towards End-to-end Deep Image Matting，毛发抠图</p>
+<h2 id="Bridging-Composite-and-Real-Towards-End-to-end-Deep-Image-Matting"><a href="#Bridging-Composite-and-Real-Towards-End-to-end-Deep-Image-Matting" class="headerlink" title="Bridging Composite and Real: Towards End-to-end Deep Image Matting"></a>Bridging Composite and Real: Towards End-to-end Deep Image Matting</h2><ol>
+<li><p>introduction</p>
+<ul>
+<li><p>毛发的分割通常需要trimap引导</p>
+</li>
+<li><p>思路还是常规的decompose，into two parallel sub-tasks：</p>
+<ul>
+<li>high-level semantic segmentation</li>
+<li>low-level details matting</li>
+</ul>
+</li>
+<li><p>propose GFM</p>
+<ul>
+<li><p>Glance and Focus Matting network (<strong>GFM</strong>)</p>
+</li>
+<li><p>a shared encoder and two separate decoders </p>
+</li>
+<li><p>learn both tasks in a collaborative manner</p>
+</li>
+</ul>
+</li>
+<li><p>分析了composed image和real-world image的差异</p>
+<ul>
+<li>a carefully designed composition route RSSN</li>
+<li>提供了2000张high-resolution的动物图和10,000张portrait图 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>related work</p>
+<ul>
+<li><p>methods</p>
+<ul>
+<li>串行：先global segmentation生成trimap，然后做local matting，串行时间效率差，而且错误的语义不会被修正，两个网络通常分别训练，存在mismatch</li>
+<li>并行：添加了一个global guidance做辅助分支，通常用coarse matte做学习目标，但是用一个网络去学全图fg/transition/bg区域的matte是一个比较困难的事，因为不同区域的表征、语义差异太大了</li>
+<li><p>this paper 并行且多任务：并行执行segmentation和matting两个任务</p>
+<ul>
+<li>global rough segmentation</li>
+<li>details matting</li>
+</ul>
+<p><img src="/2022/05/05/Matting/methods.png" width="30%;"></p>
+</li>
+</ul>
+</li>
+<li><p>datasets</p>
+<ul>
+<li>ORI-Track：之前的数据只提供前景和matte/low-resolution portraits和不太准确的matte</li>
+<li>COMP-Track：<ul>
+<li>之前是通过在公开数据集如COCO上叠加前景数据构造数据集的</li>
+<li>这种合成图像存在composition artifacts<ul>
+<li>因为和前景存在resolution，sharpness，noise，illumination差异</li>
+<li>可能存在salient object</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>this paper 提出了一个large-scale high-resolution clean background dataset (BG-20k)</p>
+<p><img src="/2022/05/05/Matting/datasets.png" width="50%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>method</p>
+<ul>
+<li><p>overview</p>
+<ul>
+<li>a segmentation stage：先识别salient rough foreground / background</li>
+<li>a matting stage：focus on the transition areas to distinguish details from the background</li>
+<li><p>collaboration</p>
+<p><img src="/2022/05/05/Matting/GFM.png" width="70%;"></p>
+</li>
+</ul>
+</li>
+<li><p>shared encoder</p>
+<ul>
+<li>输入是single image</li>
+<li>5 blocks：E0-E4，s2-s32</li>
+<li>DenseNet-121/ResNet-34/ResNet-101</li>
+</ul>
+</li>
+<li><p>Glance Decoder (GD)</p>
+<ul>
+<li>a large receptive field to learn high-level semantics</li>
+<li>PPM</li>
+<li>镜像地stack 5 blocks：D4-D0<ul>
+<li>each of which consists of three sequential 3 × 3 convolutional layers and an upsampling layer</li>
+<li>每个stage的decoder block还接受一个ele-wise sum的PPM输入</li>
+</ul>
+</li>
+<li>loss：2/3-channel的CE</li>
+</ul>
+</li>
+<li><p>Focus Decoder (FD)</p>
+<ul>
+<li><p>aims at low-level structural features in transition areas</p>
+</li>
+<li><p>bridge block (BB)</p>
+<ul>
+<li>three dilated convolutional layers</li>
+<li>leverage local context in different receptive fields</li>
+<li>E4和BB的feature concat起来作为stage5 feature</li>
+</ul>
+</li>
+<li><p>镜像地stack 5 blocks：D4-D0</p>
+<ul>
+<li>UNet style</li>
+<li>额外的来自encoder的shortcut，保留fine details</li>
+</ul>
+</li>
+<li><p>loss</p>
+<ul>
+<li><p>alpha prediction loss：absolute difference</p>
+<p><img src="/2022/05/05/Matting/fd loss1.png" width="40%;"></p>
+</li>
+<li><p>Laplacian loss：L1 loss</p>
+<p><img src="/2022/05/05/Matting/fd loss2.png" width="40%;"></p>
+</li>
+<li><p>仅关注the unknown transition areas</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Representation of Semantic and Transition Areas</p>
+<ul>
+<li>模式1：GFM-TT<ul>
+<li>3-class trimap T：segmentation gt将ground truth alpha dilation and erosion with a kernel size of 25</li>
+<li>use the ground truth alpha matte来定义the transition area</li>
+</ul>
+</li>
+<li>模式2：GFM-FT<ul>
+<li>2-class foreground F：将ground truth alpha erode with a kernel size of 50做F</li>
+<li>用(gt alpha&gt;0) - F 作为transition area</li>
+</ul>
+</li>
+<li>模式3：GFM-BT<ul>
+<li>2-class foreground G：将ground truth alpha dilate with a kernel size of 50做G</li>
+<li>用G-(gt alpha&gt;0) 作为transition area</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Collaborative Matting (CM)</p>
+<ul>
+<li><p>to generate the final alpha prediction</p>
+</li>
+<li><p>CM的不同模式</p>
+<ul>
+<li>GFM-TT模式下：CM把GD在transition area的预测换成FD的预测</li>
+<li>GFM-FT模式下：CM把GD和FD的结果相加</li>
+<li>GFM-BT模式下：CM用GD-FD的结果作为最终结果</li>
+</ul>
+</li>
+<li><p>loss</p>
+<ul>
+<li>alpha-prediction loss：absolute diff</li>
+<li>Laplacian loss：L1</li>
+<li><p>composition loss：absolute diff</p>
+<p><img src="/2022/05/05/Matting/cm loss3.png" width="40%;"></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>RSSN</p>
+</li>
+</ol>
 <h2 id="BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation"><a href="#BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation" class="headerlink" title="BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation"></a>BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation</h2><ol>
 <li><p>introduction</p>
 <ul>
@@ -1080,7 +1257,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation"><span class="nav-number">1.</span> <span class="nav-text">BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">2.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><span class="nav-number">3.</span> <span class="nav-text">MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bridging-Composite-and-Real-Towards-End-to-end-Deep-Image-Matting"><span class="nav-number">1.</span> <span class="nav-text">Bridging Composite and Real: Towards End-to-end Deep Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BiSeNet-V2-Bilateral-Network-with-Guided-Aggregation-for-Real-time-Semantic-Segmentation"><span class="nav-number">2.</span> <span class="nav-text">BiSeNet V2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PP-Matting-High-Accuracy-Natural-Image-Matting"><span class="nav-number">3.</span> <span class="nav-text">PP-Matting: High-Accuracy Natural Image Matting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MODNet-Real-Time-Trimap-Free-Portrait-Matting-via-Objective-Decomposition"><span class="nav-number">4.</span> <span class="nav-text">MODNet: Real-Time Trimap-Free Portrait Matting via Objective Decomposition</span></a></li></ol></div>
             
 
           </div>
